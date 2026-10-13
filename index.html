@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parlay Board</title>
+<style>
+:root{--bg:#f3f1ec;--card:#fff;--ink:#1c1b19;--mute:#6d6a63;--line:#dcd8cf;--pick:#0f5c4a;--pickink:#fff;--warn:#b4531a;--bad:#a8322d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171a;--card:#1f2226;--ink:#efede8;--mute:#9a978f;--line:#33373c;--pick:#3fbf9a;--pickink:#0c1713;--warn:#e59a62;--bad:#e5766f}}
+:root[data-theme="dark"]{--bg:#15171a;--card:#1f2226;--ink:#efede8;--mute:#9a978f;--line:#33373c;--pick:#3fbf9a;--pickink:#0c1713;--warn:#e59a62;--bad:#e5766f}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;line-height:1.4;padding-bottom:230px}
+header{padding:18px 16px 6px;max-width:640px;margin:0 auto}
+h1{font-size:26px;margin:0;letter-spacing:-.5px}
+.sub{color:var(--mute);font-size:13px;margin-top:2px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;border-radius:999px;font-size:13px;font-family:inherit}
+.chip.on{background:var(--ink);color:var(--bg)}
+main{max-width:640px;margin:0 auto;padding:8px 16px}
+.game{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0}
+.gh{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-bottom:8px}
+.tag{color:var(--warn);font-weight:700}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.t{border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:10px;text-align:left;font-family:inherit;font-size:15px;min-height:64px}
+.t b{display:block;font-size:16px}
+.t span{font-size:12px;opacity:.75}
+.t.sel{background:var(--pick);color:var(--pickink);border-color:var(--pick)}
+.t input{width:100%;font-size:16px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:2px}
+.info{font-size:12px;color:var(--mute);margin-top:8px}
+.info b{color:var(--ink)}
+.ctl{display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.sm{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:6px 9px;font-size:12px;font-family:inherit}
+.sm.w1{border-color:var(--warn)}.sm.w2{border-color:var(--warn);background:var(--warn);color:var(--bg)}.sm.w3{border-color:var(--bad);background:var(--bad);color:var(--bg)}
+.addbox{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:12px;margin:14px 0;display:none}
+.addbox.show{display:block}
+.addbox input{font-size:16px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%;margin:3px 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slip{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 20px rgba(0,0,0,.12)}
+.slipin{max-width:640px;margin:0 auto}
+.sl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin:2px 0}
+.big{font-size:22px;font-weight:700}
+.legs{font-size:12px;color:var(--mute);margin-bottom:4px;max-height:34px;overflow:hidden}
+.btns{display:flex;gap:8px;margin-top:8px}
+.btn{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-family:inherit;font-size:15px}
+.btn.p{background:var(--pick);color:var(--pickink);border-color:var(--pick);font-weight:700}
+.stake{width:70px;font-size:16px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.tk{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;font-size:13px}
+.tk .m{display:flex;gap:6px;margin-top:6px}
+.tk button{flex:1;padding:6px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);font-family:inherit}
+.tk.W{border-color:var(--pick)}.tk.L{border-color:var(--bad)}
+h2{font-size:17px;margin:22px 0 4px}
+.note{font-size:12px;color:var(--mute);margin:16px 0}
+.row2{display:flex;gap:6px;margin:6px 0}
+.row2 input{width:100%;font-size:16px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.tk .m .use{flex:none;padding:6px 14px}
+</style>
+</head>
+<body>
+<header>
+<h1>Parlay Board</h1>
+<div class="sub" id="hsub">NFL Week 6 &middot; sample data (data.json not found)</div>
+<div class="bar">
+<button class="chip" id="sort">Sort: safest first</button>
+<button class="chip" id="edit">Edit lines</button>
+<button class="chip" id="add">+ Add game</button>
+<button class="chip" id="reset">Reset</button>
+</div>
+</header>
+<main>
+<div class="note" style="margin-top:8px">Tap the weather button on a game to set how bad it looks (None, Light, Moderate, Heavy). Heavier weather lowers the favorite's chance by 1, 2, or 4 points. Use the arrows to shift a game toward either team after injury news. Sportsbook lines already include known injuries, so only shift when news is newer than the line.</div>
+<div class="addbox" id="addbox">
+<div class="g2"><input id="aa" placeholder="Away team"><input id="ah" placeholder="Home team"></div>
+<div class="g2"><input id="aam" placeholder="Away line (e.g. +150)"><input id="ahm" placeholder="Home line (e.g. -180)"></div>
+<button class="btn p" id="addgo" style="width:100%;margin-top:6px">Add game</button>
+</div>
+<div id="games"></div>
+<h2>Build a parlay</h2>
+<div class="sub">Finds the best-paying combos that still hit often enough. Left box: minimum chance %. Right box: number of legs. It uses the likelier team in each game.</div>
+<div class="row2"><input id="tp" type="number" inputmode="numeric" value="30"><input id="tk" type="number" inputmode="numeric" value="4"></div>
+<button class="btn p" id="bgo" style="width:100%">Suggest parlays</button>
+<div id="bres"></div>
+<h2>My tickets</h2>
+<div id="record" class="sub"></div>
+<div id="tickets"></div>
+<p class="note">Odds come from a mix of DraftKings, bet365 and ESPN lists and will differ slightly at your book. "Chance" starts from the market's no-vig odds, then applies your weather and injury changes. It is an estimate, not a prediction. Every leg has to hit, so the chance drops fast as you add legs. For entertainment only; 21+ where legal. Help: 1-800-GAMBLER.</p>
+</main>
+
+<div class="slip"><div class="slipin">
+<div class="legs" id="legs">Tap a team to add it to your parlay.</div>
+<div class="sl"><span>Combined odds</span><span class="big" id="odds">&mdash;</span></div>
+<div class="sl"><span>Stake $<input class="stake" id="stake" type="number" inputmode="decimal" value="2" min="0"></span><span>Payout <b id="pay">$0.00</b></span></div>
+<div class="sl"><span>Chance all hit</span><b id="chance">&mdash;</b></div>
+<div class="sl"><span>Expected back</span><b id="ev">&mdash;</b></div>
+<div class="btns"><button class="btn" id="clear">Clear</button><button class="btn p" id="save">Save ticket</button></div>
+</div></div>
+
+<script>
+// [away, home, day, awayML, homeML, weatherLevel 0-3, weatherNote, injuryNote]
+let D=[
+["SEA","DEN","Thu",-155,130,1,"Mile High: chance of rain and wind Thursday night","SEA: a RB is out"],
+["HOU","JAX","Sun",124,-148,0,"Played in London. Check the forecast.","Both teams have long-term injuries; no key starter news found"],
+["BAL","CLE","Sun",-235,190,0,"No weather concern found","BAL: Lamar Jackson listed out (ankle), Huntley started Week 5 and won. CLE: Gabriel out"],
+["CAR","PHI","Sun",-103,-117,1,"Showers possible, low 50s","No key news found"],
+["CHI","ATL","Sun",-182,152,0,"Dome","CHI: Caleb Williams questionable (hamstring). ATL: Penix questionable (ribs), Tua next"],
+["NO","NYG","Sun",-110,-110,1,"Rain expected, low 50s, 5-15 mph wind","NO: a RB is questionable. NYG: Dart on IR"],
+["NYJ","NE","Sun",270,-340,1,"Rain expected, upper 40s to low 50s","No key news found"],
+["PIT","TB","Sun",-151,126,3,"Wind 15-25 mph, gusts to 33, low 80s","TB: Baker Mayfield out (thumb)"],
+["TEN","IND","Sun",265,-330,0,"Dome","No key news found"],
+["ARI","LAR","Sun",525,-750,0,"Covered stadium","LAR: backup QB on IR; no starter news"],
+["BUF","LV","Sun",-270,220,0,"Dome","No key news found"],
+["LAC","KC","Sun",325,-410,0,"Check the forecast","LAC: Trey Lance doubtful (groin)"],
+["DAL","GB","Sun",-108,-112,0,"Check the forecast (Sunday night)","No key news found"],
+["WAS","SF","Mon",320,-400,0,"Check the forecast (Monday night)","WAS: Marcus Mariota out (knee)"]
+];
+const mk=()=>D.map((g,i)=>({id:i,a:g[0],h:g[1],day:g[2],am:g[3],hm:g[4],am2:g[8],hm2:g[9],w:g[5],wn:g[6],inj:g[7],sh:0}));
+const WL=["None","Light","Moderate","Heavy"],WS=[0,.01,.02,.04];
+let games=mk(),sel={},sortSafe=true,editing=false,tickets=[],nextId=100;
+try{const t=localStorage.getItem("pb_tickets");if(t)tickets=JSON.parse(t)}catch(e){}
+const $=id=>document.getElementById(id);
+const imp=ml=>ml<0?-ml/(-ml+100):100/(ml+100);
+const dec=ml=>ml<0?1+100/-ml:1+ml/100;
+const mkt=g=>{const a=imp(g.am),h=imp(g.hm);return a/(a+h)};
+function adj(g){let a=mkt(g);const s=WS[g.w];a=a>=.5?a-s:a+s;a+=g.sh/100;a=Math.min(.98,Math.max(.02,a));return[a,1-a]}
+const amer=d=>d>=2?"+"+Math.round((d-1)*100):"-"+Math.round(100/(d-1));
+const pct=p=>(p*100).toFixed(0)+"%";
+function parse(v){const n=parseInt(String(v).replace("+","").trim(),10);return isNaN(n)||Math.abs(n)<100?null:n}
+const fmt=ml=>ml>0?"+"+ml:""+ml;
+function render(){
+ let list=games.slice();
+ if(sortSafe)list.sort((x,y)=>Math.max(...adj(y))-Math.max(...adj(x)));
+ $("games").innerHTML=list.map(g=>{
+  const f=adj(g),m=mkt(g),top=Math.max(...f),s=sel[g.id],ch=Math.abs(f[0]-m)>.0005;
+  const cell=(side,name,ml,p,mp)=>`<button class="t ${s===side?"sel":""}" data-g="${g.id}" data-s="${side}"><b>${name}</b>${editing?`<input data-e="${g.id}${side}" value="${fmt(ml)}" onclick="event.stopPropagation()"><input data-e2="${g.id}${side}" placeholder="Book B line" value="${(side==="a"?g.am2:g.hm2)??""}" onclick="event.stopPropagation()">`:`${fmt(bm(g,side))}${bm(g,side)!==ml?" best":""} <span>&middot; ${pct(p)}${ch?" (mkt "+pct(mp)+")":""}</span>`}</button>`;
+  return `<div class="game"><div class="gh"><span>${g.a} @ ${g.h} &middot; ${g.day}</span>${top<.55?'<span class="tag">Toss-up</span>':""}</div><div class="row">${cell("a",g.a,g.am,f[0],m)}${cell("h",g.h,g.hm,f[1],1-m)}</div>
+  <div class="info"><b>Weather:</b> ${g.wn}</div><div class="info"><b>Injuries:</b> ${g.inj}</div>
+  <div class="ctl"><button class="sm w${g.w}" data-w="${g.id}">Weather: ${WL[g.w]}</button><button class="sm" data-sh="${g.id}" data-d="-1">&larr; ${g.a}</button><span class="info" style="margin:0">shift ${g.sh>0?"+":""}${g.sh}</span><button class="sm" data-sh="${g.id}" data-d="1">${g.h} &rarr;</button></div></div>`}).join("");
+ document.querySelectorAll(".t").forEach(b=>b.onclick=()=>{if(editing)return;const id=b.dataset.g;sel[id]=sel[id]===b.dataset.s?undefined:b.dataset.s;if(!sel[id])delete sel[id];keep()});
+ document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const g=games.find(x=>x.id==b.dataset.w);g.w=(g.w+1)%4;keep()});
+ document.querySelectorAll("[data-sh]").forEach(b=>b.onclick=()=>{const g=games.find(x=>x.id==b.dataset.sh);g.sh=Math.max(-15,Math.min(15,g.sh+ +b.dataset.d));keep()});
+ document.querySelectorAll("[data-e]").forEach(i=>i.onchange=()=>{const k=i.dataset.e,id=+k.slice(0,-1),side=k.slice(-1),g=games.find(x=>x.id===id),v=parse(i.value);if(v!==null){side==="a"?g.am=v:g.hm=v}keep()});
+ slip();tix()}
+function keep(){const y=window.scrollY;render();window.scrollTo(0,y)}
+function legsList(){return games.filter(g=>sel[g.id]).map(g=>{const a=sel[g.id]==="a";return{name:a?g.a:g.h,ml:bm(g,a?"a":"h"),p:adj(g)[a?0:1]}})}
+function slip(){
+ const L=legsList(),st=parseFloat($("stake").value)||0;
+ if(!L.length){$("legs").textContent="Tap a team to add it to your parlay.";$("odds").textContent="\u2014";$("pay").textContent="$0.00";$("chance").textContent="\u2014";$("ev").textContent="\u2014";return}
+ const d=L.reduce((a,l)=>a*dec(l.ml),1),p=L.reduce((a,l)=>a*l.p,1);
+ $("legs").textContent=L.length+" legs: "+L.map(l=>l.name+" "+fmt(l.ml)).join(", ");
+ $("odds").textContent=amer(d);
+ $("pay").textContent="$"+(st*d).toFixed(2);
+ $("chance").textContent=pct(p)+" (about 1 in "+Math.round(1/p).toLocaleString()+")";$("ev").textContent="$"+(st*p*d).toFixed(2)+" per $"+st+" ("+((p*d-1)*100).toFixed(0)+"%)"}
+function stash(){try{localStorage.setItem("pb_tickets",JSON.stringify(tickets))}catch(e){}}
+function tix(){
+ const w=tickets.filter(t=>t.r==="W").length,l=tickets.filter(t=>t.r==="L").length;
+ const S=tickets.filter(t=>t.r),ex=S.reduce((a,t)=>a+(t.p||0),0),stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.filter(t=>t.r==="W").reduce((a,t)=>a+ +t.pay,0),net=ret-stk;
+ $("record").textContent=tickets.length?`Record: ${w}W - ${l}L, ${tickets.length-w-l} open.`+(S.length?` The odds expected ${ex.toFixed(1)} wins and you got ${w}. Net ${net>=0?"+":"-"}$${Math.abs(net).toFixed(2)} on $${stk.toFixed(2)} staked.`:""):"No saved tickets yet.";
+ $("tickets").innerHTML=tickets.map((t,i)=>`<div class="tk ${t.r||""}"><b>${t.legs.length} legs &middot; ${t.odds} &middot; $${t.stake} to win $${t.pay}</b><div>${t.legs.join(", ")}</div><div class="m"><button data-tw="${i}">Won</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`).join("");
+ document.querySelectorAll("[data-tw]").forEach(b=>b.onclick=()=>{tickets[b.dataset.tw].r="W";stash();tix()});
+ document.querySelectorAll("[data-tl]").forEach(b=>b.onclick=()=>{tickets[b.dataset.tl].r="L";stash();tix()});
+ document.querySelectorAll("[data-td]").forEach(b=>b.onclick=()=>{tickets.splice(b.dataset.td,1);stash();tix()})}
+$("stake").oninput=slip;
+$("clear").onclick=()=>{sel={};render()};
+$("save").onclick=()=>{const L=legsList();if(!L.length)return;const st=parseFloat($("stake").value)||0,d=L.reduce((a,l)=>a*dec(l.ml),1);
+ tickets.unshift({legs:L.map(l=>l.name+" "+fmt(l.ml)),odds:amer(d),stake:st,pay:(st*d).toFixed(2),p:L.reduce((a,l)=>a*l.p,1)});stash();sel={};render()};
+$("sort").onclick=()=>{sortSafe=!sortSafe;$("sort").textContent=sortSafe?"Sort: safest first":"Sort: schedule";render()};
+$("edit").onclick=()=>{editing=!editing;$("edit").classList.toggle("on",editing);$("edit").textContent=editing?"Done editing":"Edit lines";render()};
+$("add").onclick=()=>$("addbox").classList.toggle("show");
+$("addgo").onclick=()=>{const a=$("aa").value.trim(),h=$("ah").value.trim(),am=parse($("aam").value),hm=parse($("ahm").value);
+ if(!a||!h||am===null||hm===null){alert("Enter both teams and both lines, like +150 and -180.");return}
+ games.push({id:nextId++,a,h,day:"Custom",am,hm,w:0,wn:"Set the weather above",inj:"Add notes by checking the injury report",sh:0});["aa","ah","aam","ahm"].forEach(i=>$(i).value="");$("addbox").classList.remove("show");render()};
+$("reset").onclick=()=>{games=mk();sel={};render()};
+function bm(g,s){const x=s==="a"?g.am:g.hm,y=s==="a"?g.am2:g.hm2;return y!=null&&dec(y)>dec(x)?y:x}
+document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.e2;if(!k)return;const id=+k.slice(0,-1),side=k.slice(-1),g=games.find(x=>x.id===id),v=parse(e.target.value);if(side==="a")g.am2=v;else g.hm2=v;keep()});
+let BR=[];
+$("bgo").onclick=()=>{
+ const T=(parseFloat($("tp").value)||0)/100,K=Math.max(2,Math.min(8,parseInt($("tk").value)||4)),st=parseFloat($("stake").value)||0;
+ const C=games.map(g=>{const f=adj(g),s=f[0]>=f[1]?"a":"h";return{id:g.id,s,name:s==="a"?g.a:g.h,ml:bm(g,s),p:Math.max(f[0],f[1])}}).sort((x,y)=>y.p-x.p).slice(0,12);
+ const out=[];
+ (function rec(i,pk){if(pk.length===K){const p=pk.reduce((a,c)=>a*c.p,1);if(p>=T)out.push({pk:pk.slice(),p,d:pk.reduce((a,c)=>a*dec(c.ml),1)});return}if(i>=C.length||pk.length+(C.length-i)<K)return;pk.push(C[i]);rec(i+1,pk);pk.pop();rec(i+1,pk)})(0,[]);
+ out.sort((x,y)=>y.d-x.d);BR=out.slice(0,5);
+ $("bres").innerHTML=BR.length?BR.map((r,i)=>`<div class="tk"><b>${amer(r.d)} &middot; ${pct(r.p)} chance (1 in ${Math.round(1/r.p)}) &middot; $${st} pays $${(st*r.d).toFixed(2)}</b><div>${r.pk.map(c=>c.name+" "+fmt(c.ml)).join(", ")}</div><div class="m"><button class="use" data-use="${i}">Use this</button></div></div>`).join(""):`<div class="tk">No ${K}-leg combo reaches ${pct(T)}. Lower the target or the number of legs.</div>`;
+ document.querySelectorAll("[data-use]").forEach(b=>b.onclick=()=>{sel={};BR[b.dataset.use].pk.forEach(c=>sel[c.id]=c.s);render();window.scrollTo(0,0)})};
+render();
+fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+ if(!j.games||!j.games.length)return;
+ D=j.games.map(g=>[g.a,g.h,g.day,g.am,g.hm,g.w,g.wn,g.inj,g.am2,g.hm2]);
+ games=mk();sel={};
+ $("hsub").textContent="NFL games, updated "+new Date(j.updated).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"});
+ render()}).catch(()=>{});
+</script>
+</body>
+</html>
