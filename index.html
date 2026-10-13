@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Parlay Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&family=Archivo+Black&family=Anton&family=Space+Grotesk:wght@400;600;700&display=swap">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <style>
-:root{--bg:#f3f1ec;--card:#fff;--ink:#1c1b19;--mute:#6d6a63;--line:#dcd8cf;--pick:#0f5c4a;--pickink:#fff;--warn:#b4531a;--bad:#a8322d;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171a;--card:#1f2226;--ink:#efede8;--mute:#9a978f;--line:#33373c;--pick:#3fbf9a;--pickink:#0c1713;--warn:#e59a62;--bad:#e5766f}}
-:root[data-theme="dark"]{--bg:#15171a;--card:#1f2226;--ink:#efede8;--mute:#9a978f;--line:#33373c;--pick:#3fbf9a;--pickink:#0c1713;--warn:#e59a62;--bad:#e5766f}
+/* safe area + themes */
+:root,:root[data-theme="clean"]{--bg:#f3f5fb;--card:#fff;--ink:#0e1230;--mute:#6a7090;--line:#e3e7f3;--pick:#3b5bff;--pick2:#8a3bff;--pickink:#fff;--warn:#ff7a00;--bad:#e5195f;--radius:18px;--shadow:0 2px 4px rgba(30,40,120,.05),0 12px 30px rgba(59,91,255,.10);--fb:"Sora",-apple-system,"SF Pro Display",system-ui,sans-serif;--fh:"Sora",-apple-system,system-ui,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+:root[data-theme="dark"]{--bg:#04060a;--card:#0c1310;--ink:#eafff0;--mute:#6f8c7c;--line:#1b2b22;--pick:#7cff00;--pick2:#00e5b0;--pickink:#031000;--warn:#ffb020;--bad:#ff4d6d;--radius:14px;--shadow:0 0 0 1px rgba(124,255,0,.12),0 12px 34px rgba(0,0,0,.6);--fb:"Rajdhani",-apple-system,system-ui,sans-serif;--fh:"Orbitron","Rajdhani",system-ui,sans-serif}
+:root[data-theme="bold"]{--bg:#ffd60a;--card:#fffdf2;--ink:#120a2a;--mute:#5a4a7a;--line:#120a2a;--pick:#ff2d78;--pick2:#ff8a00;--pickink:#fff;--warn:#d94e00;--bad:#c4005a;--radius:12px;--shadow:5px 5px 0 #120a2a;--fb:"Space Grotesk",-apple-system,system-ui,sans-serif;--fh:"Archivo Black","Space Grotesk",system-ui,sans-serif}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;line-height:1.4;padding-bottom:230px}
@@ -57,17 +59,46 @@ h2{font-size:17px;margin:22px 0 4px}
 .row2{display:flex;gap:6px;margin:6px 0}
 .row2 input{width:100%;font-size:16px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
 .tk .m .use{flex:none;padding:6px 14px}
+
+body{font-family:var(--fb);font-size:15px;-webkit-font-smoothing:antialiased}
+h1,h2,.big,.t b{font-family:var(--fh)}
+h1{font-weight:800;letter-spacing:-.5px}
+:root[data-theme="dark"] h1,:root[data-theme="dark"] h2{letter-spacing:1px;text-transform:uppercase;font-size:21px}
+.game,.tk,.addbox{border-radius:var(--radius);box-shadow:var(--shadow)}
+.game{padding:14px}
+.t{position:relative;overflow:hidden;border-radius:12px;transition:transform .12s,background .2s,border-color .2s,box-shadow .2s}
+.t:active{transform:scale(.97)}
+.t .bar{position:absolute;left:0;bottom:0;height:4px;background:var(--pick);opacity:.55;display:block}
+.t.sel .bar{background:var(--pickink);opacity:.7}
+.t.sel{box-shadow:0 6px 18px color-mix(in srgb,var(--pick) 35%,transparent)}
+.chip{transition:background .2s}
+.slip{border-radius:20px 20px 0 0;backdrop-filter:blur(12px)}
+.big{font-variant-numeric:tabular-nums}
+.ring{flex:none}
+:root[data-theme="dark"] .t.sel{box-shadow:0 0 22px color-mix(in srgb,var(--pick) 45%,transparent)}
+:root[data-theme="bold"] .game,:root[data-theme="bold"] .tk,:root[data-theme="bold"] .slip,:root[data-theme="bold"] .chip,:root[data-theme="bold"] .btn,:root[data-theme="bold"] .t{border:2px solid var(--ink)}
+:root[data-theme="bold"] .chip.on,:root[data-theme="bold"] .btn.p{background:var(--pick);border-color:var(--ink)}
+.t.sel{background:linear-gradient(135deg,var(--pick),var(--pick2));border-color:transparent}
+.big{background:linear-gradient(90deg,var(--pick),var(--pick2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.chip.on,.btn.p{background:linear-gradient(135deg,var(--pick),var(--pick2));color:var(--pickink);border-color:transparent}
+:root[data-theme="bold"] .chip.on,:root[data-theme="bold"] .btn.p{border:2px solid var(--ink)}
+.tag{background:var(--warn);color:var(--bg);padding:1px 8px;border-radius:99px;font-size:11px}
+:root[data-theme] h1{font-family:"Anton",Impact,"Arial Narrow",sans-serif;font-size:44px;font-weight:400;line-height:1;letter-spacing:3px;text-transform:uppercase}
+.ttl{background:linear-gradient(90deg,var(--pick),var(--pick2));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 10px color-mix(in srgb,var(--pick) 35%,transparent))}
+header{padding-top:22px}
 </style>
 </head>
 <body>
 <header>
-<h1>Parlay Board</h1>
+<h1><img src="icon.png" alt="" style="width:46px;height:46px;border-radius:10px;vertical-align:-10px;margin-right:10px"><span class="ttl">PARLAY BOARD</span></h1>
 <div class="sub" id="hsub">NFL Week 6 &middot; sample data (data.json not found)</div>
 <div class="bar">
 <button class="chip" id="sort">Sort: safest first</button>
 <button class="chip" id="edit">Edit lines</button>
 <button class="chip" id="add">+ Add game</button>
 <button class="chip" id="reset">Reset</button>
+<span style="flex-basis:100%;height:0"></span>
+<button class="chip" data-th="clean">Clean</button><button class="chip" data-th="dark">Dark</button><button class="chip" data-th="bold">Bold</button>
 </div>
 </header>
 <main>
@@ -93,7 +124,7 @@ h2{font-size:17px;margin:22px 0 4px}
 <div class="legs" id="legs">Tap a team to add it to your parlay.</div>
 <div class="sl"><span>Combined odds</span><span class="big" id="odds">&mdash;</span></div>
 <div class="sl"><span>Stake $<input class="stake" id="stake" type="number" inputmode="decimal" value="2" min="0"></span><span>Payout <b id="pay">$0.00</b></span></div>
-<div class="sl"><span>Chance all hit</span><b id="chance">&mdash;</b></div>
+<div class="sl"><span style="display:flex;align-items:center;gap:8px"><svg class="ring" width="40" height="40" viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="5"/><circle id="rc" cx="22" cy="22" r="18" fill="none" stroke="var(--pick)" stroke-width="5" stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="113" transform="rotate(-90 22 22)" style="transition:stroke-dashoffset .5s"/></svg>Chance all hit</span><b id="chance">&mdash;</b></div>
 <div class="sl"><span>Expected back</span><b id="ev">&mdash;</b></div>
 <div class="btns"><button class="btn" id="clear">Clear</button><button class="btn p" id="save">Save ticket</button></div>
 </div></div>
@@ -134,9 +165,9 @@ function render(){
  if(sortSafe)list.sort((x,y)=>Math.max(...adj(y))-Math.max(...adj(x)));
  $("games").innerHTML=list.map(g=>{
   const f=adj(g),m=mkt(g),top=Math.max(...f),s=sel[g.id],ch=Math.abs(f[0]-m)>.0005;
-  const cell=(side,name,ml,p,mp)=>`<button class="t ${s===side?"sel":""}" data-g="${g.id}" data-s="${side}"><b>${name}</b>${editing?`<input data-e="${g.id}${side}" value="${fmt(ml)}" onclick="event.stopPropagation()"><input data-e2="${g.id}${side}" placeholder="Book B line" value="${(side==="a"?g.am2:g.hm2)??""}" onclick="event.stopPropagation()">`:`${fmt(bm(g,side))}${bm(g,side)!==ml?" best":""} <span>&middot; ${pct(p)}${ch?" (mkt "+pct(mp)+")":""}</span>`}</button>`;
+  const cell=(side,name,ml,p,mp)=>`<button class="t ${s===side?"sel":""}" data-g="${g.id}" data-s="${side}"><b>${name}</b><i class="bar" style="width:${(p*100).toFixed(0)}%"></i>${editing?`<input data-e="${g.id}${side}" value="${fmt(ml)}" onclick="event.stopPropagation()"><input data-e2="${g.id}${side}" placeholder="Book B line" value="${(side==="a"?g.am2:g.hm2)??""}" onclick="event.stopPropagation()">`:`${fmt(bm(g,side))}${bm(g,side)!==ml?" best":""} <span>&middot; ${pct(p)}${ch?" (mkt "+pct(mp)+")":""}</span>`}</button>`;
   return `<div class="game"><div class="gh"><span>${g.a} @ ${g.h} &middot; ${g.day}</span>${top<.55?'<span class="tag">Toss-up</span>':""}</div><div class="row">${cell("a",g.a,g.am,f[0],m)}${cell("h",g.h,g.hm,f[1],1-m)}</div>
-  <div class="info"><b>Weather:</b> ${g.wn}</div><div class="info"><b>Injuries:</b> ${g.inj}</div>
+  <div class="info"><b>${/dome|covered/i.test(g.wn)?"🏟️":["☀️","🌤️","🌧️","💨"][g.w]} Weather:</b> ${g.wn}</div><div class="info"><b>🩹 Injuries:</b> ${g.inj}</div>
   <div class="ctl"><button class="sm w${g.w}" data-w="${g.id}">Weather: ${WL[g.w]}</button><button class="sm" data-sh="${g.id}" data-d="-1">&larr; ${g.a}</button><span class="info" style="margin:0">shift ${g.sh>0?"+":""}${g.sh}</span><button class="sm" data-sh="${g.id}" data-d="1">${g.h} &rarr;</button></div></div>`}).join("");
  document.querySelectorAll(".t").forEach(b=>b.onclick=()=>{if(editing)return;const id=b.dataset.g;sel[id]=sel[id]===b.dataset.s?undefined:b.dataset.s;if(!sel[id])delete sel[id];keep()});
  document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const g=games.find(x=>x.id==b.dataset.w);g.w=(g.w+1)%4;keep()});
@@ -147,12 +178,12 @@ function keep(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function legsList(){return games.filter(g=>sel[g.id]).map(g=>{const a=sel[g.id]==="a";return{name:a?g.a:g.h,ml:bm(g,a?"a":"h"),p:adj(g)[a?0:1]}})}
 function slip(){
  const L=legsList(),st=parseFloat($("stake").value)||0;
- if(!L.length){$("legs").textContent="Tap a team to add it to your parlay.";$("odds").textContent="\u2014";$("pay").textContent="$0.00";$("chance").textContent="\u2014";$("ev").textContent="\u2014";return}
+ if(!L.length){$("legs").textContent="Tap a team to add it to your parlay.";$("odds").textContent="\u2014";$("pay").textContent="$0.00";$("chance").textContent="\u2014";$("ev").textContent="\u2014";$("rc").style.strokeDashoffset=113;return}
  const d=L.reduce((a,l)=>a*dec(l.ml),1),p=L.reduce((a,l)=>a*l.p,1);
  $("legs").textContent=L.length+" legs: "+L.map(l=>l.name+" "+fmt(l.ml)).join(", ");
  $("odds").textContent=amer(d);
  $("pay").textContent="$"+(st*d).toFixed(2);
- $("chance").textContent=pct(p)+" (about 1 in "+Math.round(1/p).toLocaleString()+")";$("ev").textContent="$"+(st*p*d).toFixed(2)+" per $"+st+" ("+((p*d-1)*100).toFixed(0)+"%)"}
+ $("chance").textContent=pct(p)+" (about 1 in "+Math.round(1/p).toLocaleString()+")";$("rc").style.strokeDashoffset=113*(1-p);$("ev").textContent="$"+(st*p*d).toFixed(2)+" per $"+st+" ("+((p*d-1)*100).toFixed(0)+"%)"}
 function stash(){try{localStorage.setItem("pb_tickets",JSON.stringify(tickets))}catch(e){}}
 function tix(){
  const w=tickets.filter(t=>t.r==="W").length,l=tickets.filter(t=>t.r==="L").length;
@@ -191,6 +222,10 @@ fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).th
  games=mk();sel={};
  $("hsub").textContent="NFL games, updated "+new Date(j.updated).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"});
  render()}).catch(()=>{});
+(function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}
+document.documentElement.dataset.theme=t;
+const bs=document.querySelectorAll("[data-th]");
+bs.forEach(b=>{b.classList.toggle("on",b.dataset.th===t);b.onclick=()=>{document.documentElement.dataset.theme=b.dataset.th;try{localStorage.setItem("pb_theme",b.dataset.th)}catch(e){}bs.forEach(x=>x.classList.toggle("on",x===b))}})})();
 </script>
 </body>
 </html>
