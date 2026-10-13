@@ -1,0 +1,173 @@
+{
+ "updated": "2026-10-13T04:55:26.415490+00:00",
+ "games": [
+  {
+   "a": "SEA",
+   "h": "DEN",
+   "day": "Thu",
+   "am": -155,
+   "hm": 130,
+   "am2": -154,
+   "hm2": 130,
+   "w": 1,
+   "wn": "53F, wind 11 mph (gusts 14), 53% chance of rain",
+   "inj": "SEA: QB Drew Lock (Questionable); 2 others out | DEN: no QB listed; 2 others out"
+  },
+  {
+   "a": "HOU",
+   "h": "JAX",
+   "day": "Sun",
+   "am": 124,
+   "hm": -148,
+   "am2": 118,
+   "hm2": -138,
+   "w": 0,
+   "wn": "50F, wind 7 mph (gusts 15), 11% chance of rain",
+   "inj": "HOU: no QB listed | JAX: no QB listed; 1 others out"
+  },
+  {
+   "a": "CHI",
+   "h": "ATL",
+   "day": "Sun",
+   "am": -175,
+   "hm": 145,
+   "am2": -188,
+   "hm2": 158,
+   "w": 0,
+   "wn": "Dome or covered stadium",
+   "inj": "CHI: QB Caleb Williams (Out); 4 others out | ATL: QB Michael Penix Jr. (Questionable); 1 others out"
+  },
+  {
+   "a": "BAL",
+   "h": "CLE",
+   "day": "Sun",
+   "am": -238,
+   "hm": 195,
+   "am2": -230,
+   "hm2": 190,
+   "w": 0,
+   "wn": "54F, wind 11 mph (gusts 16), 0% chance of rain",
+   "inj": "BAL: QB Lamar Jackson (Out); 3 others out | CLE: no QB listed; 5 others out"
+  },
+  {
+   "a": "CAR",
+   "h": "PHI",
+   "day": "Sun",
+   "am": -105,
+   "hm": -115,
+   "am2": 104,
+   "hm2": -122,
+   "w": 0,
+   "wn": "53F, wind 4 mph (gusts 5), 1% chance of rain",
+   "inj": "CAR: no QB listed; 3 others out | PHI: no QB listed; 6 others out"
+  },
+  {
+   "a": "TEN",
+   "h": "IND",
+   "day": "Sun",
+   "am": 270,
+   "hm": -340,
+   "am2": 260,
+   "hm2": -320,
+   "w": 0,
+   "wn": "Dome or covered stadium",
+   "inj": "TEN: no QB listed; 2 others out | IND: no QB listed; 3 others out"
+  },
+  {
+   "a": "NYJ",
+   "h": "NE",
+   "day": "Sun",
+   "am": 280,
+   "hm": -355,
+   "am2": 300,
+   "hm2": -375,
+   "w": 0,
+   "wn": "48F, wind 9 mph (gusts 14), 0% chance of rain",
+   "inj": "NYJ: no QB listed; 4 others out | NE: no QB listed; 4 others out"
+  },
+  {
+   "a": "NO",
+   "h": "NYG",
+   "day": "Sun",
+   "am": -110,
+   "hm": -110,
+   "am2": -112,
+   "hm2": -104,
+   "w": 0,
+   "wn": "52F, wind 5 mph (gusts 8), 1% chance of rain",
+   "inj": "NO: no QB listed; 5 others out | NYG: no QB listed; 1 others out"
+  },
+  {
+   "a": "PIT",
+   "h": "TB",
+   "day": "Sun",
+   "am": -155,
+   "hm": 130,
+   "am2": -138,
+   "hm2": 118,
+   "w": 1,
+   "wn": "79F, wind 15 mph (gusts 18), 9% chance of rain",
+   "inj": "PIT: no QB listed; 4 others out | TB: QB Baker Mayfield (Out); 3 others out"
+  },
+  {
+   "a": "ARI",
+   "h": "LAR",
+   "day": "Sun",
+   "am": 600,
+   "hm": -900,
+   "am2": 600,
+   "hm2": -800,
+   "w": 0,
+   "wn": "Dome or covered stadium",
+   "inj": "ARI: no QB listed; 1 others out | LAR: QB Ty Simpson (Out); 4 others out"
+  },
+  {
+   "a": "BUF",
+   "h": "LV",
+   "day": "Sun",
+   "am": -285,
+   "hm": 230,
+   "am2": -275,
+   "hm2": 225,
+   "w": 0,
+   "wn": "Dome or covered stadium",
+   "inj": "BUF: no QB listed; 7 others out | LV: no QB listed; 2 others out"
+  },
+  {
+   "a": "LAC",
+   "h": "KC",
+   "day": "Sun",
+   "am": 340,
+   "hm": -440,
+   "am2": 360,
+   "hm2": -460,
+   "w": 1,
+   "wn": "67F, wind 13 mph (gusts 18), 1% chance of rain",
+   "inj": "LAC: no QB listed; 7 others out | KC: no QB listed"
+  },
+  {
+   "a": "DAL",
+   "h": "GB",
+   "day": "Sun",
+   "am": -105,
+   "hm": -115,
+   "am2": -106,
+   "hm2": -110,
+   "w": 3,
+   "wn": "54F, wind 15 mph (gusts 32), 0% chance of rain",
+   "inj": "DAL: no QB listed; 4 others out | GB: no QB listed; 5 others out"
+  },
+  {
+   "a": "WAS",
+   "h": "SF",
+   "day": "Mon",
+   "am": 320,
+   "hm": -410,
+   "am2": 350,
+   "hm2": -450,
+   "w": 0,
+   "wn": "65F, wind 12 mph (gusts 15), 12% chance of rain",
+   "inj": "WAS: QB Marcus Mariota (Out); 5 others out | SF: no QB listed; 6 others out"
+  }
+ ]
+}
