@@ -8,8 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
-<link rel="icon" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Parlay Board">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 /* ---------- themes ---------- */
 :root,:root[data-theme="dark"]{
@@ -223,6 +228,8 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .how{font-size:13px;color:var(--mute)}
 .how b{color:var(--ink)}
 footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
+/* opened from the home screen: keep the status bar readable on the light theme */
+@media (display-mode:standalone){:root[data-theme="clean"] body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#0f1b2d;z-index:50}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (min-width:760px){.mark{font-size:52px}}
 </style>
