@@ -7,7 +7,7 @@ What it pulls each run:
   * PrizePicks lines + sportsbook player props for upcoming games, paced so the
     monthly Odds API quota lasts (see settings.json)
 """
-import os, json, math, difflib, unicodedata, calendar, datetime as dt
+import os, json, math, time, difflib, unicodedata, calendar, datetime as dt
 from statistics import NormalDist, median
 from zoneinfo import ZoneInfo
 import requests
@@ -220,15 +220,20 @@ def geocode(city, state, country):
     k = (city, state, country)
     if k in GEO: return GEO[k]
     res = None
-    try:
-        p = {"name": city, "count": 10, "language": "en", "format": "json"}
-        if not country or country in ("USA", "United States"): p["countryCode"] = "US"
-        rs = requests.get("https://geocoding-api.open-meteo.com/v1/search", params=p, timeout=20).json().get("results", [])
-        full = STATES.get(state or "")
-        pick = next((r for r in rs if full and r.get("admin1") == full), rs[0] if rs else None)
-        if pick: res = (pick["latitude"], pick["longitude"])
-    except Exception as e:
-        print("geocode failed:", city, e)
+    p = {"name": city, "count": 10, "language": "en", "format": "json"}
+    if not country or country in ("USA", "United States"): p["countryCode"] = "US"
+    for attempt in range(3):
+        try:
+            j = requests.get("https://geocoding-api.open-meteo.com/v1/search", params=p, timeout=20).json()
+            if j.get("error"): raise RuntimeError(j.get("reason"))
+            rs = j.get("results", [])
+            full = STATES.get(state or "")
+            pick = next((r for r in rs if full and r.get("admin1") == full), rs[0] if rs else None)
+            if pick: res = (pick["latitude"], pick["longitude"])
+            break
+        except Exception as e:
+            print("geocode failed:", city, e)
+            time.sleep(3 * (attempt + 1))
     GEO[k] = res
     return res
 
@@ -238,26 +243,42 @@ def level(temp, wind, gust, rain):
     if wind >= 12 or rain >= 40 or temp <= 35: return 1
     return 0
 
-WX = {}
-def weather(lat, lon, roof, kick):
+def fetch_forecasts(locs):
+    """One Open-Meteo call per 40 venues (instead of one per game), with retries."""
+    out = {}
+    locs = sorted(set(locs))
+    for i in range(0, len(locs), 40):
+        chunk = locs[i:i + 40]
+        for attempt in range(4):
+            try:
+                j = requests.get("https://api.open-meteo.com/v1/forecast", params={
+                    "latitude": ",".join(str(a) for a, _ in chunk), "longitude": ",".join(str(b) for _, b in chunk),
+                    "timezone": "UTC", "forecast_days": 16,
+                    "hourly": "temperature_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m",
+                    "temperature_unit": "fahrenheit", "wind_speed_unit": "mph"}, timeout=60).json()
+                if isinstance(j, dict) and j.get("error"):
+                    raise RuntimeError(j.get("reason"))
+                res = j if isinstance(j, list) else [j]
+                for loc, r in zip(chunk, res):
+                    out[loc] = r["hourly"]
+                break
+            except Exception as e:
+                print(f"weather batch failed (try {attempt + 1}):", e)
+                time.sleep(5 * (attempt + 1))
+    return out
+
+def weather_for(lat, lon, roof, kick, fc):
     if roof == "closed":
         return 0, "Dome or covered stadium"
-    if lat is None:
+    h = fc.get((round(lat, 3), round(lon, 3))) if lat is not None else None
+    if not h:
         return 0, "Forecast unavailable. Check it yourself."
-    k = kick.replace(minute=0, second=0, microsecond=0)
     try:
-        key = (round(lat, 3), round(lon, 3))
-        if key not in WX:
-            WX[key] = requests.get("https://api.open-meteo.com/v1/forecast", params={
-                "latitude": lat, "longitude": lon, "timezone": "UTC", "forecast_days": 16,
-                "hourly": "temperature_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m",
-                "temperature_unit": "fahrenheit", "wind_speed_unit": "mph"}, timeout=30).json()["hourly"]
-        h = WX[key]
-        i = h["time"].index(k.strftime("%Y-%m-%dT%H:00"))
+        i = h["time"].index(kick.replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%dT%H:00"))
         t, w, g, p = h["temperature_2m"][i], h["wind_speed_10m"][i], h["wind_gusts_10m"][i], h["precipitation_probability"][i] or 0
         return level(t, w, g, p), f"{t:.0f}°F, wind {w:.0f} mph (gusts {g:.0f}), {p}% chance of rain"
     except Exception as e:
-        print("weather failed:", e)
+        print("weather lookup failed:", e)
         return 0, "Forecast unavailable. Check it yourself."
 
 
@@ -323,7 +344,6 @@ def build_games(s, overrides, inj):
                 if ll: lat, lon = ll
             elif sp == "NFL" and home in T:
                 lat, lon, roof = T[home][1], T[home][2], T[home][3]
-            w, wn = weather(lat, lon, roof, kick)
 
             if sp == "NFL":
                 notes = [n for n in (inj_note(away, A["ab"], inj), inj_note(home, H["ab"], inj)) if n]
@@ -332,11 +352,15 @@ def build_games(s, overrides, inj):
                 inj_txt = "College teams don't publish a full injury feed. Check team news before kickoff."
 
             g = {"id": e["id"], "sp": sp, "kick": iso(kick), "a": A, "h": H, "px": px, "fair": round(fair, 4),
-                 "w": w, "wn": wn, "inj": inj_txt}
+                 "inj": inj_txt, "_wx": (lat, lon, roof, kick)}
             if em and em["neutral"]: g["neu"] = True
             if vname: g["v"] = vname
             games.append(g)
             events.append((g, key, em))
+    fc = fetch_forecasts([(round(g["_wx"][0], 3), round(g["_wx"][1], 3)) for g in games
+                          if g["_wx"][0] is not None and g["_wx"][2] != "closed"])
+    for g in games:
+        g["w"], g["wn"] = weather_for(*g.pop("_wx"), fc)
     return games, events
 
 

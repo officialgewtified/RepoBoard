@@ -282,7 +282,7 @@ const ui={popen:{},tab:LS.get("pb_tab","top"),sport:LS.get("pb_sport","all"),day
  ml:{K:3,min:35,by:"value",res:null},pp:{size:"auto",mode:"best",per:1,res:null}};
 let stakeML=LS.get("pb_stake",2),stakePP=LS.get("pb_ppstake",5);
 
-const bname=k=>BOOKNAME[k]||(DATA&&DATA.books&&DATA.books[k])||k;
+const bname=k=>((DATA&&DATA.books&&DATA.books[k])||BOOKNAME[k]||k).replace(/\.ag$/,"");
 const okBook=k=>!myBooks||myBooks.includes(k);
 const live=g=>!g.t||g.t>Date.now();
 const inSport=sp=>ui.sport==="all"||ui.sport===sp;
@@ -308,6 +308,7 @@ function bePower(n){const m=PAY.power[n];return m?Math.pow(1/m,1/n):null}
 function dist(ps){let d=[1];for(const p of ps){const n=new Array(d.length+1).fill(0);for(let i=0;i<d.length;i++){n[i]+=d[i]*(1-p);n[i+1]+=d[i]*p}d=n}return d}
 function evPower(ps){const m=PAY.power[ps.length];return m?ps.reduce((a,p)=>a*p,1)*m-1:null}
 function evFlex(ps){const t=PAY.flex[ps.length];if(!t)return null;const d=dist(ps),n=ps.length;let e=0;t.forEach((m,i)=>e+=(d[n-i]||0)*m);return e-1}
+function profit(ps,mode){const n=ps.length,d=dist(ps);if(mode==="power")return d[n];const t=PAY.flex[n]||[];let x=0;t.forEach((m,i)=>{if(m>1)x+=d[n-i]||0});return x}
 function beFlex(n){if(!PAY.flex[n])return null;let lo=.3,hi=.95;for(let i=0;i<40;i++){const m=(lo+hi)/2;evFlex(Array(n).fill(m))>0?hi=m:lo=m}return hi}
 function breakevens(){const out=[];for(let n=2;n<=6;n++){const a=bePower(n),b=beFlex(n);if(a)out.push(a);if(b)out.push(b)}return{lo:Math.min(...out),hi:Math.max(...out)}}
 let BE=breakevens();
@@ -356,6 +357,7 @@ function scanParlays(K,minP,by){
 
 function ppCandidates(onlyPP){
  const byPl={};for(const r of P){const g=GI[r.g];if(!g||!live(g)||!inSport(r.sp))continue;if(onlyPP&&!r.pp)continue;
+  if(r.nb<2)continue;   // need at least two books before a pick goes into lineups
   const{side,p}=propSide(r);if(p<.5)continue;const k=r.g+"|"+r.pl;if(!byPl[k]||byPl[k].p<p)byPl[k]={r,side,p}}
  return Object.values(byPl).sort((a,b)=>b.p-a.p)}
 function scanLineups(sizes,mode,per,onlyPP,pool=20){
@@ -411,7 +413,7 @@ function propRow(r){
  const lineTxt=Number.isInteger(r.ln)?r.ln:r.ln.toFixed(1);
  const btn=s=>{const pp=s==="o"?r.po:1-r.po;return `<button class="side-b ${side===s?"rec":""} ${cur===s?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${cur===s}"><small>${s==="o"?"More":"Less"}</small><b>${pct(pp)}</b><span class="ln">${lineTxt}</span></button>`};
  return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}<span class="tier ${tc}">${tl}</span></b>
-  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span></button>
+  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span></button>
   <div class="sides">${btn("o")}${btn("u")}</div>
   ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line.
    <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table></div>`:""}</div>`}
@@ -424,7 +426,7 @@ function comboML(r,i){return `<div class="combo"><div class="hd"><b>${amer(r.D)}
  <ul>${r.legs.map(l=>`<li><span>${esc(teamName(l.g[l.s]))} ${fmtML(l.ml)}</span><span>${esc(bname(l.book))}, ${pct(l.p)}</span></li>`).join("")}</ul>
  <button class="use" data-useml="${i}">Put on slip</button></div>`}
 function comboPP(r,i,src){const n=r.picks.length;const mult=r.mode==="power"?PAY.power[n]+"x":PAY.flex[n][0]+"x top";
- return `<div class="combo"><div class="hd"><b>${sgn(r.ev)}</b><span>${n}-pick ${r.mode==="power"?"Power":"Flex"} (${mult})<br>${pct(r.all)} to hit all</span></div>
+ return `<div class="combo"><div class="hd"><b>${sgn(r.ev)}</b><span>${n}-pick ${r.mode==="power"?"Power":"Flex"} (${mult})<br>${pct(profit(r.picks.map(x=>x.p),r.mode))} to win money</span></div>
  <ul>${r.picks.map(x=>`<li><span>${esc(x.r.pl)} ${x.side==="o"?"More":"Less"} ${x.r.ln} ${esc(MK[x.r.mk]||x.r.mk)}</span><span>${pct(x.p)}</span></li>`).join("")}</ul>
  <button class="use" data-usepp="${src}|${i}">Put on slip</button></div>`}
 
@@ -441,7 +443,7 @@ function renderTop(){
  if(hero){const n=hero.picks.length,pos=hero.ev>0;
   h+=`<h2>Best PrizePicks lineup</h2><p class="lede">${pos?"The lineup with the highest expected return at standard payouts.":"No lineup beats PrizePicks' payouts right now. This is the closest one."}</p>
   <section class="card hero"><div class="kick"><div><h3>${n}-pick ${hero.mode==="power"?"Power Play":"Flex Play"}</h3><div class="sub">Expected return per entry</div></div><div class="ev ${pos?"":"neg"}">${sgn(hero.ev)}</div></div>
-  <div class="stats"><div class="stat"><small>Hits all</small><b>${pct(hero.all)}</b></div><div class="stat"><small>Pays</small><b>${hero.mode==="power"?PAY.power[n]:PAY.flex[n][0]}x</b></div><div class="stat"><small>Avg pick</small><b>${pct(hero.picks.reduce((a,x)=>a+x.p,0)/n)}</b></div></div>
+  <div class="stats"><div class="stat"><small>Wins money</small><b>${pct(profit(hero.picks.map(x=>x.p),hero.mode))}</b></div><div class="stat"><small>Hits all</small><b>${pct(hero.all)}</b></div><div class="stat"><small>Top payout</small><b>${hero.mode==="power"?PAY.power[n]:PAY.flex[n][0]}x</b></div></div>
   <div class="list">${hero.picks.map(x=>propRow(x.r)).join("")}</div>
   <button class="btn go wide" style="margin-top:12px" data-usepp="top|0">Put this lineup on the slip</button>
   <p class="fine">Scanned ${T.pp.n.toLocaleString()} lineups from the ${T.pp.pool} strongest ${T.onlyPP?"PrizePicks lines":"props"}, one pick per game.</p></section>`;
@@ -449,7 +451,7 @@ function renderTop(){
   if(sizes.length>1)h+=`<h2>Best lineup by size</h2><p class="lede">Fewer picks hit more often. More picks pay more.</p><div class="res">${sizes.map(s=>comboPP(T.pp.bySize[s],s,"size")).join("")}</div>`;
  }else if(P.length===0){h+=`<h2>PrizePicks</h2><div class="card empty">No PrizePicks lines in this update. Props are pulled for games that start before the next update.</div>`}
  const props=ppCandidates(T.onlyPP).slice(0,8);
- if(props.length)h+=`<h2>Strongest picks</h2><p class="lede">Highest chance to land, from sportsbook prop prices compared to the PrizePicks line.</p><div class="list">${props.map(x=>propRow(x.r)).join("")}</div>`;
+ if(props.length)h+=`<h2>Strongest picks</h2><p class="lede">Highest chance to land, from sportsbook prop prices compared to the PrizePicks line. Picks need at least two books.</p><div class="list">${props.map(x=>propRow(x.r)).join("")}</div>`;
  const C=mlCandidates();
  const value=C.filter(x=>x.e>1.005).sort((a,b)=>b.e-a.e).slice(0,6);
  h+=`<h2>Best-priced moneylines</h2><p class="lede">Your best available price is better than the fair price across every book.</p>`;
@@ -558,7 +560,7 @@ function renderSlip(){
   body=`<h4>PRIZEPICKS LINEUP</h4><div class="ts">${esc(now)}</div>
   ${Q.map(q=>`<div class="leg"><span>${esc(q.r.pl)}<small>${q.s==="o"?"More":"Less"} ${q.r.ln} ${esc(MK[q.r.mk]||q.r.mk)}, ${esc(GI[q.r.g].a.ab||GI[q.r.g].a.n)} @ ${esc(GI[q.r.g].h.ab||GI[q.r.g].h.n)}</small></span><b>${pct(q.p)}</b><button class="x" data-pp="${q.r.i}|${q.s}" aria-label="Remove">×</button></div>`).join("")}
   <div class="modes"><button class="mode ${mode==="power"?"on":""}" data-ppmode="power" ${ep==null?"disabled":""}><b>Power ${PAY.power[n]?PAY.power[n]+"x":""}</b>${ep==null?"Needs 2 to 6 picks":`All must hit<br>${pct(all)} chance<br>Return ${sgn(ep)}`}</button>
-   <button class="mode ${mode==="flex"?"on":""}" data-ppmode="flex" ${ef==null?"disabled":""}><b>Flex ${PAY.flex[n]?PAY.flex[n][0]+"x top":""}</b>${ef==null?"Needs 3 to 6 picks":`Pays on ${n-PAY.flex[n].length+1}+ hits<br>Return ${sgn(ef)}`}</button></div>
+   <button class="mode ${mode==="flex"?"on":""}" data-ppmode="flex" ${ef==null?"disabled":""}><b>Flex ${PAY.flex[n]?PAY.flex[n][0]+"x top":""}</b>${ef==null?"Needs 3 to 6 picks":`Pays on ${n-PAY.flex[n].length+1}+ hits<br>${pct(profit(ps,"flex"))} to win money<br>Return ${sgn(ef)}`}</button></div>
   <div class="tot"><span>Entry $<input id="stakePP" type="number" inputmode="decimal" value="${st}" min="0"></span><b>Max payout ${money(st*top)}</b></div>
   ${n<2||games<2?'<div class="note">PrizePicks needs at least 2 picks from at least 2 teams.</div>':""}${same?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}
   <div class="rbtns"><button data-clear="pp">Clear</button><button class="go" data-save="pp" data-mode="${mode}">Save ticket</button></div>`;
