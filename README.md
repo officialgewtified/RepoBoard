@@ -16,11 +16,13 @@ NFL and college football moneylines from every sportsbook in the feed, PrizePick
 - **Settings:** theme, which sportsbooks you can use, and PrizePicks payouts (edit them if your state's are different).
 
 ## Odds API credits
-- Game lines cost 2 credits per run (NFL + college).
+- Games update 5 times every week (Tue, Thu, Fri, Sat, Sun). Game lines cost 2 credits per update, and a reserve is always kept so they never stop.
 - Player props cost 1 credit per stat per game. The default 4 stats (pass, rush, receiving yards, receptions) cost 4 credits per game.
-- `settings.json` controls this. With `"prop_credits_per_run": "auto"` the script spreads your remaining monthly credits across the scheduled runs, giving Saturday and Sunday the biggest share, and always keeps a reserve for game lines.
-- On the free plan (500 credits a month) that covers roughly 10 to 15 games of props on Saturdays and Sundays, starting with NFL and ranked college games. A paid plan covers every game automatically, no changes needed.
-- Props are pulled for games that start before the next scheduled run, so each game is only paid for once.
+- Every football week (Tuesday to Monday) gets the same share of your monthly credits: about 115 on the free plan (500 a month). Game lines come out of that first and props get the rest, about 105 a week.
+- Within a week, weekday updates use a little and anything left rolls to Saturday (college) and Sunday (NFL). That's roughly 10 to 15 games of props each weekend on the free plan, NFL and ranked college teams first.
+- Because each week has a fixed allowance, props keep coming every week no matter what day your credits reset. A paid plan raises the allowance automatically.
+- Props are pulled for games that start before the next update, so each game is only paid for once.
+- Change any of this in `settings.json`.
 
 ## Notes
 - overrides.json can set a venue for a neutral-site game, but neutral sites are now picked up automatically from ESPN.

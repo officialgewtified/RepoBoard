@@ -7,7 +7,7 @@ What it pulls each run:
   * PrizePicks lines + sportsbook player props for upcoming games, paced so the
     monthly Odds API quota lasts (see settings.json)
 """
-import os, json, math, time, difflib, unicodedata, calendar, datetime as dt
+import os, json, math, time, difflib, unicodedata, datetime as dt
 from statistics import NormalDist, median
 from zoneinfo import ZoneInfo
 import requests
@@ -29,7 +29,8 @@ PROP_BOOKS = ["prizepicks", "draftkings", "fanduel", "betmgm", "betrivers", "esp
 DEFAULTS = {
     "days_ahead": {"NFL": 8, "CFB": 6},
     "prop_markets": ["player_pass_yds", "player_rush_yds", "player_reception_yds", "player_receptions"],
-    "prop_credits_per_run": "auto",      # "auto" paces the monthly quota, or a number
+    "weekly_credits": "auto",            # "auto" = monthly quota x 7/30.4, or a number
+    "prop_credits_per_run": "auto",      # optional cap per run
     "credit_reserve": 40,                # never spend below this (keeps game lines running)
     "props_refresh_hours": 10,           # reuse props fetched more recently than this
     # Scheduled runs in UTC: [weekday (Mon=0), hour, weight]. Keep in sync with .github/workflows/update.yml
@@ -430,28 +431,47 @@ def parse_props(ev_json, market_keys):
                      "nb": len(books), "bl": [[k] + v for k, v in sorted(books.items())]})
     return rows
 
-def prop_budget(s):
-    rem = CRED["remaining"]
-    sched = s["schedule"]
-    # Runs left this month (rough: assumes the quota resets on the 1st).
-    today = NOW.date()
-    last = today.replace(day=calendar.monthrange(today.year, today.month)[1])
-    runs, weight_left = 0, 0.0
-    d = today
-    while d <= last:
-        for wd, hr, wt in sched:
-            if d.weekday() == wd and (d > today or hr >= NOW.hour - 1):
-                runs += 1; weight_left += wt
-        d += dt.timedelta(days=1)
-    reserve = max(float(s["credit_reserve"]), 2.0 * runs + 4)
+def week_start(t):
+    """Football week: Tuesday through Monday (UTC)."""
+    d = t.date()
+    return d - dt.timedelta(days=(d.weekday() - 1) % 7)
+
+def prop_budget(s, ledger):
+    """Credits this run may spend on props.
+
+    Every football week gets the same allowance (monthly quota x 7/30.4, minus game lines),
+    so props keep coming every week no matter which day the quota resets. Within the week,
+    the allowance is split by run weight, and anything a run doesn't use rolls to the next one.
+    """
+    rem, used = CRED["remaining"], CRED["used"] or 0.0
     if rem is None:
-        return 0
-    spendable = max(0.0, rem - reserve)
-    cfg = s["prop_credits_per_run"]
-    if isinstance(cfg, (int, float)):
-        return int(min(cfg, spendable))
-    wt_now = next((wt for wd, hr, wt in sched if wd == NOW.weekday()), 1)
-    return int(spendable * wt_now / max(weight_left, 1.0))
+        return 0, 0.0, 0.0
+    sched = s["schedule"]
+    cfg_week = s.get("weekly_credits", "auto")
+    week_total = (rem + used) * 7 / 30.4 if cfg_week == "auto" else float(cfg_week)
+    props_week = max(0.0, week_total - 2.0 * len(sched))
+    wk = str(week_start(NOW))
+    spent = float(ledger.get("props", 0)) if ledger.get("week") == wk else 0.0
+    left = max(0.0, props_week - spent)
+
+    # This run's weight: the scheduled run it belongs to (within 3 hours), else 1 for a manual run.
+    def run_time(d, hr):
+        return dt.datetime(d.year, d.month, d.day, hr, tzinfo=dt.timezone.utc)
+    w_now = next((wt for wd, hr, wt in sched if NOW.weekday() == wd
+                  and abs((NOW - run_time(NOW.date(), hr)).total_seconds()) < 3 * 3600), 1)
+    w_rest = w_now
+    end = week_start(NOW) + dt.timedelta(days=7)
+    d = NOW.date()
+    while d < end:
+        for wd, hr, wt in sched:
+            if d.weekday() == wd and run_time(d, hr) > NOW + dt.timedelta(hours=3):
+                w_rest += wt
+        d += dt.timedelta(days=1)
+    allot = left * w_now / w_rest
+    cap = max(0.0, rem - float(s["credit_reserve"]))
+    cfg_run = s.get("prop_credits_per_run", "auto")
+    budget = min(allot, cap, float(cfg_run) if isinstance(cfg_run, (int, float)) else allot)
+    return int(budget), props_week, spent
 
 def window_end(s):
     """Fetch props for games that start before the next scheduled run (+1h), so no game is fetched twice."""
@@ -471,9 +491,11 @@ def build_props(s, events):
     for r in prev.get("props", []):
         prev_by.setdefault(r.get("g"), []).append(r)
     markets = [m for m in s["prop_markets"] if m in MARKET_LABEL]
-    budget = prop_budget(s)
+    ledger = prev.get("ledger", {})
+    budget, props_week, spent_week = prop_budget(s, ledger)
     end = window_end(s)
-    print(f"prop budget this run: {budget} credits; window until {iso(end)}; remaining {CRED['remaining']}")
+    print(f"prop budget this run: {budget} credits (weekly prop allowance {props_week:.0f}, "
+          f"already used this week {spent_week:.0f}); window until {iso(end)}; remaining {CRED['remaining']}")
     start_spent = CRED["spent"]
 
     def prio(item):
@@ -528,7 +550,9 @@ def build_props(s, events):
     rows = [r for r in rows if r.get("g") in live]
     print(f"props: fetched {fetched} games this run, {len(rows)} prop lines total, "
           f"{sum(1 for r in rows if r['pp'])} with PrizePicks lines")
-    return rows, budget
+    used_now = CRED["spent"] - start_spent
+    new_ledger = {"week": str(week_start(NOW)), "props": round(spent_week + used_now, 1), "allowance": round(props_week, 1)}
+    return rows, budget, new_ledger
 
 
 def main():
@@ -536,11 +560,11 @@ def main():
     overrides = load_json("overrides.json", {})
     inj = get_injuries()
     games, events = build_games(s, overrides, inj)
-    props, budget = build_props(s, events) if events else ([], 0)
+    props, budget, ledger = build_props(s, events) if events else ([], 0, load_json("data.json", {}).get("ledger", {}))
     out = {"updated": iso(NOW), "games": games, "props": props,
            "markets": {k: MARKET_LABEL[k] for k in s["prop_markets"] if k in MARKET_LABEL},
            "books": BOOK_TITLES,
-           "credits": {"remaining": CRED["remaining"], "used": CRED["used"], "spent": CRED["spent"], "prop_budget": budget}}
+           "credits": {"remaining": CRED["remaining"], "used": CRED["used"], "spent": CRED["spent"], "prop_budget": budget}, "ledger": ledger}
     if not games:
         print("no games found; keeping previous data.json")
         return
