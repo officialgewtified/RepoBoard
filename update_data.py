@@ -220,7 +220,7 @@ def geocode(city, state, country):
     k = (city, state, country)
     if k in GEO: return GEO[k]
     res = None
-    p = {"name": city, "count": 10, "language": "en", "format": "json"}
+    p = {"name": city, "count": 50, "language": "en", "format": "json"}
     if not country or country in ("USA", "United States"): p["countryCode"] = "US"
     for attempt in range(3):
         try:
