@@ -233,6 +233,8 @@ table.books .off{opacity:.45}
 .tk.W{border-color:var(--go)}.tk.L{border-color:var(--stop)}.tk.PT{border-color:var(--led)}
 .tk .res{font-size:13px;margin-top:8px;color:var(--mute)}
 .tk .res b{color:var(--ink)}.tk .res.W b{color:var(--go)}.tk .res.L b{color:var(--stop)}.tk .res.PT b{color:var(--led)}
+/* what a ticket paid */
+.filters.chips{flex-wrap:wrap;overflow:visible}
 .lgl{display:flex;flex-direction:column;gap:3px;margin-top:6px;font-size:13px;color:var(--mute)}
 .lgl div{display:flex;gap:8px;align-items:baseline}
 .lgl .mk{flex:none;width:14px;text-align:center;font-weight:800}
@@ -299,6 +301,7 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
 
 <dialog id="settings"><div class="sheet" id="sheet"></div></dialog>
 <dialog id="logtix"><div class="sheet" id="logsheet"></div></dialog>
+<dialog id="payout"><div class="sheet" id="paysheet"></div></dialog>
 
 <script>
 "use strict";
@@ -688,12 +691,13 @@ function renderTix(){
  const S=tickets.filter(t=>t.r),w=S.filter(t=>tNet(t)>0).length,l=S.filter(t=>tNet(t)<0).length,pu=S.length-w-l;
  const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.reduce((a,t)=>a+tRet(t),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.pw??t.p??0),0);
  return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}${pu?"-"+pu:""}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
- <p class="fine">${tickets.length-S.length} open. Tickets grade themselves after each update when the board tracked every pick. A win means it made money, so a Flex that pays back less than you put in counts as a loss. Expected wins is how many the odds said would make money.</p>`:""}
+ <p class="fine">${tickets.length-S.length} open. Tickets grade themselves after each update when the board tracked every pick. Tap Won or Edit payout on any ticket to enter what it really paid, like a smaller payout after a tie. A win means it made money, so a Flex that pays back less than you put in counts as a loss. Expected wins is how many the odds said would make money.</p>`:""}
  ${renderRecord()}<h2>Saved tickets</h2>
- <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>{const n=t.r?tNet(t):0,cls=!t.r?"":n>0?"W":tRet(t)>0?"PT":"L",flex=t.kind==="pp"&&t.mode==="Flex";
+ <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>{const n=t.r?tNet(t):0,cls=!t.r?"":n>0?"W":tRet(t)>0?"PT":"L",flex=t.kind==="pp"&&t.mode==="Flex",ti=tieInfo(t);
   return `<div class="card tk ${cls}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
-  ${legRows(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`:""}
-  <div class="m"><button data-tw="${i}">${flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>`}
+  ${legRows(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":n===0&&tRet(t)>0?"Refund":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`
+   :ti?`<div class="res PT"><b>Tie</b> · ${ti.ties>1?ti.ties+" picks":"a pick"} landed right on the line, so this pays less than ${money(t.pay)}${ti.est!=null?`, usually about ${money(ti.est)}`:""}. Tap ${flex?"Paid":"Won"} and enter what you got.</div>`:""}
+  <div class="m"><button data-tw="${i}">${t.r?"Edit payout":flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>`}
 
 /* ---------- auto-grade open tickets from the board's graded results (history.json) ---------- */
 let HIST=null;
@@ -725,6 +729,36 @@ function autoGrade(){if(!HIST)return;let ch=0;
   if(ret==null)continue;                                                    // a push or an ungraded pick: leave it for you
   t.r=ret>0?"W":"L";t.ret=ret;t.auto=true;t.hits=`${hit} of ${n}`;t.res=R.map(x=>x?{h:x.h,a:x.a}:{});ch++}
  if(ch){LS.set("pb_tickets",tickets);keep()}}
+
+/* ---------- ties: a pick that lands right on the line pays less than the full amount ---------- */
+// Open PrizePicks tickets only. est is the usual payout once every other pick has hit on a Power:
+// it drops to the next smaller Power, a 2-pick with one tie pays 1.5x, and all ties is a refund. Your state may differ, so it's only a starting guess.
+function tieInfo(t){if(t.r||t.kind!=="pp"||!HIST||!Array.isArray(t.legs))return null;
+ const R=legsOf(t).map(l=>gradeLeg(t,l)),ties=R.filter(x=>x&&x.h===null).length;if(!ties)return null;
+ if(t.mode!=="Power"||R.some(x=>x===undefined||x.h===false))return{ties,est:null};
+ const n=R.length,left=n-ties,k=PAY.power[n]?(+t.pay/+t.stake)/PAY.power[n]:1;
+ const m=left>=2?(PAY.power[left]||0)*k:left===1?1.5:1;
+ return{ties,est:m>0?+(t.stake*m).toFixed(2):null}}
+
+/* ---------- ask what a ticket paid (every kind: Power, Flex and parlays) ---------- */
+let payT=null;   // the ticket being paid
+function openPay(t){if(!t)return;payT=t;const st=+t.stake,full=+t.pay,ti=tieInfo(t);
+ const guess=t.r?tRet(t):ti&&ti.est!=null?ti.est:full;
+ const chips=[["Full payout",full]];if(ti&&ti.est!=null&&Math.abs(ti.est-full)>.005)chips.push(["With the tie",ti.est]);chips.push(["Entry back",st],["Nothing",0]);
+ $("#paysheet").innerHTML=`<h3>How much did it pay?</h3>
+ <p>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"}, ${t.legs.length} legs: ${money(st)} to win ${money(full)}. Enter what actually came back to you, like a smaller payout after a tie.</p>
+ <div class="filters chips">${chips.map(([l,v])=>`<button class="pill" data-payset="${v}">${l} ${money(v)}</button>`).join("")}</div>
+ <div class="ctrls" style="margin-top:12px;grid-template-columns:1fr"><label>It paid $<input id="payamt" type="number" inputmode="decimal" min="0" step="any" value="${(+guess).toFixed(2)}"></label></div>
+ <p class="fine" id="paynet" aria-live="polite"></p>
+ <div class="btns"><button class="btn" data-payclose>Cancel</button><button class="btn go" data-paysave>Save</button></div>`;
+ payNet();$("#payout").showModal()}
+function payNet(){const el=$("#paynet"),inp=$("#payamt");if(!payT||!el||!inp)return;const v=parseFloat(inp.value);
+ if(!(v>=0)){el.textContent="Enter 0 if it paid nothing.";return}const n=v-(+payT.stake);
+ el.textContent=`${n>0?"Counts as a win":n<0?(v>0?"Counts as a loss, since it paid back less than you put in":"Counts as a loss"):"Counts as a push"}: ${n>=0?"+":"−"}${money(Math.abs(n))}.`}
+function savePay(){const t=payT,v=parseFloat($("#payamt").value);if(!t||!tickets.includes(t)){closePay();return}
+ if(!(v>=0)){payNet();$("#payamt").focus();return}
+ t.ret=+v.toFixed(2);t.r=t.ret>0?"W":"L";delete t.auto;LS.set("pb_tickets",tickets);closePay();keep()}
+function closePay(){const d=$("#payout");if(d.open)d.close();payT=null}
 
 /* ---------- log a ticket by hand ---------- */
 let lt=null;
@@ -915,7 +949,12 @@ document.addEventListener("click",e=>{
  if(d.useml!==undefined){const src=ui.tab==="games"&&ui.ml.res?ui.ml.res:topScan().ml;const r=src.top[+d.useml];if(!r)return;sel={};r.legs.forEach(l=>sel[l.g.id]=l.s);ui.kind="ml";ui.slipOpen=true;save();keep();return}
  if(d.usepp){const[src,i]=d.usepp.split("|");const T=topScan();const r=src==="scan"?ui.pp.res.top[+i]:src==="size"?T.pp.bySize[i]:T.pp.top[+i];if(!r)return;
   pps={};r.picks.forEach(x=>pps[x.r.k]=x.side);ui.ppMode=r.mode;ui.kind="pp";ui.slipOpen=true;save();keep();return}
- if(d.tw!==undefined){const tk=tickets[+d.tw];if(tk.kind==="pp"&&tk.mode==="Flex"){const v=prompt("How much did PrizePicks pay? Enter 0 if nothing.",tk.ret??tk.pay);if(v===null)return;tk.ret=Math.max(0,parseFloat(v)||0)}else tk.ret=+tk.pay;tk.r=tk.ret>0?"W":"L";delete tk.auto;LS.set("pb_tickets",tickets);keep();return}
+ if(d.tw!==undefined){openPay(tickets[+d.tw]);return}
+ if(t.closest("#payout")){
+  if(d.payset!==undefined){const p=$("#payamt");p.value=(+d.payset).toFixed(2);payNet();return}
+  if(d.paysave!==undefined){savePay();return}
+  if(d.payclose!==undefined){closePay();return}
+ }
  if(d.tl!==undefined){const tk=tickets[+d.tl];tk.r="L";tk.ret=0;delete tk.auto;LS.set("pb_tickets",tickets);keep();return}
  if(d.td!==undefined){tickets.splice(+d.td,1);LS.set("pb_tickets",tickets);keep();return}
  if(d.logtix!==undefined){openLog();return}
@@ -940,6 +979,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("input",e=>{const t=e.target;
  if(lt&&t.dataset&&t.dataset.lf!==undefined){ltInput(t);return}
+ if(t.id==="payamt"){payNet();return}
  if(t.id==="gq"){ui.q=t.value;const pos=t.selectionStart;keep();const n=$("#gq");n.focus();n.setSelectionRange(pos,pos);return}
  if(t.id==="pq"){ui.pq=t.value;ui.limit=60;const pos=t.selectionStart;keep();const n=$("#pq");n.focus();n.setSelectionRange(pos,pos);return}
  if(t.id==="stakeML"){stakeML=t.value;LS.set("pb_stake",stakeML);updateSlipNums();return}
@@ -958,6 +998,9 @@ function fallbackCopy(txt,done){const a=document.createElement("textarea");a.val
 function updateSlipNums(){const a=document.activeElement,id=a&&a.id,pos=a&&a.selectionStart;renderSlip();if(id){const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}}
 $("#openSettings").onclick=()=>{renderSettings();$("#settings").showModal()};
 $("#settings").addEventListener("click",e=>{if(e.target.id==="settings")$("#settings").close()});
+$("#payout").addEventListener("click",e=>{if(e.target.id==="payout")closePay()});
+$("#payout").addEventListener("close",()=>{payT=null});
+$("#payout").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="payamt"){e.preventDefault();savePay()}});
 
 function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("pb_theme",t)}catch(e){}
  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()}
@@ -973,7 +1016,7 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
   if(have){for(const k in t)if(!(k in have)){have[k]=t[k];n++}continue}
   if(seen.has(t.id))continue;seen.add(t.id);tickets.unshift(t);n++}
  LS.set("pb_imported",[...seen]);if(n){LS.set("pb_tickets",tickets);keep()}}).catch(()=>{}).finally(()=>
- fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade()}}).catch(()=>{}));
+ fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();if(ui.tab==="tix")keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
 </body>
