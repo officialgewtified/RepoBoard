@@ -775,11 +775,15 @@ USAGE = {"player_reception_yds": ("receivingTargets", "Targets"), "player_recept
          "player_rush_reception_yds": ("rushingAttempts", "Carries")}
 SKILL_POS = {"QB", "RB", "WR", "TE", "FB"}
 
+def g_done(r):
+    """Injury info is refreshed every run, so only skip rows that have everything else."""
+    return False
+
 def attach_form(rows, games_by_id, inj=None):
     """Adds rf = {v: last 5 values (newest first), n: games used (max 10), o: games over the line, avg}."""
     done = 0
     for r in rows:
-        if ("rf" in r and "sd" in r and "aid" in r) or r["mk"] not in FORM_STAT:
+        if ("rf" in r and "med" in r["rf"] and "sd" in r and "aid" in r and g_done(r)) or r["mk"] not in FORM_STAT:
             continue
         g = games_by_id.get(r["g"])
         if not g:
@@ -798,13 +802,14 @@ def attach_form(rows, games_by_id, inj=None):
         if inj is not None and g["sp"] == "NFL":
             team = g[r["sd"]].get("full", "")
             me = pname(r["pl"])
+            r.pop("ij", None)
             for n, pos, st in inj.get(team, []):
-                if pname(n) == me and st:
+                if pname(n) == me and st and st.lower() != "active":
                     r["ij"] = st
             outs = [f"{n} ({pos}, {st})" for n, pos, st in inj.get(team, [])
                     if pname(n) != me and pos in SKILL_POS and st in ("Out", "Doubtful")]
             if outs: r["tmo"] = outs[:4]
-        if "rf" in r:
+        if "rf" in r and "med" in r["rf"]:
             continue
         stats = FORM_STAT[r["mk"]]
         log = [x for x in game_log(g["sp"], aid) if any(k in x for k in stats)][:10]

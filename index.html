@@ -207,6 +207,7 @@ table.books .off{opacity:.45}
 .receipt .ts{text-align:center;font-size:11px;opacity:.6;margin-bottom:10px}
 .receipt .leg{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--paperline)}
 .receipt .leg small{display:block;opacity:.6;font-size:11px}
+.receipt .cp{border:0;background:transparent;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;text-align:left}
 .receipt .x{border:0;background:transparent;color:var(--paperink);opacity:.5;font-size:16px;padding:0 2px}
 .receipt .tot{display:flex;justify-content:space-between;padding:4px 0}
 .receipt .tot b{font-weight:600}
@@ -489,7 +490,7 @@ function gameCard(g){
  </article>`}
 
 function extraChips(r){const g=GI[r.g],out=[];
- if(r.ij)out.push(`<span class="mchip tough">${esc(r.ij)}</span>`);
+ if(r.ij&&!/^active$/i.test(r.ij))out.push(`<span class="mchip tough">${esc(r.ij)}</span>`);
  const W=g.wx;if(W&&/pass|recep/.test(r.mk)){if(W.w>=15||W.gu>=25)out.push(`<span class="mchip warn">Windy: ${W.w} mph, gusts ${W.gu}</span>`);
   else if(W.p>=60)out.push(`<span class="mchip warn">Rain likely (${W.p}%)</span>`);else if(W.t<=32)out.push(`<span class="mchip warn">Cold: ${W.t}\u00b0F</span>`)}
  if(r.op!=null&&r.op!==r.ln)out.push(`<span class="mchip even">PP line moved ${r.op} \u2192 ${r.ln}</span>`);
@@ -690,11 +691,13 @@ function renderSlip(){
   const top=mode==="power"?(PAY.power[n]||0):(PAY.flex[n]?PAY.flex[n][0]:0);
   bar=`<span><span class="k">PrizePicks, ${n} pick${n>1?"s":""}</span><br><span class="c">${pct(all)} to hit all</span></span><span class="o">${top?top+"x":"—"}</span>${chev}`;
   body=`<h4>PRIZEPICKS LINEUP</h4><div class="ts">${esc(now)}</div>
-  ${Q.map(q=>`<div class="leg"><span>${esc(q.r.pl)}<small>${q.s==="o"?"More":"Less"} ${q.r.ln} ${esc(MK[q.r.mk]||q.r.mk)}, ${esc(GI[q.r.g].a.ab||GI[q.r.g].a.n)} @ ${esc(GI[q.r.g].h.ab||GI[q.r.g].h.n)}</small></span><b>${pct(q.p)}</b><button class="x" data-pp="${q.r.i}|${q.s}" aria-label="Remove">×</button></div>`).join("")}
+  ${Q.map(q=>`<div class="leg"><span><button class="cp" data-copyname="${esc(q.r.pl)}">${esc(q.r.pl)}</button><small>${q.s==="o"?"More":"Less"} ${q.r.ln} ${esc(MK[q.r.mk]||q.r.mk)}, ${esc(GI[q.r.g].a.ab||GI[q.r.g].a.n)} @ ${esc(GI[q.r.g].h.ab||GI[q.r.g].h.n)}</small></span><b>${pct(q.p)}</b><button class="x" data-pp="${q.r.i}|${q.s}" aria-label="Remove">×</button></div>`).join("")}
   <div class="modes"><button class="mode ${mode==="power"?"on":""}" data-ppmode="power" ${ep==null?"disabled":""}><b>Power ${PAY.power[n]?PAY.power[n]+"x":""}</b>${ep==null?"Needs 2 to 6 picks":`All must hit<br>${pct(all)} chance<br>Return ${sgn(ep)}`}</button>
    <button class="mode ${mode==="flex"?"on":""}" data-ppmode="flex" ${ef==null?"disabled":""}><b>Flex ${PAY.flex[n]?PAY.flex[n][0]+"x top":""}</b>${ef==null?"Needs 3 to 6 picks":`Pays on ${n-PAY.flex[n].length+1}+ hits<br>${pct(profit(ps,"flex"))} to win money<br>Return ${sgn(ef)}`}</button></div>
   <div class="tot"><span>Entry $<input id="stakePP" type="number" inputmode="decimal" value="${st}" min="0"></span><b>Max payout ${money(st*top)}</b></div>
   ${n<2||games<2?'<div class="note">PrizePicks needs at least 2 picks from at least 2 teams.</div>':""}${same?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}
+  <div class="rbtns"><button data-copyall>Copy picks</button></div>
+  <div class="note">Tap a name to copy it, then paste it into PrizePicks search.</div>
   <div class="rbtns"><button data-clear="pp">Clear</button><button class="go" data-save="pp" data-mode="${mode}">Save ticket</button></div>`;
  }
  $("#slipin").innerHTML=`<button class="sbar" data-slip aria-expanded="${ui.slipOpen}">${bar}</button><div class="receipt">${body}</div>`;
@@ -756,6 +759,8 @@ document.addEventListener("click",e=>{
  if(d.pponly!==undefined){ui.ppOnly=!ui.ppOnly;keep();return}
  if(d.moreprops!==undefined){ui.limit+=60;keep();return}
  if(d.slip!==undefined){ui.slipOpen=!ui.slipOpen;renderSlip();return}
+ if(d.copyname!==undefined){copyText(d.copyname,t);return}
+ if(d.copyall!==undefined){copyText(ppLegs().map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`).join("\n"),t);return}
  if(d.ppmode){ui.ppMode=d.ppmode;renderSlip();return}
  if(d.clear){if(d.clear==="ml")sel={};else pps={};ui.ppMode=null;save();keep();return}
  if(d.save){
@@ -796,6 +801,10 @@ document.addEventListener("change",e=>{const t=e.target,d=t.dataset;
  if(d.payp){const v=parseFloat(t.value);if(v>0){PAY.power[d.payp]=v;LS.set("pb_pay",PAY);BE=breakevens();ui.pp.res=null;render()}return}
  if(d.payf){const[n,i]=d.payf.split("|"),v=parseFloat(t.value);if(v>=0){PAY.flex[n][+i]=v;LS.set("pb_pay",PAY);BE=breakevens();ui.pp.res=null;render()}return}
 });
+function copyText(txt,btn){const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>{btn.textContent=o},1200)};
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done))}else fallbackCopy(txt,done)}
+function fallbackCopy(txt,done){const a=document.createElement("textarea");a.value=txt;a.setAttribute("readonly","");a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();
+ try{document.execCommand("copy");done()}catch(e){prompt("Copy this:",txt)}a.remove()}
 function updateSlipNums(){const a=document.activeElement,id=a&&a.id,pos=a&&a.selectionStart;renderSlip();if(id){const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}}
 $("#openSettings").onclick=()=>{renderSettings();$("#settings").showModal()};
 $("#settings").addEventListener("click",e=>{if(e.target.id==="settings")$("#settings").close()});
