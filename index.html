@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d1626">
-<title>Parlay Board</title>
+<title>Signal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-title" content="Parlay Board">
+<meta name="apple-mobile-web-app-title" content="Signal">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -43,7 +43,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .top{padding-top:calc(14px + env(safe-area-inset-top,0px))}
 .brand{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
 .mark{font:900 36px/0.9 "Big Shoulders Display",Impact,sans-serif;letter-spacing:1px;margin:0;text-transform:uppercase}
-.mark span{color:var(--led)}
+.mark{display:flex;align-items:flex-end;gap:10px}
+.mark .bars{width:38px;height:32px;fill:var(--led);flex:none;margin-bottom:2px}
 .stamp{flex:none;max-width:52%;font-size:13px;color:var(--mute);text-align:right;line-height:1.3}
 .stamp b{color:var(--ink);font-weight:600}
 .iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 10px;font-size:13px;font-weight:600}
@@ -256,7 +257,7 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
 <body>
 <header class="wrap top">
  <div class="brand">
-  <h1 class="mark">Parlay <span>Board</span></h1>
+  <h1 class="mark"><svg class="bars" viewBox="0 0 40 34" aria-hidden="true"><rect x="0" y="22" width="7" height="12" rx="1.5"/><rect x="11" y="15" width="7" height="19" rx="1.5"/><rect x="22" y="8" width="7" height="26" rx="1.5"/><rect x="33" y="0" width="7" height="34" rx="1.5"/></svg>Signal</h1>
   <div class="stamp"><div id="stamp">Loading lines…</div><button class="iconbtn" id="openSettings" style="margin-top:6px">Settings</button></div>
  </div>
  <div id="banner"></div>
@@ -560,7 +561,7 @@ function topScan(){
 function renderTop(){
  const T=topScan(),hero=T.pp.top[0];let h="";
  const ag=P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&agree(r)&&(!T.onlyPP||r.pp)).sort((a,b)=>propSide(b).p-propSide(a).p).slice(0,8);
- h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag. These are the board's most solid picks, but solid isn't certain: check the Board record on the Tickets tab to see how often they really hit.</p>`;
+ h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag. These are the board's most solid picks, but solid isn't certain: check the Track record on the Tickets tab to see how often they really hit.</p>`;
  h+=ag.length?`<div class="list">${ag.map(propRow).join("")}</div>`:`<div class="card empty">No pick has every signal lined up right now. That's normal; it means skip rather than force it.</div>`;
  if(hero){const n=hero.picks.length,pos=hero.ev>0;
   h+=`<h2>Best PrizePicks lineup</h2><p class="lede">${pos?"The lineup with the highest expected return at standard payouts.":"No lineup beats PrizePicks' payouts right now. This is the closest one."}</p>
@@ -639,10 +640,10 @@ function renderPP(){
 function recRow(label,a,note){if(!a||!a.n)return"";const hr=a.w/a.n;
  return `<div class="recrow"><span>${label}${note?`<br><span class="k">${note}</span>`:""}</span><span class="k">${a.w}-${a.n-a.w}</span><b class="${hr>=a.ep-.02?"gold":hr<a.ep-.06?"red":""}">${pct(hr)}</b></div>`}
 function renderRecord(){const R=DATA&&DATA.record;
- if(!R||(!R.props.all.n&&!R.ml.all.n))return `<h2>Board record</h2><div class="card empty">The board grades its own picks after every game. Results show up here after the next update.</div>`;
+ if(!R||(!R.props.all.n&&!R.ml.all.n))return `<h2>Track record</h2><div class="card empty">The board grades its own picks after every game. Results show up here after the next update.</div>`;
  const P=R.props,M=R.ml;
  const stat=Object.entries(P.stat||{}).map(([k,a])=>recRow(MK[k]||k,a)).join("");
- return `<h2>Board record</h2><p class="lede">Every pick the board made before kickoff, graded after the game${R.since?` since ${esc(R.since)}`:""}. Gold means it's hitting at least as often as the board said it would.</p>
+ return `<h2>Track record</h2><p class="lede">Every pick the board made before kickoff, graded after the game${R.since?` since ${esc(R.since)}`:""}. Gold means it's hitting at least as often as the board said it would.</p>
  <section class="card" style="padding:4px 14px 10px">
   ${recRow("All PrizePicks-style picks",P.all,P.all.ep?`board expected ${pct(P.all.ep)}`:"")}
   ${recRow("Last 7 days",P.week)}
