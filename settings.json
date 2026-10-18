@@ -4,7 +4,8 @@
   "player_pass_yds",
   "player_rush_yds",
   "player_reception_yds",
-  "player_receptions"
+  "player_receptions",
+  "player_rush_reception_yds"
  ],
  "weekly_credits": "auto",
  "prop_credits_per_run": "auto",

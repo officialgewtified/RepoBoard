@@ -390,7 +390,7 @@ function matchup(r){
  let m=fs.reduce((a,k)=>a+S[k]/L.avg[k],0)/fs.length;
  const gp=S.gp||1;m=1+(m-1)*gp/(gp+3);   // early in the season, trust it less
  const k0=fs[0];return{m,team:o,k:k0,val:S[k0],rk:S.rk&&S.rk[k0],n:L.n,sp:g.sp}}
-function sigmaFor(mk,L){if(mk==="player_pass_yds")return Math.max(40,.28*L);if(mk==="player_rush_yds")return 9+.38*L;if(mk==="player_reception_yds")return 8+.48*L;
+function sigmaFor(mk,L){if(mk==="player_pass_yds")return Math.max(40,.28*L);if(mk==="player_rush_yds")return 9+.38*L;if(mk==="player_reception_yds")return 8+.48*L;if(mk==="player_rush_reception_yds")return 10+.42*L;
  if(/receptions|tds|completions|attempts|interceptions/.test(mk))return Math.sqrt(Math.max(L,.5))+.6;return 8+.4*L}
 function pFinal(r){let p=pOver(r);const M=matchup(r),W=MATCHW[matchW];if(!M||!W)return p;
  const z=(r.ln*(M.m-1)*W)/sigmaFor(r.mk,r.ln);return Phi(PhiInv(p)+z)}
