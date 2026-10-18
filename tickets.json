@@ -1,0 +1,22 @@
+{
+ "_help": "Tickets you forgot to save from the slip. The page adds each one to the Tickets tab once (by id), so deleting it there keeps it gone. Same fields as a saved ticket: kind 'pp' or 'ml', mode 'Power' or 'Flex', legs, odds (top multiplier), stake, pay (max payout), p (chance every leg hits).",
+ "add": [
+  {
+   "id": "pp-2026-10-17-flex6-cfb",
+   "kind": "pp",
+   "mode": "Flex",
+   "legs": [
+    "CJ Brown Less 16.5 Receiving Yards",
+    "Jaden Craig More 218.5 Pass Yards",
+    "Umari Hatcher Less 79.5 Receiving Yards",
+    "Caleb Hawkins Less 19.5 Receiving Yards",
+    "Lloyd Avant Less 11.5 Receiving Yards",
+    "Jack Foley More 44.5 Receiving Yards"
+   ],
+   "odds": "25x",
+   "stake": 10,
+   "pay": "250.00",
+   "p": 0.0307
+  }
+ ]
+}

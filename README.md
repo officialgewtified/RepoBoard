@@ -26,6 +26,7 @@ NFL and college football moneylines from every sportsbook in the feed, PrizePick
 - Change any of this in `settings.json`.
 
 ## Notes
+- tickets.json adds tickets you forgot to save from the slip. Each one shows up on the Tickets tab once (by id), and deleting it there keeps it gone.
 - overrides.json can set a venue for a neutral-site game, but neutral sites are now picked up automatically from ESPN.
 - If you change the schedule in .github/workflows/update.yml, change `schedule` in settings.json to match.
 - Chances are estimates from betting markets, not guarantees. For entertainment only. 21+ where legal. Help: 1-800-GAMBLER.

@@ -827,6 +827,11 @@ function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.s
 render();
 fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render()})
  .catch(()=>{$("#stamp").textContent="Couldn't load data.json";render()});
+/* tickets.json: tickets added by hand (ones that never got saved from the slip). Each id is added once, so deleting it here keeps it gone. */
+fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!Array.isArray(j.add))return;
+ const seen=new Set(LS.get("pb_imported",[]));let n=0;
+ for(const t of j.add.slice().reverse()){if(!t||!t.id||!Array.isArray(t.legs)||seen.has(t.id))continue;seen.add(t.id);if(!tickets.some(x=>x.id===t.id)){tickets.unshift(t);n++}}
+ LS.set("pb_imported",[...seen]);if(n){LS.set("pb_tickets",tickets);keep()}}).catch(()=>{});
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
 </body>
