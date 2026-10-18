@@ -373,6 +373,10 @@ function mixed(r){const mkt=r.po>=.5,n=formN(r);
  const M=MATCHW[matchW]?matchup(r):null,mOpp=M&&Math.abs(M.m-1)>=.12&&((M.m>1)!==mkt);
  return formOpp||(mOpp&&!formAgree)}
 function propSide(r){const q=pFinal(r),o=q>=.5?"o":"u";return{side:o,p:o==="o"?q:1-q}}
+/* every signal points the same way: books, his recent games, the matchup; 2+ books; not hurt */
+function agree(r){const mkt=r.po>=.5,n=formN(r);if(n<4||r.nb<2)return false;const h=r.rf.o/n;
+ if((h>=.5)!==mkt||Math.abs(h-.5)<.0999)return false;const M=matchup(r);if(M&&Math.abs(M.m-1)>=.05&&(M.m>1)!==mkt)return false;
+ if(r.ij&&/questionable|doubtful|out/i.test(r.ij))return false;const q=pFinal(r);return (q>=.5)===mkt&&Math.max(q,1-q)>=BE.lo}
 
 /* game-level matchup: each offense against the other defense */
 const CLASH=[["ppg","ppg_a","Points per game",1],["rush","rush_a","Rushing yards per game",0],["ypc","ypc_a","Yards per carry",2],["pass","pass_a","Passing yards per game",0],
@@ -431,14 +435,15 @@ function scanParlays(K,minP,by){
  })(0,1,1);
  return{top:diverse(top,5,r=>r.legs.map(l=>l.g.id+l.s)),n:Math.min(n,LIM),pool:C.length,stopped}}
 
-function ppCandidates(onlyPP){
+function ppCandidates(onlyPP,onlyAgree){
  const byPl={};for(const r of P){const g=GI[r.g];if(!g||!live(g)||!inSport(r.sp))continue;if(onlyPP&&!r.pp)continue;
   if(r.nb<2)continue;   // need at least two books before a pick goes into lineups
   if(skipMixed&&mixed(r))continue;   // books and his recent games disagree: leave it out
+  if(onlyAgree&&!agree(r))continue;
   const{side,p}=propSide(r);if(p<.5)continue;const k=r.g+"|"+r.pl;if(!byPl[k]||byPl[k].p<p)byPl[k]={r,side,p}}
  return Object.values(byPl).sort((a,b)=>b.p-a.p)}
-function scanLineups(sizes,mode,per,onlyPP,pool=20,goal="ev"){
- const C=ppCandidates(onlyPP).slice(0,pool);const top=[],bySize={};let n=0;const pk=[],gc={};
+function scanLineups(sizes,mode,per,onlyPP,pool=20,goal="ev",onlyAgree=false){
+ const C=ppCandidates(onlyPP,onlyAgree).slice(0,pool);const top=[],bySize={};let n=0;const pk=[],gc={};
  (function rec(i){
   if(sizes.includes(pk.length)){
    const games=Object.keys(gc).filter(k=>gc[k]>0).length;
@@ -526,7 +531,7 @@ function propRow(r){
  const g=GI[r.g],{side,p}=propSide(r),[tc,tl]=tier(p),cur=pps[r.k],open=ui.popen[r.k];
  const lineTxt=Number.isInteger(r.ln)?r.ln:r.ln.toFixed(1);
  const btn=s=>{const q=pFinal(r),pp=s==="o"?q:1-q;return `<button class="side-b ${side===s?"rec":""} ${cur===s?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${cur===s}"><small>${s==="o"?"More":"Less"}</small><b>${pct(pp)}</b><span class="ln">${lineTxt}</span></button>`};
- return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?'<span class="tier mix">Mixed signals</span>':`<span class="tier ${tc}">${tl}</span>`}</b>
+ return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?'<span class="tier mix">Mixed signals</span>':`<span class="tier ${tc}">${tl}</span>`}${agree(r)?'<span class="tier t3">All signals agree</span>':""}</b>
   <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${extraChips(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
   ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
@@ -554,6 +559,9 @@ function topScan(){
 
 function renderTop(){
  const T=topScan(),hero=T.pp.top[0];let h="";
+ const ag=P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&agree(r)&&(!T.onlyPP||r.pp)).sort((a,b)=>propSide(b).p-propSide(a).p).slice(0,8);
+ h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag. These are the board's most solid picks, but solid isn't certain: check the Board record on the Tickets tab to see how often they really hit.</p>`;
+ h+=ag.length?`<div class="list">${ag.map(propRow).join("")}</div>`:`<div class="card empty">No pick has every signal lined up right now. That's normal; it means skip rather than force it.</div>`;
  if(hero){const n=hero.picks.length,pos=hero.ev>0;
   h+=`<h2>Best PrizePicks lineup</h2><p class="lede">${pos?"The lineup with the highest expected return at standard payouts.":"No lineup beats PrizePicks' payouts right now. This is the closest one."}</p>
   <section class="card hero"><div class="kick"><div><h3>${n}-pick ${hero.mode==="power"?"Power Play":"Flex Play"}</h3><div class="sub">Expected return per entry</div></div><div class="ev ${pos?"":"neg"}">${sgn(hero.ev)}</div></div>
@@ -604,7 +612,7 @@ function renderGames(){
 
 function renderPP(){
  const R=ui.pp.res,hasPP=P.some(r=>r.pp);
- let list=P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!ui.ppOnly||r.pp)&&(ui.stat==="all"||r.mk===ui.stat));
+ let list=P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!ui.ppOnly||r.pp)&&(ui.stat==="all"||r.mk===ui.stat)&&(!ui.agreeOnly||agree(r)));
  if(ui.pq){const q=ui.pq.toLowerCase();list=list.filter(r=>r.pl.toLowerCase().includes(q)||[GI[r.g].a.n,GI[r.g].h.n].some(s=>s.toLowerCase().includes(q)))}
  if(ui.psort==="time")list.sort((a,b)=>(GI[a.g].t||0)-(GI[b.g].t||0)||propSide(b).p-propSide(a).p);else list.sort((a,b)=>propSide(b).p-propSide(a).p);
  const stats=[...new Set(P.map(r=>r.mk))];
@@ -614,7 +622,8 @@ function renderPP(){
   <label>Picks<select id="ppSize"><option value="auto" ${ui.pp.size==="auto"?"selected":""}>Any (2–6)</option>${[2,3,4,5,6].map(n=>`<option ${ui.pp.size==n?"selected":""}>${n}</option>`).join("")}</select></label>
   <label>Play<select id="ppMode"><option value="best" ${ui.pp.mode==="best"?"selected":""}>Best</option><option value="power" ${ui.pp.mode==="power"?"selected":""}>Power</option><option value="flex" ${ui.pp.mode==="flex"?"selected":""}>Flex</option></select></label>
   <label>Same game<select id="ppPer"><option value="1" ${ui.pp.per==1?"selected":""}>1 pick</option><option value="2" ${ui.pp.per==2?"selected":""}>Up to 2</option></select></label></div>
-  <div class="ctrls" style="grid-template-columns:1fr;margin-top:8px"><label>Goal<select id="ppGoal"><option value="ev" ${ui.pp.goal!=="win"?"selected":""}>Most money over time (expected return)</option><option value="win" ${ui.pp.goal==="win"?"selected":""}>Most likely to win money on this slip</option></select></label></div>
+  <div class="ctrls" style="grid-template-columns:1fr;margin-top:8px"><label>Goal<select id="ppGoal"><option value="ev" ${ui.pp.goal!=="win"?"selected":""}>Most money over time (expected return)</option><option value="win" ${ui.pp.goal==="win"?"selected":""}>Most likely to win money on this slip</option></select></label>
+  <label>Picks to use<select id="ppPool"><option value="all" ${!ui.pp.agree?"selected":""}>All strong picks</option><option value="agree" ${ui.pp.agree?"selected":""}>Only picks where all signals agree</option></select></label></div>
   <button class="btn go wide" style="margin-top:10px" data-scanpp>Scan lineups</button>
   ${R?(R.top.length?`<div class="res">${R.top.map((r,i)=>comboPP(r,i,"scan")).join("")}</div>`:`<div class="empty">Not enough picks from different games to build a lineup.</div>`)+`<p class="scanned">Scanned ${R.n.toLocaleString()} lineups from the ${R.pool} strongest picks.</p>`:""}
   <p class="fine">Power Play break-even per pick: ${be}. Same-game picks can lower PrizePicks payouts.</p>
@@ -623,7 +632,7 @@ function renderPP(){
  <div class="filters"><button class="pill ${ui.stat==="all"?"on":""}" data-stat="all">All stats</button>${stats.map(s=>`<button class="pill ${ui.stat===s?"on":""}" data-stat="${s}">${esc(MK[s]||s)}</button>`).join("")}</div>
  <div class="toolbar" style="margin-top:8px"><input class="search" id="pq" type="search" placeholder="Find a player or team" value="${esc(ui.pq)}">
   <select class="sel" id="psort"><option value="p" ${ui.psort==="p"?"selected":""}>Strongest</option><option value="time" ${ui.psort==="time"?"selected":""}>Kickoff</option></select></div>
- ${hasPP?`<div class="filters"><button class="pill ${ui.ppOnly?"on":""}" data-pponly>PrizePicks lines only</button></div>`:(P.length?`<p class="fine">PrizePicks lines weren't in this update, so these use the sportsbook line. Compare with the app before you play.</p>`:"")}
+ ${hasPP?`<div class="filters"><button class="pill ${ui.ppOnly?"on":""}" data-pponly>PrizePicks lines only</button><button class="pill ${ui.agreeOnly?"on":""}" data-agreeonly>All signals agree</button></div>`:(P.length?`<p class="fine">PrizePicks lines weren't in this update, so these use the sportsbook line. Compare with the app before you play.</p>`:"")}
  <div class="list" style="margin-top:10px">${list.length?list.slice(0,ui.limit).map(propRow).join(""):`<div class="card empty">${P.length?"No props match.":"No player props in this update. They're pulled for games that start before the next update."}</div>`}</div>
  ${list.length>ui.limit?`<button class="btn wide" style="margin-top:10px" data-moreprops>Show more (${list.length-ui.limit} left)</button>`:""}`}
 
@@ -639,7 +648,7 @@ function renderRecord(){const R=DATA&&DATA.record;
   ${recRow("Last 7 days",P.week)}
   ${recRow("Strong picks",P.strong,"59%+ chance")}${recRow("Playable picks",P.playable,"54 to 59%")}${recRow("Thin picks",P.thin,"under 54%")}
   ${recRow("Picks the scanners would use",P.scanner,"Playable or better, 2+ books, no mixed signals")}
-  ${recRow("Clean signals",P.clean)}${recRow("Mixed signals",P.mixed,"books and recent games or matchup disagreed")}
+  ${recRow("All signals agree",P.agree)}${recRow("Clean signals",P.clean)}${recRow("Mixed signals",P.mixed,"books and recent games or matchup disagreed")}
   ${recRow("More picks",P.more)}${recRow("Less picks",P.less)}${recRow("NFL",P.nfl)}${recRow("College",P.cfb)}${stat}
   ${M.all.n?`${recRow("Game winners (favorites)",M.all,M.all.ep?`board expected ${pct(M.all.ep)}`:"")}${recRow("Favorites 50 to 60%",M.b50)}${recRow("Favorites 60 to 70%",M.b60)}${recRow("Favorites 70 to 80%",M.b70)}${recRow("Favorites 80%+",M.b80)}`:""}
  </section>
@@ -757,6 +766,7 @@ document.addEventListener("click",e=>{
  if(d.adjreset!==undefined){delete adj[d.adjreset];save();keep();return}
  if(d.stat){ui.stat=d.stat;ui.limit=60;keep();return}
  if(d.pponly!==undefined){ui.ppOnly=!ui.ppOnly;keep();return}
+ if(d.agreeonly!==undefined){ui.agreeOnly=!ui.agreeOnly;ui.limit=60;keep();return}
  if(d.moreprops!==undefined){ui.limit+=60;keep();return}
  if(d.slip!==undefined){ui.slipOpen=!ui.slipOpen;renderSlip();return}
  if(d.copyname!==undefined){copyText(d.copyname,t);return}
@@ -771,9 +781,9 @@ document.addEventListener("click",e=>{
   LS.set("pb_tickets",tickets);save();ui.slipOpen=false;ui.ppMode=null;keep();return}
  if(d.scanml!==undefined){ui.ml.K=+$("#mlK").value;ui.ml.min=clamp(parseFloat($("#mlMin").value)||0,0,99);ui.ml.by=$("#mlBy").value;
   t.textContent="Scanning…";setTimeout(()=>{ui.ml.res=scanParlays(ui.ml.K,ui.ml.min/100,ui.ml.by);keep()},20);return}
- if(d.scanpp!==undefined){ui.pp.size=$("#ppSize").value;ui.pp.mode=$("#ppMode").value;ui.pp.per=+$("#ppPer").value;ui.pp.goal=$("#ppGoal").value;
+ if(d.scanpp!==undefined){ui.pp.size=$("#ppSize").value;ui.pp.mode=$("#ppMode").value;ui.pp.per=+$("#ppPer").value;ui.pp.goal=$("#ppGoal").value;ui.pp.agree=$("#ppPool").value==="agree";
   t.textContent="Scanning…";const sizes=ui.pp.size==="auto"?[2,3,4,5,6]:[+ui.pp.size];
-  setTimeout(()=>{ui.pp.res=scanLineups(sizes,ui.pp.mode,ui.pp.per,ui.ppOnly&&P.some(r=>r.pp),ui.pp.per>1?16:20,ui.pp.goal);keep()},20);return}
+  setTimeout(()=>{ui.pp.res=scanLineups(sizes,ui.pp.mode,ui.pp.per,ui.ppOnly&&P.some(r=>r.pp),ui.pp.per>1?16:20,ui.pp.goal,ui.pp.agree);keep()},20);return}
  if(d.useml!==undefined){const src=ui.tab==="games"&&ui.ml.res?ui.ml.res:topScan().ml;const r=src.top[+d.useml];if(!r)return;sel={};r.legs.forEach(l=>sel[l.g.id]=l.s);ui.kind="ml";ui.slipOpen=true;save();keep();return}
  if(d.usepp){const[src,i]=d.usepp.split("|");const T=topScan();const r=src==="scan"?ui.pp.res.top[+i]:src==="size"?T.pp.bySize[i]:T.pp.top[+i];if(!r)return;
   pps={};r.picks.forEach(x=>pps[x.r.k]=x.side);ui.ppMode=r.mode;ui.kind="pp";ui.slipOpen=true;save();keep();return}

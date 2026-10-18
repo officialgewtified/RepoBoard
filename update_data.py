@@ -879,6 +879,18 @@ def is_mixed(r, teams, gbi):
     return bool(form_opp or (m_opp and not form_agree))
 
 
+def all_agree(r, teams, gbi, p):
+    """Books, his recent games and the matchup all point the same way, with enough books and chance."""
+    mkt = r["po"] >= .5
+    rf = r.get("rf"); n = (rf["o"] + rf["u"]) if rf else 0
+    if n < 4 or r["nb"] < 2 or max(p, 1 - p) < .542: return False
+    h = rf["o"] / n
+    if (h >= .5) != mkt or abs(h - .5) < .0999: return False
+    m = match_factor(r, teams, gbi)
+    if m is not None and abs(m - 1) >= .05 and (m > 1) != mkt: return False
+    if r.get("ij") and r["ij"].lower() in ("questionable", "doubtful", "out"): return False
+    return (p >= .5) == mkt
+
 # ---------- track record: snapshot picks before kickoff, grade them after ----------
 FOUND = {}
 def find_athlete(sport, name):
@@ -933,7 +945,7 @@ def update_history(games, props, teams):
         h["pending"][f"p|{r['g']}|{r['mk']}|{r['pl']}"] = {
             "t": "p", "sp": g["sp"], "kick": g["kick"], "pl": r["pl"], "mk": r["mk"], "ln": r["ln"], "pp": r["pp"],
             "nb": r["nb"], "po": r["po"], "side": "o" if pf >= .5 else "u", "p": round(max(pf, 1 - pf), 4),
-            "mx": is_mixed(r, teams, gbi), "aid": r["aid"]}
+            "mx": is_mixed(r, teams, gbi), "ag": all_agree(r, teams, gbi, pf), "aid": r["aid"]}
     for g in games:
         if g.get("eid") and parse_t(g["kick"]) > NOW:
             h["pending"][f"m|{g['id']}"] = {"t": "m", "sp": g["sp"], "kick": g["kick"], "eid": g["eid"],
@@ -961,7 +973,7 @@ def update_history(games, props, teams):
             res = None if act == x["ln"] else ((act > x["ln"]) == (x["side"] == "o"))
             h["props"].append({"d": x["kick"][:10], "sp": x["sp"], "pl": x["pl"], "mk": x["mk"], "ln": x["ln"],
                                "pp": x["pp"], "nb": x["nb"], "po": x["po"], "side": x["side"], "p": x["p"],
-                               "mx": x["mx"], "act": act, "hit": res})
+                               "mx": x["mx"], "ag": x.get("ag", False), "act": act, "hit": res})
         else:
             day = kick.astimezone(ET).strftime("%Y%m%d")
             sc = final_scores(x["sp"], day).get(x["eid"])
@@ -994,6 +1006,7 @@ def summarize(h):
         "playable": agg([r for r in P if tier_of(r["p"]) == "playable"]),
         "thin": agg([r for r in P if tier_of(r["p"]) == "thin"]),
         "clean": agg([r for r in P if not r["mx"]]), "mixed": agg([r for r in P if r["mx"]]),
+        "agree": agg([r for r in P if r.get("ag")]),
         "scanner": agg([r for r in P if r["p"] >= .542 and not r["mx"] and r["nb"] >= 2]),
         "pp": agg([r for r in P if r["pp"]]), "more": agg([r for r in P if r["side"] == "o"]),
         "less": agg([r for r in P if r["side"] == "u"]),
