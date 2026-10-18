@@ -230,7 +230,14 @@ table.books .off{opacity:.45}
 .tk .lg2{font-size:13px;color:var(--mute);margin-top:4px}
 .tk .m{display:flex;gap:6px;margin-top:8px}
 .tk .m button{flex:1;border:1px solid var(--line);background:transparent;border-radius:9px;padding:7px;font-weight:600;font-size:13px}
-.tk.W{border-color:var(--go)}.tk.L{border-color:var(--stop)}
+.tk.W{border-color:var(--go)}.tk.L{border-color:var(--stop)}.tk.PT{border-color:var(--led)}
+.tk .res{font-size:13px;margin-top:8px;color:var(--mute)}
+.tk .res b{color:var(--ink)}.tk .res.W b{color:var(--go)}.tk .res.L b{color:var(--stop)}.tk .res.PT b{color:var(--led)}
+.lgl{display:flex;flex-direction:column;gap:3px;margin-top:6px;font-size:13px;color:var(--mute)}
+.lgl div{display:flex;gap:8px;align-items:baseline}
+.lgl .mk{flex:none;width:14px;text-align:center;font-weight:800}
+.lgl .ok .mk{color:var(--go)}.lgl .no .mk{color:var(--stop)}
+.lgl .ok span:last-child,.lgl .no span:last-child{color:var(--ink)}
 .record{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
 .hrow .iconbtn{flex:none;margin-bottom:4px}
@@ -672,21 +679,58 @@ function renderRecord(){const R=DATA&&DATA.record;
   ${M.all.n?`${recRow("Game winners (favorites)",M.all,M.all.ep?`board expected ${pct(M.all.ep)}`:"")}${recRow("Favorites 50 to 60%",M.b50)}${recRow("Favorites 60 to 70%",M.b60)}${recRow("Favorites 70 to 80%",M.b70)}${recRow("Favorites 80%+",M.b80)}`:""}
  </section>
  ${R.recent&&R.recent.length?`<h2>Latest graded picks</h2><div class="card reclist" style="padding:6px 14px">${R.recent.map(x=>`<div><b style="color:${x.hit===true?"var(--go)":x.hit===false?"var(--stop)":"var(--mute)"}">${x.hit===true?"Hit":x.hit===false?"Miss":"Push"}</b> ${esc(x.pl)} ${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk)}: had ${x.act} <span>(${pct(x.p)}${x.mx?", mixed":""})</span></div>`).join("")}</div>`:""}`}
+const tRet=t=>t.r==="L"?0:+(t.ret??t.pay);
+const tNet=t=>tRet(t)-(+t.stake);
+function legRows(t){const L=t.res;if(!L)return `<div class="lg2">${t.legs.map(esc).join(", ")}</div>`;
+ return `<div class="lgl">${t.legs.map((x,i)=>{const r=L[i]||{};const c=r.h===true?"ok":r.h===false?"no":"na";
+  return `<div class="${c}"><span class="mk" aria-label="${r.h===true?"Hit":r.h===false?"Miss":r.h===null?"Push":"Not graded"}">${r.h===true?"✓":r.h===false?"✕":"–"}</span><span>${esc(x)}${r.a!=null?` <small>had ${r.a}</small>`:""}</span></div>`}).join("")}</div>`}
 function renderTix(){
- const S=tickets.filter(t=>t.r),w=tickets.filter(t=>t.r==="W").length,l=tickets.filter(t=>t.r==="L").length;
- const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.filter(t=>t.r==="W").reduce((a,t)=>a+ +(t.ret??t.pay),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.p||0),0);
- return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
- <p class="fine">${tickets.length-w-l} open. Expected wins is what the odds said you'd hit on settled tickets.</p>`:""}
+ const S=tickets.filter(t=>t.r),w=S.filter(t=>tNet(t)>0).length,l=S.filter(t=>tNet(t)<0).length,pu=S.length-w-l;
+ const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.reduce((a,t)=>a+tRet(t),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.pw??t.p??0),0);
+ return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}${pu?"-"+pu:""}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
+ <p class="fine">${tickets.length-S.length} open. Tickets grade themselves after each update when the board tracked every pick. A win means it made money, so a Flex that pays back less than you put in counts as a loss. Expected wins is how many the odds said would make money.</p>`:""}
  ${renderRecord()}<h2>Saved tickets</h2>
- <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>`<div class="card tk ${t.r||""}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
-  <div class="lg2">${t.legs.map(esc).join(", ")}</div>${t.r==="W"&&t.ret!=null&&+t.ret!==+t.pay?`<div class="lg2">Paid ${money(t.ret)}</div>`:""}
-  <div class="m"><button data-tw="${i}">Won</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>`}
+ <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>{const n=t.r?tNet(t):0,cls=!t.r?"":n>0?"W":tRet(t)>0?"PT":"L",flex=t.kind==="pp"&&t.mode==="Flex";
+  return `<div class="card tk ${cls}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
+  ${legRows(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`:""}
+  <div class="m"><button data-tw="${i}">${flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>`}
+
+/* ---------- auto-grade open tickets from the board's graded results (history.json) ---------- */
+let HIST=null;
+const pnm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z ]/g,"").replace(/\b(jr|sr|ii|iii|iv|v)\b/g,"").replace(/\s+/g," ").trim();
+const mkOf=s=>Object.keys(MK).find(k=>MK[k].toLowerCase()===String(s||"").trim().toLowerCase())||null;
+const etDay=ms=>new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+const addDays=(d,n)=>new Date(Date.parse(d+"T12:00:00Z")+n*864e5).toISOString().slice(0,10);
+function legsOf(t){if(t.lg)return t.lg;   // older tickets: read the leg text
+ return t.legs.map(x=>{let m;if(t.kind==="pp"){m=/^(.*) (More|Less) (-?[\d.]+) (.+)$/.exec(x);return m?{pl:m[1],side:m[2]==="More"?"o":"u",ln:+m[3],mk:mkOf(m[4])}:null}
+  m=/^(?:#\d+ )?(.+?) [+−-]\d+$/.exec(x);return m?{team:m[1]}:null})}
+function pickGame(c,t,l){if(!c.length)return null;
+ if(l.k)return c.find(x=>x.d===l.k.slice(0,10))||null;                       // saved from the slip: exact game
+ if(t.day){const hi=addDays(t.day,8);return c.filter(x=>x.d>=t.day&&x.d<=hi).sort((a,b)=>a.d<b.d?-1:1)[0]||null}  // logged: first game on/after that day
+ return c.length===1?c[0]:null}                                               // no date: only if there's no doubt
+function gradeLeg(t,l){if(!l)return undefined;
+ if(t.kind==="pp"){if(!l.mk)return undefined;const n=pnm(l.pl),c=pickGame(HIST.props.filter(x=>x.mk===l.mk&&pnm(x.pl)===n),t,l);
+  if(!c)return undefined;return{h:c.act===l.ln?null:(c.act>l.ln)===(l.side==="o"),a:c.act}}
+ const tm=pnm(l.team),c=pickGame(HIST.ml.filter(x=>l.a?x.a===l.a&&x.h===l.h:pnm(x.a)===tm||pnm(x.h)===tm),t,l);
+ if(!c)return undefined;if(c.hit==null)return{h:null};const win=c.hit?c.side:c.side==="a"?"h":"a";
+ return{h:l.s?win===l.s:pnm(win==="a"?c.a:c.h)===tm}}
+function flexTable(t){const n=t.legs.length,b=t.pt||PAY.flex[n];if(!b)return null;const k=(+t.pay/+t.stake)/b[0];return Math.abs(k-1)>.01?b.map(x=>x*k):b}
+function autoGrade(){if(!HIST)return;let ch=0;
+ for(const t of tickets){if(t.r||!Array.isArray(t.legs))continue;
+  const R=legsOf(t).map(l=>gradeLeg(t,l)),n=R.length,hit=R.filter(x=>x&&x.h===true).length,miss=R.filter(x=>x&&x.h===false).length,open=R.some(x=>x===undefined||x.h===null);
+  let ret=null;
+  if(t.kind==="pp"&&t.mode==="Flex"){const tab=flexTable(t);if(!tab)continue;
+   if(miss>tab.length-1)ret=0;else if(!open)ret=+(t.stake*(tab[miss]||0)).toFixed(2)}
+  else if(miss)ret=0;else if(!open)ret=+t.pay;
+  if(ret==null)continue;                                                    // a push or an ungraded pick: leave it for you
+  t.r=ret>0?"W":"L";t.ret=ret;t.auto=true;t.hits=`${hit} of ${n}`;t.res=R.map(x=>x?{h:x.h,a:x.a}:{});ch++}
+ if(ch){LS.set("pb_tickets",tickets);keep()}}
 
 /* ---------- log a ticket by hand ---------- */
 let lt=null;
 const ltLeg=k=>k==="pp"?{pl:"",side:"o",ln:"",st:""}:{pick:"",ml:""};
 const parseML=s=>{const v=parseFloat(String(s??"").replace(/[−–]/g,"-").replace(/^\+/,""));return isFinite(v)&&Math.abs(v)>=100?v:null};
-function openLog(){lt={kind:"pp",mode:"Flex",legs:[1,2,3].map(()=>ltLeg("pp")),stake:"",pay:"",payEdited:false,r:"",ret:"",err:""};renderLog();$("#logtix").showModal()}
+function openLog(){lt={kind:"pp",mode:"Flex",legs:[1,2,3].map(()=>ltLeg("pp")),day:etDay(Date.now()-6*36e5),stake:"",pay:"",payEdited:false,r:"",ret:"",err:""};renderLog();$("#logtix").showModal()}
 function readLog(){document.querySelectorAll("#logsheet [data-lf]").forEach(el=>{const[f,i]=el.dataset.lf.split("|");if(i!==undefined){if(lt.legs[+i])lt.legs[+i][f]=el.value}else lt[f]=el.value})}
 function ltMult(){const n=lt.legs.length;
  if(lt.kind==="pp")return lt.mode==="Power"?PAY.power[n]||null:PAY.flex[n]?PAY.flex[n][0]:null;
@@ -705,7 +749,8 @@ function renderLog(){const pp=lt.kind==="pp",n=lt.legs.length;
   <div class="r2"><input data-lf="ln|${i}" value="${esc(l.ln)}" type="number" inputmode="decimal" step="0.5" min="0" placeholder="Line" aria-label="Line ${i+1}"><input data-lf="st|${i}" value="${esc(l.st)}" placeholder="Stat" list="ltstats" autocomplete="off" aria-label="Stat ${i+1}"></div></div>`
   :`<div class="ltleg"><div class="r1"><input data-lf="pick|${i}" value="${esc(l.pick)}" placeholder="Pick, like Ohio State ML" aria-label="Leg ${i+1}"><input class="odds" data-lf="ml|${i}" value="${esc(l.ml)}" placeholder="−110" autocomplete="off" aria-label="Odds ${i+1}"><button class="x" data-ltdel="${i}" aria-label="Remove leg ${i+1}">×</button></div></div>`).join("")}</div>
  <button class="sm" data-ltadd style="margin-top:8px" ${n>=(pp?6:15)?"disabled":""}>+ Add ${pp?"pick":"leg"}</button>
- <div class="ctrls" style="margin-top:14px;grid-template-columns:1fr 1fr"><label>Entry $<input data-lf="stake" value="${esc(lt.stake)}" type="number" inputmode="decimal" min="0" step="any"></label><label>To win $<input data-lf="pay" value="${esc(lt.pay)}" type="number" inputmode="decimal" min="0" step="any"></label></div>
+ <div class="ctrls" style="margin-top:14px;grid-template-columns:1fr"><label>Game day (first game on the ticket)<input data-lf="day" type="date" value="${esc(lt.day)}"></label></div>
+ <div class="ctrls" style="margin-top:8px;grid-template-columns:1fr 1fr"><label>Entry $<input data-lf="stake" value="${esc(lt.stake)}" type="number" inputmode="decimal" min="0" step="any"></label><label>To win $<input data-lf="pay" value="${esc(lt.pay)}" type="number" inputmode="decimal" min="0" step="any"></label></div>
  <p class="fine" id="ltnote">${esc(ltNote())}</p>
  <h4>Result</h4><div class="filters">${[["","Still open"],["W","Won"],["L","Lost"]].map(([k,l])=>`<button class="pill ${lt.r===k?"on":""}" data-ltres="${k}">${l}</button>`).join("")}</div>
  ${lt.r==="W"?`<div class="ctrls" style="margin-top:8px;grid-template-columns:1fr"><label>It paid $<input data-lf="ret" value="${esc(lt.ret)}" type="number" inputmode="decimal" min="0" step="any" placeholder="${esc(lt.pay)}"></label></div>`:""}
@@ -731,13 +776,15 @@ function saveLog(){readLog();const pp=lt.kind==="pp";
  if(!err&&!(pay>st))err="To win should be more than the entry.";
  if(!err&&lt.r==="W"&&!(ret>=0))err="Enter what it paid.";
  if(err){lt.err=err;renderLog();const w=$("#logsheet .warn");if(w)w.scrollIntoView({block:"nearest"});return}
- const t={id:"log-"+Date.now(),kind:pp?"pp":"ml",stake:st,pay:pay.toFixed(2)};
- if(pp){t.mode=lt.mode;const mkOf=s=>Object.keys(MK).find(k=>MK[k].toLowerCase()===s.trim().toLowerCase());
+ const t={id:"log-"+Date.now(),kind:pp?"pp":"ml",stake:st,pay:pay.toFixed(2)};if(/^\d{4}-\d\d-\d\d$/.test(lt.day))t.day=lt.day;
+ if(pp){t.mode=lt.mode;
+  t.lg=legs.map(l=>({pl:l.pl.trim(),mk:mkOf(l.st),ln:parseFloat(l.ln),side:l.side}));if(lt.mode==="Flex"&&PAY.flex[n])t.pt=PAY.flex[n].slice();
   t.legs=legs.map(l=>`${l.pl.trim()} ${l.side==="o"?"More":"Less"} ${parseFloat(l.ln)} ${MK[mkOf(l.st)]||l.st.trim()}`);t.odds=+(pay/st).toFixed(2)+"x";
   // chance every pick hits, only when each pick is on the board at the same line
   const ps=legs.map(l=>{const mk=mkOf(l.st),r=P.find(r=>r.pl.toLowerCase()===l.pl.trim().toLowerCase()&&r.mk===mk&&+r.ln===parseFloat(l.ln));if(!r)return null;const q=pFinal(r);return l.side==="o"?q:1-q});
-  if(ps.every(v=>v!=null))t.p=ps.reduce((a,v)=>a*v,1)}
- else{t.legs=legs.map(l=>{const v=parseML(l.ml);return l.pick.trim()+(v!=null?" "+fmtML(v):"")});t.odds=amer(pay/st)}
+  if(ps.every(v=>v!=null)){t.p=ps.reduce((a,v)=>a*v,1);t.pw=lt.mode==="Power"?t.p:profit(ps,"flex")}}
+ else{t.legs=legs.map(l=>{const v=parseML(l.ml);return l.pick.trim()+(v!=null?" "+fmtML(v):"")});
+  t.lg=legs.map(l=>({team:l.pick.trim().replace(/^#\d+\s+/,"").replace(/\s+(ml|moneyline|to win)$/i,"")}));t.odds=amer(pay/st)}
  if(lt.r){t.r=lt.r;t.ret=lt.r==="W"?ret:0}
  tickets.unshift(t);LS.set("pb_tickets",tickets);$("#logtix").close();lt=null;keep()}
 
@@ -853,9 +900,12 @@ document.addEventListener("click",e=>{
  if(d.clear){if(d.clear==="ml")sel={};else pps={};ui.ppMode=null;save();keep();return}
  if(d.save){
   if(d.save==="ml"){const L=mlLegs();if(!L.length)return;const D=L.reduce((a,l)=>a*dec(l.ml),1),st=+stakeML||0;
-   tickets.unshift({kind:"ml",legs:L.map(l=>teamName(l.g[l.s])+" "+fmtML(l.ml)),odds:L.length>1?amer(D):fmtML(L[0].ml),stake:st,pay:(st*D).toFixed(2),p:L.reduce((a,l)=>a*l.p,1)});sel={}}
+   const pa=L.reduce((a,l)=>a*l.p,1);
+   tickets.unshift({kind:"ml",legs:L.map(l=>teamName(l.g[l.s])+" "+fmtML(l.ml)),lg:L.map(l=>({a:l.g.a.n,h:l.g.h.n,s:l.s,k:l.g.kick})),odds:L.length>1?amer(D):fmtML(L[0].ml),stake:st,pay:(st*D).toFixed(2),p:pa,pw:pa});sel={}}
   else{const Q=ppLegs();const n=Q.length;if(n<2)return;const mode=d.mode,st=+stakePP||0,top=mode==="power"?PAY.power[n]:PAY.flex[n][0];
-   tickets.unshift({kind:"pp",mode:mode==="power"?"Power":"Flex",legs:Q.map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`),odds:top+"x",stake:st,pay:(st*top).toFixed(2),p:Q.reduce((a,q)=>a*q.p,1)});pps={}}
+   const ps=Q.map(q=>q.p),pa=ps.reduce((a,v)=>a*v,1);
+   tickets.unshift({kind:"pp",mode:mode==="power"?"Power":"Flex",legs:Q.map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`),lg:Q.map(q=>({pl:q.r.pl,mk:q.r.mk,ln:q.r.ln,side:q.s,k:GI[q.r.g]&&GI[q.r.g].kick})),
+    odds:top+"x",stake:st,pay:(st*top).toFixed(2),p:pa,pw:mode==="power"?pa:profit(ps,"flex"),...(mode==="power"?{}:{pt:PAY.flex[n].slice()})});pps={}}
   LS.set("pb_tickets",tickets);save();ui.slipOpen=false;ui.ppMode=null;keep();return}
  if(d.scanml!==undefined){ui.ml.K=+$("#mlK").value;ui.ml.min=clamp(parseFloat($("#mlMin").value)||0,0,99);ui.ml.by=$("#mlBy").value;
   t.textContent="Scanning…";setTimeout(()=>{ui.ml.res=scanParlays(ui.ml.K,ui.ml.min/100,ui.ml.by);keep()},20);return}
@@ -865,8 +915,8 @@ document.addEventListener("click",e=>{
  if(d.useml!==undefined){const src=ui.tab==="games"&&ui.ml.res?ui.ml.res:topScan().ml;const r=src.top[+d.useml];if(!r)return;sel={};r.legs.forEach(l=>sel[l.g.id]=l.s);ui.kind="ml";ui.slipOpen=true;save();keep();return}
  if(d.usepp){const[src,i]=d.usepp.split("|");const T=topScan();const r=src==="scan"?ui.pp.res.top[+i]:src==="size"?T.pp.bySize[i]:T.pp.top[+i];if(!r)return;
   pps={};r.picks.forEach(x=>pps[x.r.k]=x.side);ui.ppMode=r.mode;ui.kind="pp";ui.slipOpen=true;save();keep();return}
- if(d.tw!==undefined){const tk=tickets[+d.tw];if(tk.kind==="pp"&&tk.mode==="Flex"){const v=prompt("How much did it pay?",tk.pay);if(v===null)return;tk.ret=parseFloat(v)||0}else tk.ret=tk.pay;tk.r="W";LS.set("pb_tickets",tickets);keep();return}
- if(d.tl!==undefined){tickets[+d.tl].r="L";tickets[+d.tl].ret=0;LS.set("pb_tickets",tickets);keep();return}
+ if(d.tw!==undefined){const tk=tickets[+d.tw];if(tk.kind==="pp"&&tk.mode==="Flex"){const v=prompt("How much did PrizePicks pay? Enter 0 if nothing.",tk.ret??tk.pay);if(v===null)return;tk.ret=Math.max(0,parseFloat(v)||0)}else tk.ret=+tk.pay;tk.r=tk.ret>0?"W":"L";delete tk.auto;LS.set("pb_tickets",tickets);keep();return}
+ if(d.tl!==undefined){const tk=tickets[+d.tl];tk.r="L";tk.ret=0;delete tk.auto;LS.set("pb_tickets",tickets);keep();return}
  if(d.td!==undefined){tickets.splice(+d.td,1);LS.set("pb_tickets",tickets);keep();return}
  if(d.logtix!==undefined){openLog();return}
  if(lt&&t.closest("#logtix")){
@@ -919,8 +969,11 @@ fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.sta
 /* tickets.json: tickets added by hand (ones that never got saved from the slip). Each id is added once, so deleting it here keeps it gone. */
 fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!Array.isArray(j.add))return;
  const seen=new Set(LS.get("pb_imported",[]));let n=0;
- for(const t of j.add.slice().reverse()){if(!t||!t.id||!Array.isArray(t.legs)||seen.has(t.id))continue;seen.add(t.id);if(!tickets.some(x=>x.id===t.id)){tickets.unshift(t);n++}}
- LS.set("pb_imported",[...seen]);if(n){LS.set("pb_tickets",tickets);keep()}}).catch(()=>{});
+ for(const t of j.add.slice().reverse()){if(!t||!t.id||!Array.isArray(t.legs))continue;const have=tickets.find(x=>x.id===t.id);
+  if(have){for(const k in t)if(!(k in have)){have[k]=t[k];n++}continue}
+  if(seen.has(t.id))continue;seen.add(t.id);tickets.unshift(t);n++}
+ LS.set("pb_imported",[...seen]);if(n){LS.set("pb_tickets",tickets);keep()}}).catch(()=>{}).finally(()=>
+ fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
 </body>

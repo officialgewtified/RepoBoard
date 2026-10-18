@@ -1,5 +1,5 @@
 {
- "_help": "Tickets you forgot to save from the slip. The page adds each one to the Tickets tab once (by id), so deleting it there keeps it gone. Same fields as a saved ticket: kind 'pp' or 'ml', mode 'Power' or 'Flex', legs, odds (top multiplier), stake, pay (max payout), p (chance every leg hits).",
+ "_help": "Tickets you forgot to save from the slip. The page adds each one to the Tickets tab once (by id), so deleting it there keeps it gone, and fills in any field a ticket already there is missing. Fields: kind 'pp' or 'ml', mode 'Power' or 'Flex', legs (text), lg (each pick: player, stat key, line, side o/u, used for auto-grading), day (ET date of the first game), odds (top multiplier), stake, pay (max payout), pt (Flex payouts by misses), p (chance every leg hits), pw (chance it makes money).",
  "add": [
   {
    "id": "pp-2026-10-17-flex6-cfb",
@@ -16,7 +16,52 @@
    "odds": "25x",
    "stake": 10,
    "pay": "250.00",
-   "p": 0.0307
+   "p": 0.0307,
+   "day": "2026-10-17",
+   "lg": [
+    {
+     "pl": "CJ Brown",
+     "mk": "player_reception_yds",
+     "ln": 16.5,
+     "side": "u"
+    },
+    {
+     "pl": "Jaden Craig",
+     "mk": "player_pass_yds",
+     "ln": 218.5,
+     "side": "o"
+    },
+    {
+     "pl": "Umari Hatcher",
+     "mk": "player_reception_yds",
+     "ln": 79.5,
+     "side": "u"
+    },
+    {
+     "pl": "Caleb Hawkins",
+     "mk": "player_reception_yds",
+     "ln": 19.5,
+     "side": "u"
+    },
+    {
+     "pl": "Lloyd Avant",
+     "mk": "player_reception_yds",
+     "ln": 11.5,
+     "side": "u"
+    },
+    {
+     "pl": "Jack Foley",
+     "mk": "player_reception_yds",
+     "ln": 44.5,
+     "side": "o"
+    }
+   ],
+   "pt": [
+    25,
+    2,
+    0.4
+   ],
+   "pw": 0.1759
   }
  ]
 }
