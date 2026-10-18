@@ -146,7 +146,7 @@ def espn_team(c):
     return {"name": t.get("displayName", ""), "short": t.get("shortDisplayName") or t.get("location", ""),
             "nick": t.get("name", ""), "abbr": t.get("abbreviation", ""),
             "rank": rk if rk and rk <= 25 else None, "rec": rec,
-            "color": "#" + t["color"] if t.get("color") else None}
+            "color": "#" + t["color"] if t.get("color") else None, "id": t.get("id")}
 
 def espn_games(sport, days):
     out = []
@@ -288,10 +288,10 @@ def team_obj(sport, full, et):
     if sport == "NFL":
         ab = T[full][0] if full in T else (et["abbr"] if et else "".join(w[0] for w in full.split())[:3].upper())
         n = (et or {}).get("nick") or full.split()[-1]
-        return {"ab": ab, "n": n, "full": full, "rec": (et or {}).get("rec"), "c": (et or {}).get("color")}
+        return {"ab": ab, "n": n, "full": full, "rec": (et or {}).get("rec"), "c": (et or {}).get("color"), "tid": (et or {}).get("id")}
     if et:
         return {"ab": et["abbr"] or et["short"][:4].upper(), "n": et["short"] or full, "full": full,
-                "rk": et["rank"], "rec": et["rec"], "c": et["color"]}
+                "rk": et["rank"], "rec": et["rec"], "c": et["color"], "tid": et.get("id")}
     parts = full.split()
     n = " ".join(parts[:-1]) if len(parts) > 1 else full
     return {"ab": "".join(w[0] for w in parts[:-1])[:4].upper() or full[:3].upper(), "n": n, "full": full}
@@ -556,6 +556,90 @@ def build_props(s, events):
     return rows, budget, new_ledger
 
 
+# ---------- recent form (ESPN game logs) ----------
+FORM_STAT = {"player_reception_yds": ["receivingYards"], "player_receptions": ["receptions"],
+             "player_rush_yds": ["rushingYards"], "player_pass_yds": ["passingYards"],
+             "player_pass_tds": ["passingTouchdowns"], "player_pass_completions": ["completions"],
+             "player_pass_attempts": ["passingAttempts"], "player_rush_attempts": ["rushingAttempts"],
+             "player_pass_interceptions": ["interceptions"],
+             "player_rush_reception_yds": ["rushingYards", "receivingYards"],
+             "player_pass_rush_yds": ["passingYards", "rushingYards"]}
+ROSTERS, LOGS = {}, {}
+
+def pname(s):
+    s = norm(s)
+    for suf in ("jr", "sr", "iii", "ii", "iv", "v"):
+        if s.endswith(suf) and len(s) > len(suf) + 3:
+            return s[: -len(suf)]
+    return s
+
+def roster(sport, tid):
+    if not tid: return {}
+    if (sport, tid) in ROSTERS: return ROSTERS[(sport, tid)]
+    out = {}
+    try:
+        j = requests.get(f"https://site.api.espn.com/apis/site/v2/sports/{ESPN_PATH[sport]}/teams/{tid}/roster", timeout=20).json()
+        for grp in j.get("athletes", []):
+            for a in grp.get("items", []) if isinstance(grp, dict) and "items" in grp else [grp]:
+                if a.get("id"):
+                    for nm in (a.get("displayName"), a.get("fullName")):
+                        if nm: out[pname(nm)] = a["id"]
+    except Exception as e:
+        print("roster failed:", sport, tid, e)
+    ROSTERS[(sport, tid)] = out
+    return out
+
+def game_log(sport, aid):
+    """Per-game stats for the current season, most recent first: [{stat: value}]."""
+    if (sport, aid) in LOGS: return LOGS[(sport, aid)]
+    games = []
+    try:
+        j = requests.get(f"https://site.web.api.espn.com/apis/common/v3/sports/{ESPN_PATH[sport]}/athletes/{aid}/gamelog", timeout=20).json()
+        names, evmeta = j.get("names", []), j.get("events", {})
+        for st in j.get("seasonTypes", []):
+            if "pre" in (st.get("displayName") or "").lower():
+                continue
+            for cat in st.get("categories", []):
+                for ev in cat.get("events", []):
+                    vals = {}
+                    for n, v in zip(names, ev.get("stats", [])):
+                        try: vals[n] = float(str(v).replace(",", ""))
+                        except ValueError: pass
+                    vals["_t"] = (evmeta.get(ev.get("eventId"), {}) or {}).get("gameDate", "")
+                    games.append(vals)
+        games.sort(key=lambda x: x["_t"], reverse=True)
+    except Exception as e:
+        print("game log failed:", sport, aid, e)
+    LOGS[(sport, aid)] = games
+    return games
+
+def attach_form(rows, games_by_id):
+    """Adds rf = {v: last 5 values (newest first), n: games used (max 10), o: games over the line, avg}."""
+    done = 0
+    for r in rows:
+        if "rf" in r or r["mk"] not in FORM_STAT:
+            continue
+        g = games_by_id.get(r["g"])
+        if not g:
+            continue
+        key = pname(r["pl"])
+        aid = None
+        for side in ("a", "h"):
+            aid = roster(g["sp"], g[side].get("tid")).get(key)
+            if aid: break
+        if not aid:
+            continue
+        stats = FORM_STAT[r["mk"]]
+        vals = [sum(x.get(k, 0.0) for k in stats) for x in game_log(g["sp"], aid) if any(k in x for k in stats)][:10]
+        if len(vals) < 2:
+            continue
+        r["rf"] = {"v": [round(v, 1) for v in vals[:5]], "n": len(vals),
+                   "o": sum(1 for v in vals if v > r["ln"]), "u": sum(1 for v in vals if v < r["ln"]),
+                   "avg": round(sum(vals[:5]) / len(vals[:5]), 1)}
+        done += 1
+    print(f"recent form added to {done} props ({len(LOGS)} game logs, {len(ROSTERS)} rosters)")
+
+
 def main():
     s = settings()
     overrides = load_json("overrides.json", {})
@@ -563,6 +647,7 @@ def main():
     games, events = build_games(s, overrides, inj)
     if events:
         props, budget, ledger = build_props(s, events)
+        attach_form(props, {g["id"]: g for g in games})
     else:
         props, budget, ledger = [], 0, load_json("data.json", {}).get("ledger", {})
         if ledger.get("week") == str(week_start(NOW)):

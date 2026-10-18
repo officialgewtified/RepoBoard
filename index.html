@@ -111,6 +111,9 @@ select.sel{border:1px solid var(--line);background:var(--panel);border-radius:10
 .tier.t3{background:color-mix(in srgb,var(--go) 22%,transparent);color:var(--go)}
 .tier.t2{background:color-mix(in srgb,var(--led) 20%,transparent);color:var(--led)}
 .tier.t1{background:var(--raise);color:var(--mute)}
+.tier.mix{background:color-mix(in srgb,var(--stop) 20%,transparent);color:var(--stop)}
+.form{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;line-height:1.25;color:var(--mute)}
+.form svg{flex:none}
 .ppmark{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:5px;padding:0 4px;color:var(--mute)}
 
 /* ---------- games ---------- */
@@ -319,7 +322,14 @@ function profit(ps,mode){const n=ps.length,d=dist(ps);if(mode==="power")return d
 function beFlex(n){if(!PAY.flex[n])return null;let lo=.3,hi=.95;for(let i=0;i<40;i++){const m=(lo+hi)/2;evFlex(Array(n).fill(m))>0?hi=m:lo=m}return hi}
 function breakevens(){const out=[];for(let n=2;n<=6;n++){const a=bePower(n),b=beFlex(n);if(a)out.push(a);if(b)out.push(b)}return{lo:Math.min(...out),hi:Math.max(...out)}}
 let BE=breakevens();
-function propSide(r){const o=r.po>=.5?"o":"u";return{side:o,p:o==="o"?r.po:1-r.po}}
+/* recent form: the market chance is the base (books already price in recent games); a player's
+   last 10 games against this exact line nudge it, weighted like K extra games of evidence */
+const FORMK={off:0,light:20,normal:10,heavy:5};
+let formW=LS.get("pb_form","normal"),skipMixed=LS.get("pb_skipmixed",true);
+function formN(r){return r.rf?r.rf.o+r.rf.u:0}
+function pOver(r){const K=FORMK[formW],n=formN(r);if(!K||!n)return r.po;const h=(r.rf.o+.5)/(n+1);return (K*r.po+n*h)/(K+n)}
+function mixed(r){const n=formN(r);if(n<4)return false;const h=r.rf.o/n;return (r.po>=.5)!==(h>=.5)&&Math.abs(h-.5)>=.0999}
+function propSide(r){const q=pOver(r),o=q>=.5?"o":"u";return{side:o,p:o==="o"?q:1-q}}
 function tier(p){return p>=BE.hi?["t3","Strong"]:p>=BE.lo?["t2","Playable"]:["t1","Thin"]}
 
 /* ---------- data ---------- */
@@ -365,6 +375,7 @@ function scanParlays(K,minP,by){
 function ppCandidates(onlyPP){
  const byPl={};for(const r of P){const g=GI[r.g];if(!g||!live(g)||!inSport(r.sp))continue;if(onlyPP&&!r.pp)continue;
   if(r.nb<2)continue;   // need at least two books before a pick goes into lineups
+  if(skipMixed&&mixed(r))continue;   // books and his recent games disagree: leave it out
   const{side,p}=propSide(r);if(p<.5)continue;const k=r.g+"|"+r.pl;if(!byPl[k]||byPl[k].p<p)byPl[k]={r,side,p}}
  return Object.values(byPl).sort((a,b)=>b.p-a.p)}
 function scanLineups(sizes,mode,per,onlyPP,pool=20){
@@ -415,14 +426,21 @@ function gameCard(g){
   </div>`:""}
  </article>`}
 
+function formStrip(r){const f=r.rf;if(!f||!f.v||!f.v.length)return"";
+ const v=f.v.slice().reverse(),mx=Math.max(r.ln*1.6,...v,1),bw=9,gap=3,W=v.length*(bw+gap)-gap,H=24;
+ const ly=H-(r.ln/mx)*H;
+ const bars=v.map((x,i)=>{const h=Math.max(2,(x/mx)*H);return `<rect x="${i*(bw+gap)}" y="${(H-h).toFixed(1)}" width="${bw}" height="${h.toFixed(1)}" rx="2" fill="${x>r.ln?"var(--go)":"var(--mute)"}" opacity="${x>r.ln?1:.55}"/>`}).join("");
+ const n=formN(r),last=v.length;
+ return `<span class="form"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${bars}<line x1="0" x2="${W}" y1="${ly.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 2" opacity=".7"/></svg>
+  <span>Over in ${f.o} of last ${n}<br>Avg ${f.avg} (last ${last})</span></span>`}
 function propRow(r){
  const g=GI[r.g],{side,p}=propSide(r),[tc,tl]=tier(p),cur=pps[r.k],open=ui.popen[r.k];
  const lineTxt=Number.isInteger(r.ln)?r.ln:r.ln.toFixed(1);
- const btn=s=>{const pp=s==="o"?r.po:1-r.po;return `<button class="side-b ${side===s?"rec":""} ${cur===s?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${cur===s}"><small>${s==="o"?"More":"Less"}</small><b>${pct(pp)}</b><span class="ln">${lineTxt}</span></button>`};
- return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}<span class="tier ${tc}">${tl}</span></b>
-  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span></button>
+ const btn=s=>{const q=pOver(r),pp=s==="o"?q:1-q;return `<button class="side-b ${side===s?"rec":""} ${cur===s?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${cur===s}"><small>${s==="o"?"More":"Less"}</small><b>${pct(pp)}</b><span class="ln">${lineTxt}</span></button>`};
+ return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?'<span class="tier mix">Mixed signals</span>':`<span class="tier ${tc}">${tl}</span>`}</b>
+  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
-  ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line.
+  ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}.`:""}
    <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table></div>`:""}</div>`}
 
 function mlRow(x){const g=x.g,t=g[x.s],on=sel[g.id]===x.s,o=g[x.s==="a"?"h":"a"];
@@ -440,7 +458,7 @@ function comboPP(r,i,src){const n=r.picks.length;const mult=r.mode==="power"?PAY
 /* ---------- tabs ---------- */
 let TOP=null,TOPKEY="";
 function topScan(){
- const key=JSON.stringify([ui.sport,myBooks,PAY,adj,DATA&&DATA.updated,Math.floor(Date.now()/6e5)]);
+ const key=JSON.stringify([ui.sport,myBooks,PAY,adj,formW,skipMixed,DATA&&DATA.updated,Math.floor(Date.now()/6e5)]);
  if(TOP&&TOPKEY===key)return TOP;
  const onlyPP=P.some(r=>r.pp);
  TOP={pp:scanLineups([2,3,4,5,6],"best",1,onlyPP,18),ml:scanParlays(3,.35,"value"),onlyPP};TOPKEY=key;return TOP}
@@ -535,7 +553,7 @@ function renderSportBar(){
 
 /* ---------- slip ---------- */
 function mlLegs(){return Object.entries(sel).map(([id,s])=>{const g=GI[id];if(!g)return null;const b=best(g,s);if(!b)return null;return{g,s,ml:b.ml,book:b.book,p:pSide(g,s)}}).filter(Boolean)}
-function ppLegs(){return Object.entries(pps).map(([k,s])=>{const r=PI[k];if(!r)return null;return{r,s,p:s==="o"?r.po:1-r.po}}).filter(Boolean)}
+function ppLegs(){return Object.entries(pps).map(([k,s])=>{const r=PI[k];if(!r)return null;const q=pOver(r);return{r,s,p:s==="o"?q:1-q}}).filter(Boolean)}
 function renderSlip(){
  const L=mlLegs(),Q=ppLegs();
  let kind=ui.tab==="games"?"ml":ui.tab==="pp"?"pp":ui.kind;
@@ -585,12 +603,15 @@ function renderSettings(){
  <h4>Look</h4><div class="filters">${[["dark","Night"],["clean","Day"],["bold","Field"]].map(([k,l])=>`<button class="pill ${th===k?"on":""}" data-th="${k}">${l}</button>`).join("")}</div>
  <h4>Your sportsbooks</h4><p>Best prices only come from books you check. Fair chances always use every book.</p>
  <div class="checks">${books.map(k=>`<label><input type="checkbox" data-book="${k}" ${okBook(k)?"checked":""}>${esc(bname(k))}</label>`).join("")||"<p>Books appear after the first update.</p>"}</div>
+ <h4>Recent games</h4><p>How much a player's last 10 games move the chance on a prop. The betting market stays the base because books already price in recent games.</p>
+ <div class="filters">${[["off","Off"],["light","Light"],["normal","Normal"],["heavy","Heavy"]].map(([k,l])=>`<button class="pill ${formW===k?"on":""}" data-formw="${k}">${l}</button>`).join("")}</div>
+ <div class="checks" style="grid-template-columns:1fr;margin-top:8px"><label><input type="checkbox" data-skipmixed ${skipMixed?"checked":""}>Leave out picks where the books and recent games disagree</label></div>
  <h4>PrizePicks payouts</h4><p>Standard payouts are filled in. If your app shows different numbers, change them here.</p>
  <div class="paygrid"><span></span><b>Power</b><span></span><span></span>${[2,3,4,5,6].map(n=>`<span>${n} picks</span><input data-payp="${n}" type="number" step="0.05" value="${PAY.power[n]}"><span></span><span></span>`).join("")}
   <span></span><b>Flex: all</b><b>1 miss</b><b>2 misses</b>${[3,4,5,6].map(n=>`<span>${n} picks</span>${fx(n)}`).join("")}</div>
  <div class="btns"><button class="btn" data-payreset>Use standard payouts</button></div>
  <h4>How picks are made</h4><div class="how"><p><b>Games:</b> each book's moneyline has its cut (vig) removed, then the board takes the middle value across all books as the fair chance. A side shows as value when your best price pays more than that fair chance is worth.</p>
- <p><b>PrizePicks:</b> sportsbook over/under prices on the same player stat are de-vigged and adjusted to the exact PrizePicks line, then combined across books. A pick needs to land about ${pct(BE.lo)} to ${pct(BE.hi)} of the time to beat PrizePicks payouts.</p>
+ <p><b>PrizePicks:</b> sportsbook over/under prices on the same player stat are de-vigged and adjusted to the exact PrizePicks line, then combined across books. His last 10 games against that line then nudge the chance, and picks where the two disagree are flagged as mixed signals. A pick needs to land about ${pct(BE.lo)} to ${pct(BE.hi)} of the time to beat PrizePicks payouts.</p>
  <p><b>Scanners:</b> every combination of the strongest picks is scored by expected return, treating each pick as independent.</p></div>
  ${c&&c.remaining!=null?`<h4>Odds API credits</h4><p>${Math.round(c.remaining)} left this month. The last update used ${Math.round(c.spent)}.</p>`:""}
  <div class="btns"><button class="btn go" data-closesettings>Done</button></div>`}
@@ -647,6 +668,8 @@ document.addEventListener("click",e=>{
  if(d.th){setTheme(d.th);renderSettings();return}
  if(d.book){const all=[...new Set(G.flatMap(g=>Object.keys(g.px)))];let cur=myBooks||all.slice();cur=t.checked?[...new Set([...cur,d.book])]:cur.filter(k=>k!==d.book);
   myBooks=cur.length===all.length?null:cur;LS.set("pb_books",myBooks);ui.ml.res=null;render();return}
+ if(d.formw){formW=d.formw;LS.set("pb_form",formW);TOP=null;ui.pp.res=null;renderSettings();render();return}
+ if(d.skipmixed!==undefined){skipMixed=t.checked;LS.set("pb_skipmixed",skipMixed);TOP=null;ui.pp.res=null;render();return}
  if(d.payreset!==undefined){PAY=JSON.parse(JSON.stringify(DEF_PAY));LS.set("pb_pay",PAY);BE=breakevens();ui.pp.res=null;renderSettings();render();return}
  if(d.closesettings!==undefined){$("#settings").close();return}
 });
