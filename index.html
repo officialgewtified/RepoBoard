@@ -232,6 +232,23 @@ table.books .off{opacity:.45}
 .tk .m button{flex:1;border:1px solid var(--line);background:transparent;border-radius:9px;padding:7px;font-weight:600;font-size:13px}
 .tk.W{border-color:var(--go)}.tk.L{border-color:var(--stop)}
 .record{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.hrow .iconbtn{flex:none;margin-bottom:4px}
+/* log a ticket */
+.ltlegs{display:flex;flex-direction:column;gap:8px}
+.ltleg{border:1px solid var(--line);background:var(--raise);border-radius:12px;padding:8px}
+.ltleg input{min-width:0;width:100%;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 9px;font-size:16px;font-weight:600}
+.ltleg .r1{display:flex;gap:6px;align-items:center}
+.ltleg .r1 input{flex:1}
+.ltleg .r1 .odds{flex:0 0 84px}
+.ltleg .r2{display:grid;grid-template-columns:84px 1fr 30px;gap:6px;margin-top:6px}
+.ltleg .ms{align-self:stretch}
+.ltleg .x{flex:none;border:0;background:transparent;color:var(--mute);font-size:24px;line-height:1;padding:0 4px}
+.ms{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.ms button{border:0;background:var(--panel);padding:0 9px;font-size:13px;font-weight:700;color:var(--mute)}
+.ms button.on{background:var(--led);color:var(--ledink)}
+.filters .gap{flex:none;width:6px}
+.sm:disabled{opacity:.4}
 
 /* ---------- settings ---------- */
 dialog{border:0;padding:0;background:transparent;max-width:min(560px,94vw);width:100%;color:var(--ink)}
@@ -274,6 +291,7 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
 <div class="slip" id="slip"><div class="in" id="slipin"></div></div>
 
 <dialog id="settings"><div class="sheet" id="sheet"></div></dialog>
+<dialog id="logtix"><div class="sheet" id="logsheet"></div></dialog>
 
 <script>
 "use strict";
@@ -657,12 +675,71 @@ function renderRecord(){const R=DATA&&DATA.record;
 function renderTix(){
  const S=tickets.filter(t=>t.r),w=tickets.filter(t=>t.r==="W").length,l=tickets.filter(t=>t.r==="L").length;
  const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.filter(t=>t.r==="W").reduce((a,t)=>a+ +(t.ret??t.pay),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.p||0),0);
- return `<h2>My tickets</h2>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
+ return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
  <p class="fine">${tickets.length-w-l} open. Expected wins is what the odds said you'd hit on settled tickets.</p>`:""}
  ${renderRecord()}<h2>Saved tickets</h2>
  <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>`<div class="card tk ${t.r||""}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
   <div class="lg2">${t.legs.map(esc).join(", ")}</div>${t.r==="W"&&t.ret!=null&&+t.ret!==+t.pay?`<div class="lg2">Paid ${money(t.ret)}</div>`:""}
-  <div class="m"><button data-tw="${i}">Won</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do.</div>'}</div>`}
+  <div class="m"><button data-tw="${i}">Won</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>`}
+
+/* ---------- log a ticket by hand ---------- */
+let lt=null;
+const ltLeg=k=>k==="pp"?{pl:"",side:"o",ln:"",st:""}:{pick:"",ml:""};
+const parseML=s=>{const v=parseFloat(String(s??"").replace(/[−–]/g,"-").replace(/^\+/,""));return isFinite(v)&&Math.abs(v)>=100?v:null};
+function openLog(){lt={kind:"pp",mode:"Flex",legs:[1,2,3].map(()=>ltLeg("pp")),stake:"",pay:"",payEdited:false,r:"",ret:"",err:""};renderLog();$("#logtix").showModal()}
+function readLog(){document.querySelectorAll("#logsheet [data-lf]").forEach(el=>{const[f,i]=el.dataset.lf.split("|");if(i!==undefined){if(lt.legs[+i])lt.legs[+i][f]=el.value}else lt[f]=el.value})}
+function ltMult(){const n=lt.legs.length;
+ if(lt.kind==="pp")return lt.mode==="Power"?PAY.power[n]||null:PAY.flex[n]?PAY.flex[n][0]:null;
+ const m=lt.legs.map(l=>parseML(l.ml));return m.length&&m.every(v=>v!=null)?m.reduce((a,v)=>a*dec(v),1):null}
+function ltAuto(){if(lt.payEdited)return;const m=ltMult(),st=parseFloat(lt.stake);lt.pay=m&&st>0?(st*m).toFixed(2):""}
+function ltNote(){const n=lt.legs.length,m=ltMult();
+ if(lt.kind==="pp"){if(!m)return lt.mode==="Power"?"Power needs 2 to 6 picks.":"Flex needs 3 to 6 picks.";
+  return lt.mode==="Power"?`Power ${n} picks pays ${m}x if every pick hits.`:`Flex ${n} picks pays ${PAY.flex[n].map((x,i)=>`${x}x for ${n-i} of ${n}`).join(", ")}.`}
+ return m?`Parlay odds ${n>1?amer(m):fmtML(parseML(lt.legs[0].ml))}.`:"Add odds for every leg, like −110 or +150."}
+function renderLog(){const pp=lt.kind==="pp",n=lt.legs.length;
+ const names=pp?[...new Set(P.map(r=>r.pl))].sort():[];
+ $("#logsheet").innerHTML=`<h3>Log a ticket</h3><p>For a ticket you placed but didn't save from the slip.</p>
+ <div class="filters"><button class="pill ${pp?"on":""}" data-ltkind="pp">PrizePicks</button><button class="pill ${pp?"":"on"}" data-ltkind="ml">Parlay</button>${pp?`<span class="gap"></span><button class="pill ${lt.mode==="Power"?"on":""}" data-ltmode="Power">Power</button><button class="pill ${lt.mode==="Flex"?"on":""}" data-ltmode="Flex">Flex</button>`:""}</div>
+ <h4>${pp?"Picks":"Legs"}</h4>
+ <div class="ltlegs">${lt.legs.map((l,i)=>pp?`<div class="ltleg"><div class="r1"><input data-lf="pl|${i}" value="${esc(l.pl)}" placeholder="Player" list="ltplayers" autocomplete="off" autocapitalize="words" aria-label="Player ${i+1}"><span class="ms" role="group" aria-label="More or Less"><button class="${l.side==="o"?"on":""}" data-ltside="${i}|o">More</button><button class="${l.side==="u"?"on":""}" data-ltside="${i}|u">Less</button></span><button class="x" data-ltdel="${i}" aria-label="Remove pick ${i+1}">×</button></div>
+  <div class="r2"><input data-lf="ln|${i}" value="${esc(l.ln)}" type="number" inputmode="decimal" step="0.5" min="0" placeholder="Line" aria-label="Line ${i+1}"><input data-lf="st|${i}" value="${esc(l.st)}" placeholder="Stat" list="ltstats" autocomplete="off" aria-label="Stat ${i+1}"></div></div>`
+  :`<div class="ltleg"><div class="r1"><input data-lf="pick|${i}" value="${esc(l.pick)}" placeholder="Pick, like Ohio State ML" aria-label="Leg ${i+1}"><input class="odds" data-lf="ml|${i}" value="${esc(l.ml)}" placeholder="−110" autocomplete="off" aria-label="Odds ${i+1}"><button class="x" data-ltdel="${i}" aria-label="Remove leg ${i+1}">×</button></div></div>`).join("")}</div>
+ <button class="sm" data-ltadd style="margin-top:8px" ${n>=(pp?6:15)?"disabled":""}>+ Add ${pp?"pick":"leg"}</button>
+ <div class="ctrls" style="margin-top:14px;grid-template-columns:1fr 1fr"><label>Entry $<input data-lf="stake" value="${esc(lt.stake)}" type="number" inputmode="decimal" min="0" step="any"></label><label>To win $<input data-lf="pay" value="${esc(lt.pay)}" type="number" inputmode="decimal" min="0" step="any"></label></div>
+ <p class="fine" id="ltnote">${esc(ltNote())}</p>
+ <h4>Result</h4><div class="filters">${[["","Still open"],["W","Won"],["L","Lost"]].map(([k,l])=>`<button class="pill ${lt.r===k?"on":""}" data-ltres="${k}">${l}</button>`).join("")}</div>
+ ${lt.r==="W"?`<div class="ctrls" style="margin-top:8px;grid-template-columns:1fr"><label>It paid $<input data-lf="ret" value="${esc(lt.ret)}" type="number" inputmode="decimal" min="0" step="any" placeholder="${esc(lt.pay)}"></label></div>`:""}
+ ${lt.err?`<div class="warn" role="alert">${esc(lt.err)}</div>`:""}
+ <div class="btns"><button class="btn" data-ltclose>Cancel</button><button class="btn go" data-ltsave>Save ticket</button></div>
+ <datalist id="ltplayers">${names.map(x=>`<option value="${esc(x)}">`).join("")}</datalist><datalist id="ltstats">${Object.values(MK).map(x=>`<option value="${esc(x)}">`).join("")}</datalist>`}
+function ltInput(t){const[f,i]=t.dataset.lf.split("|");if(i!==undefined){if(lt.legs[+i])lt.legs[+i][f]=t.value}else lt[f]=t.value;
+ if(f==="pay")lt.payEdited=t.value!=="";ltAuto();
+ const p=document.querySelector('#logsheet [data-lf="pay"]');if(p&&p!==document.activeElement)p.value=lt.pay;
+ const r=document.querySelector('#logsheet [data-lf="ret"]');if(r)r.placeholder=lt.pay;
+ const nt=$("#ltnote");if(nt)nt.textContent=ltNote()}
+function ltRedo(fn){readLog();fn();lt.err="";ltAuto();renderLog()}
+function saveLog(){readLog();const pp=lt.kind==="pp";
+ const legs=lt.legs.filter(l=>pp?(l.pl+l.ln+l.st).trim():(l.pick+l.ml).trim()),n=legs.length,st=parseFloat(lt.stake),pay=parseFloat(lt.pay),ret=lt.ret===""?pay:parseFloat(lt.ret);
+ let err="";
+ if(pp){if(!n)err="Add your picks.";
+  else if(legs.some(l=>!l.pl.trim()||!(parseFloat(l.ln)>=0)||!l.st.trim()))err="Every pick needs a player, a line and a stat.";
+  else if(lt.mode==="Power"&&(n<2||n>6))err="Power needs 2 to 6 picks.";
+  else if(lt.mode==="Flex"&&(n<3||n>6))err="Flex needs 3 to 6 picks."}
+ else if(!n)err="Add at least one leg.";
+ else if(legs.some(l=>!l.pick.trim()))err="Every leg needs a pick.";
+ if(!err&&!(st>0))err="Enter what you put in.";
+ if(!err&&!(pay>st))err="To win should be more than the entry.";
+ if(!err&&lt.r==="W"&&!(ret>=0))err="Enter what it paid.";
+ if(err){lt.err=err;renderLog();const w=$("#logsheet .warn");if(w)w.scrollIntoView({block:"nearest"});return}
+ const t={id:"log-"+Date.now(),kind:pp?"pp":"ml",stake:st,pay:pay.toFixed(2)};
+ if(pp){t.mode=lt.mode;const mkOf=s=>Object.keys(MK).find(k=>MK[k].toLowerCase()===s.trim().toLowerCase());
+  t.legs=legs.map(l=>`${l.pl.trim()} ${l.side==="o"?"More":"Less"} ${parseFloat(l.ln)} ${MK[mkOf(l.st)]||l.st.trim()}`);t.odds=+(pay/st).toFixed(2)+"x";
+  // chance every pick hits, only when each pick is on the board at the same line
+  const ps=legs.map(l=>{const mk=mkOf(l.st),r=P.find(r=>r.pl.toLowerCase()===l.pl.trim().toLowerCase()&&r.mk===mk&&+r.ln===parseFloat(l.ln));if(!r)return null;const q=pFinal(r);return l.side==="o"?q:1-q});
+  if(ps.every(v=>v!=null))t.p=ps.reduce((a,v)=>a*v,1)}
+ else{t.legs=legs.map(l=>{const v=parseML(l.ml);return l.pick.trim()+(v!=null?" "+fmtML(v):"")});t.odds=amer(pay/st)}
+ if(lt.r){t.r=lt.r;t.ret=lt.r==="W"?ret:0}
+ tickets.unshift(t);LS.set("pb_tickets",tickets);$("#logtix").close();lt=null;keep()}
 
 function renderSportBar(){
  const live2=G.filter(live),n=sp=>live2.filter(g=>sp==="all"||g.sp===sp).length;
@@ -791,6 +868,17 @@ document.addEventListener("click",e=>{
  if(d.tw!==undefined){const tk=tickets[+d.tw];if(tk.kind==="pp"&&tk.mode==="Flex"){const v=prompt("How much did it pay?",tk.pay);if(v===null)return;tk.ret=parseFloat(v)||0}else tk.ret=tk.pay;tk.r="W";LS.set("pb_tickets",tickets);keep();return}
  if(d.tl!==undefined){tickets[+d.tl].r="L";tickets[+d.tl].ret=0;LS.set("pb_tickets",tickets);keep();return}
  if(d.td!==undefined){tickets.splice(+d.td,1);LS.set("pb_tickets",tickets);keep();return}
+ if(d.logtix!==undefined){openLog();return}
+ if(lt&&t.closest("#logtix")){
+  if(d.ltkind){if(d.ltkind!==lt.kind)ltRedo(()=>{lt.kind=d.ltkind;lt.legs=(d.ltkind==="pp"?[1,2,3]:[1,2]).map(()=>ltLeg(d.ltkind))});return}
+  if(d.ltmode){ltRedo(()=>{lt.mode=d.ltmode});return}
+  if(d.ltside){const[i,s]=d.ltside.split("|");ltRedo(()=>{lt.legs[+i].side=s});return}
+  if(d.ltadd!==undefined){ltRedo(()=>{lt.legs.push(ltLeg(lt.kind))});const ins=document.querySelectorAll("#logsheet .ltleg");const last=ins[ins.length-1];if(last){last.scrollIntoView({block:"nearest"});last.querySelector("input").focus()}return}
+  if(d.ltdel!==undefined){ltRedo(()=>{lt.legs.splice(+d.ltdel,1);if(!lt.legs.length)lt.legs.push(ltLeg(lt.kind))});return}
+  if(d.ltres!==undefined){ltRedo(()=>{lt.r=d.ltres});return}
+  if(d.ltsave!==undefined){saveLog();return}
+  if(d.ltclose!==undefined){$("#logtix").close();lt=null;return}
+ }
  if(d.th){setTheme(d.th);renderSettings();return}
  if(d.book){const all=[...new Set(G.flatMap(g=>Object.keys(g.px)))];let cur=myBooks||all.slice();cur=t.checked?[...new Set([...cur,d.book])]:cur.filter(k=>k!==d.book);
   myBooks=cur.length===all.length?null:cur;LS.set("pb_books",myBooks);ui.ml.res=null;render();return}
@@ -801,6 +889,7 @@ document.addEventListener("click",e=>{
  if(d.closesettings!==undefined){$("#settings").close();return}
 });
 document.addEventListener("input",e=>{const t=e.target;
+ if(lt&&t.dataset&&t.dataset.lf!==undefined){ltInput(t);return}
  if(t.id==="gq"){ui.q=t.value;const pos=t.selectionStart;keep();const n=$("#gq");n.focus();n.setSelectionRange(pos,pos);return}
  if(t.id==="pq"){ui.pq=t.value;ui.limit=60;const pos=t.selectionStart;keep();const n=$("#pq");n.focus();n.setSelectionRange(pos,pos);return}
  if(t.id==="stakeML"){stakeML=t.value;LS.set("pb_stake",stakeML);updateSlipNums();return}
