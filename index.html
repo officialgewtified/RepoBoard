@@ -372,7 +372,7 @@ const CLASH=[["ppg","ppg_a","Points per game",1],["rush","rush_a","Rushing yards
  ["ypa","ypa_a","Yards per pass",2],["third","third_a","Third down %",0],["rz","rz_a","Red zone scoring %",0],["sacked","sacks","Sacks per game (allowed vs made)",2],["give","take","Turnovers per game (giveaways vs takeaways)",2]];
 function pctl(rk,n){return n>1?1-(rk-1)/(n-1):.5}
 function clashes(g,off,def){const A=TS(g.sp,g[off].tid),D=TS(g.sp,g[def].tid),L=LG(g.sp);if(!A||!D||!L)return null;
- return CLASH.map(([ko,kd,label,dp])=>{if(A[ko]==null||D[kd]==null||!A.rk||!D.rk)return null;
+ return CLASH.map(([ko,kd,label,dp])=>{if(A[ko]==null||D[kd]==null||!A.rk||!D.rk||!L.avg[ko]||!L.avg[kd]||!A.rk[ko]||!D.rk[kd])return null;
   const po=pctl(A.rk[ko],L.n),pd=pctl(D.rk[kd],L.n);const edge=po-pd;
   const verdict=po>=.75&&pd>=.75?"Strength vs strength":edge>=.4?`Edge ${g[off].ab||g[off].n}`:edge<=-.4?`Edge ${g[def].ab||g[def].n}`:"";
   return{label,ov:A[ko],orank:A.rk[ko],dv:D[kd],drank:D.rk[kd],dp,edge,verdict,ko,po,pd}}).filter(Boolean)}
@@ -499,7 +499,7 @@ function matchupTables(g){const L=LG(g.sp);if(!L)return"";let h="";
   ${c.map(x=>`<tr><td>${esc(x.label)}${x.verdict?`<br><span class="vd ${x.verdict.startsWith("Strength")?"ss":x.edge>0?"eo":"ed"}">${esc(x.verdict)}</span>`:""}</td><td>${fmtv(x.ov,x.dp)} <span class="k">#${x.orank}</span></td><td>${fmtv(x.dv,x.dp)} <span class="k">#${x.drank}</span></td></tr>`).join("")}</table>`}
  const sl=statsLean(g);
  if(sl!=null)h+=`<p><span class="k">Season stats lean</span> ${esc(g.a.n)} ${pct(sl)}, ${esc(g.h.n)} ${pct(1-sl)} <span class="k">vs the market's ${pct(g.fair)} / ${pct(1-g.fair)}. Built from points scored and allowed plus home field; it doesn't adjust for strength of schedule, so the market number stays the main one.</span></p>`;
- return h?`<p class="k">Ranks are out of ${L.n} teams${g.sp==="CFB"?" (FBS)":""}. Defense ranks: #1 allows the least.</p>`+h:""}
+ return h?`<p class="k">Ranks are out of ${L.n} teams. Defense ranks: #1 allows the least.</p>`+h:""}
 function propRow(r){
  const g=GI[r.g],{side,p}=propSide(r),[tc,tl]=tier(p),cur=pps[r.k],open=ui.popen[r.k];
  const lineTxt=Number.isInteger(r.ln)?r.ln:r.ln.toFixed(1);

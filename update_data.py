@@ -644,7 +644,9 @@ def build_team_stats(games):
         avg = {}
         for k, hib in keys.items():
             vals = sorted(((t, v[k]) for t, v in league.items() if k in v), key=lambda x: x[1], reverse=hib)
-            if not vals: continue
+            if not vals or not any(x for _, x in vals):     # stat not tracked for this league
+                for v in league.values(): v.pop(k, None)
+                continue
             avg[k] = round(sum(x for _, x in vals) / len(vals), 2)
             for i, (t, _) in enumerate(vals):
                 league[t].setdefault("rk", {})[k] = i + 1
