@@ -41,11 +41,11 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* ---------- header ---------- */
 .top{padding-top:calc(14px + env(safe-area-inset-top,0px))}
-.brand{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.brand{display:flex;flex-direction:column;align-items:center;gap:12px}
 .mark{font:900 36px/0.9 "Big Shoulders Display",Impact,sans-serif;letter-spacing:1px;margin:0;text-transform:uppercase}
-.mark{display:flex;align-items:flex-end;gap:10px}
+.mark{display:flex;align-items:flex-end;justify-content:center;gap:10px}
 .mark .bars{width:44px;height:38px;flex:none;margin-bottom:0;color:var(--ink)}
-.stamp{flex:none;max-width:52%;font-size:13px;color:var(--mute);text-align:right;line-height:1.3}
+.stamp{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--mute);text-align:left;line-height:1.3}
 .stamp b{color:var(--ink);font-weight:600}
 .iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 10px;font-size:13px;font-weight:600}
 .warn{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--stop) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--stop) 40%,transparent);font-size:13px}
@@ -258,7 +258,7 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
 <header class="wrap top">
  <div class="brand">
   <h1 class="mark"><svg class="bars" viewBox="-4 -4 48 42" aria-hidden="true"><defs><linearGradient id="mkg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB21E"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><filter id="mkf" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter></defs><g filter="url(#mkf)" opacity=".75" fill="#FF8A00"><rect x="11" y="14" width="7" height="20" rx="3.5"/><rect x="22" y="7" width="7" height="27" rx="3.5"/><rect x="33" y="0" width="7" height="34" rx="3.5"/></g><rect x="0" y="22" width="7" height="12" rx="3.5" fill="currentColor" opacity=".22"/><rect x="11" y="14" width="7" height="20" rx="3.5" fill="url(#mkg)"/><rect x="22" y="7" width="7" height="27" rx="3.5" fill="url(#mkg)"/><rect x="33" y="0" width="7" height="34" rx="3.5" fill="url(#mkg)"/></svg>Signal</h1>
-  <div class="stamp"><div id="stamp">Loading lines…</div><button class="iconbtn" id="openSettings" style="margin-top:6px">Settings</button></div>
+  <div class="stamp"><div id="stamp">Loading lines…</div><button class="iconbtn" id="openSettings">Settings</button></div>
  </div>
  <div id="banner"></div>
 </header>
