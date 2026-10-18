@@ -52,7 +52,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* sticky tabs */
 .tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0 10px;padding-top:max(12px,env(safe-area-inset-top,0px))}
-.seg{display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
 .seg button{border:0;background:transparent;border-radius:9px;padding:9px 4px;font-weight:600;font-size:14px;color:var(--mute)}
 .seg button.on{background:var(--raise);color:var(--ink);box-shadow:inset 0 -2px 0 var(--led)}
 .filters{display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none}
@@ -259,6 +259,22 @@ table.books .off{opacity:.45}
 .ms button{border:0;background:var(--panel);padding:0 9px;font-size:13px;font-weight:700;color:var(--mute)}
 .ms button.on{background:var(--led);color:var(--ledink)}
 .filters .gap{flex:none;width:6px}
+/* players */
+.pcard{padding:0;overflow:hidden}
+.phd{width:100%;display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:0;background:transparent;padding:11px 12px;text-align:left;color:var(--ink)}
+.pn b{display:block;font-size:15px}
+.pn small{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.pdots{display:flex;gap:2px}
+.pm{display:inline-block;width:14px;text-align:center;font-weight:800;font-size:12px;color:var(--mute)}
+.pm.ok{color:var(--go)}.pm.no{color:var(--stop)}
+.prec{font:800 20px/1 "Big Shoulders Display",Impact,sans-serif;min-width:34px;text-align:right}
+.plog{border-top:1px solid var(--line);padding:4px 12px 8px;font-size:13px}
+.plog div{display:grid;grid-template-columns:14px 74px 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--line)}
+.plog div:last-child{border-bottom:0}
+.plog .k{color:var(--mute);font-size:12px}
+.seg button{white-space:nowrap}
+@media (max-width:400px){.seg button{font-size:12.5px;padding:9px 2px}.pdots .pm{width:11px}}
+@media (max-width:370px){.seg button{font-size:11.5px;padding:9px 1px}}
 .sm:disabled{opacity:.4}
 
 /* ---------- settings ---------- */
@@ -292,7 +308,7 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
 </header>
 <nav class="tabs"><div class="wrap">
  <div class="seg" role="tablist">
-  <button data-tab="top" role="tab">Top picks</button><button data-tab="games" role="tab">Games</button><button data-tab="pp" role="tab">PrizePicks</button><button data-tab="tix" role="tab">Tickets</button>
+  <button data-tab="top" role="tab">Top picks</button><button data-tab="games" role="tab">Games</button><button data-tab="pp" role="tab">PrizePicks</button><button data-tab="tix" role="tab">Tickets</button><button data-tab="players" role="tab">Players</button>
  </div>
  <div class="filters" id="sportbar"></div>
 </div></nav>
@@ -336,7 +352,8 @@ let sel=LS.get("pb_sel",{});      // gameId -> "a"|"h"
 let pps=LS.get("pb_pps",{});      // propKey -> "o"|"u"
 let tickets=LS.get("pb_tickets",[]);
 const ui={popen:{},tab:LS.get("pb_tab","top"),sport:LS.get("pb_sport","all"),day:"all",gsort:"time",q:"",pq:"",stat:"all",psort:"p",ppOnly:true,open:{},slipOpen:false,kind:"ml",ppMode:null,limit:60,
- ml:{K:3,min:35,by:"value",res:null},pp:{size:"auto",mode:"best",per:1,goal:"ev",res:null}};
+ ml:{K:3,min:35,by:"value",res:null},pp:{size:"auto",mode:"best",per:1,goal:"ev",res:null},
+ plMine:LS.get("pb_plmine",false),plq:"",plsort:"last",plopen:{},plLimit:40};
 let stakeML=LS.get("pb_stake",2),stakePP=LS.get("pb_ppstake",5);
 
 const bname=k=>{const t=DATA&&DATA.books&&DATA.books[k];return ((t&&t!==k?t:null)||BOOKNAME[k]||k).replace(/\.ag$/,"")};
@@ -748,6 +765,46 @@ function autoGrade(){if(!HIST)return;let ch=0;
   t.r=ret>0?"W":"L";t.ret=ret;t.auto=true;t.hits=`${hit} of ${n}`;t.res=R.map(x=>x?{h:x.h,a:x.a}:{});ch++}
  if(ch){LS.set("pb_tickets",tickets);keep()}}
 
+/* ---------- players: every graded pick, grouped by player ---------- */
+// Board picks: every prop the board pulled is graded after the game (history.json), using the side the board leaned before kickoff.
+// My picks: the players on your saved PrizePicks tickets, graded the same way on your side. A leg only grades if the board pulled that stat.
+const dayTxt=d=>d?new Date(d+"T12:00:00Z").toLocaleDateString([],{weekday:"short",month:"numeric",day:"numeric",timeZone:"UTC"}):"";
+function myLegs(){const out=[],seen=new Set();
+ for(const t of tickets){if(t.kind!=="pp"||!Array.isArray(t.legs))continue;
+  legsOf(t).forEach(l=>{if(!l||!l.pl||l.ln==null)return;
+   const c=HIST&&l.mk?pickGame(HIST.props.filter(x=>x.mk===l.mk&&pnm(x.pl)===pnm(l.pl)),t,l):null;
+   const d=c?c.d:l.k?etDay(Date.parse(l.k)):t.day||"";
+   const key=[pnm(l.pl),l.mk,l.ln,l.side,d].join("|");if(seen.has(key))return;seen.add(key);
+   const pr=P.find(r=>pnm(r.pl)===pnm(l.pl));
+   out.push(c?{d:c.d,sp:c.sp,pl:l.pl,mk:l.mk,ln:l.ln,side:l.side,act:c.act,hit:c.act===l.ln?null:(c.act>l.ln)===(l.side==="o")}
+    :{d,sp:pr?pr.sp:null,pl:l.pl,mk:l.mk,ln:l.ln,side:l.side,open:true})})}
+ return out}
+function playerList(){const rows=ui.plMine?myLegs():(HIST?HIST.props:[]);const by={};
+ for(const r of rows){if(r.sp&&!inSport(r.sp))continue;const k=(r.sp||"")+"|"+pnm(r.pl);
+  const p=by[k]=by[k]||{k,pl:r.pl,sp:r.sp,g:[]};p.g.push(r);if(!p.sp&&r.sp)p.sp=r.sp}
+ let L=Object.values(by);
+ for(const p of L){p.g.sort((a,b)=>(b.d||"").localeCompare(a.d||""));p.w=p.g.filter(x=>x.hit===true).length;p.l=p.g.filter(x=>x.hit===false).length;
+  p.pu=p.g.filter(x=>!x.open&&x.hit==null).length;p.op=p.g.filter(x=>x.open).length;p.n=p.w+p.l;p.rate=p.n?p.w/p.n:-1;p.last=p.g[0].d||""}
+ if(ui.plq){const q=pnm(ui.plq);L=L.filter(p=>pnm(p.pl).includes(q))}
+ const by2={rate:(a,b)=>b.rate-a.rate||b.n-a.n,most:(a,b)=>b.n-a.n||b.rate-a.rate,last:(a,b)=>b.last.localeCompare(a.last)||b.n-a.n};
+ return L.sort(by2[ui.plsort]||by2.last)}
+function plMark(x){return x.open?'<span class="pm op" aria-label="Not graded yet">•</span>':x.hit===true?'<span class="pm ok" aria-label="Hit">✓</span>':x.hit===false?'<span class="pm no" aria-label="Miss">✕</span>':'<span class="pm pu" aria-label="Push">–</span>'}
+function renderPlayers(){const L=playerList(),mine=ui.plMine;
+ const w=L.reduce((a,p)=>a+p.w,0),l=L.reduce((a,p)=>a+p.l,0),op=L.reduce((a,p)=>a+p.op,0);
+ let h=`<h2>Players</h2><p class="lede">${mine?"Every player on your saved PrizePicks tickets and whether your pick on him hit.":"Every player prop the board pulled, graded after the game. A hit means the side the board leaned before kickoff came in."} Ties on the line show as a push.</p>
+ <div class="filters"><button class="pill ${mine?"":"on"}" data-plmine="0">Board picks</button><button class="pill ${mine?"on":""}" data-plmine="1">My picks</button></div>
+ <div class="toolbar" style="margin-top:8px"><input class="search" id="plq" type="search" placeholder="Find a player" value="${esc(ui.plq)}">
+  <select class="sel" id="plsort"><option value="last" ${ui.plsort==="last"?"selected":""}>Latest</option><option value="rate" ${ui.plsort==="rate"?"selected":""}>Best hit rate</option><option value="most" ${ui.plsort==="most"?"selected":""}>Most picks</option></select></div>`;
+ if(!L.length){h+=`<div class="card empty">${ui.plq?"No player matches.":mine?"Players from your saved PrizePicks tickets show up here. Save a lineup from the slip or tap Log a ticket on the Tickets tab.":"Players show up here once their games are graded, after the next update."}</div>`;return h}
+ h+=`<div class="record"><div class="stat"><small>Players</small><b>${L.length}</b></div><div class="stat"><small>${mine?"Your picks":"Picks"}</small><b>${w}-${l}</b></div><div class="stat"><small>Hit rate</small><b class="${w+l&&w/(w+l)>=.55?"gold":""}">${w+l?pct(w/(w+l)):"–"}</b></div></div>
+ ${mine&&op?`<p class="fine">${op} pick${op===1?" is":"s are"} still waiting on a result. A pick only grades if the board pulled that player's stat for the game.</p>`:""}
+ <div class="list" style="margin-top:10px">${L.slice(0,ui.plLimit).map(p=>{const open=ui.plopen[p.k],last=p.g.slice(0,10);   /* newest first, same as the game log */
+  return `<div class="card pcard"><button class="phd" data-plopen="${esc(p.k)}" aria-expanded="${!!open}"><span class="pn"><b>${esc(p.pl)}</b><small>${esc([p.sp==="CFB"?"College":p.sp,[p.n?p.n+" graded":"",p.pu?p.pu+" push":"",p.op?p.op+" waiting":""].filter(Boolean).join(", ")].filter(Boolean).join(" · "))}</small></span>
+   <span class="pdots" aria-hidden="true">${last.map(plMark).join("")}</span><span class="prec ${p.n&&p.rate>=.55?"gold":p.n&&p.rate<.45?"red":""}">${p.n?`${p.w}-${p.l}`:"–"}</span></button>
+   ${open?`<div class="plog">${p.g.map(x=>`<div>${plMark(x)}<span>${esc(dayTxt(x.d))}</span><span>${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk||"")}</span><span class="k">${x.open?"not graded":`had ${x.act}`}</span></div>`).join("")}</div>`:""}</div>`}).join("")}</div>
+ ${L.length>ui.plLimit?`<button class="btn wide" style="margin-top:10px" data-plmore>Show more (${L.length-ui.plLimit} left)</button>`:""}`;
+ return h}
+
 /* ---------- ties: a pick that lands right on the line pays less than the full amount ---------- */
 // Open PrizePicks tickets only. est is the usual payout once every other pick has hit on a Power:
 // it drops to the next smaller Power, a 2-pick with one tie pays 1.5x, and all ties is a refund. Your state may differ, so it's only a starting guess.
@@ -920,7 +977,7 @@ function renderSettings(){
 /* ---------- main render ---------- */
 function render(){
  renderSportBar();
- const v=$("#view");v.innerHTML=ui.tab==="games"?renderGames():ui.tab==="pp"?renderPP():ui.tab==="tix"?renderTix():renderTop();
+ const v=$("#view");v.innerHTML=ui.tab==="games"?renderGames():ui.tab==="pp"?renderPP():ui.tab==="tix"?renderTix():ui.tab==="players"?renderPlayers():renderTop();
  renderSlip();
  document.body.style.paddingBottom=$("#slipin").innerHTML?"":"40px";
 }
@@ -978,6 +1035,9 @@ document.addEventListener("click",e=>{
  if(d.tl!==undefined){const tk=tickets[+d.tl];tk.r="L";tk.ret=0;delete tk.auto;LS.set("pb_tickets",tickets);keep();return}
  if(d.td!==undefined){tickets.splice(+d.td,1);LS.set("pb_tickets",tickets);keep();return}
  if(d.logtix!==undefined){openLog();return}
+ if(d.plmine!==undefined){ui.plMine=d.plmine==="1";LS.set("pb_plmine",ui.plMine);ui.plLimit=40;keep();return}
+ if(d.plopen!==undefined){ui.plopen[d.plopen]=!ui.plopen[d.plopen];keep();return}
+ if(d.plmore!==undefined){ui.plLimit+=40;keep();return}
  if(lt&&t.closest("#logtix")){
   if(d.ltkind){if(d.ltkind!==lt.kind)ltRedo(()=>{lt.kind=d.ltkind;lt.legs=(d.ltkind==="pp"?[1,2,3]:[1,2]).map(()=>ltLeg(d.ltkind))});return}
   if(d.ltmode){ltRedo(()=>{lt.mode=d.ltmode});return}
@@ -1001,6 +1061,7 @@ document.addEventListener("input",e=>{const t=e.target;
  if(lt&&t.dataset&&t.dataset.lf!==undefined){ltInput(t);return}
  if(t.id==="payamt"){payNet();return}
  if(t.id==="gq"){ui.q=t.value;const pos=t.selectionStart;keep();const n=$("#gq");n.focus();n.setSelectionRange(pos,pos);return}
+ if(t.id==="plq"){ui.plq=t.value;ui.plLimit=40;const pos=t.selectionStart;keep();const n=$("#plq");n.focus();n.setSelectionRange(pos,pos);return}
  if(t.id==="pq"){ui.pq=t.value;ui.limit=60;const pos=t.selectionStart;keep();const n=$("#pq");n.focus();n.setSelectionRange(pos,pos);return}
  if(t.id==="stakeML"){stakeML=t.value;LS.set("pb_stake",stakeML);updateSlipNums();return}
  if(t.id==="stakePP"){stakePP=t.value;LS.set("pb_ppstake",stakePP);updateSlipNums();return}
@@ -1008,6 +1069,7 @@ document.addEventListener("input",e=>{const t=e.target;
 document.addEventListener("change",e=>{const t=e.target,d=t.dataset;
  if(t.id==="gsort"){ui.gsort=t.value;keep();return}
  if(t.id==="psort"){ui.psort=t.value;keep();return}
+ if(t.id==="plsort"){ui.plsort=t.value;keep();return}
  if(d.payp){const v=parseFloat(t.value);if(v>0){PAY.power[d.payp]=v;LS.set("pb_pay",PAY);BE=breakevens();ui.pp.res=null;render()}return}
  if(d.payf){const[n,i]=d.payf.split("|"),v=parseFloat(t.value);if(v>=0){PAY.flex[n][+i]=v;LS.set("pb_pay",PAY);BE=breakevens();ui.pp.res=null;render()}return}
 });
@@ -1036,7 +1098,7 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
   if(have){for(const k in t)if(!(k in have)){have[k]=t[k];n++}continue}
   if(seen.has(t.id))continue;seen.add(t.id);tickets.unshift(t);n++}
  LS.set("pb_imported",[...seen]);if(n){LS.set("pb_tickets",tickets);keep()}}).catch(()=>{}).finally(()=>
- fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();if(ui.tab==="tix")keep()}}).catch(()=>{}));
+ fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();if(ui.tab==="tix"||ui.tab==="players")keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
 </body>
