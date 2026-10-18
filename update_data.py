@@ -556,6 +556,106 @@ def build_props(s, events):
     return rows, budget, new_ledger
 
 
+# ---------- team stats (offense and defense, ranked across the league) ----------
+# key: (category, ESPN stat name, own/opp, higher_is_better)
+TEAM_STATS = {
+    "ppg":    ("scoring", "totalPointsPerGame", "own", True),
+    "ppg_a":  ("scoring", "totalPointsPerGame", "opp", False),
+    "ypg":    ("passing", "yardsPerGame", "own", True),
+    "ypg_a":  ("passing", "yardsPerGame", "opp", False),
+    "pass":   ("passing", "netPassingYardsPerGame", "own", True),
+    "pass_a": ("passing", "netPassingYardsPerGame", "opp", False),
+    "ypa":    ("passing", "yardsPerPassAttempt", "own", True),
+    "ypa_a":  ("passing", "yardsPerPassAttempt", "opp", False),
+    "rush":   ("rushing", "rushingYardsPerGame", "own", True),
+    "rush_a": ("rushing", "rushingYardsPerGame", "opp", False),
+    "ypc":    ("rushing", "yardsPerRushAttempt", "own", True),
+    "ypc_a":  ("rushing", "yardsPerRushAttempt", "opp", False),
+    "third":  ("miscellaneous", "thirdDownConvPct", "own", True),
+    "third_a": ("miscellaneous", "thirdDownConvPct", "opp", False),
+    "rz":     ("miscellaneous", "redzoneScoringPct", "own", True),
+    "rz_a":   ("miscellaneous", "redzoneScoringPct", "opp", False),
+}
+# Per-game rates built from season totals: key: (category, stat, own/opp, higher_is_better)
+TEAM_TOTALS = {
+    "sacks":  ("defensive", "sacks", "own", True),          # pass rush
+    "sacked": ("passing", "sacks", "own", False),           # protection
+    "take":   ("miscellaneous", "totalTakeaways", "own", True),
+    "give":   ("miscellaneous", "totalGiveaways", "own", False),
+    "patt":   ("passing", "passingAttempts", "own", None),
+    "ratt":   ("rushing", "rushingAttempts", "own", None),
+}
+
+def team_list(sport):
+    url = f"https://site.api.espn.com/apis/site/v2/sports/{ESPN_PATH[sport]}/teams"
+    params = {"limit": 400}
+    if sport == "CFB": params["groups"] = 80
+    try:
+        j = requests.get(url, params=params, timeout=30).json()
+        return [t["team"]["id"] for t in j["sports"][0]["leagues"][0]["teams"]]
+    except Exception as e:
+        print("team list failed:", sport, e)
+        return []
+
+def team_season(sport, tid):
+    try:
+        j = requests.get(f"https://site.api.espn.com/apis/site/v2/sports/{ESPN_PATH[sport]}/teams/{tid}/statistics",
+                         timeout=20).json().get("results", {})
+    except Exception as e:
+        print("team stats failed:", sport, tid, e)
+        return None
+    def side(cats):
+        out = {}
+        for c in cats or []:
+            for st in c.get("stats", []):
+                try: out[(c.get("name"), st.get("name"))] = float(st.get("value"))
+                except (TypeError, ValueError): pass
+        return out
+    own = side((j.get("stats") or {}).get("categories"))
+    opp = side(j.get("opponent") if isinstance(j.get("opponent"), list) else (j.get("opponent") or {}).get("categories"))
+    if not own:
+        return None
+    gp = own.get(("general", "gamesPlayed")) or own.get(("passing", "teamGamesPlayed")) or 0
+    if not gp:
+        return None
+    v = {"gp": gp}
+    for k, (cat, name, who, _) in TEAM_STATS.items():
+        x = (own if who == "own" else opp).get((cat, name))
+        if x is not None: v[k] = round(x, 2)
+    for k, (cat, name, who, _) in TEAM_TOTALS.items():
+        x = (own if who == "own" else opp).get((cat, name))
+        if x is not None: v[k] = round(x / gp, 2)
+    if v.get("patt") and v.get("ratt"):
+        v["prate"] = round(v["patt"] / (v["patt"] + v["ratt"]), 3)    # play-calling style
+    return v
+
+def build_team_stats(games):
+    """Season stats for every team in the league, ranked; returns only the teams playing on the board."""
+    need = {(g["sp"], g[s].get("tid")) for g in games for s in ("a", "h") if g[s].get("tid")}
+    out = {}
+    for sp in sorted({sp for sp, _ in need}):
+        ids = team_list(sp) or [tid for s2, tid in need if s2 == sp]
+        ids = list(dict.fromkeys(ids + [tid for s2, tid in need if s2 == sp]))
+        league = {}
+        for tid in ids:
+            v = team_season(sp, tid)
+            if v: league[tid] = v
+        keys = {**{k: d[3] for k, d in TEAM_STATS.items()}, **{k: d[3] for k, d in TEAM_TOTALS.items() if d[3] is not None}}
+        avg = {}
+        for k, hib in keys.items():
+            vals = sorted(((t, v[k]) for t, v in league.items() if k in v), key=lambda x: x[1], reverse=hib)
+            if not vals: continue
+            avg[k] = round(sum(x for _, x in vals) / len(vals), 2)
+            for i, (t, _) in enumerate(vals):
+                league[t].setdefault("rk", {})[k] = i + 1
+        for tid, v in league.items():
+            if (sp, tid) in need:
+                out[f"{sp}:{tid}"] = v
+        out[f"{sp}:_league"] = {"n": len(league), "avg": avg}
+        print(f"team stats {sp}: {len(league)} teams ranked")
+    return out
+
+
 # ---------- recent form (ESPN game logs) ----------
 FORM_STAT = {"player_reception_yds": ["receivingYards"], "player_receptions": ["receptions"],
              "player_rush_yds": ["rushingYards"], "player_pass_yds": ["passingYards"],
@@ -617,7 +717,7 @@ def attach_form(rows, games_by_id):
     """Adds rf = {v: last 5 values (newest first), n: games used (max 10), o: games over the line, avg}."""
     done = 0
     for r in rows:
-        if "rf" in r or r["mk"] not in FORM_STAT:
+        if ("rf" in r and "sd" in r) or r["mk"] not in FORM_STAT:
             continue
         g = games_by_id.get(r["g"])
         if not g:
@@ -626,8 +726,10 @@ def attach_form(rows, games_by_id):
         aid = None
         for side in ("a", "h"):
             aid = roster(g["sp"], g[side].get("tid")).get(key)
-            if aid: break
-        if not aid:
+            if aid:
+                r["sd"] = side          # the player's team in this game (a = away, h = home)
+                break
+        if not aid or "rf" in r:
             continue
         stats = FORM_STAT[r["mk"]]
         vals = [sum(x.get(k, 0.0) for k in stats) for x in game_log(g["sp"], aid) if any(k in x for k in stats)][:10]
@@ -652,10 +754,11 @@ def main():
         props, budget, ledger = [], 0, load_json("data.json", {}).get("ledger", {})
         if ledger.get("week") == str(week_start(NOW)):
             ledger["spent"] = round(float(ledger.get("spent", 0)) + CRED["spent"], 1)
+    teams = build_team_stats(games) if games else {}
     out = {"updated": iso(NOW), "games": games, "props": props,
            "markets": {k: MARKET_LABEL[k] for k in s["prop_markets"] if k in MARKET_LABEL},
            "books": BOOK_TITLES,
-           "credits": {"remaining": CRED["remaining"], "used": CRED["used"], "spent": CRED["spent"], "prop_budget": budget}, "ledger": ledger}
+           "credits": {"remaining": CRED["remaining"], "used": CRED["used"], "spent": CRED["spent"], "prop_budget": budget}, "ledger": ledger, "teams": teams}
     if not games:
         print("no games found; keeping previous data.json")
         return
