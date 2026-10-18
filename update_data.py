@@ -7,7 +7,7 @@ What it pulls each run:
   * PrizePicks lines + sportsbook player props for upcoming games, paced so the
     monthly Odds API quota lasts (see settings.json)
 """
-import os, json, math, time, difflib, unicodedata, datetime as dt
+import os, re, json, math, time, difflib, unicodedata, datetime as dt
 from statistics import NormalDist, median
 from zoneinfo import ZoneInfo
 import requests
@@ -148,6 +148,26 @@ def espn_team(c):
             "rank": rk if rk and rk <= 25 else None, "rec": rec,
             "color": "#" + t["color"] if t.get("color") else None, "id": t.get("id")}
 
+def num(x):
+    """'o41.5' / '+3' / '-3' / 41.5 -> float, else None."""
+    if x is None: return None
+    if isinstance(x, (int, float)): return float(x)
+    m = re.search(r"[-+]?\d+(\.\d+)?", str(x))
+    return float(m.group()) if m else None
+
+def espn_odds(comp):
+    """Spread (home team's line, negative = home favored) and total, now and at open."""
+    try:
+        o = (comp.get("odds") or [None])[0]
+        if not o: return None
+        out = {"spr": num(o.get("spread")), "tot": num(o.get("overUnder"))}
+        ps, tt = o.get("pointSpread") or {}, o.get("total") or {}
+        out["spr_o"] = num((((ps.get("home") or {}).get("open")) or {}).get("line"))
+        out["tot_o"] = num((((tt.get("over") or {}).get("open")) or {}).get("line"))
+        return out if out["tot"] or out["spr"] is not None else None
+    except Exception:
+        return None
+
 def espn_games(sport, days):
     out = []
     today = NOW.astimezone(ET).date()
@@ -169,6 +189,7 @@ def espn_games(sport, days):
                 v = comp.get("venue") or {}
                 addr = v.get("address") or {}
                 out.append({"kick": parse_t(ev["date"]), "home": cs["home"], "away": cs["away"],
+                            "id": ev.get("id"), "odds": espn_odds(comp),
                             "neutral": bool(comp.get("neutralSite")),
                             "venue": {"name": v.get("fullName"), "city": addr.get("city"), "state": addr.get("state"),
                                       "country": addr.get("country"), "indoor": bool(v.get("indoor"))}})
@@ -268,6 +289,7 @@ def fetch_forecasts(locs):
                 time.sleep(5 * (attempt + 1))
     return out
 
+WXNUM = {}
 def weather_for(lat, lon, roof, kick, fc):
     if roof == "closed":
         return 0, "Dome or covered stadium"
@@ -277,6 +299,7 @@ def weather_for(lat, lon, roof, kick, fc):
     try:
         i = h["time"].index(kick.replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%dT%H:00"))
         t, w, g, p = h["temperature_2m"][i], h["wind_speed_10m"][i], h["wind_gusts_10m"][i], h["precipitation_probability"][i] or 0
+        WXNUM[id(fc)] = {"t": round(t), "w": round(w), "gu": round(g), "p": p}
         return level(t, w, g, p), f"{t:.0f}°F, wind {w:.0f} mph (gusts {g:.0f}), {p}% chance of rain"
     except Exception as e:
         print("weather lookup failed:", e)
@@ -352,16 +375,34 @@ def build_games(s, overrides, inj):
             else:
                 inj_txt = "College teams don't publish a full injury feed. Check team news before kickoff."
 
+            if em and em.get("odds") and ea and eh:
+                od = em["odds"]
+                spr_home = od.get("spr")
+                if spr_home is not None and sw: spr_home = -spr_home      # ESPN's home is the feed's away
+                if od.get("tot") and spr_home is not None:
+                    H["imp"] = round((od["tot"] - spr_home) / 2, 1)
+                    A["imp"] = round((od["tot"] + spr_home) / 2, 1)
+                gl = {"tot": od.get("tot"), "spr": spr_home, "tot_o": od.get("tot_o"),
+                      "spr_o": (-od["spr_o"] if sw and od.get("spr_o") is not None else od.get("spr_o"))}
+            else:
+                gl = None
             g = {"id": e["id"], "sp": sp, "kick": iso(kick), "a": A, "h": H, "px": px, "fair": round(fair, 4),
                  "inj": inj_txt, "_wx": (lat, lon, roof, kick)}
             if em and em["neutral"]: g["neu"] = True
+            if gl: g["gl"] = {k: v for k, v in gl.items() if v is not None}
+            if em and em.get("id"): g["eid"] = em["id"]
             if vname: g["v"] = vname
             games.append(g)
             events.append((g, key, em))
     fc = fetch_forecasts([(round(g["_wx"][0], 3), round(g["_wx"][1], 3)) for g in games
                           if g["_wx"][0] is not None and g["_wx"][2] != "closed"])
+    prev_games = {x["id"]: x for x in load_json("data.json", {}).get("games", [])}
     for g in games:
+        WXNUM.pop(id(fc), None)
         g["w"], g["wn"] = weather_for(*g.pop("_wx"), fc)
+        if id(fc) in WXNUM: g["wx"] = WXNUM.pop(id(fc))
+        pg = prev_games.get(g["id"])
+        g["of"] = (pg.get("of", pg.get("fair")) if pg else None) or g["fair"]     # fair chance when first seen
     return games, events
 
 
@@ -549,6 +590,15 @@ def build_props(s, events):
         rows += new or [r for r in old if old_t and (NOW - old_t) < dt.timedelta(hours=40)]
         fetched += 1
     rows = [r for r in rows if r.get("g") in live]
+    prev_rows = {(r.get("g"), r.get("mk"), r.get("pl")): r for r in prev.get("props", [])}
+    for r in rows:
+        r["bm"] = median(b[1] for b in r["bl"]) if r.get("bl") else None
+        pr = prev_rows.get((r["g"], r["mk"], r["pl"]))
+        if pr and pr is not r:
+            r["op"] = pr.get("op", pr.get("ln"))
+            r["obm"] = pr.get("obm", pr.get("bm"))
+        else:
+            r.setdefault("op", r["ln"]); r.setdefault("obm", r["bm"])
     print(f"props: fetched {fetched} games this run, {len(rows)} prop lines total, "
           f"{sum(1 for r in rows if r['pp'])} with PrizePicks lines")
     new_ledger = {"week": str(week_start(NOW)), "spent": round(spent_week + CRED["spent"] - start_spent, 1),
@@ -707,7 +757,10 @@ def game_log(sport, aid):
                     for n, v in zip(names, ev.get("stats", [])):
                         try: vals[n] = float(str(v).replace(",", ""))
                         except ValueError: pass
-                    vals["_t"] = (evmeta.get(ev.get("eventId"), {}) or {}).get("gameDate", "")
+                    meta = evmeta.get(ev.get("eventId"), {}) or {}
+                    vals["_t"] = meta.get("gameDate", "")
+                    vals["_ha"] = "a" if meta.get("atVs") == "@" else "h"
+                    vals["_e"] = ev.get("eventId")
                     games.append(vals)
         games.sort(key=lambda x: x["_t"], reverse=True)
     except Exception as e:
@@ -715,11 +768,18 @@ def game_log(sport, aid):
     LOGS[(sport, aid)] = games
     return games
 
-def attach_form(rows, games_by_id):
+USAGE = {"player_reception_yds": ("receivingTargets", "Targets"), "player_receptions": ("receivingTargets", "Targets"),
+         "player_rush_yds": ("rushingAttempts", "Carries"), "player_rush_attempts": ("rushingAttempts", "Carries"),
+         "player_pass_yds": ("passingAttempts", "Pass attempts"), "player_pass_completions": ("passingAttempts", "Pass attempts"),
+         "player_pass_attempts": ("passingAttempts", "Pass attempts"), "player_pass_tds": ("passingAttempts", "Pass attempts"),
+         "player_rush_reception_yds": ("rushingAttempts", "Carries")}
+SKILL_POS = {"QB", "RB", "WR", "TE", "FB"}
+
+def attach_form(rows, games_by_id, inj=None):
     """Adds rf = {v: last 5 values (newest first), n: games used (max 10), o: games over the line, avg}."""
     done = 0
     for r in rows:
-        if ("rf" in r and "sd" in r) or r["mk"] not in FORM_STAT:
+        if ("rf" in r and "sd" in r and "aid" in r) or r["mk"] not in FORM_STAT:
             continue
         g = games_by_id.get(r["g"])
         if not g:
@@ -731,17 +791,215 @@ def attach_form(rows, games_by_id):
             if aid:
                 r["sd"] = side          # the player's team in this game (a = away, h = home)
                 break
-        if not aid or "rf" in r:
+        if not aid:
+            continue
+        r["aid"] = aid
+        # injury report (NFL): the player's own status and teammates who are out
+        if inj is not None and g["sp"] == "NFL":
+            team = g[r["sd"]].get("full", "")
+            me = pname(r["pl"])
+            for n, pos, st in inj.get(team, []):
+                if pname(n) == me and st:
+                    r["ij"] = st
+            outs = [f"{n} ({pos}, {st})" for n, pos, st in inj.get(team, [])
+                    if pname(n) != me and pos in SKILL_POS and st in ("Out", "Doubtful")]
+            if outs: r["tmo"] = outs[:4]
+        if "rf" in r:
             continue
         stats = FORM_STAT[r["mk"]]
-        vals = [sum(x.get(k, 0.0) for k in stats) for x in game_log(g["sp"], aid) if any(k in x for k in stats)][:10]
+        log = [x for x in game_log(g["sp"], aid) if any(k in x for k in stats)][:10]
+        vals = [sum(x.get(k, 0.0) for k in stats) for x in log]
         if len(vals) < 2:
             continue
-        r["rf"] = {"v": [round(v, 1) for v in vals[:5]], "n": len(vals),
-                   "o": sum(1 for v in vals if v > r["ln"]), "u": sum(1 for v in vals if v < r["ln"]),
-                   "avg": round(sum(vals[:5]) / len(vals[:5]), 1)}
+        rf = {"v": [round(v, 1) for v in vals[:5]], "n": len(vals),
+              "o": sum(1 for v in vals if v > r["ln"]), "u": sum(1 for v in vals if v < r["ln"]),
+              "avg": round(sum(vals[:5]) / len(vals[:5]), 1), "med": round(median(vals), 1)}
+        hv = [v for v, x in zip(vals, log) if x.get("_ha") == "h"]
+        av = [v for v, x in zip(vals, log) if x.get("_ha") == "a"]
+        if hv and av:
+            rf["ha"] = [round(sum(hv) / len(hv), 1), len(hv), round(sum(av) / len(av), 1), len(av)]
+        uk = USAGE.get(r["mk"])
+        if uk and any(uk[0] in x for x in log[:5]):
+            rf["us"] = [round(x.get(uk[0], 0)) for x in log[:5]]
+            rf["ul"] = uk[1]
+        r["rf"] = rf
         done += 1
     print(f"recent form added to {done} props ({len(LOGS)} game logs, {len(ROSTERS)} rosters)")
+
+
+# ---------- board chance (same math as the page at default settings) ----------
+K_FORM, W_MATCH = 10, 0.5
+MATCH_STAT_PY = {"player_rush_yds": ["rush_a", "ypc_a"], "player_rush_attempts": ["rush_a"],
+                 "player_reception_yds": ["pass_a", "ypa_a"], "player_receptions": ["pass_a"],
+                 "player_pass_yds": ["pass_a", "ypa_a"], "player_pass_tds": ["ppg_a", "pass_a"],
+                 "player_pass_completions": ["pass_a"], "player_pass_attempts": ["pass_a"],
+                 "player_pass_interceptions": ["take"], "player_rush_reception_yds": ["rush_a", "pass_a"],
+                 "player_pass_rush_yds": ["pass_a", "rush_a"]}
+
+def sigma_for(mk, L):
+    if mk in SIGMA: return SIGMA[mk](max(L, 1))
+    if mk in COUNT_MARKETS: return math.sqrt(max(L, .5)) + .6
+    return 8 + .4 * L
+
+def match_factor(r, teams, gbi):
+    g = gbi.get(r["g"])
+    if not g or not r.get("sd"): return None
+    opp = g["h"] if r["sd"] == "a" else g["a"]
+    S, L = teams.get(f"{g['sp']}:{opp.get('tid')}"), teams.get(f"{g['sp']}:_league")
+    ks = [k for k in MATCH_STAT_PY.get(r["mk"], []) if S and L and S.get(k) is not None and L["avg"].get(k)]
+    if not ks: return None
+    m = sum(S[k] / L["avg"][k] for k in ks) / len(ks)
+    gp = S.get("gp") or 1
+    return 1 + (m - 1) * gp / (gp + 3)
+
+def board_prob(r, teams, gbi):
+    p, rf = r["po"], r.get("rf")
+    n = (rf["o"] + rf["u"]) if rf else 0
+    if n:
+        p = (K_FORM * p + n * (rf["o"] + .5) / (n + 1)) / (K_FORM + n)
+    m = match_factor(r, teams, gbi)
+    if m:
+        z = r["ln"] * (m - 1) * W_MATCH / sigma_for(r["mk"], r["ln"])
+        p = ND.cdf(ND.inv_cdf(min(max(p, 1e-6), 1 - 1e-6)) + z)
+    return p
+
+def is_mixed(r, teams, gbi):
+    mkt, rf = r["po"] >= .5, r.get("rf")
+    n = (rf["o"] + rf["u"]) if rf else 0
+    h = rf["o"] / n if n else .5
+    form_opp = n >= 4 and (h >= .5) != mkt and abs(h - .5) >= .0999
+    form_agree = n >= 4 and (h >= .5) == mkt and abs(h - .5) >= .0999
+    m = match_factor(r, teams, gbi)
+    m_opp = m is not None and abs(m - 1) >= .12 and ((m > 1) != mkt)
+    return bool(form_opp or (m_opp and not form_agree))
+
+
+# ---------- track record: snapshot picks before kickoff, grade them after ----------
+FOUND = {}
+def find_athlete(sport, name):
+    """ESPN athlete id by name search (used when a pick was saved without one)."""
+    key = (sport, pname(name))
+    if key in FOUND: return FOUND[key]
+    aid = None
+    try:
+        j = requests.get("https://site.web.api.espn.com/apis/common/v3/search",
+                         params={"query": name, "limit": 10, "type": "player"}, timeout=20).json()
+        league = "nfl" if sport == "NFL" else "college-football"
+        for it in j.get("items", []):
+            if it.get("league") == league and pname(it.get("displayName", "")) == pname(name):
+                aid = it.get("id"); break
+    except Exception as e:
+        print("athlete search failed:", name, e)
+    FOUND[key] = aid
+    return aid
+
+SCORES = {}
+def final_scores(sport, day):
+    """{espn event id: (away score, home score)} for finished games on an ET date."""
+    if (sport, day) in SCORES: return SCORES[(sport, day)]
+    out = {}
+    params = {"dates": day, "limit": 500}
+    if sport == "CFB": params["groups"] = 80
+    try:
+        j = requests.get(f"https://site.api.espn.com/apis/site/v2/sports/{ESPN_PATH[sport]}/scoreboard", params=params, timeout=30).json()
+        for ev in j.get("events", []):
+            comp = ev["competitions"][0]
+            if not ((comp.get("status") or ev.get("status") or {}).get("type") or {}).get("completed"):
+                continue
+            sc = {c["homeAway"]: num(c.get("score")) for c in comp["competitors"]}
+            out[ev["id"]] = (sc.get("away"), sc.get("home"))
+    except Exception as e:
+        print("scores failed:", sport, day, e)
+    SCORES[(sport, day)] = out
+    return out
+
+def tier_of(p):
+    return "strong" if p >= .591 else "playable" if p >= .542 else "thin"
+
+def update_history(games, props, teams):
+    h = load_json("history.json", {})
+    h.setdefault("pending", {}); h.setdefault("props", []); h.setdefault("ml", [])
+    gbi = {g["id"]: g for g in games}
+    for r in props:
+        g = gbi.get(r["g"])
+        if not g or not r.get("aid") or parse_t(g["kick"]) <= NOW:
+            continue
+        pf = board_prob(r, teams, gbi)
+        h["pending"][f"p|{r['g']}|{r['mk']}|{r['pl']}"] = {
+            "t": "p", "sp": g["sp"], "kick": g["kick"], "pl": r["pl"], "mk": r["mk"], "ln": r["ln"], "pp": r["pp"],
+            "nb": r["nb"], "po": r["po"], "side": "o" if pf >= .5 else "u", "p": round(max(pf, 1 - pf), 4),
+            "mx": is_mixed(r, teams, gbi), "aid": r["aid"]}
+    for g in games:
+        if g.get("eid") and parse_t(g["kick"]) > NOW:
+            h["pending"][f"m|{g['id']}"] = {"t": "m", "sp": g["sp"], "kick": g["kick"], "eid": g["eid"],
+                                           "a": g["a"]["n"], "h": g["h"]["n"], "side": "a" if g["fair"] >= .5 else "h",
+                                           "p": round(max(g["fair"], 1 - g["fair"]), 4)}
+    graded = 0
+    for k, x in list(h["pending"].items()):
+        kick = parse_t(x["kick"])
+        if NOW - kick < dt.timedelta(hours=4):
+            continue
+        if NOW - kick > dt.timedelta(days=5):          # never got a result (didn't play, game moved)
+            del h["pending"][k]; continue
+        if x["t"] == "p":
+            stats = FORM_STAT.get(x["mk"], [])
+            if not x.get("aid"):
+                x["aid"] = find_athlete(x["sp"], x["pl"])
+                if not x["aid"]:
+                    continue
+            LOGS.pop((x["sp"], x["aid"]), None)          # always read a fresh log for grading
+            game = next((e for e in game_log(x["sp"], x["aid"])
+                         if e.get("_t") and abs((parse_t(e["_t"]) - kick).total_seconds()) < 18 * 3600), None)
+            if not game:
+                continue
+            act = sum(game.get(st, 0.0) for st in stats)
+            res = None if act == x["ln"] else ((act > x["ln"]) == (x["side"] == "o"))
+            h["props"].append({"d": x["kick"][:10], "sp": x["sp"], "pl": x["pl"], "mk": x["mk"], "ln": x["ln"],
+                               "pp": x["pp"], "nb": x["nb"], "po": x["po"], "side": x["side"], "p": x["p"],
+                               "mx": x["mx"], "act": act, "hit": res})
+        else:
+            day = kick.astimezone(ET).strftime("%Y%m%d")
+            sc = final_scores(x["sp"], day).get(x["eid"])
+            if not sc or sc[0] is None or sc[1] is None:
+                continue
+            if sc[0] == sc[1]:
+                res = None
+            else:
+                res = ("a" if sc[0] > sc[1] else "h") == x["side"]
+            h["ml"].append({"d": x["kick"][:10], "sp": x["sp"], "a": x["a"], "h": x["h"], "side": x["side"],
+                            "p": x["p"], "hit": res})
+        del h["pending"][k]
+        graded += 1
+    h["props"], h["ml"] = h["props"][-4000:], h["ml"][-2000:]
+    with open(os.path.join(HERE, "history.json"), "w") as f:
+        json.dump(h, f, separators=(",", ":"))
+    print(f"track record: graded {graded} picks; {len(h['pending'])} waiting; {len(h['props'])} props and {len(h['ml'])} games on record")
+    return summarize(h)
+
+def summarize(h):
+    def agg(rows):
+        rows = [r for r in rows if r.get("hit") in (True, False)]
+        n = len(rows)
+        return {"n": n, "w": sum(1 for r in rows if r["hit"]), "ep": round(sum(r["p"] for r in rows) / n, 4) if n else None}
+    wk = str((NOW - dt.timedelta(days=7)).date())
+    P, M = h["props"], h["ml"]
+    out = {"props": {
+        "all": agg(P), "week": agg([r for r in P if r["d"] >= wk]),
+        "strong": agg([r for r in P if tier_of(r["p"]) == "strong"]),
+        "playable": agg([r for r in P if tier_of(r["p"]) == "playable"]),
+        "thin": agg([r for r in P if tier_of(r["p"]) == "thin"]),
+        "clean": agg([r for r in P if not r["mx"]]), "mixed": agg([r for r in P if r["mx"]]),
+        "scanner": agg([r for r in P if r["p"] >= .542 and not r["mx"] and r["nb"] >= 2]),
+        "pp": agg([r for r in P if r["pp"]]), "more": agg([r for r in P if r["side"] == "o"]),
+        "less": agg([r for r in P if r["side"] == "u"]),
+        "nfl": agg([r for r in P if r["sp"] == "NFL"]), "cfb": agg([r for r in P if r["sp"] == "CFB"]),
+        "stat": {mk: agg([r for r in P if r["mk"] == mk]) for mk in sorted({r["mk"] for r in P})}},
+        "ml": {"all": agg(M), "week": agg([r for r in M if r["d"] >= wk]),
+               "b50": agg([r for r in M if r["p"] < .6]), "b60": agg([r for r in M if .6 <= r["p"] < .7]),
+               "b70": agg([r for r in M if .7 <= r["p"] < .8]), "b80": agg([r for r in M if r["p"] >= .8])},
+        "since": min([r["d"] for r in P + M] or [None]) if (P or M) else None,
+        "recent": [{k: r[k] for k in ("d", "pl", "mk", "ln", "side", "p", "act", "hit", "mx")} for r in P[-30:]][::-1]}
+    return out
 
 
 def main():
@@ -751,16 +1009,21 @@ def main():
     games, events = build_games(s, overrides, inj)
     if events:
         props, budget, ledger = build_props(s, events)
-        attach_form(props, {g["id"]: g for g in games})
+        attach_form(props, {g["id"]: g for g in games}, inj)
     else:
         props, budget, ledger = [], 0, load_json("data.json", {}).get("ledger", {})
         if ledger.get("week") == str(week_start(NOW)):
             ledger["spent"] = round(float(ledger.get("spent", 0)) + CRED["spent"], 1)
     teams = build_team_stats(games) if games else {}
+    try:
+        record = update_history(games, props, teams) if games else None
+    except Exception as e:
+        print("track record failed:", e)
+        record = None
     out = {"updated": iso(NOW), "games": games, "props": props,
            "markets": {k: MARKET_LABEL[k] for k in s["prop_markets"] if k in MARKET_LABEL},
            "books": BOOK_TITLES,
-           "credits": {"remaining": CRED["remaining"], "used": CRED["used"], "spent": CRED["spent"], "prop_budget": budget}, "ledger": ledger, "teams": teams}
+           "credits": {"remaining": CRED["remaining"], "used": CRED["used"], "spent": CRED["spent"], "prop_budget": budget}, "ledger": ledger, "teams": teams, "record": record}
     if not games:
         print("no games found; keeping previous data.json")
         return

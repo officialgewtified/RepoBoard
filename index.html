@@ -118,6 +118,12 @@ select.sel{border:1px solid var(--line);background:var(--panel);border-radius:10
 .mchip.soft{background:color-mix(in srgb,var(--go) 16%,transparent);color:var(--go)}
 .mchip.tough{background:color-mix(in srgb,var(--stop) 16%,transparent);color:var(--stop)}
 .mchip.even{background:var(--raise);color:var(--mute)}
+.mchip.warn{background:color-mix(in srgb,var(--led) 16%,transparent);color:var(--led)}
+.recrow{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline}
+.recrow b{font:800 18px/1 "Big Shoulders Display",Impact,sans-serif}
+.recrow .k{font-size:12px;color:var(--mute)}
+.reclist{font-size:12.5px;color:var(--mute)}
+.reclist div{padding:4px 0;border-bottom:1px dashed var(--line)}
 .key{margin-top:8px;font-size:12.5px;color:var(--mute)}
 .key b{color:var(--led);font-weight:700;margin-left:4px}
 .mt{margin:10px 0 2px!important}
@@ -298,7 +304,7 @@ let sel=LS.get("pb_sel",{});      // gameId -> "a"|"h"
 let pps=LS.get("pb_pps",{});      // propKey -> "o"|"u"
 let tickets=LS.get("pb_tickets",[]);
 const ui={popen:{},tab:LS.get("pb_tab","top"),sport:LS.get("pb_sport","all"),day:"all",gsort:"time",q:"",pq:"",stat:"all",psort:"p",ppOnly:true,open:{},slipOpen:false,kind:"ml",ppMode:null,limit:60,
- ml:{K:3,min:35,by:"value",res:null},pp:{size:"auto",mode:"best",per:1,res:null}};
+ ml:{K:3,min:35,by:"value",res:null},pp:{size:"auto",mode:"best",per:1,goal:"ev",res:null}};
 let stakeML=LS.get("pb_stake",2),stakePP=LS.get("pb_ppstake",5);
 
 const bname=k=>{const t=DATA&&DATA.books&&DATA.books[k];return ((t&&t!==k?t:null)||BOOKNAME[k]||k).replace(/\.ag$/,"")};
@@ -430,16 +436,17 @@ function ppCandidates(onlyPP){
   if(skipMixed&&mixed(r))continue;   // books and his recent games disagree: leave it out
   const{side,p}=propSide(r);if(p<.5)continue;const k=r.g+"|"+r.pl;if(!byPl[k]||byPl[k].p<p)byPl[k]={r,side,p}}
  return Object.values(byPl).sort((a,b)=>b.p-a.p)}
-function scanLineups(sizes,mode,per,onlyPP,pool=20){
+function scanLineups(sizes,mode,per,onlyPP,pool=20,goal="ev"){
  const C=ppCandidates(onlyPP).slice(0,pool);const top=[],bySize={};let n=0;const pk=[],gc={};
  (function rec(i){
   if(sizes.includes(pk.length)){
    const games=Object.keys(gc).filter(k=>gc[k]>0).length;
    if(games>=2){n++;const ps=pk.map(x=>x.p);
     for(const m of(mode==="best"?["power","flex"]:[mode])){const ev=m==="power"?evPower(ps):evFlex(ps);if(ev==null)continue;
-     const o={ev,mode:m,picks:pk.slice(),all:ps.reduce((a,p)=>a*p,1)};
-     pushTop(top,o,"ev",60);
-     const sz=pk.length;if(!bySize[sz]||ev>bySize[sz].ev)bySize[sz]=o}}}
+     const o={ev,mode:m,picks:pk.slice(),all:ps.reduce((a,p)=>a*p,1),win:profit(ps,m)};
+     o.score=goal==="win"?o.win+ev*1e-3:ev;     // "win": most likely to make money, EV breaks ties
+     pushTop(top,o,"score",60);
+     const sz=pk.length;if(!bySize[sz]||o.score>bySize[sz].score)bySize[sz]=o}}}
   if(pk.length>=Math.max(...sizes))return;
   for(let j=i;j<C.length;j++){const x=C[j];if((gc[x.r.g]||0)>=per)continue;gc[x.r.g]=(gc[x.r.g]||0)+1;pk.push(x);rec(j+1);pk.pop();gc[x.r.g]--}
  })(0);
@@ -471,7 +478,8 @@ function gameCard(g){
   ${(()=>{const k=keyClash(g);return k?`<div class="key">Key matchup: ${esc(k.off.ab||k.off.n)} ${k.ko==="rush"?"run game":"passing game"} #${k.orank} vs ${esc(k.def.ab||k.def.n)} ${k.ko==="rush"?"run D":"pass D"} #${k.drank}${k.verdict?` <b>${esc(k.verdict)}</b>`:""}</div>`:""})()}
   <div class="gfoot"><span class="wx">${wxIcon(g)}${esc(g.wn||"")}</span>${evA?`<span class="val">Value ${sgn(evA.e)}</span>`:""}<button class="linkbtn" data-more="${esc(g.id)}">${open?"Less":"Details"}</button></div>
   ${open?`<div class="details">
-   <p><span class="k">Fair chance</span> ${esc(g.a.n)} ${pct(g.fair)}, ${esc(g.h.n)} ${pct(1-g.fair)} <span class="k">from ${nb} book${nb===1?"":"s"}, vig removed</span></p>
+   <p><span class="k">Fair chance</span> ${esc(g.a.n)} ${pct(g.fair)}, ${esc(g.h.n)} ${pct(1-g.fair)} <span class="k">from ${nb} book${nb===1?"":"s"}, vig removed</span>${g.of&&Math.abs(g.of-g.fair)>=.01?` <span class="k">(first seen ${esc(g.a.n)} ${pct(g.of)}, money moved toward</span> ${esc(g.fair>g.of?g.a.n:g.h.n)}<span class="k">)</span>`:""}</p>
+   ${scriptLine(g)}
    <table class="books"><tr><th>Book</th><th>${esc(g.a.n)}</th><th>${esc(g.h.n)}</th></tr>${booksRows}</table>
    ${matchupTables(g)}
    <p><span class="k">Injuries</span> ${esc(g.inj||"")}</p>
@@ -480,6 +488,12 @@ function gameCard(g){
   </div>`:""}
  </article>`}
 
+function extraChips(r){const g=GI[r.g],out=[];
+ if(r.ij)out.push(`<span class="mchip tough">${esc(r.ij)}</span>`);
+ const W=g.wx;if(W&&/pass|recep/.test(r.mk)){if(W.w>=15||W.gu>=25)out.push(`<span class="mchip warn">Windy: ${W.w} mph, gusts ${W.gu}</span>`);
+  else if(W.p>=60)out.push(`<span class="mchip warn">Rain likely (${W.p}%)</span>`);else if(W.t<=32)out.push(`<span class="mchip warn">Cold: ${W.t}\u00b0F</span>`)}
+ if(r.op!=null&&r.op!==r.ln)out.push(`<span class="mchip even">PP line moved ${r.op} \u2192 ${r.ln}</span>`);
+ return out.join(" ")}
 function matchChip(r){const M=matchup(r);if(!M)return"";const cls=M.m>=1.1?"soft":M.m<=.9?"tough":"even";
  const word=cls==="soft"?"Soft matchup":cls==="tough"?"Tough matchup":"Average matchup";
  const fewest=M.k!=="take";
@@ -491,6 +505,13 @@ function formStrip(r){const f=r.rf;if(!f||!f.v||!f.v.length)return"";
  const n=formN(r),last=v.length;
  return `<span class="form"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${bars}<line x1="0" x2="${W}" y1="${ly.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 2" opacity=".7"/></svg>
   <span>Over in ${f.o} of last ${n}<br>Avg ${f.avg} (last ${last})</span></span>`}
+function sline(x){return x==null?"":(x>0?"+":x<0?"\u2212":"")+Math.abs(x)}
+function scriptLine(g){const L=g.gl;if(!L||(L.spr==null&&!L.tot))return"";
+ const fav=L.spr==null?null:L.spr<0?g.h:L.spr>0?g.a:null,sp=L.spr==null?null:Math.abs(L.spr);
+ const sprTxt=L.spr==null?"":fav?`${esc(fav.ab||fav.n)} \u2212${sp}`:"Pick'em";
+ const sprOpen=L.spr_o!=null&&L.spr_o!==L.spr?` <span class="k">(opened ${L.spr_o<0?esc(g.h.ab||g.h.n)+" \u2212"+Math.abs(L.spr_o):L.spr_o>0?esc(g.a.ab||g.a.n)+" \u2212"+L.spr_o:"pick'em"})</span>`:"";
+ const totOpen=L.tot_o&&L.tot_o!==L.tot?` <span class="k">(opened ${L.tot_o})</span>`:"";
+ return `<p><span class="k">Game script</span> ${sprTxt}${sprOpen}${L.tot?`, total ${L.tot}${totOpen}`:""}${g.a.imp!=null?`. Expected points: ${esc(g.a.n)} ${g.a.imp}, ${esc(g.h.n)} ${g.h.imp}`:""}.</p>`}
 function fmtv(v,dp){return dp?(+v).toFixed(dp):Math.round(v)}
 function matchupTables(g){const L=LG(g.sp);if(!L)return"";let h="";
  for(const[o,d]of[["a","h"],["h","a"]]){const c=clashes(g,o,d);if(!c||!c.length)continue;const A=TS(g.sp,g[o].tid);
@@ -505,9 +526,9 @@ function propRow(r){
  const lineTxt=Number.isInteger(r.ln)?r.ln:r.ln.toFixed(1);
  const btn=s=>{const q=pFinal(r),pp=s==="o"?q:1-q;return `<button class="side-b ${side===s?"rec":""} ${cur===s?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${cur===s}"><small>${s==="o"?"More":"Less"}</small><b>${pct(pp)}</b><span class="ln">${lineTxt}</span></button>`};
  return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?'<span class="tier mix">Mixed signals</span>':`<span class="tier ${tc}">${tl}</span>`}</b>
-  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)}</button>
+  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${extraChips(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
-  ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}.`:""}
+  ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
    <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table></div>`:""}</div>`}
 
 function mlRow(x){const g=x.g,t=g[x.s],on=sel[g.id]===x.s,o=g[x.s==="a"?"h":"a"];
@@ -592,6 +613,7 @@ function renderPP(){
   <label>Picks<select id="ppSize"><option value="auto" ${ui.pp.size==="auto"?"selected":""}>Any (2–6)</option>${[2,3,4,5,6].map(n=>`<option ${ui.pp.size==n?"selected":""}>${n}</option>`).join("")}</select></label>
   <label>Play<select id="ppMode"><option value="best" ${ui.pp.mode==="best"?"selected":""}>Best</option><option value="power" ${ui.pp.mode==="power"?"selected":""}>Power</option><option value="flex" ${ui.pp.mode==="flex"?"selected":""}>Flex</option></select></label>
   <label>Same game<select id="ppPer"><option value="1" ${ui.pp.per==1?"selected":""}>1 pick</option><option value="2" ${ui.pp.per==2?"selected":""}>Up to 2</option></select></label></div>
+  <div class="ctrls" style="grid-template-columns:1fr;margin-top:8px"><label>Goal<select id="ppGoal"><option value="ev" ${ui.pp.goal!=="win"?"selected":""}>Most money over time (expected return)</option><option value="win" ${ui.pp.goal==="win"?"selected":""}>Most likely to win money on this slip</option></select></label></div>
   <button class="btn go wide" style="margin-top:10px" data-scanpp>Scan lineups</button>
   ${R?(R.top.length?`<div class="res">${R.top.map((r,i)=>comboPP(r,i,"scan")).join("")}</div>`:`<div class="empty">Not enough picks from different games to build a lineup.</div>`)+`<p class="scanned">Scanned ${R.n.toLocaleString()} lineups from the ${R.pool} strongest picks.</p>`:""}
   <p class="fine">Power Play break-even per pick: ${be}. Same-game picks can lower PrizePicks payouts.</p>
@@ -604,11 +626,29 @@ function renderPP(){
  <div class="list" style="margin-top:10px">${list.length?list.slice(0,ui.limit).map(propRow).join(""):`<div class="card empty">${P.length?"No props match.":"No player props in this update. They're pulled for games that start before the next update."}</div>`}</div>
  ${list.length>ui.limit?`<button class="btn wide" style="margin-top:10px" data-moreprops>Show more (${list.length-ui.limit} left)</button>`:""}`}
 
+function recRow(label,a,note){if(!a||!a.n)return"";const hr=a.w/a.n;
+ return `<div class="recrow"><span>${label}${note?`<br><span class="k">${note}</span>`:""}</span><span class="k">${a.w}-${a.n-a.w}</span><b class="${hr>=a.ep-.02?"gold":hr<a.ep-.06?"red":""}">${pct(hr)}</b></div>`}
+function renderRecord(){const R=DATA&&DATA.record;
+ if(!R||(!R.props.all.n&&!R.ml.all.n))return `<h2>Board record</h2><div class="card empty">The board grades its own picks after every game. Results show up here after the next update.</div>`;
+ const P=R.props,M=R.ml;
+ const stat=Object.entries(P.stat||{}).map(([k,a])=>recRow(MK[k]||k,a)).join("");
+ return `<h2>Board record</h2><p class="lede">Every pick the board made before kickoff, graded after the game${R.since?` since ${esc(R.since)}`:""}. Gold means it's hitting at least as often as the board said it would.</p>
+ <section class="card" style="padding:4px 14px 10px">
+  ${recRow("All PrizePicks-style picks",P.all,P.all.ep?`board expected ${pct(P.all.ep)}`:"")}
+  ${recRow("Last 7 days",P.week)}
+  ${recRow("Strong picks",P.strong,"59%+ chance")}${recRow("Playable picks",P.playable,"54 to 59%")}${recRow("Thin picks",P.thin,"under 54%")}
+  ${recRow("Picks the scanners would use",P.scanner,"Playable or better, 2+ books, no mixed signals")}
+  ${recRow("Clean signals",P.clean)}${recRow("Mixed signals",P.mixed,"books and recent games or matchup disagreed")}
+  ${recRow("More picks",P.more)}${recRow("Less picks",P.less)}${recRow("NFL",P.nfl)}${recRow("College",P.cfb)}${stat}
+  ${M.all.n?`${recRow("Game winners (favorites)",M.all,M.all.ep?`board expected ${pct(M.all.ep)}`:"")}${recRow("Favorites 50 to 60%",M.b50)}${recRow("Favorites 60 to 70%",M.b60)}${recRow("Favorites 70 to 80%",M.b70)}${recRow("Favorites 80%+",M.b80)}`:""}
+ </section>
+ ${R.recent&&R.recent.length?`<h2>Latest graded picks</h2><div class="card reclist" style="padding:6px 14px">${R.recent.map(x=>`<div><b style="color:${x.hit===true?"var(--go)":x.hit===false?"var(--stop)":"var(--mute)"}">${x.hit===true?"Hit":x.hit===false?"Miss":"Push"}</b> ${esc(x.pl)} ${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk)}: had ${x.act} <span>(${pct(x.p)}${x.mx?", mixed":""})</span></div>`).join("")}</div>`:""}`}
 function renderTix(){
  const S=tickets.filter(t=>t.r),w=tickets.filter(t=>t.r==="W").length,l=tickets.filter(t=>t.r==="L").length;
  const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.filter(t=>t.r==="W").reduce((a,t)=>a+ +(t.ret??t.pay),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.p||0),0);
  return `<h2>My tickets</h2>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
  <p class="fine">${tickets.length-w-l} open. Expected wins is what the odds said you'd hit on settled tickets.</p>`:""}
+ ${renderRecord()}<h2>Saved tickets</h2>
  <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>`<div class="card tk ${t.r||""}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
   <div class="lg2">${t.legs.map(esc).join(", ")}</div>${t.r==="W"&&t.ret!=null&&+t.ret!==+t.pay?`<div class="lg2">Paid ${money(t.ret)}</div>`:""}
   <div class="m"><button data-tw="${i}">Won</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do.</div>'}</div>`}
@@ -726,9 +766,9 @@ document.addEventListener("click",e=>{
   LS.set("pb_tickets",tickets);save();ui.slipOpen=false;ui.ppMode=null;keep();return}
  if(d.scanml!==undefined){ui.ml.K=+$("#mlK").value;ui.ml.min=clamp(parseFloat($("#mlMin").value)||0,0,99);ui.ml.by=$("#mlBy").value;
   t.textContent="Scanning…";setTimeout(()=>{ui.ml.res=scanParlays(ui.ml.K,ui.ml.min/100,ui.ml.by);keep()},20);return}
- if(d.scanpp!==undefined){ui.pp.size=$("#ppSize").value;ui.pp.mode=$("#ppMode").value;ui.pp.per=+$("#ppPer").value;
+ if(d.scanpp!==undefined){ui.pp.size=$("#ppSize").value;ui.pp.mode=$("#ppMode").value;ui.pp.per=+$("#ppPer").value;ui.pp.goal=$("#ppGoal").value;
   t.textContent="Scanning…";const sizes=ui.pp.size==="auto"?[2,3,4,5,6]:[+ui.pp.size];
-  setTimeout(()=>{ui.pp.res=scanLineups(sizes,ui.pp.mode,ui.pp.per,ui.ppOnly&&P.some(r=>r.pp),ui.pp.per>1?16:20);keep()},20);return}
+  setTimeout(()=>{ui.pp.res=scanLineups(sizes,ui.pp.mode,ui.pp.per,ui.ppOnly&&P.some(r=>r.pp),ui.pp.per>1?16:20,ui.pp.goal);keep()},20);return}
  if(d.useml!==undefined){const src=ui.tab==="games"&&ui.ml.res?ui.ml.res:topScan().ml;const r=src.top[+d.useml];if(!r)return;sel={};r.legs.forEach(l=>sel[l.g.id]=l.s);ui.kind="ml";ui.slipOpen=true;save();keep();return}
  if(d.usepp){const[src,i]=d.usepp.split("|");const T=topScan();const r=src==="scan"?ui.pp.res.top[+i]:src==="size"?T.pp.bySize[i]:T.pp.top[+i];if(!r)return;
   pps={};r.picks.forEach(x=>pps[x.r.k]=x.side);ui.ppMode=r.mode;ui.kind="pp";ui.slipOpen=true;save();keep();return}
