@@ -223,6 +223,8 @@ table.books .off{opacity:.45}
 .mode.on{border-color:var(--paperink);background:#fff}
 .mode:disabled{opacity:.4}
 .note{font-size:11.5px;opacity:.75;margin-top:8px;line-height:1.4}
+.note.bad{opacity:1;font-weight:700;color:var(--stop);border:1.5px solid var(--stop);border-radius:8px;padding:6px 8px}
+.receipt .rbtns button:disabled{opacity:.35}
 
 /* ---------- tickets ---------- */
 .tk{padding:12px;font-size:14px}
@@ -464,6 +466,19 @@ function scanParlays(K,minP,by){
  })(0,1,1);
  return{top:diverse(top,5,r=>r.legs.map(l=>l.g.id+l.s)),n:Math.min(n,LIM),pool:C.length,stopped}}
 
+/* ---------- PrizePicks lineup rules and variety ---------- */
+// PrizePicks only accepts a lineup with picks from at least 2 different teams, so a 2-pick can't be two teammates.
+const teamKey=r=>r.sd?r.g+"|"+r.sd:null;
+const teamOf=r=>r.sd&&GI[r.g]?GI[r.g][r.sd]:null;
+// true: at least 2 teams. false: every pick is on one team. null: same game, but a pick's team isn't known.
+function twoTeams(rs){if(new Set(rs.map(r=>r.g)).size>=2)return true;   // different games always means different teams
+ const k=rs.map(teamKey);if(new Set(k.filter(Boolean)).size>=2)return true;return k.every(Boolean)?false:null}
+// best first, but at most `cap` from any one game; picks past the cap only come in if there aren't enough other games
+function spread(list,cap,n,gid=x=>x.r.g){const out=[],extra=[],c={};
+ list.forEach((x,i)=>{const g=gid(x);if((c[g]||0)<cap){c[g]=(c[g]||0)+1;out.push([i,x])}else extra.push([i,x])});
+ return out.slice(0,n).concat(extra.slice(0,Math.max(0,n-out.length))).sort((a,b)=>a[0]-b[0]).map(y=>y[1])}
+function gameTxt(r){const g=GI[r.g],t=teamOf(r);if(!t)return `${g.a.ab||g.a.n} @ ${g.h.ab||g.h.n}`;const o=g[r.sd==="a"?"h":"a"];return `${t.ab||t.n} ${r.sd==="a"?"at":"vs"} ${o.ab||o.n}`}
+
 function ppCandidates(onlyPP,onlyAgree){
  const byPl={};for(const r of P){const g=GI[r.g];if(!g||!live(g)||!inSport(r.sp))continue;if(onlyPP&&!r.pp)continue;
   if(r.nb<2)continue;   // need at least two books before a pick goes into lineups
@@ -472,18 +487,19 @@ function ppCandidates(onlyPP,onlyAgree){
   const{side,p}=propSide(r);if(p<.5)continue;const k=r.g+"|"+r.pl;if(!byPl[k]||byPl[k].p<p)byPl[k]={r,side,p}}
  return Object.values(byPl).sort((a,b)=>b.p-a.p)}
 function scanLineups(sizes,mode,per,onlyPP,pool=20,goal="ev",onlyAgree=false){
- const C=ppCandidates(onlyPP,onlyAgree).slice(0,pool);const top=[],bySize={};let n=0;const pk=[],gc={};
+ const C=spread(ppCandidates(onlyPP,onlyAgree),3,pool);const top=[],bySize={};let n=0;const pk=[],gc={},tc={};
  (function rec(i){
   if(sizes.includes(pk.length)){
-   const games=Object.keys(gc).filter(k=>gc[k]>0).length;
-   if(games>=2){n++;const ps=pk.map(x=>x.p);
+   const games=Object.keys(gc).filter(k=>gc[k]>0).length,teams=Object.keys(tc).filter(k=>tc[k]>0).length;
+   if(games>=2||teams>=2){n++;const ps=pk.map(x=>x.p);   // PrizePicks: picks from at least 2 different teams
     for(const m of(mode==="best"?["power","flex"]:[mode])){const ev=m==="power"?evPower(ps):evFlex(ps);if(ev==null)continue;
      const o={ev,mode:m,picks:pk.slice(),all:ps.reduce((a,p)=>a*p,1),win:profit(ps,m)};
      o.score=goal==="win"?o.win+ev*1e-3:ev;     // "win": most likely to make money, EV breaks ties
      pushTop(top,o,"score",60);
      const sz=pk.length;if(!bySize[sz]||o.score>bySize[sz].score)bySize[sz]=o}}}
   if(pk.length>=Math.max(...sizes))return;
-  for(let j=i;j<C.length;j++){const x=C[j];if((gc[x.r.g]||0)>=per)continue;gc[x.r.g]=(gc[x.r.g]||0)+1;pk.push(x);rec(j+1);pk.pop();gc[x.r.g]--}
+  for(let j=i;j<C.length;j++){const x=C[j],tk=teamKey(x.r);if((gc[x.r.g]||0)>=per)continue;
+   gc[x.r.g]=(gc[x.r.g]||0)+1;if(tk)tc[tk]=(tc[tk]||0)+1;pk.push(x);rec(j+1);pk.pop();gc[x.r.g]--;if(tk)tc[tk]--}
  })(0);
  return{top:diverse(top,6,r=>r.picks.map(x=>x.r.k)),bySize,n,pool:C.length}}
 
@@ -561,7 +577,7 @@ function propRow(r){
  const lineTxt=Number.isInteger(r.ln)?r.ln:r.ln.toFixed(1);
  const btn=s=>{const q=pFinal(r),pp=s==="o"?q:1-q;return `<button class="side-b ${side===s?"rec":""} ${cur===s?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${cur===s}"><small>${s==="o"?"More":"Less"}</small><b>${pct(pp)}</b><span class="ln">${lineTxt}</span></button>`};
  return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?'<span class="tier mix">Mixed signals</span>':`<span class="tier ${tc}">${tl}</span>`}${agree(r)?'<span class="tier t3">All signals agree</span>':""}</b>
-  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(g.a.ab||g.a.n)} @ ${esc(g.h.ab||g.h.n)}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${extraChips(r)}</button>
+  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(gameTxt(r))}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${extraChips(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
   ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
    <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table></div>`:""}</div>`}
@@ -588,7 +604,9 @@ function topScan(){
 
 function renderTop(){
  const T=topScan(),hero=T.pp.top[0];let h="";
- const ag=P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&agree(r)&&(!T.onlyPP||r.pp)).sort((a,b)=>propSide(b).p-propSide(a).p).slice(0,8);
+ const ag=spread(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&agree(r)&&(!T.onlyPP||r.pp)).sort((a,b)=>propSide(b).p-propSide(a).p),2,8,r=>r.g);   // at most 2 per game while other games have picks
+ const pg=[...new Set(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!T.onlyPP||r.pp)).map(r=>r.g))];
+ const oneGame=pg.length===1?`<div class="card empty" style="margin-top:8px">Only ${esc(GI[pg[0]].a.n)} @ ${esc(GI[pg[0]].h.n)} has player props right now, so every pick comes from that game. Props for later games are pulled in the update before they kick off.</div>`:"";
  h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag. These are the board's most solid picks, but solid isn't certain: check the Track record on the Tickets tab to see how often they really hit.</p>`;
  h+=ag.length?`<div class="list">${ag.map(propRow).join("")}</div>`:`<div class="card empty">No pick has every signal lined up right now. That's normal; it means skip rather than force it.</div>`;
  if(hero){const n=hero.picks.length,pos=hero.ev>0;
@@ -601,8 +619,8 @@ function renderTop(){
   const sizes=Object.keys(T.pp.bySize).sort((a,b)=>a-b);
   if(sizes.length>1)h+=`<h2>Best lineup by size</h2><p class="lede">Fewer picks hit more often. More picks pay more.</p><div class="res">${sizes.map(s=>comboPP(T.pp.bySize[s],s,"size")).join("")}</div>`;
  }else if(P.length===0){h+=`<h2>PrizePicks</h2><div class="card empty">No PrizePicks lines in this update. Props are pulled for games that start before the next update.</div>`}
- const props=ppCandidates(T.onlyPP).slice(0,8);
- if(props.length)h+=`<h2>Strongest picks</h2><p class="lede">Highest chance to land, from sportsbook prop prices compared to the PrizePicks line. Picks need at least two books.</p><div class="list">${props.map(x=>propRow(x.r)).join("")}</div>`;
+ const props=spread(ppCandidates(T.onlyPP),2,8);
+ if(props.length)h+=`<h2>Strongest picks</h2><p class="lede">Highest chance to land, from sportsbook prop prices compared to the PrizePicks line. Picks need at least two books, and no more than 2 come from one game while other games have picks.</p>${oneGame}<div class="list">${props.map(x=>propRow(x.r)).join("")}</div>`;
  const C=mlCandidates();
  const value=C.filter(x=>x.e>1.005).sort((a,b)=>b.e-a.e).slice(0,6);
  h+=`<h2>Best-priced moneylines</h2><p class="lede">Your best available price is better than the fair price across every book.</p>`;
@@ -654,7 +672,7 @@ function renderPP(){
   <div class="ctrls" style="grid-template-columns:1fr;margin-top:8px"><label>Goal<select id="ppGoal"><option value="ev" ${ui.pp.goal!=="win"?"selected":""}>Most money over time (expected return)</option><option value="win" ${ui.pp.goal==="win"?"selected":""}>Most likely to win money on this slip</option></select></label>
   <label>Picks to use<select id="ppPool"><option value="all" ${!ui.pp.agree?"selected":""}>All strong picks</option><option value="agree" ${ui.pp.agree?"selected":""}>Only picks where all signals agree</option></select></label></div>
   <button class="btn go wide" style="margin-top:10px" data-scanpp>Scan lineups</button>
-  ${R?(R.top.length?`<div class="res">${R.top.map((r,i)=>comboPP(r,i,"scan")).join("")}</div>`:`<div class="empty">Not enough picks from different games to build a lineup.</div>`)+`<p class="scanned">Scanned ${R.n.toLocaleString()} lineups from the ${R.pool} strongest picks.</p>`:""}
+  ${R?(R.top.length?`<div class="res">${R.top.map((r,i)=>comboPP(r,i,"scan")).join("")}</div>`:`<div class="empty">Not enough picks from different teams to build a lineup. PrizePicks needs at least 2 teams.</div>`)+`<p class="scanned">Scanned ${R.n.toLocaleString()} lineups from the ${R.pool} strongest picks.</p>`:""}
   <p class="fine">Power Play break-even per pick: ${be}. Same-game picks can lower PrizePicks payouts.</p>
  </section>
  <h2>Player props</h2><p class="lede">Gold marks the likelier side after the books, his recent games and the matchup. Tap a side to add it to your lineup.</p>
@@ -855,18 +873,20 @@ function renderSlip(){
   const ep=evPower(ps),ef=evFlex(ps);
   let mode=ui.ppMode;if(mode==="power"&&ep==null)mode=null;if(mode==="flex"&&ef==null)mode=null;
   if(!mode)mode=ep!=null&&(ef==null||ep>=ef)?"power":ef!=null?"flex":"power";
-  const games=new Set(Q.map(q=>q.r.g)).size,same=games<n;
+  const games=new Set(Q.map(q=>q.r.g)).size,same=games<n,tt=n>=2?twoTeams(Q.map(q=>q.r)):null,one=tt===false?teamOf(Q[0].r):null;
   const top=mode==="power"?(PAY.power[n]||0):(PAY.flex[n]?PAY.flex[n][0]:0);
   bar=`<span><span class="k">PrizePicks, ${n} pick${n>1?"s":""}</span><br><span class="c">${pct(all)} to hit all</span></span><span class="o">${top?top+"x":"—"}</span>${chev}`;
   body=`<h4>PRIZEPICKS LINEUP</h4><div class="ts">${esc(now)}</div>
-  ${Q.map(q=>`<div class="leg"><span><button class="cp" data-copyname="${esc(q.r.pl)}">${esc(q.r.pl)}</button><small>${q.s==="o"?"More":"Less"} ${q.r.ln} ${esc(MK[q.r.mk]||q.r.mk)}, ${esc(GI[q.r.g].a.ab||GI[q.r.g].a.n)} @ ${esc(GI[q.r.g].h.ab||GI[q.r.g].h.n)}</small></span><b>${pct(q.p)}</b><button class="x" data-pp="${q.r.i}|${q.s}" aria-label="Remove">×</button></div>`).join("")}
+  ${Q.map(q=>`<div class="leg"><span><button class="cp" data-copyname="${esc(q.r.pl)}">${esc(q.r.pl)}</button><small>${q.s==="o"?"More":"Less"} ${q.r.ln} ${esc(MK[q.r.mk]||q.r.mk)}, ${esc(gameTxt(q.r))}</small></span><b>${pct(q.p)}</b><button class="x" data-pp="${q.r.i}|${q.s}" aria-label="Remove">×</button></div>`).join("")}
   <div class="modes"><button class="mode ${mode==="power"?"on":""}" data-ppmode="power" ${ep==null?"disabled":""}><b>Power ${PAY.power[n]?PAY.power[n]+"x":""}</b>${ep==null?"Needs 2 to 6 picks":`All must hit<br>${pct(all)} chance<br>Return ${sgn(ep)}`}</button>
    <button class="mode ${mode==="flex"?"on":""}" data-ppmode="flex" ${ef==null?"disabled":""}><b>Flex ${PAY.flex[n]?PAY.flex[n][0]+"x top":""}</b>${ef==null?"Needs 3 to 6 picks":`Pays on ${n-PAY.flex[n].length+1}+ hits<br>${pct(profit(ps,"flex"))} to win money<br>Return ${sgn(ef)}`}</button></div>
   <div class="tot"><span>Entry $<input id="stakePP" type="number" inputmode="decimal" value="${st}" min="0"></span><b>Max payout ${money(st*top)}</b></div>
-  ${n<2||games<2?'<div class="note">PrizePicks needs at least 2 picks from at least 2 teams.</div>':""}${same?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}
+  ${n<2?'<div class="note">PrizePicks needs at least 2 picks from at least 2 different teams.</div>'
+   :tt===false?`<div class="note bad" role="alert">Every pick is a ${esc(one?(one.ab||one.n):"same-team")} player. PrizePicks won't take a lineup from one team, so swap one for a player on another team.</div>`
+   :tt===null?'<div class="note">Check these aren\'t all on the same team. PrizePicks needs at least 2 different teams.</div>':""}${same&&tt!==false?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}
   <div class="rbtns"><button data-copyall>Copy picks</button></div>
   <div class="note">Tap a name to copy it, then paste it into PrizePicks search.</div>
-  <div class="rbtns"><button data-clear="pp">Clear</button><button class="go" data-save="pp" data-mode="${mode}">Save ticket</button></div>`;
+  <div class="rbtns"><button data-clear="pp">Clear</button><button class="go" data-save="pp" data-mode="${mode}" ${tt===false?"disabled":""}>Save ticket</button></div>`;
  }
  $("#slipin").innerHTML=`<button class="sbar" data-slip aria-expanded="${ui.slipOpen}">${bar}</button><div class="receipt">${body}</div>`;
  el.dataset.kind=kind;
@@ -936,7 +956,7 @@ document.addEventListener("click",e=>{
   if(d.save==="ml"){const L=mlLegs();if(!L.length)return;const D=L.reduce((a,l)=>a*dec(l.ml),1),st=+stakeML||0;
    const pa=L.reduce((a,l)=>a*l.p,1);
    tickets.unshift({kind:"ml",legs:L.map(l=>teamName(l.g[l.s])+" "+fmtML(l.ml)),lg:L.map(l=>({a:l.g.a.n,h:l.g.h.n,s:l.s,k:l.g.kick})),odds:L.length>1?amer(D):fmtML(L[0].ml),stake:st,pay:(st*D).toFixed(2),p:pa,pw:pa});sel={}}
-  else{const Q=ppLegs();const n=Q.length;if(n<2)return;const mode=d.mode,st=+stakePP||0,top=mode==="power"?PAY.power[n]:PAY.flex[n][0];
+  else{const Q=ppLegs();const n=Q.length;if(n<2||twoTeams(Q.map(q=>q.r))===false)return;/* PrizePicks won't take a one-team lineup */const mode=d.mode,st=+stakePP||0,top=mode==="power"?PAY.power[n]:PAY.flex[n][0];
    const ps=Q.map(q=>q.p),pa=ps.reduce((a,v)=>a*v,1);
    tickets.unshift({kind:"pp",mode:mode==="power"?"Power":"Flex",legs:Q.map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`),lg:Q.map(q=>({pl:q.r.pl,mk:q.r.mk,ln:q.r.ln,side:q.s,k:GI[q.r.g]&&GI[q.r.g].kick})),
     odds:top+"x",stake:st,pay:(st*top).toFixed(2),p:pa,pw:mode==="power"?pa:profit(ps,"flex"),...(mode==="power"?{}:{pt:PAY.flex[n].slice()})});pps={}}
