@@ -243,6 +243,38 @@ table.books .off{opacity:.45}
 .lgl .ok .mk{color:var(--go)}.lgl .no .mk{color:var(--stop)}
 .lgl .ok span:last-child,.lgl .no span:last-child{color:var(--ink)}
 .record{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+/* check a pick */
+.askbar{width:100%;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 12px;font-size:15px;font-weight:600;color:var(--mute);text-align:left}
+.askbar svg{flex:none;color:var(--led)}
+.cklist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ckrow{display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--raise);border-radius:12px;padding:10px 12px}
+.ckrow b{display:block;font-size:16px;line-height:1.2}
+.ckrow small{display:block;color:var(--mute);font-size:12.5px;margin-top:1px}
+.ckrow .tier{flex:none;margin:0}
+.ckhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:12px}
+.ckhead b{display:block;font-size:20px;line-height:1.15}
+.ckhead small{display:block;color:var(--mute);font-size:13px;margin-top:2px}
+.ckline{display:flex;align-items:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
+.ckline label{font-size:12px;color:var(--mute);font-weight:600;display:flex;flex-direction:column;gap:4px}
+.ckline input{width:120px;border:1px solid var(--line);background:var(--raise);border-radius:10px;padding:9px 10px;font-size:18px;font-weight:700}
+.ckline .k{font-size:12.5px;color:var(--mute);padding-bottom:10px}
+.ckv{margin-top:12px;padding:12px}
+.feel{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:var(--raise);border-left:4px solid var(--mute)}
+.feel small{display:block;font-size:11.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.feel .hl{display:block;font:800 30px/1.05 "Big Shoulders Display",Impact,sans-serif}
+.feel .sides{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.feel .side-b{min-width:0;padding:8px}
+.feel.good{border-color:var(--go)}.feel.good .hl{color:var(--go)}
+.feel.ok{border-color:var(--led)}.feel.ok .hl{color:var(--led)}
+.feel.mix{border-color:var(--stop)}
+.feel.no{border-color:var(--stop)}.feel.no .hl{color:var(--stop)}
+.why{margin:12px 0 0;padding:0 0 0 18px;font-size:13.5px;color:var(--mute);display:flex;flex-direction:column;gap:7px}
+.why b{color:var(--ink);font-weight:600}
+.why .mchip,.why .form{margin-top:4px}
+.cklog{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.cklog span{font-size:12px;border-radius:7px;padding:2px 7px;background:var(--panel);border:1px solid var(--line)}
+.cklog .ov{color:var(--go);border-color:color-mix(in srgb,var(--go) 45%,transparent)}
+.ckshow{display:inline-block;margin-top:6px;border:0;background:transparent;padding:0;color:var(--ink);font-weight:600;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
 .hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
 .hrow .iconbtn{flex:none;margin-bottom:4px}
 /* log a ticket */
@@ -303,6 +335,7 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
  <div class="brand">
   <h1 class="mark"><svg class="bars" viewBox="-4 -4 48 42" aria-hidden="true"><defs><linearGradient id="mkg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB21E"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><filter id="mkf" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter></defs><g filter="url(#mkf)" opacity=".75" fill="#FF8A00"><rect x="11" y="14" width="7" height="20" rx="3.5"/><rect x="22" y="7" width="7" height="27" rx="3.5"/><rect x="33" y="0" width="7" height="34" rx="3.5"/></g><rect x="0" y="22" width="7" height="12" rx="3.5" fill="currentColor" opacity=".22"/><rect x="11" y="14" width="7" height="20" rx="3.5" fill="url(#mkg)"/><rect x="22" y="7" width="7" height="27" rx="3.5" fill="url(#mkg)"/><rect x="33" y="0" width="7" height="34" rx="3.5" fill="url(#mkg)"/></svg>Signal</h1>
   <div class="stamp"><div id="stamp">Loading lines…</div><button class="iconbtn" id="openSettings">Settings</button></div>
+  <button class="askbar" data-check=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Check any player's pick</button>
  </div>
  <div id="banner"></div>
 </header>
@@ -318,6 +351,7 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
 <div class="slip" id="slip"><div class="in" id="slipin"></div></div>
 
 <dialog id="settings"><div class="sheet" id="sheet"></div></dialog>
+<dialog id="check" aria-label="Check a pick"><div class="sheet" id="cksheet"></div></dialog>
 <dialog id="logtix"><div class="sheet" id="logsheet"></div></dialog>
 <dialog id="payout"><div class="sheet" id="paysheet"></div></dialog>
 
@@ -697,7 +731,7 @@ function renderPP(){
  <div class="toolbar" style="margin-top:8px"><input class="search" id="pq" type="search" placeholder="Find a player or team" value="${esc(ui.pq)}">
   <select class="sel" id="psort"><option value="p" ${ui.psort==="p"?"selected":""}>Strongest</option><option value="time" ${ui.psort==="time"?"selected":""}>Kickoff</option></select></div>
  ${hasPP?`<div class="filters"><button class="pill ${ui.ppOnly?"on":""}" data-pponly>PrizePicks lines only</button><button class="pill ${ui.agreeOnly?"on":""}" data-agreeonly>All signals agree</button></div>`:(P.length?`<p class="fine">PrizePicks lines weren't in this update, so these use the sportsbook line. Compare with the app before you play.</p>`:"")}
- <div class="list" style="margin-top:10px">${list.length?list.slice(0,ui.limit).map(propRow).join(""):`<div class="card empty">${P.length?"No props match.":"No player props in this update. They're pulled for games that start before the next update."}</div>`}</div>
+ <div class="list" style="margin-top:10px">${list.length?list.slice(0,ui.limit).map(propRow).join(""):`<div class="card empty">${ui.pq?`No props on the board match "${esc(ui.pq)}".<br><button class="btn go" style="margin-top:10px" data-check="${esc(ui.pq)}">Check ${esc(ui.pq)} anyway</button>`:P.length?"No props match.":"No player props in this update. They're pulled for games that start before the next update."}</div>`}</div>
  ${list.length>ui.limit?`<button class="btn wide" style="margin-top:10px" data-moreprops>Show more (${list.length-ui.limit} left)</button>`:""}`}
 
 function recRow(label,a,note){if(!a||!a.n)return"";const hr=a.w/a.n;
@@ -897,6 +931,129 @@ function saveLog(){readLog();const pp=lt.kind==="pp";
  if(lt.r){t.r=lt.r;t.ret=lt.r==="W"?ret:0}
  tickets.unshift(t);LS.set("pb_tickets",tickets);$("#logtix").close();lt=null;keep()}
 
+/* ---------- check a pick: any player, any line ---------- */
+// players.json (built by update_data.py from ESPN box scores) has every NFL and FBS player's last 8 games.
+// Players with props on the board get the full board read; everyone else gets his recent games and the matchup.
+let PJ=null,PJload=null,CK=null,CKP=null,CKPkey="";
+const pyName=s=>{let x=String(s||"").normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/&/g,"and").replace(/'/g,"").replace(/[^a-z0-9]/g,"");
+ for(const f of["jr","sr","iii","ii","iv","v"])if(x.endsWith(f)&&x.length>f.length+3)return x.slice(0,-f.length);return x};
+function boxGet(mk){if(!PJ||!PJ.cols)return null;const c=k=>PJ.cols.indexOf(k),I={py:c("py"),pa:c("pa"),pc:c("pc"),ptd:c("ptd"),int:c("int"),ry:c("ry"),ra:c("ra"),rcy:c("rcy"),rec:c("rec")};
+ const one=k=>I[k]>=0?g=>g[I[k]]:null,two=(a,b)=>I[a]>=0&&I[b]>=0?g=>g[I[a]]+g[I[b]]:null;
+ return({player_pass_yds:one("py"),player_pass_attempts:one("pa"),player_pass_completions:one("pc"),player_pass_tds:one("ptd"),player_pass_interceptions:one("int"),
+  player_rush_yds:one("ry"),player_rush_attempts:one("ra"),player_reception_yds:one("rcy"),player_receptions:one("rec"),
+  player_rush_reception_yds:two("ry","rcy"),player_pass_rush_yds:two("py","ry")})[mk]||null}
+function ckNext(p){
+ for(const r of p.rows){const g=GI[r.g];if(g&&r.sd)return{g,sd:r.sd}}
+ if(p.rows.length){const g=GI[p.rows[0].g];if(g&&p.tid)return{g,sd:g.a.tid===p.tid?"a":g.h.tid===p.tid?"h":null}}
+ if(!p.tid)return null;
+ const g=G.filter(g=>live(g)&&g.sp===p.sp&&(g.a.tid===p.tid||g.h.tid===p.tid)).sort((a,b)=>(a.t||0)-(b.t||0))[0];
+ return g?{g,sd:g.a.tid===p.tid?"a":"h"}:null}
+function ckPeople(){const key=(DATA&&DATA.updated)+"|"+(PJ?PJ.updated:"");if(CKP&&CKPkey===key)return CKP;
+ const L=[],byAid={},byName={};
+ if(PJ&&PJ.players)for(const aid in PJ.players){const b=PJ.players[aid];if(!b||!Array.isArray(b.g))continue;
+  const p={aid,n:b.n,sp:b.s,ab:b.t,tid:b.tid,box:b,rows:[]};L.push(p);byAid[aid]=p;byName[b.s+"|"+pnm(b.n)]=p}
+ for(const r of P){if(!live(GI[r.g]))continue;const t=teamOf(r),nk=r.sp+"|"+pnm(r.pl);let p=(r.aid&&byAid[r.aid])||byName[nk];
+  if(!p){p={aid:r.aid||null,n:r.pl,sp:r.sp,ab:t?t.ab:null,tid:t?t.tid:null,box:null,rows:[]};L.push(p);if(r.aid)byAid[r.aid]=p;byName[nk]=p}
+  p.rows.push(r);if(t){p.tid=t.tid;p.ab=t.ab||p.ab}}
+ for(const p of L){p.key=p.aid||p.sp+"|"+pnm(p.n);p.nm=pnm(p.n);p.next=ckNext(p);p.last=p.box&&p.box.g[0]?p.box.g[0][0]:0;
+  p.rows.sort((a,b)=>propSide(b).p-propSide(a).p)}
+ CKPkey=key;return CKP=L}
+function ckFind(q){const n=pnm(q);if(n.length<2)return[];const words=n.split(" ");
+ const sc=p=>{const nm=p.nm;if(nm===n)return 0;if(nm.startsWith(n))return 1;if(nm.split(" ").some(w=>w.startsWith(n)))return 2;if(words.every(w=>nm.split(" ").some(x=>x.startsWith(w))))return 3;if(nm.includes(n))return 4;return 9};
+ return ckPeople().map(p=>({p,s:sc(p)})).filter(x=>x.s<9)
+  .sort((a,b)=>a.s-b.s||(b.p.rows.length>0)-(a.p.rows.length>0)||(!!b.p.next)-(!!a.p.next)||b.p.last-a.p.last||a.p.n.localeCompare(b.p.n)).slice(0,8).map(x=>x.p)}
+const ROLE={qb:["player_pass_yds","player_pass_rush_yds","player_rush_yds","player_pass_tds","player_pass_completions","player_pass_attempts","player_pass_interceptions","player_rush_attempts"],
+ rb:["player_rush_yds","player_rush_reception_yds","player_rush_attempts","player_receptions","player_reception_yds"],
+ wr:["player_reception_yds","player_receptions","player_rush_reception_yds"]};
+function ckStats(p){const out=p.rows.map(r=>r.mk),g=p.box?p.box.g:[];
+ if(g.length&&PJ&&PJ.cols){const c=k=>PJ.cols.indexOf(k),share=i=>g.filter(x=>x[i]>0).length/g.length,roles=[];
+  if(share(c("pa"))>=.5)roles.push("qb");if(share(c("ra"))>=.4)roles.push("rb");if(share(c("rec"))>=.4)roles.push("wr");
+  if(!roles.length)roles.push(g.some(x=>x[c("pa")]>0)?"qb":g.some(x=>x[c("rec")]>0)?"wr":"rb");
+  roles.forEach(r=>out.push(...ROLE[r]))}
+ return [...new Set(out)].filter(mk=>MK[mk])}
+function ckVals(p,mk){const f=boxGet(mk);if(p.box&&f)return{v:p.box.g.map(f),g:p.box.g};
+ const r=p.rows.find(x=>x.mk===mk);return r&&r.rf&&r.rf.v?{v:r.rf.v.slice(),g:null}:{v:[],g:null}}
+const med=a=>{const s=a.slice().sort((x,y)=>x-y),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):null};
+function ckDefLine(p,mk){const r=p.rows.find(x=>x.mk===mk);if(r)return r.ln;const v=ckVals(p,mk).v;if(!v.length)return 0.5;return Math.floor(med(v))+.5}
+function ckInj(p){const r=p.rows.find(x=>x.ij);if(r)return r.ij;return p.sp==="NFL"&&PJ&&PJ.inj?PJ.inj[pyName(p.n)]||null:null}
+function ckJudge(p,mk,ln){
+ const r=p.rows.find(x=>x.mk===mk),nx=p.next,V=ckVals(p,mk),v=V.v,n=v.length;
+ const o=v.filter(x=>x>ln).length,u=v.filter(x=>x<ln).length;
+ let q,src,shift=0;
+ if(r){const base=pFinal(r);shift=+(ln-r.ln).toFixed(2);q=shift?Phi(PhiInv(base)-shift/sigmaFor(mk,r.ln)):base;src="books"}
+ else{if(n<2)return{none:true,v,V,o,u};
+  const w=v.map((_,i)=>Math.pow(.85,i)),W=w.reduce((a,b)=>a+b,0),mean=v.reduce((a,x,i)=>a+x*w[i],0)/W;
+  const m0=v.reduce((a,b)=>a+b,0)/n,sdS=Math.sqrt(v.reduce((a,x)=>a+(x-m0)**2,0)/Math.max(1,n-1));
+  const sd=Math.max(sigmaFor(mk,Math.max(ln,1)),sdS);
+  q=.5+(Phi((mean-ln)/sd)-.5)*n/(n+4);src="form";
+  const M=nx&&nx.sd&&MATCHW[matchW]?matchup({g:nx.g.id,sd:nx.sd,mk,ln}):null;
+  if(M)q=Phi(PhiInv(q)+(ln*(M.m-1)*MATCHW[matchW])/sigmaFor(mk,ln));
+  q=clamp(q,.35,.65)}
+ const side=q>=.5?"o":"u",ps=Math.max(q,1-q),S=side==="o"?"More":"Less";
+ // recent games pointing the other way
+ const fr=o+u?o/(o+u):.5,formOpp=o+u>=4&&(fr>=.5)!==(side==="o")&&Math.abs(fr-.5)>=.0999;
+ const mix=r&&!shift?mixed(r):formOpp,all=r&&!shift?agree(r):false;
+ const ij=ckInj(p),out=ij&&/out|reserve|doubtful|suspend/i.test(ij);
+ let head,cls;
+ if(out){head="Stay away";cls="no"}
+ else if(src==="books"){if(ps<BE.lo){head="Coin flip";cls="flat"}else if(mix){head=`Mixed, leans ${S}`;cls="mix"}else if(ps>=BE.hi){head=(all?"Loves ":"Likes ")+S;cls="good"}else{head=`Leans ${S}`;cls="ok"}}
+ else{if(ps<.56){head="No real lean";cls="flat"}else if(mix){head=`Mixed, leans ${S}`;cls="mix"}else{head=`Leans ${S}`;cls="ok"}}
+ return{r,q,src,shift,side,ps,S,head,cls,mix,all,ij,out,v,V,o,u,n}}
+function ckGames(V,ln){if(!V.g)return V.v.length?`<div class="cklog">${V.v.map(x=>`<span class="${x>ln?"ov":""}">${x}</span>`).join("")}</div>`:"";
+ return `<div class="cklog">${V.g.map((g,i)=>{const d=String(g[0]);return `<span class="${V.v[i]>ln?"ov":""}">${+d.slice(4,6)}/${+d.slice(6)} ${g[2]?"vs":"@"} ${esc(g[1])}: <b>${V.v[i]}</b></span>`}).join("")}</div>`}
+function ckVerdict(){const p=CK.p,mk=CK.mk,ln=CK.ln,J=ckJudge(p,mk,ln),nx=p.next,g=nx&&nx.g,be2=bePower(2);
+ const lnTxt=Number.isInteger(ln)?ln:(+ln).toFixed(1),stat=MK[mk]||mk;
+ if(J.none)return `<section class="card ckv"><div class="feel flat"><div><small>The board</small><b class="hl">Can't tell</b></div></div>
+  <ul class="why"><li>${J.n?`Only ${J.n} game`:"No games"} on file for his ${esc(stat.toLowerCase())}, so there's nothing to go on.${PJ===false?" The full player list shows up after the next board update.":""}</li></ul></section>`;
+ const r=J.r,slip=r&&!J.shift;
+ const lean=J.cls!=="flat"&&!J.out;
+ const sideBox=s=>{const pp=s==="o"?J.q:1-J.q,on=slip&&pps[r.k]===s,rec=lean&&J.side===s?"rec":"",lab=`<small>${s==="o"?"More":"Less"} ${lnTxt}</small><b>${pct(pp)}</b>`;
+  return slip?`<button class="side-b ${rec} ${on?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${on}">${lab}</button>`:`<div class="side-b ${rec}">${lab}</div>`};
+ const why=[];
+ if(J.out)why.push(`<b>He's listed ${esc(J.ij)}.</b> If he doesn't play, PrizePicks usually voids the pick, but don't count on it.`);
+ if(J.src==="books"){why.push(`<b>Sportsbooks:</b> ${r.nb} book${r.nb===1?"":"s"} price ${r.pp?"the PrizePicks line":"this stat"} at ${r.ln}, with More at ${pct(r.lo)} to ${pct(r.hi)}.${J.shift?` Your line is ${Math.abs(J.shift)} ${J.shift>0?"higher":"lower"} than ${r.ln}, so the chance is moved to match.`:""}`)}
+ else why.push(`<b>No sportsbook lines for him in this update</b>, so this comes from his recent games${nx&&nx.sd?" and the matchup":""} only. Treat it as a lean, not a lock.`);
+ if(J.n)why.push(`<b>Recent games:</b> over ${lnTxt} in ${J.o} of his last ${J.n}${J.u+J.o<J.n?` (${J.n-J.o-J.u} right on it)`:""}. Median ${med(J.v)}.${ckGames(J.V,ln)}`);
+ if(g&&nx.sd){const pr={g:g.id,sd:nx.sd,mk,ln,ij:null,op:null};const mc=MATCHW[matchW]?matchChip(pr):"",xc=extraChips(pr);
+  if(mc||xc)why.push(`<b>Matchup:</b><br>${mc} ${xc}`);
+  if(g[nx.sd].imp!=null)why.push(`His team is expected to score <b>${g[nx.sd].imp}</b> points.`)}
+ if(r&&r.tmo&&r.tmo.length)why.push(`Teammates out: ${esc(r.tmo.join(", "))}.`);
+ if(J.ij&&!J.out)why.push(`<span class="mchip tough">${esc(J.ij)}</span> Check his status before kickoff.`);
+ if(J.mix&&J.cls!=="flat")why.push(J.src==="books"?"The books and his recent games point opposite ways, so the board's scanners skip this pick.":`His recent games point ${J.side==="o"?"Less":"More"} at this line, but the matchup tips it ${J.S}.`);
+ if(J.all)why.push("<b>All signals agree:</b> the books, his recent games and the matchup point the same way.");
+ if(!J.out&&J.cls!=="flat")why.push(`${J.ps>=be2?"Clears":"Falls short of"} the ${pct(be2)} each pick needs on a 2-pick Power Play.`);
+ return `<section class="card ckv"><div class="feel ${J.cls}"><div><small>The board${J.src==="books"?"":" · recent games only"}</small><b class="hl">${esc(J.head)}</b></div><div class="sides">${sideBox("o")}${sideBox("u")}</div></div>
+  <ul class="why">${why.map(x=>`<li>${x}</li>`).join("")}</ul>
+  ${slip?`<p class="fine">Tap More or Less to add it to your lineup.</p>`:r?`<p class="fine">Set the line back to ${r.ln} to add it to your lineup.</p>`:""}</section>`}
+function ckVerdictDraw(){const el=$("#ckv");if(el&&CK&&CK.p)el.innerHTML=ckVerdict()}
+function ckDraw(){const el=$("#ckbody");if(!el||!CK)return;const p=CK.p;
+ if(!p){const L=ckFind(CK.q);
+  const note=PJ===null?'<p class="fine">Loading every player…</p>':PJ===false?'<p class="fine">Right now you can check players with props on the board. Every NFL and college player shows up after the next board update.</p>':"";
+  el.innerHTML=CK.q.trim().length<2?`<p class="fine">Type a name, like ${esc((P[0]&&P[0].pl)||"Jack Foley")}. You'll see how the board feels about any line you enter.</p>${note}`
+   :L.length?`<div class="cklist">${L.map(x=>{const g=x.next&&x.next.g,o=g&&x.next.sd?g[x.next.sd==="a"?"h":"a"]:null;
+     return `<button class="ckrow" data-ckpick="${esc(x.key)}"><span><b>${esc(x.n)}</b><small>${esc([x.ab,x.sp==="CFB"?"College":x.sp].filter(Boolean).join(" · "))}${o?` · next ${x.next.sd==="a"?"@":"vs"} ${esc(o.ab||o.n)} ${esc(when(g))}`:""}</small></span>${x.rows.length?'<span class="tier t2">On the board</span>':""}</button>`}).join("")}</div>${note}`
+   :`<div class="card empty" style="margin-top:10px">No player named "${esc(CK.q)}".${PJ?" Try the last name only.":""}</div>${note}`;
+  return}
+ const stats=ckStats(p),shown=CK.all?stats:stats.slice(0,5);if(!stats.includes(CK.mk)){CK.mk=stats[0];CK.ln=CK.mk?ckDefLine(p,CK.mk):0.5}
+ const nx=p.next,g=nx&&nx.g,o=g&&nx.sd?g[nx.sd==="a"?"h":"a"]:null,r=p.rows.find(x=>x.mk===CK.mk);
+ el.innerHTML=`<div class="ckhead"><div><b>${esc(p.n)}</b><small>${esc([p.ab,p.sp==="CFB"?"College":p.sp].filter(Boolean).join(" · "))}${o?` · ${nx.sd==="a"?"@":"vs"} ${esc(o.ab||o.n)}, ${esc(when(g))}`:" · no game on the board yet"}</small></div><button class="sm" data-ckback>Search</button></div>
+  ${stats.length?`<div class="filters">${shown.map(mk=>`<button class="pill ${CK.mk===mk?"on":""}" data-ckmk="${mk}">${esc(MK[mk])}${p.rows.some(x=>x.mk===mk)?" ★":""}</button>`).join("")}${stats.length>5?`<button class="pill" data-ckall>${CK.all?"Fewer":"More stats"}</button>`:""}</div>
+  <div class="ckline"><label>PrizePicks line<input id="ckln" type="number" inputmode="decimal" step="0.5" min="0" value="${CK.ln}"></label><span class="k">${r?`Board line ${r.ln}${r.pp?"":" (sportsbooks)"}`:"Enter the line from the app"}</span></div>
+  <div id="ckv">${ckVerdict()}</div>${p.rows.length?'<p class="fine">★ means the board pulled sportsbook lines for that stat.</p>':""}`
+  :`<div class="card empty" style="margin-top:10px">No passing, rushing or receiving games on file for him yet.</div>`}`}
+function ckSelect(key){const p=ckPeople().find(x=>x.key===key);if(!p)return;CK.p=p;CK.all=false;
+ const st=ckStats(p);CK.mk=(p.rows[0]&&p.rows[0].mk)||st[0];CK.ln=CK.mk?ckDefLine(p,CK.mk):0.5;
+ const q=$("#ckq");if(q){q.value=p.n;CK.q=p.n}ckDraw()}
+function ckOpen(q){CK={q:q||"",p:null,mk:null,ln:0.5,all:false};
+ $("#cksheet").innerHTML=`<h3>Check a pick</h3><p>Search any NFL or college player and enter the PrizePicks line. The board tells you which side it likes and why.</p>
+  <input class="search" id="ckq" type="search" placeholder="Player name" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search" aria-label="Player name" value="${esc(CK.q)}" style="width:100%">
+  <div id="ckbody"></div><div class="btns"><button class="btn" data-ckclose>Done</button></div>`;
+ ckDraw();$("#check").showModal();const i=$("#ckq");i.focus();i.setSelectionRange(i.value.length,i.value.length);
+ if(PJ===null&&!PJload)PJload=fetch("players.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{PJ=j&&j.players?j:false}).catch(()=>{PJ=false}).finally(()=>{if(CK&&!CK.p)ckDraw()})}
+$("#check").addEventListener("close",()=>{CK=null});
+$("#check").addEventListener("click",e=>{if(e.target.id==="check")$("#check").close()});
+document.addEventListener("keydown",e=>{if(CK&&e.target.id==="ckq"&&e.key==="Enter"){const f=ckFind(CK.q)[0];if(f){e.preventDefault();ckSelect(f.key);e.target.blur()}}});
+
 function renderSportBar(){
  const live2=G.filter(live),n=sp=>live2.filter(g=>sp==="all"||g.sp===sp).length;
  $("#sportbar").innerHTML=[["all","All"],["NFL","NFL"],["CFB","College"]].map(([k,l])=>`<button class="pill ${ui.sport===k?"on":""}" data-sport="${k}">${l}<span class="ct">${n(k)}</span></button>`).join("");
@@ -994,7 +1151,15 @@ document.addEventListener("click",e=>{
  if(d.sport){ui.sport=d.sport;LS.set("pb_sport",ui.sport);ui.ml.res=null;ui.pp.res=null;keep();return}
  if(d.day){ui.day=d.day;keep();return}
  if(d.pick){const[id,s]=d.pick.split("|");if(sel[id]===s)delete sel[id];else sel[id]=s;ui.kind="ml";save();keep();return}
- if(d.pp){const[i,s]=d.pp.split("|"),r=P[+i];if(!r)return;if(pps[r.k]===s)delete pps[r.k];else pps[r.k]=s;ui.kind="pp";save();keep();return}
+ if(d.pp){const[i,s]=d.pp.split("|"),r=P[+i];if(!r)return;if(pps[r.k]===s)delete pps[r.k];else pps[r.k]=s;ui.kind="pp";save();keep();if(CK)ckVerdictDraw();return}
+ if(d.check!==undefined){ckOpen(d.check);return}
+ if(CK&&t.closest("#check")){
+  if(d.ckpick!==undefined){ckSelect(d.ckpick);return}
+  if(d.ckmk){CK.mk=d.ckmk;CK.ln=ckDefLine(CK.p,CK.mk);ckDraw();return}
+  if(d.ckback!==undefined){CK.p=null;ckDraw();const q=$("#ckq");q.focus();q.select();return}
+  if(d.ckall!==undefined){CK.all=!CK.all;ckDraw();return}
+  if(d.ckclose!==undefined){$("#check").close();return}
+ }
  if(d.more){ui.open[d.more]=!ui.open[d.more];keep();return}
  if(d.pinfo){const r=P[+d.pinfo];if(r){ui.popen[r.k]=!ui.popen[r.k];keep()}return}
  if(d.wx){const x=adj[d.wx]=adj[d.wx]||{};x.w=((x.w||0)+1)%4;save();keep();return}
@@ -1058,6 +1223,8 @@ document.addEventListener("click",e=>{
  if(d.closesettings!==undefined){$("#settings").close();return}
 });
 document.addEventListener("input",e=>{const t=e.target;
+ if(CK&&t.id==="ckq"){CK.q=t.value;CK.p=null;ckDraw();return}
+ if(CK&&t.id==="ckln"){const v=parseFloat(t.value);if(isFinite(v)&&v>=0){CK.ln=v;ckVerdictDraw()}return}
  if(lt&&t.dataset&&t.dataset.lf!==undefined){ltInput(t);return}
  if(t.id==="payamt"){payNet();return}
  if(t.id==="gq"){ui.q=t.value;const pos=t.selectionStart;keep();const n=$("#gq");n.focus();n.setSelectionRange(pos,pos);return}

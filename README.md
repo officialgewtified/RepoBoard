@@ -9,6 +9,7 @@ NFL and college football moneylines from every sportsbook in the feed, PrizePick
 4. Actions tab > "Update board data" > Run workflow once. After that it runs Tue, Thu, Fri, Sat and Sunday morning on its own.
 
 ## What's on the board
+- **Check any player's pick:** the search bar at the top. Type any NFL or college player's name, pick the stat and enter the PrizePicks line, and the board says how it feels (Likes, Leans, Coin flip, Mixed or Stay away) and why: sportsbook prices when the board pulled them, his recent games against your line, the matchup, injuries and whether it clears what a 2-pick Power Play needs. Players without sportsbook lines are judged on recent games and the matchup only, so they top out at a lean. If the PrizePicks tab search finds no prop, it offers to check the player anyway.
 - **Top picks:** the best PrizePicks lineup, the best lineup at each size, the strongest single picks (no more than 2 from one game while other games have picks), moneylines priced above fair, safest favorites and suggested parlays.
 - **Games:** every NFL and college game with the best price at your books, fair win chance (vig removed, middle value across all books), weather and injuries. Tap Details for every book's price.
 - **PrizePicks:** every player prop with the chance of More and Less at the PrizePicks line. The lineup scanner scores every 2 to 6 pick lineup of the strongest picks for Power and Flex. Every lineup follows PrizePicks' rule of picks from at least 2 different teams, and the slip won't save one that doesn't (each pick shows the player's team).
@@ -27,6 +28,7 @@ NFL and college football moneylines from every sportsbook in the feed, PrizePick
 - Change any of this in `settings.json`.
 
 ## Notes
+- players.json is every NFL and FBS player's last 8 games of passing, rushing and receiving, read from ESPN box scores (no Odds API credits). Each update only reads games that finished since the last one, and the first update fills in the last 7 weeks.
 - tickets.json adds tickets you forgot to save from the slip. Each one shows up on the Tickets tab once (by id), and deleting it there keeps it gone.
 - overrides.json can set a venue for a neutral-site game, but neutral sites are now picked up automatically from ESPN.
 - If you change the schedule in .github/workflows/update.yml, change `schedule` in settings.json to match.

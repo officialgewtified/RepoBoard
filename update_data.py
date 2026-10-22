@@ -1020,6 +1020,121 @@ def summarize(h):
     return out
 
 
+# ---------- every player's recent games, for "Check a pick" (ESPN box scores, no Odds API credits) ----------
+# players.json keeps the last BOX_KEEP games of passing, rushing and receiving for every NFL and FBS
+# player, read from game box scores. Each run only reads games that finished since the last run.
+BOX_COLS = ["py", "pa", "pc", "ptd", "int", "ry", "ra", "rcy", "rec"]   # after [date, opponent, home]
+BOX_KEEP = 8
+BOX_LOOKBACK = 49        # days read on the first run
+BOX_SECONDS = 360        # time limit per run; whatever is left gets read next run
+BOX = requests.Session()
+
+def box_int(x):
+    try: return int(round(float(str(x).replace(",", ""))))
+    except (TypeError, ValueError): return 0
+
+def box_score(sport, eid):
+    """{athlete id: (name, team abbr, team id, opponent abbr, home 1/0, {stat: value})} for one finished game."""
+    j = BOX.get(f"https://site.api.espn.com/apis/site/v2/sports/{ESPN_PATH[sport]}/summary",
+                params={"event": eid}, timeout=30).json()
+    sides = (j.get("boxscore") or {}).get("players") or []
+    if len(sides) != 2:
+        return {}
+    comp = (((j.get("header") or {}).get("competitions")) or [{}])[0]
+    ha = {str(c.get("id") or (c.get("team") or {}).get("id")): c.get("homeAway") for c in comp.get("competitors", [])}
+    out = {}
+    for i, side in enumerate(sides):
+        t, o = side.get("team") or {}, (sides[1 - i].get("team") or {})
+        tid = str(t.get("id", ""))
+        home = 1 if (ha.get(tid) == "home" if ha.get(tid) else side.get("displayOrder", i + 1) == 2) else 0
+        for cat in side.get("statistics", []):
+            name, keys = cat.get("name"), cat.get("keys") or []
+            if name not in ("passing", "rushing", "receiving"):
+                continue
+            for a in cat.get("athletes", []):
+                ath, vals = a.get("athlete") or {}, dict(zip(keys, a.get("stats") or []))
+                if not ath.get("id"):
+                    continue
+                row = out.setdefault(str(ath["id"]), (ath.get("displayName", ""), t.get("abbreviation", ""), tid,
+                                                      o.get("abbreviation", ""), home, {}))[5]
+                if name == "passing":
+                    ca = str(vals.get("completions/passingAttempts", "0/0")).split("/")
+                    row.update(pc=box_int(ca[0]), pa=box_int(ca[-1]), py=box_int(vals.get("passingYards")),
+                               ptd=box_int(vals.get("passingTouchdowns")), int=box_int(vals.get("interceptions")))
+                elif name == "rushing":
+                    row.update(ra=box_int(vals.get("rushingAttempts")), ry=box_int(vals.get("rushingYards")))
+                else:
+                    row.update(rec=box_int(vals.get("receptions")), rcy=box_int(vals.get("receivingYards")))
+    return out
+
+def build_players(inj):
+    """Adds finished games to players.json. Returns True when the file changed."""
+    pj = load_json("players.json", {})
+    players, done = pj.get("players", {}), pj.get("done", {})
+    start, read, changed = time.time(), 0, False
+    today = NOW.astimezone(ET).date()
+    for sport in ("NFL", "CFB"):
+        seen = set(done.get(sport, {}).get("ids", []))
+        through = done.get(sport, {}).get("through")
+        first = today - dt.timedelta(days=BOX_LOOKBACK)
+        if through:   # re-read the last 2 days in case a game wasn't final yet
+            first = max(first, dt.datetime.strptime(through, "%Y%m%d").date() - dt.timedelta(days=2))
+        days = [today - dt.timedelta(days=k) for k in range((today - first).days + 1)]   # newest first
+        timed_out = False
+        for d in days:
+            if time.time() - start > BOX_SECONDS:
+                timed_out = True; break
+            day = d.strftime("%Y%m%d")
+            for eid in final_scores(sport, day):
+                if eid in seen:
+                    continue
+                if time.time() - start > BOX_SECONDS:
+                    timed_out = True; break
+                try:
+                    box = box_score(sport, eid)
+                except Exception as e:
+                    print("box score failed:", sport, eid, e); continue
+                read += 1; seen.add(eid); changed = True
+                for aid, (name, ab, tid, opp, home, st) in box.items():
+                    p = players.setdefault(aid, {"n": name, "s": sport, "t": ab, "tid": tid, "g": []})
+                    p["g"] = [g for g in p["g"] if g[0] != int(day)]
+                    p["g"].append([int(day), opp, home] + [st.get(c, 0) for c in BOX_COLS])
+                    p["g"].sort(key=lambda g: g[0], reverse=True)
+                    p["g"] = p["g"][:BOX_KEEP]
+                    if p["g"][0][0] == int(day):         # name and team as of his latest game
+                        p.update(n=name, t=ab, tid=tid)
+            if timed_out:
+                break
+        done[sport] = {"ids": sorted(seen)[-1500:],
+                       "through": (done.get(sport, {}).get("through") if timed_out else (today - dt.timedelta(days=1)).strftime("%Y%m%d"))}
+    # drop players who haven't played in 10 weeks or barely touch the ball
+    old = int((today - dt.timedelta(days=70)).strftime("%Y%m%d"))
+    def keeps(p):
+        g = p["g"]
+        if not g or g[0][0] < old: return False
+        tot = [sum(x[3 + i] for x in g) for i in range(len(BOX_COLS))]
+        c = dict(zip(BOX_COLS, tot))
+        return c["pa"] >= 5 or c["py"] + c["ry"] + c["rcy"] >= 25 or c["rec"] >= 2
+    before = len(players)
+    players = {k: v for k, v in players.items() if keeps(v)}
+    changed = changed or len(players) != before
+    injuries = {}
+    for team, lst in (inj or {}).items():
+        for name, pos, status in lst:
+            if status and status.lower() not in ("active",):
+                injuries[pname(name)] = status
+    if injuries != pj.get("inj"):
+        changed = True
+    print(f"players: read {read} box scores in {time.time() - start:.0f}s; {len(players)} players on file")
+    if not changed:
+        return False
+    out = {"updated": iso(NOW), "cols": ["date", "opp", "home"] + BOX_COLS, "inj": injuries,
+           "players": dict(sorted(players.items())), "done": done}
+    with open(os.path.join(HERE, "players.json"), "w") as f:
+        json.dump(out, f, separators=(",", ":"))
+    return True
+
+
 def main():
     s = settings()
     overrides = load_json("overrides.json", {})
@@ -1038,6 +1153,10 @@ def main():
     except Exception as e:
         print("track record failed:", e)
         record = None
+    try:
+        build_players(inj)
+    except Exception as e:
+        print("player list failed:", e)
     out = {"updated": iso(NOW), "games": games, "props": props,
            "markets": {k: MARKET_LABEL[k] for k in s["prop_markets"] if k in MARKET_LABEL},
            "books": BOOK_TITLES,
