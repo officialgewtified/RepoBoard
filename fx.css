@@ -448,7 +448,104 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 :root[data-sport="fb"][data-theme="mix"]{--led:#ffb420;--ledink:#1b1200}
 :root[data-sport="bb"][data-theme="mix"]{--led:#ff8b2c;--ledink:#1d0c00}
 
+/* ---------- projections and streaks ---------- */
+.mchip.proj{background:color-mix(in srgb,var(--ink) 9%,var(--raise));color:var(--ink);font-weight:700}
+.mchip.hot{background:color-mix(in srgb,#ff6a2a 22%,var(--raise));color:#ff9b6b;font-weight:750}
+.mchip.cold{background:color-mix(in srgb,#5aa8ff 22%,var(--raise));color:#8cc4ff;font-weight:750}
+:root[data-theme="clean"] .mchip.hot{color:#b7410e}:root[data-theme="clean"] .mchip.cold{color:#1f5fa8}
+.who .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+/* ---------- today's ticker ---------- */
+.ticker{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;margin:14px -16px 0;padding:2px 16px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.ticker::-webkit-scrollbar{display:none}
+.tg{flex:none;scroll-snap-align:start;min-width:104px;padding:7px 10px 8px;background:var(--panel);clip-path:var(--tile);box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:2px}
+.tg.mine{box-shadow:inset 0 0 0 1px var(--line),inset 3px 0 0 var(--led)}
+.tg .tt{font-size:11px;font-weight:750;color:var(--mute);letter-spacing:.02em;text-transform:uppercase;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tg.live .tt{color:var(--stop)}
+.tg .tt i{width:7px;height:7px;border-radius:50%;background:var(--stop);animation:fxLive 1.4s ease-in-out infinite}
+.tg .tr{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
+.tg .tr b{font-weight:750}
+.tg .tr em{font:italic 900 17px/1 var(--fd);font-stretch:68%;font-style:italic}
+.tg.fin .tt{color:var(--mute)}
+.ticker.big{margin-top:6px;flex-wrap:wrap;overflow:visible}
+.ticker.big .tg{flex:1 1 150px}
+/* ---------- ticket notes ---------- */
+.tnote{margin-top:8px;font-size:13px;font-style:italic;color:var(--mute);border-left:2px solid var(--led);padding-left:8px}
+/* ---------- the win celebration ---------- */
+.kit-cheer{position:fixed;inset:0;z-index:200;pointer-events:auto;overflow:hidden}
+.kit-cheer i{position:absolute;top:-24px;border-radius:2px;animation:kitFall linear forwards}
+@keyframes kitFall{to{transform:translate(var(--x),110vh) rotate(var(--r))}}
+.kit-ban{position:absolute;left:50%;top:22%;transform:translateX(-50%);min-width:240px;text-align:center;padding:18px 24px;clip-path:var(--shape);
+ background:linear-gradient(180deg,#fff6d6 0%,#ffd24d 38%,#e39a00 52%,#ffc93a 100%);color:#2a1700;animation:kitPop .6s var(--spring)}
+.kit-ban b{display:block;font:italic 900 40px/1 var(--fd);font-stretch:66%}
+.kit-ban small{display:block;margin-top:6px;font-weight:700;font-size:14px}
+@keyframes kitPop{from{transform:translateX(-50%) scale(.6);opacity:0}}
+
+/* =========================================================================
+   Chrome: every button is a polished metal plate with real depth.
+   Gold chrome for the main action and whatever's picked; gunmetal for the rest (silver on Day).
+   Plates lift off the page with a shadow, catch a light sweep when tapped, and press in.
+   ========================================================================= */
+:root{
+ --chrome-gm:linear-gradient(180deg,#6b778c 0%,#404b5f 15%,#283142 45%,#161c28 52%,#232c3c 76%,#3b4659 100%);
+ --chrome-ag:linear-gradient(180deg,#ffffff 0%,#f0f3f7 15%,#c9d0d9 45%,#9ba3ae 52%,#cdd3db 76%,#f7f9fb 100%);
+ --chrome-au:linear-gradient(180deg,#fffbea 0%,#ffeaa8 14%,color-mix(in srgb,var(--led) 78%,#fff 22%) 40%,color-mix(in srgb,var(--led) 74%,#4a2600 26%) 52%,var(--led) 72%,color-mix(in srgb,var(--led) 55%,#fff 45%) 100%);
+ --bevel:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 0 rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.07);
+ --bevel-au:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 0 rgba(90,40,0,.42),inset 0 0 0 1px rgba(255,255,255,.28);
+ --lift:0 7px 14px -6px rgba(0,0,0,.75),0 2px 3px rgba(0,0,0,.4);
+ --lift-au:0 9px 22px -8px color-mix(in srgb,var(--led) 75%,transparent),0 2px 3px rgba(0,0,0,.4);
+ --press:inset 0 2px 6px rgba(0,0,0,.6),inset 0 -1px 0 rgba(255,255,255,.12);
+ --plate-ink:#eef2f8;--plate-shadow:0 -1px 0 rgba(0,0,0,.6)}
+:root[data-theme="clean"]{--chrome-gm:var(--chrome-ag);--plate-ink:#18202d;--plate-shadow:0 1px 0 rgba(255,255,255,.8);
+ --bevel:inset 0 1px 0 #fff,inset 0 -2px 0 rgba(30,40,60,.22),inset 0 0 0 1px rgba(20,30,50,.12);
+ --lift:0 6px 14px -7px rgba(15,27,45,.45),0 1px 2px rgba(15,27,45,.25);--press:inset 0 2px 5px rgba(15,27,45,.35)}
+
+.btn,.sm,.pill,.side-b,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn{
+ clip-path:none;border:0;border-radius:12px;position:relative;overflow:hidden;isolation:isolate;
+ background:var(--chrome-gm);color:var(--plate-ink);text-shadow:var(--plate-shadow);box-shadow:var(--bevel),var(--lift)}
+.pill,.net a,.iconbtn{border-radius:999px}
+.side-b{border-radius:14px}
+.mode{color:color-mix(in srgb,var(--plate-ink) 75%,transparent)}
+.mode b,.side-b small,.side-b .ln{color:var(--plate-ink)}
+.pill .ct{opacity:.7}
+.net a{box-shadow:var(--bevel),var(--lift)}
+.net a.on{box-shadow:var(--bevel-au),var(--lift-au)}
+/* gold: the main action and whatever's picked */
+.btn.go,.pill.on,.side-b.on,.mode.on,.receipt .rbtns .go,.net a.on,.shr-b .btn.go,.combo .use{
+ background:var(--chrome-au);color:var(--ledink,#1b1200);text-shadow:0 1px 0 rgba(255,255,255,.45);box-shadow:var(--bevel-au),var(--lift-au)}
+.side-b.on b,.side-b.on small,.side-b.on .ln,.mode.on b,.net a.on i{color:var(--ledink,#1b1200);background-color:transparent}
+.net a.on i{background:var(--ledink,#1b1200)}
+.mode.on{color:color-mix(in srgb,var(--ledink,#1b1200) 80%,transparent)}
+/* the board's side: a lit LED strip under the plate */
+.side-b.rec:not(.on){box-shadow:var(--bevel),var(--lift),inset 0 -3px 0 var(--led),0 0 14px -4px var(--led)}
+.side-b b{text-shadow:0 1px 0 rgba(0,0,0,.45)}
+.side-b.on b{text-shadow:0 1px 0 rgba(255,255,255,.4)}
+:root[data-theme="clean"] .side-b b{text-shadow:none}
+/* a light sweep crosses the plate when it's tapped; the main button catches one every few seconds */
+.btn::after,.sm::after,.pill::after,.side-b::after,.iconbtn::after,.mode::after,.tk .m button::after,.receipt .rbtns button::after,.net a::after,.shr-b .btn::after{
+ content:"";position:absolute;inset:-2px;z-index:1;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(112deg,transparent 32%,rgba(255,255,255,.42) 47%,rgba(255,255,255,.1) 53%,transparent 64%);transform:translateX(-135%)}
+.fx-press::after{transform:translateX(135%);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.btn.go::after,.receipt .rbtns .go::after{animation:fxSheen 6s ease-in-out infinite}
+@keyframes fxSheen{0%,74%{transform:translateX(-135%)}90%,100%{transform:translateX(135%)}}
+/* pressing pushes the plate into the panel */
+:is(.btn,.sm,.pill,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn).fx-press{transform:translateY(2px) scale(.97);box-shadow:var(--press)}
+.side-b.fx-press{transform:translateY(2px) scale(.93);box-shadow:var(--press)}
+button:disabled.btn,button:disabled.mode,button:disabled.sm{opacity:.45;box-shadow:var(--bevel)}
+@media (hover:hover){:is(.btn,.sm,.pill,.side-b,.iconbtn,.mode,.net a):hover{filter:brightness(1.1) saturate(1.05)}}
+.filters{padding:3px 3px 12px;margin-bottom:-9px;margin-left:-3px;margin-right:-3px}   /* room for the plates' shadows inside the scrolling row */
+.pill{padding:8px 17px;box-shadow:var(--bevel),0 4px 7px -3px rgba(0,0,0,.6)}
+.pill.on{box-shadow:var(--bevel-au),0 4px 10px -4px color-mix(in srgb,var(--led) 85%,transparent)}
+:root[data-theme="clean"] .pill{box-shadow:var(--bevel),0 3px 6px -3px rgba(15,27,45,.35)}
+.sbar{background:var(--chrome-au);box-shadow:var(--bevel-au);color:var(--ledink,#1b1200)}
+/* the bottom bar's tab light becomes a gold rail */
+.seg .fx-ind{background:var(--chrome-au);height:4px!important;box-shadow:0 0 16px var(--led),0 0 3px var(--led)}
+/* inputs sit sunk into the panel, the opposite of a plate */
+.search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.receipt input,.lset input,.cxlim input{
+ border-radius:10px;clip-path:none;box-shadow:inset 0 2px 5px rgba(0,0,0,.45),inset 0 -1px 0 rgba(255,255,255,.06)}
+:root[data-theme="clean"] :is(.search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.receipt input,.lset input,.cxlim input){box-shadow:inset 0 2px 4px rgba(15,27,45,.18)}
+
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
  .fx-ripple,.fx-ring,.fx-spark{display:none}
+ .btn::after,.receipt .rbtns .go::after{animation:none!important}
 }

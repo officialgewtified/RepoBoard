@@ -359,7 +359,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=9">
+<link rel="stylesheet" href="../fx.css?v=10">
 </head>
 <body>
 <header class="wrap top">
@@ -570,7 +570,7 @@ function ticketsSection(){if(!XT.length)return"";
   return `<div class="card tk ${cls}"><div class="hd"><span>${esc(t.mode)} ${t.legs.length} picks, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
   ${(!t.r&&cxLiveRows(t,null))||`<div class="lgl">${t.legs.map((x,j)=>{const r=(t.res||[])[j]||{},c=r.h===true?"ok":r.h===false?"no":"na";return `<div class="${c}"><span class="mk">${r.h===true?"✓":r.h===false?"✕":"–"}</span><span>${esc(x)}${r.a!=null?` <small>had ${r.a}</small>`:""}</span></div>`}).join("")}</div>`}
   ${t.r?`<div class="res ${cls}"><b>${n>0?"Won":tRet(t)>0?"Partial":"Lost"}</b>, paid ${money(tRet(t))} (${n>=0?"+":"−"}${money(Math.abs(n))})${t.auto?", graded automatically":""}</div>`:""}
-  <div class="m"><button data-xtw="${i}">${t.r?"Edit payout":"Won"}</button><button data-xtl="${i}">Lost</button><button data-xtd="${i}">Delete</button></div></div>`}).join("")}</div>`}
+  ${t.note?`<div class="tnote">“${esc(t.note)}”</div>`:""}<div class="m"><button data-xtw="${i}">${t.r?"Edit payout":"Won"}</button><button data-xtl="${i}">Lost</button><button data-xtnote="${i}">${t.note?"Edit note":"Note"}</button><button data-xtd="${i}">Delete</button></div></div>`}).join("")}</div>`}
 function renderXSlip(){const el=$("#slip"),inn=$("#slipin");if(!el||!inn)return;
  XS=XS.filter(s=>Date.parse(s.kick)>Date.now());
  if(!XS.length){inn.innerHTML="";el.classList.remove("open");return}
@@ -605,7 +605,7 @@ const lg=x=>`<span class="lg">${esc(x.g.sp)}</span>`;
 function pickRow(x,i){const lineTxt=Number.isInteger(x.r.ln)?x.r.ln:x.r.ln.toFixed(1),gm=x.team&&x.opp?`${esc(x.team.ab||x.team.n)} ${x.r.sd==="a"?"at":"vs"} ${esc(x.opp.ab||x.opp.n)}`:`${esc(x.g.a.ab||x.g.a.n)} @ ${esc(x.g.h.ab||x.g.h.n)}`;
  return `<div class="card prop"><div class="who"><b>${i!=null?`<span class="rank">${i+1}</span>`:""}${esc(x.r.pl)}${x.r.ij?`<span class="tier mix">${esc(x.r.ij)}</span>`:""}</b>
   <span class="m">${lg(x)}<span class="stat-name">${x.side==="o"?"More":"Less"} ${lineTxt} ${esc(MK[x.r.mk]||x.r.mk)}</span><span>${gm}</span><span>${esc(when(Date.parse(x.g.kick)))}</span></span>
-  ${x.gap?`<span class="mchip gap">PrizePicks ${x.r.ln}, books ${x.r.bm}</span>`:""}<span class="m" style="margin-top:4px"><span>${esc(x.b.name)}${x.gap?"'s books":"'s math"} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
+  <span class="chips">${cxProjChips(x)}</span>${x.gap?`<span class="mchip gap">PrizePicks ${x.r.ln}, books ${x.r.bm}</span>`:""}<span class="m" style="margin-top:4px"><span>${esc(x.b.name)}${x.gap?"'s books":"'s math"} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
   <div class="sides">${(()=>{const k=xkey(x),on=xOn(x);XI[k]=x;return `<button class="side-b rec ${on?"on":""}" data-xp="${esc(k)}" aria-pressed="${on}"><small>${on?"On slip":"Add"}</small><b>${pct(x.q)}</b><span class="ln">${x.side==="o"?"More":"Less"}</span></button>`})()}</div></div>`}
 function pairCard(P,title,lede,id){if(!P)return"";const[a,c]=P.legs,all=a.q*c.q,ev=all*PAY2-1;
  return `<h2>${title}</h2><p class="lede">${lede}</p><section class="card hero"><div class="kick"><div><h3>2-pick Power Play</h3><div class="sub">Pays ${PAY2}x if both hit</div></div><div class="ev ${ev>0?"":"neg"}">${pct(all)}</div></div>
@@ -727,12 +727,45 @@ function shareRecap(btn){const R=recapData();
   led:getComputedStyle(document.documentElement).getPropertyValue("--led").trim()||"#ffa024",url:location.host+location.pathname.replace(/index\.html$/,""),
   text:`Crossover · ${R.label}: ${R.w}-${R.l}, ${R.net>=0?"+":"−"}${money(Math.abs(R.net))}`,file:"crossover-week.png"},btn)}
 
+/* ---------- projections and streaks ---------- */
+function cxProj(x){const qo=clamp(x.side==="o"?x.q:1-x.q,.02,.98);return Math.max(0,x.r.ln+x.b.sigma(x.r.mk,x.r.ln)*PhiInv(qo))}
+function cxStreak(r){const v=r.rf&&r.rf.v;if(!v||v.length<4)return null;const up=v[0]>r.ln;let n=0;for(const y of v){if(y===r.ln||(y>r.ln)!==up)break;n++}return n>=4?{up,n}:null}
+function cxProjChips(x){const f=x.r.rf,S=cxStreak(x.r);
+ return `<span class="mchip proj">Projects ${cxProj(x).toFixed(1)}${f&&f.avg!=null&&f.v&&f.v.length?` · last ${Math.min(5,f.v.length)} avg ${f.avg}`:""}</span>${S?` <span class="mchip ${S.up?"hot":"cold"}">${S.up?"Over":"Under"} in ${S.n} straight</span>`:""}`}
+
+/* ---------- today's ticker across both sports (ESPN scores, free) ---------- */
+let SC={},scAt=0,scBusy=false;
+function todayGames(){const d=etDay(Date.now()),out=[];for(const b of B)if(b.d)for(const g of b.d.games){const t=Date.parse(g.kick);if(etDay(t)===d&&(sportSel==="all"||g.sp===sportSel))out.push({...g,t,bk:b.k})}return out.sort((a,b)=>a.t-b.t)}
+async function scRefresh(force){if(scBusy||!window.Live)return;const T=todayGames();if(!T.length)return;
+ const live=T.some(g=>{const s=SC[g.eid];return g.t<=Date.now()&&!(s&&s.completed)});if(!force&&!live&&Date.now()-scAt<5*6e4)return;
+ scBusy=true;scAt=Date.now();let ch=false;const day=etDay(Date.now());
+ try{await Promise.all([...new Set(T.map(g=>g.sp))].map(async sp=>{try{const m=await Live.scores(sp,day);for(const k in m){const o=SC[k],n=m[k];if(!o||o.detail!==n.detail||o.a.score!==n.a.score||o.h.score!==n.h.score){SC[k]=n;ch=true}}}catch(e){}}))}finally{scBusy=false}
+ const a=document.activeElement;if(ch&&!(a&&a.matches&&a.matches("input,select,textarea"))&&!document.querySelector("dialog[open]"))rerender()}
+setInterval(()=>{if(!document.hidden)scRefresh()},40000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)scRefresh(true)});
+function myGames(){const ids=new Set();for(const{t,bk}of openTix())for(const l of t.lg){const b=boardFor(l,bk);if(!b||!b.d)continue;const r=(b.d.props||[]).find(r=>r.mk===l.mk&&pnmx(r.pl)===pnmx(l.pl));if(r)ids.add(r.g)}
+ for(const s of XS){const g=s.k.split("|")[1];if(g)ids.add(g)}return ids}
+function ticker(){const T=todayGames();if(!T.length)return"";const mine=myGames();
+ return `<div class="ticker" aria-label="Today's games">${T.map(g=>{const s=SC[g.eid],on=s&&s.state!=="pre",live=on&&s.state==="in";
+  return `<div class="tg ${on?(live?"live":"fin"):""} ${mine.has(g.id)?"mine":""}"><span class="tt">${on?(live?`<i></i>${esc(s.detail)}`:esc(s.completed?"Final":s.detail)):`${esc(g.sp)} ${esc(new Date(g.t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}))}`}</span>
+   <span class="tr"><b>${esc(g.a.ab||g.a.n)}</b>${on?`<em>${esc(s.a.score)}</em>`:""}</span><span class="tr"><b>${esc(g.h.ab||g.h.n)}</b>${on?`<em>${esc(s.h.score)}</em>`:""}</span></div>`}).join("")}</div>`}
+
+/* ---------- win celebration, shared with the boards so a win only gets one ---------- */
+const CHEERKEY="arena_cheered";
+const tkKey=t=>String(t.id||t.at||"")+"|"+(t.legs||[]).join(",").slice(0,60);
+function checkWins(){if(!window.Kit)return;let S;try{S=new Set(JSON.parse(localStorage.getItem(CHEERKEY)||"[]"))}catch(e){S=new Set()}
+ const first=!localStorage.getItem(CHEERKEY),now=Date.now(),wins=[];
+ for(const t of[...rawTix("pb_tickets"),...rawTix("bl_tickets"),...XT]){if(!t.r||tNet(t)<=0)continue;const k=tkKey(t);if(S.has(k))continue;S.add(k);if(!first&&tAt(t)&&now-tAt(t)<4*864e5)wins.push(t)}
+ for(const{t,bk}of openTix()){const X=t.lg.map(l=>cxLiveLeg(l,bk));if(!X.length||!X.every(x=>x&&x.j.c==="ok"))continue;const k="live:"+tkKey(t);if(S.has(k))continue;S.add(k);Kit.cheer("Every pick hit!",`${money(t.pay)} once it's graded`)}
+ try{localStorage.setItem(CHEERKEY,JSON.stringify([...S].slice(-300)))}catch(e){}
+ if(wins.length){const sum=wins.reduce((a,t)=>a+tNet(t),0);Kit.cheer(`Cashed +${money(sum)}`,wins.length>1?`${wins.length} winning tickets`:`${wins[0].mode||""} ${wins[0].legs.length}-pick hit`)}}
+
 let LAST={};
 function render(){
  const live=sp=>B.reduce((a,b)=>a+(b.d?b.d.games.filter(g=>Date.parse(g.kick)>Date.now()&&(sp==="all"||g.sp===sp)).length:0),0);
  $("#sportbar").innerHTML=SPORTS.filter(([k])=>k==="all"||live(k)).map(([k,l])=>`<button class="pill ${sportSel===k?"on":""}" data-sport="${k}">${l}<span class="ct">${live(k)}</span></button>`).join("");
  const C=picks(),best=pairs(C,false),mix=sportSel==="all"?pairs(C,true):null;LAST={best,mix};
- let h=coolBanner()+sweatSection()+recordCard();
+ let h=ticker()+coolBanner()+sweatSection()+recordCard();
  if(!C.length)h+=`<div class="card empty" style="margin-top:14px">No player props on either board right now. Each board pulls them in its overnight update for that day's games.</div>`;
  else{
   h+=pairCard(best,"The slip I'd build","If you asked me for one slip right now, it's this one: the two picks with the highest corrected chance, from 2 different teams.","best");
@@ -746,7 +779,7 @@ function render(){
  xGrade();h+=ticketsSection();h+=bankCard();h+=recapCard();h+=reportCard();h+=honestySection();
  const L=getLimit();if(L){const ws=weekStart(Date.now()),wk=[...rawTix("pb_tickets"),...rawTix("bl_tickets"),...rawTix("cx_tickets")].filter(t=>{const a=tAt(t);return a&&a>=ws}).reduce((a,t)=>a+(+t.stake||0),0);
   if(wk>=L)h=`<div class="warn" style="margin-top:14px">You've put in ${money(wk)} this week across both sports, past your ${money(L)} weekly limit.</div>`+h}
- $("#view").innerHTML=h;renderXSlip()}
+ $("#view").innerHTML=h;renderXSlip();checkWins()}
 function copyText(txt,btn){const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>{btn.textContent=o},1200)};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,()=>prompt("Copy this:",txt));else prompt("Copy this:",txt)}
 function xKeep(){const a=document.activeElement,id=a&&a.id,pos=a&&a.selectionStart;renderXSlip();if(id){const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}}}
@@ -756,7 +789,7 @@ document.addEventListener("input",e=>{const t=e.target;
   if(v>0&&st>0&&XS.length){xPay={sig:xSig(xPlay().m),m:+(v/st).toFixed(4)};try{localStorage.setItem("cx_pay",JSON.stringify(xPay))}catch(_){}}xKeep()}});
 document.addEventListener("change",e=>{if(e.target.id==="xpayin"){xPayTxt=null;renderXSlip()}});
 document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const d=t.dataset;
- if(d.sport){sportSel=d.sport;try{localStorage.setItem("cx_sport",sportSel)}catch(_){}render();return}
+ if(d.sport){sportSel=d.sport;try{localStorage.setItem("cx_sport",sportSel)}catch(_){}render();scRefresh(true);return}
  if(d.limitsave!==undefined){const v=parseFloat($("#limitamt").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(e){}const y=scrollY;render();scrollTo(0,y);return}
  if(d.xp!==undefined){const x=XI[d.xp];if(x){xToggle(x);rerender()}return}
  if(d.xslip!==undefined){const P=LAST[d.xslip];if(P){XS=P.legs.map(xItem);xSave();xOpen=true;rerender()}return}
@@ -774,6 +807,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)r
  if(d.xtl!==undefined){const t=XT[+d.xtl];if(!t)return;t.r="L";t.ret=0;delete t.auto;xTSave();rerender();return}
  if(d.xtd!==undefined){XT.splice(+d.xtd,1);xTSave();rerender();return}
  if(d.copyname!==undefined){copyText(d.copyname,t);return}
+ if(d.xtnote!==undefined){const x=XT[+d.xtnote];if(!x)return;const v=prompt("A note for this ticket (why you took it):",x.note||"");if(v===null)return;x.note=v.trim().slice(0,200);if(!x.note)delete x.note;xTSave();rerender();return}
  if(d.coolok!==undefined){try{localStorage.setItem(COOLKEY,etDay(Date.now()))}catch(_){}rerender();return}
  if(d.recapshare!==undefined){shareRecap(t);return}
  if(d.xshare!==undefined){const P=xPlay();xShare(XS,P.m,t,P.top);return}
@@ -809,6 +843,8 @@ function renderSettings(){const th=document.documentElement.dataset.theme,L=getL
  <div class="btns"><button class="btn" data-cxpayreset>Use standard payouts</button></div>
  <h4>Weekly limit</h4><p>Shared with Gridline and Baseline. Every site warns you once you've put in more than this in a week.</p>
  <div class="cxlim"><label>Weekly limit $<input id="cxlimit" type="number" inputmode="decimal" min="0" step="1" value="${L||""}" placeholder="none"></label><button class="btn" data-cxlimitsave>Save</button></div>
+ <h4>Backup</h4><p>Your tickets, slips, bankroll and settings for all three sites are saved only on this phone. Save a backup to Files or iCloud now and then, and restore it after clearing Safari or on a new phone.</p>
+ <div class="btns"><button class="btn" data-cxbackup>Back up</button><button class="btn" data-cxrestore>Restore</button></div>
  <h4>How Crossover picks</h4><div class="how"><p><b>Both boards:</b> Crossover reads Gridline's and Baseline's lines, recent games and matchups, and works out each pick's chance the same way the boards do, with your settings above.</p>
  <p><b>The correction:</b> each board's chances are adjusted to match how its graded PrizePicks-line picks have really hit, so a board whose big numbers haven't held up can't outrank one that's been right.</p>
  <p><b>Slips:</b> "The slip I'd build" is the two picks with the highest corrected chance from 2 different teams. A 2-pick Power Play needs ${pct(BE2)} per pick at ${PAY2}x.</p></div>
@@ -827,6 +863,8 @@ document.addEventListener("click",e=>{const t=e.target.closest("button,input[typ
  if(d.cxskip!==undefined){CXS.skipMixed=t.checked;cxSave();rerender();return}
  if(d.cxpayreset!==undefined){XPAY=JSON.parse(JSON.stringify(XPAY_STD));payChanged();renderSettings();rerender();return}
  if(d.cxlimitsave!==undefined){const v=parseFloat($("#cxlimit").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(_){}t.textContent="Saved";rerender();return}
+ if(d.cxbackup!==undefined){Kit.backup(t);return}
+ if(d.cxrestore!==undefined){Kit.restore();return}
  if(d.cxclose!==undefined){$("#settings").close();return}});
 document.addEventListener("change",e=>{const t=e.target,d=t.dataset;if(!t.closest||!t.closest("#sheet"))return;
  if(d.cxpayp){const v=parseFloat(t.value);if(v>0){XPAY.power[d.cxpayp]=v;payChanged();rerender()}return}
@@ -836,10 +874,11 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  fetch(b.hist,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null)]).then(([d,h])=>{b.d=d&&Array.isArray(d.games)?d:null;b.h=h;
  if(b.d){b.GI={};b.d.games.forEach(g=>b.GI[g.id]=g)}calib(b)}))).then(()=>{
  const st=B.map(b=>`${esc(b.name)} <b>${b.d?new Date(b.d.updated).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}):"not loaded"}</b>`).join("<br>");
- $("#stamp").innerHTML=st;render();liveRefresh();injRefresh(true)});
+ $("#stamp").innerHTML=st;render();liveRefresh();injRefresh(true);scRefresh(true)});
 </script>
 <script src="../share.js?v=3"></script>
-<script src="../live.js?v=1"></script>
+<script src="../live.js?v=2"></script>
+<script src="../kit.js?v=1"></script>
 <script src="../fx.js?v=10"></script>
 </body>
 </html>

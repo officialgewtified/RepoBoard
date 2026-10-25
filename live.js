@@ -50,5 +50,12 @@ return{
  async injuries(sp,maxAge=600000){if(!PATH[sp])return{};const j=await getJSON(`${API}${PATH[sp]}/injuries`,maxAge),out={};
   for(const t of j.injuries||[])for(const i of t.injuries||[]){const n=nm(i.athlete&&i.athlete.displayName);if(n)out[n]=i.status||((i.type||{}).description)||""}
   return out},
- isOut:s=>/out|doubtful|injured reserve|suspen|inactive/i.test(s||"")
+ isOut:s=>/out|doubtful|injured reserve|suspen|inactive/i.test(s||""),
+ /* a day's scores for a league: ESPN event id -> {state, detail, a:{ab,score}, h:{ab,score}} */
+ async scores(sp,day,maxAge=30000){if(!PATH[sp])return{};const grp=sp==="CFB"?"&groups=80":sp==="CBB"?"&groups=50":"";
+  const j=await getJSON(`${API}${PATH[sp]}/scoreboard?dates=${String(day).replace(/-/g,"")}&limit=400${grp}`,maxAge),out={};
+  for(const e of j.events||[]){const c=(e.competitions||[])[0]||{},st=((c.status||e.status||{}).type)||{},side=k=>{const t=(c.competitors||[]).find(x=>x.homeAway===k)||{};
+    return{ab:(t.team||{}).abbreviation||"",score:t.score!=null?String(t.score):""}};
+   out[e.id]={state:st.state||"pre",completed:!!st.completed,detail:st.shortDetail||st.detail||"",a:side("away"),h:side("home")}}
+  return out}
 }})();

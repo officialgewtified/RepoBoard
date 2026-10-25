@@ -348,7 +348,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="fx.css?v=9">
+<link rel="stylesheet" href="fx.css?v=10">
 </head>
 <body>
 <header class="wrap top">
@@ -683,7 +683,7 @@ function propRow(r){
  // each label carries its real record (hits-misses on PrizePicks lines); it only gets its color once results back it up
  const tk=RKEY[tc];
  return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?`<span class="tier mix">Mixed signals${recSpan("mixed")}</span>`:`<span class="tier ${tc==="t1"||earns(tk)?tc:"t1"}">${tl}${recSpan(tk)}</span>`}${agree(r)?`<span class="tier ${earns("agree")?"t3":"t1"}">All agree${recSpan("agree")}</span>`:""}</b>
-  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(gameTxt(r))}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${gapChip(r)} ${extraChips(r)}</button>
+  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(gameTxt(r))}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${projChips(r)} ${matchChip(r)} ${gapChip(r)} ${extraChips(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
   ${open?`<div class="pdet">${caseBlock(r)}${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}${honest?`; adjusted for how the board's picks have really hit, ${pct(pShow(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
    <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table><button class="sm" data-player="${r.i}">Open player page</button></div>`:""}</div>`}
@@ -713,7 +713,7 @@ function renderTop(){
  const ag=spread(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&agree(r)&&(!T.onlyPP||r.pp)).sort((a,b)=>propSide(b).p-propSide(a).p),2,8,r=>r.g);   // at most 2 per game while other games have picks
  const pg=[...new Set(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!T.onlyPP||r.pp)).map(r=>r.g))];
  const oneGame=pg.length===1?`<div class="card empty" style="margin-top:8px">Only ${esc(GI[pg[0]].a.n)} @ ${esc(GI[pg[0]].h.n)} has player props right now, so every pick comes from that game. Props for later games are pulled in the update before they kick off.</div>`:"";
- h+=coolBanner();h+=sweatSection();h+=recCard();
+ h+=ticker();h+=coolBanner();h+=sweatSection();h+=recCard();
  h+=caseSection(P.some(r=>r.pp));
  h+=gapSection();h+=gapScore();
  const RA=rec()&&rec().agree,be2=bePower(2);
@@ -757,7 +757,7 @@ function renderGames(){
  else if(ui.gsort==="value"){const v=g=>Math.max(...["a","h"].map(s=>{const b=best(g,s);return b?pSide(g,s)*dec(b.ml):0}));list.sort((x,y)=>v(y)-v(x))}
  else list.sort((x,y)=>(x.t||0)-(y.t||0));
  const R=ui.ml.res;
- return `<h2>Parlay scanner</h2><p class="lede">Checks every combination of games and ranks them. It uses the likelier team in each game, plus underdogs priced above fair.</p>
+ return `${scoresSection()}<h2>Parlay scanner</h2><p class="lede">Checks every combination of games and ranks them. It uses the likelier team in each game, plus underdogs priced above fair.</p>
  <section class="card scanner"><div class="ctrls">
   <label>Legs<select id="mlK">${[2,3,4,5,6,7,8].map(k=>`<option ${k==ui.ml.K?"selected":""}>${k}</option>`).join("")}</select></label>
   <label>Min chance %<input id="mlMin" type="number" inputmode="numeric" value="${ui.ml.min}"></label>
@@ -829,7 +829,7 @@ function renderTix(){
   return `<div class="card tk ${cls}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
   ${(!t.r&&liveRows(t))||legRows(t)}${scratchNote(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":n===0&&tRet(t)>0?"Refund":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`
    :ti?`<div class="res PT"><b>Tie</b> · ${ti.ties>1?ti.ties+" picks":"a pick"} landed right on the line, so this pays less than ${money(t.pay)}${ti.est!=null?`, usually about ${money(ti.est)}`:""}. Tap ${flex?"Paid":"Won"} and enter what you got.</div>`:""}
-  <div class="m"><button data-tw="${i}">${t.r?"Edit payout":flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>
+  ${noteHtml(t)}<div class="m"><button data-tw="${i}">${t.r?"Edit payout":flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-tnote="${i}">${t.note?"Edit note":"Note"}</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>
  ${reportCard(tickets)}${renderRecord()}${honestyCard()}${backtestCard()}`}
 
 /* ---------- auto-grade open tickets from the board's graded results (history.json) ---------- */
@@ -1413,16 +1413,16 @@ function backtestCard(){const B=backtest();if(!B||!B.market||B.n<30)return"";
 function reportCard(list,bySport){const S=list.filter(t=>t.r);if(!S.length)return"";
  const bePick=bePower(2);
  const add=(m,k,net,w)=>{const o=m[k]=m[k]||{w:0,l:0,net:0,c:0};o.c++;if(w===true)o.w++;else if(w===false)o.l++;if(net!=null)o.net+=net};
- const play={},sport={},stat={},side={};
+ const play={},sport={},stat={},side={},noteG={};
  for(const t of S){const n=(t.legs||[]).length,net=tNet(t),w=net>0?true:net<0?false:null;
-  add(play,t.kind==="pp"?`${t.mode||"PrizePicks"} ${n}-pick`:`${n}-leg parlay`,net,w);if(bySport)add(sport,bySport(t),net,w);
+  add(play,t.kind==="pp"?`${t.mode||"PrizePicks"} ${n}-pick`:`${n}-leg parlay`,net,w);if(bySport)add(sport,bySport(t),net,w);add(noteG,t.note?"Tickets you wrote a note on":"Tickets without a note",net,w);
   const L=Array.isArray(t.lg)?t.lg:null;if(t.kind==="pp"&&L&&Array.isArray(t.res))t.res.forEach((r,j)=>{const l=L[j];if(!l||!r||r.h==null)return;
    add(stat,MK[l.mk]||"Other",null,r.h);add(side,l.side==="o"?"More":"Less",null,r.h)})}
  const rows=(m,isMoney)=>Object.entries(m).sort((a,b)=>b[1].c-a[1].c).map(([k,o])=>{const hr=o.w/(o.w+o.l||1);
   return `<div class="recrow"><span>${esc(k)}</span><span class="k">${o.w}-${o.l}</span><b class="${isMoney?(o.net>=0?"gold":"red"):hr>=bePick?"gold":"red"}">${isMoney?(o.net>=0?"+":"−")+money(Math.abs(o.net)):pct(hr)}</b></div>`}).join("");
  return `<h2>Your report card</h2><p class="lede">From the tickets you saved or logged and graded. Money rows are what each kind of ticket really made or lost. Pick rows are how often each kind of pick hit, gold when it beat the ${pct(bePick)} a 2-pick Power needs.</p>
   <section class="card rpcard"><h4 class="rp-h">By play</h4>${rows(play,true)}${bySport&&Object.keys(sport).length>1?`<h4 class="rp-h">By sport</h4>${rows(sport,true)}`:""}
-  ${Object.keys(stat).length?`<h4 class="rp-h">Each pick, by stat</h4>${rows(stat)}<h4 class="rp-h">More vs Less</h4>${rows(side)}`:`<p class="fine">Pick-by-pick rows show up once a saved ticket grades itself.</p>`}</section>`}
+  ${Object.keys(stat).length?`<h4 class="rp-h">Each pick, by stat</h4>${rows(stat)}<h4 class="rp-h">More vs Less</h4>${rows(side)}`:`<p class="fine">Pick-by-pick rows show up once a saved ticket grades itself.</p>`}${S.some(t=>t.note)?`<h4 class="rp-h">Your notes</h4>${rows(noteG,true)}`:""}</section>`}
 
 /* correlated pairs: picks in the same game that tend to move together */
 const CATS={player_pass_yds:"pass",player_pass_tds:"pass",player_pass_completions:"pass",player_pass_attempts:"pass",player_pass_rush_yds:"pass",
@@ -1539,6 +1539,49 @@ function gapScore(){if(!HIST)return"";const B=[[.15,.3,"Small gaps"],[.3,.5,"Med
   ${tot?B.map(b=>b.n?`<div class="recrow"><span>${b.l}</span><span class="k">${b.w}-${b.n-b.w}</span><b class="${b.w/b.n>=be?"gold":"red"}">${pct(b.w/b.n)}</b></div>`:`<div class="recrow"><span>${b.l}</span><span class="k">none yet</span><b>–</b></div>`).join("")
    :`<p class="fine" style="margin:6px 0 0">The board started saving the sportsbooks' line with each pick, so results show up here after the next grading. Gold means a size of gap is beating the ${pct(be)} a 2-pick Power needs.</p>`}</section>`}
 
+/* ---------- projections and streaks on each pick ---------- */
+// what the pick projects to: the line moved by the chance shown, along the stat's usual spread
+function projOf(r){const q=clamp(pShow(r),.02,.98),v=r.ln+sigmaFor(r.mk,r.ln)*PhiInv(q);return Math.max(0,v)}
+function streakOf(r){const v=r.rf&&r.rf.v;if(!v||v.length<4)return null;const up=v[0]>r.ln;let n=0;for(const x of v){if(x===r.ln||(x>r.ln)!==up)break;n++}return n>=4?{up,n}:null}
+function projChips(r){const pj=projOf(r),f=r.rf,S=streakOf(r);
+ return `<span class="mchip proj">Projects ${pj.toFixed(1)}</span>${S?` <span class="mchip ${S.up?"hot":"cold"}">${S.up?"Over":"Under"} in ${S.n} straight</span>`:""}`}
+
+/* ---------- live scoreboard: today's scores from ESPN (free), a ticker up top and scores on the Games tab ---------- */
+let SC={},scAt=0,scBusy=false;
+function todayGames(){const d=etDay(Date.now());return G.filter(g=>g.t&&etDay(g.t)===d&&inSport(g.sp)).sort((a,b)=>a.t-b.t)}
+async function scRefresh(force){if(scBusy||!window.Live||!DATA)return;const T=todayGames();if(!T.length)return;
+ const live=T.some(g=>{const s=SC[g.eid];return g.t<=Date.now()&&!(s&&s.completed)});if(!force&&!live&&Date.now()-scAt<5*6e4)return;
+ scBusy=true;scAt=Date.now();let ch=false;const day=etDay(Date.now());
+ try{await Promise.all([...new Set(T.map(g=>g.sp))].map(async sp=>{try{const m=await Live.scores(sp,day);for(const k in m){const o=SC[k],n=m[k];if(!o||o.detail!==n.detail||o.a.score!==n.a.score||o.h.score!==n.h.score){SC[k]=n;ch=true}}}catch(e){}}))}finally{scBusy=false}
+ const a=document.activeElement;if(ch&&!(a&&a.matches("input,select,textarea"))&&!document.querySelector("dialog[open]"))keep()}
+setInterval(()=>{if(!document.hidden)scRefresh()},40000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)scRefresh(true)});
+function myGameIds(){const ids=new Set();for(const t of tickets){if(t.r||!Array.isArray(t.legs))continue;for(const l of legsOf(t)){if(!l||!l.pl)continue;const r=P.find(r=>r.mk===l.mk&&pnm(r.pl)===pnm(l.pl));if(r)ids.add(r.g)}}
+ for(const k in pps){const r=PI[k];if(r)ids.add(r.g)}return ids}
+function scoreTxt(g){const s=SC[g.eid];if(!s||s.state==="pre")return null;return{live:s.state==="in",fin:s.completed,a:s.a.score,h:s.h.score,d:s.completed?"Final":s.detail}}
+function ticker(){const T=todayGames();if(!T.length)return"";const mine=myGameIds();
+ return `<div class="ticker" aria-label="Today's games">${T.map(g=>{const s=scoreTxt(g);
+  return `<div class="tg ${s?(s.live?"live":"fin"):""} ${mine.has(g.id)?"mine":""}"><span class="tt">${s?(s.live?`<i></i>${esc(s.d)}`:esc(s.d)):esc(new Date(g.t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}))}</span>
+   <span class="tr"><b>${esc(g.a.ab||g.a.n)}</b>${s?`<em>${esc(s.a)}</em>`:""}</span><span class="tr"><b>${esc(g.h.ab||g.h.n)}</b>${s?`<em>${esc(s.h)}</em>`:""}</span></div>`}).join("")}</div>`}
+function scoresSection(){const T=todayGames().filter(g=>scoreTxt(g));if(!T.length)return"";
+ return `<h2>Scores</h2><p class="lede">Today's games that have started, from ESPN. Gold edge: you have a pick in it.</p><div class="ticker big">${T.map(g=>{const s=scoreTxt(g),mine=myGameIds().has(g.id);
+  return `<div class="tg ${s.live?"live":"fin"} ${mine?"mine":""}"><span class="tt">${s.live?"<i></i>":""}${esc(s.d)}</span><span class="tr"><b>${esc(g.a.n)}</b><em>${esc(s.a)}</em></span><span class="tr"><b>${esc(g.h.n)}</b><em>${esc(s.h)}</em></span></div>`}).join("")}</div>`}
+
+/* ---------- win celebration: once per win, shared by all three sites so it never shows twice ---------- */
+const CHEERKEY="arena_cheered";
+const tkKey=t=>String(t.id||t.at||"")+"|"+(t.legs||[]).join(",").slice(0,60);
+function cheered(){try{return new Set(JSON.parse(localStorage.getItem(CHEERKEY)||"[]"))}catch(e){return new Set()}}
+function markCheered(S){try{localStorage.setItem(CHEERKEY,JSON.stringify([...S].slice(-300)))}catch(e){}}
+function checkWins(){if(!window.Kit)return;const S=cheered(),first=!localStorage.getItem(CHEERKEY),now=Date.now(),wins=[];
+ for(const t of allTix()){if(!t.r||tNet(t)<=0)continue;const k=tkKey(t);if(S.has(k))continue;S.add(k);if(!first&&tAt(t)&&now-tAt(t)<4*864e5)wins.push(t)}
+ // a live ticket where every pick has already hit
+ for(const t of tickets){if(t.r||!Array.isArray(t.legs))continue;const L=legsOf(t),X=L.map(liveLeg);if(!L.length||!X.every(x=>x&&x.j.c==="ok"))continue;
+  const k="live:"+tkKey(t);if(S.has(k))continue;S.add(k);Kit.cheer("Every pick hit!",`${money(t.pay)} once it's graded`)}
+ markCheered(S);if(wins.length){const sum=wins.reduce((a,t)=>a+tNet(t),0);Kit.cheer(`Cashed +${money(sum)}`,wins.length>1?`${wins.length} winning tickets`:`${wins[0].kind==="pp"?`${wins[0].mode||""} ${wins[0].legs.length}-pick`:"Parlay"} hit`)}}
+
+/* ---------- ticket notes ---------- */
+function noteHtml(t){return t.note?`<div class="tnote">“${esc(t.note)}”</div>`:""}
+
 function renderSlip(){
  const L=mlLegs(),Q=ppLegs();
  let kind=ui.tab==="games"?"ml":ui.tab==="pp"?"pp":ui.kind;
@@ -1606,6 +1649,8 @@ function renderSettings(){
  <div class="paygrid"><span></span><b>Power</b><span></span><span></span>${[2,3,4,5,6].map(n=>`<span>${n} picks</span><input data-payp="${n}" type="number" step="0.05" value="${PAY.power[n]}"><span></span><span></span>`).join("")}
   <span></span><b>Flex: all</b><b>1 miss</b><b>2 misses</b>${[3,4,5,6].map(n=>`<span>${n} picks</span>${fx(n)}`).join("")}</div>
  <div class="btns"><button class="btn" data-payreset>Use standard payouts</button></div>
+ <h4>Backup</h4><p>Your tickets, slips, bankroll and settings for all three sites are saved only on this phone. Save a backup to Files or iCloud now and then, and restore it after clearing Safari or on a new phone.</p>
+ <div class="btns"><button class="btn" data-backup>Back up</button><button class="btn" data-restore>Restore</button></div>
  <h4>How picks are made</h4><div class="how"><p><b>Games:</b> each book's moneyline has its cut (vig) removed, then the board takes the middle value across all books as the fair chance. A side shows as value when your best price pays more than that fair chance is worth.</p>
  <p><b>PrizePicks:</b> sportsbook over/under prices on the same player stat are de-vigged and adjusted to the exact PrizePicks line, then combined across books. His last 10 games against that line and the opposing defense's numbers in that stat then nudge the chance, and picks where they point against the books are flagged as mixed signals.</p>
  <p><b>Matchups:</b> every team's offense and defense (points, rushing, passing, yards per carry and per pass, third downs, red zone, sacks, turnovers, run/pass mix) is ranked against the whole league. Game details show each offense against the other defense and call out the edges. A pick needs to land about ${pct(BE.lo)} to ${pct(BE.hi)} of the time to beat PrizePicks payouts.</p>
@@ -1621,6 +1666,7 @@ function render(){
  renderSlip();
  limitBar();
  document.body.style.paddingBottom=$("#slipin").innerHTML?"":"40px";
+ if(DATA)checkWins();
 }
 function stampText(){if(!DATA)return;const u=new Date(DATA.updated),age=(Date.now()-u)/36e5;
  $("#stamp").innerHTML=`Updated <b>${u.toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})}</b><br>${G.filter(live).length} games, ${P.filter(r=>live(GI[r.g])).length} props`;
@@ -1658,6 +1704,9 @@ document.addEventListener("click",e=>{
  if(d.moreprops!==undefined){ui.limit+=60;keep();return}
  if(d.slip!==undefined){ui.slipOpen=!ui.slipOpen;renderSlip();return}
  if(d.copyname!==undefined){copyText(d.copyname,t);return}
+ if(d.backup!==undefined){Kit.backup(t);return}
+ if(d.restore!==undefined){Kit.restore();return}
+ if(d.tnote!==undefined){const x=tickets[+d.tnote];if(!x)return;const v=prompt("A note for this ticket (why you took it):",x.note||"");if(v===null)return;x.note=v.trim().slice(0,200);if(!x.note)delete x.note;LS.set("pb_tickets",tickets);keep();return}
  if(d.coolok!==undefined){try{localStorage.setItem(COOLKEY,etDay(Date.now()))}catch(_){}keep();return}
  if(d.recapshare!==undefined){shareRecap(t);return}
  if(d.usebest){const[f,m]=d.usebest.split("|");if(!FORMK.hasOwnProperty(f)||!MATCHW.hasOwnProperty(m))return;formW=f;matchW=m;LS.set(PFX+"form",f);LS.set(PFX+"match",m);TOP=null;ui.pp.res=null;keep();return}
@@ -1758,7 +1807,7 @@ function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.s
 (function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}if(!["dark","clean","bold","mix"].includes(t))t="dark";setTheme(t)})();
 
 render();
-fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render();liveRefresh();injRefresh(true)})
+fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render();liveRefresh();injRefresh(true);scRefresh(true)})
  .catch(()=>{window.LOADFAIL=1;$("#stamp").textContent="Couldn't load the board";render()});
 /* tickets.json: tickets added by hand (ones that never got saved from the slip). Each id is added once, so deleting it here keeps it gone. */
 fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!Array.isArray(j.add))return;
@@ -1772,7 +1821,8 @@ setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&!document.activeElement.matches("input,select")){stampText();keep()}});   // back from another app: drop games that started
 </script>
 <script src="share.js?v=3"></script>
-<script src="live.js?v=1"></script>
+<script src="live.js?v=2"></script>
+<script src="kit.js?v=1"></script>
 <script src="fx.js?v=10"></script>
 </body>
 </html>
