@@ -56,7 +56,7 @@ function burst(el){const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.t
   h.appendChild(s);setTimeout(()=>s.remove(),950)}}
 const ATTRS=["data-pp","data-pick","data-sport","data-tab","data-plmode","data-stat","data-ppmode","data-ltside","data-ltkind","data-ltmode","data-ltres",
  "data-th","data-formw","data-matchw","data-day","data-ckmk","data-ckpick","data-useml","data-usepp","data-save","data-copy","data-copyall","data-scanpp","data-scanml",
- "data-gaponly","data-agreeonly","data-share","data-limitsave","data-xp","data-xslip","data-xcopyall","data-xmode","data-xsave","data-usebest","data-corrslip","data-xshare","data-xsharepair","data-honest","data-paystd","data-xpaystd"];
+ "data-gaponly","data-agreeonly","data-share","data-limitsave","data-xp","data-xslip","data-xcopyall","data-xmode","data-xsave","data-usebest","data-corrslip","data-xshare","data-xsharepair","data-honest","data-paystd","data-xpaystd","data-cxth","data-cxhonest","data-cxform","data-cxmatch"];
 const OPENS=["data-tab","data-sport","data-plmode","data-stat"];
 const isOn=el=>el.classList.contains("on")||el.getAttribute("aria-pressed")==="true";
 let enterNext=false;

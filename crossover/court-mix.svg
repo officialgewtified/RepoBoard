@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1000" preserveAspectRatio="xMidYMid slice">
+<!-- Crossover's floor: football turf up top, a hardwood court below, joined by one glowing seam -->
+<defs>
+ <linearGradient id="turf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d6a43"/><stop offset="1" stop-color="#124c2c"/></linearGradient>
+ <pattern id="mow" width="600" height="100" patternUnits="userSpaceOnUse"><rect width="600" height="50" fill="#fff" opacity=".045"/></pattern>
+ <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c78545"/><stop offset=".55" stop-color="#a8652f"/><stop offset="1" stop-color="#7c4520"/></linearGradient>
+ <pattern id="planks" width="30" height="400" patternUnits="userSpaceOnUse">
+  <rect x="29" width="1.2" height="400" fill="#3a1c06" opacity=".32"/>
+  <rect x="0" y="130" width="30" height="1" fill="#3a1c06" opacity=".22"/>
+  <rect x="0" y="330" width="30" height="1" fill="#3a1c06" opacity=".22"/>
+  <rect x="3" width="10" height="400" fill="#fff" opacity=".03"/>
+ </pattern>
+ <clipPath id="field"><polygon points="0,0 600,0 600,390 0,610"/></clipPath>
+ <clipPath id="court"><polygon points="0,610 600,390 600,1000 0,1000"/></clipPath>
+ <linearGradient id="seam" x1="0" y1="610" x2="600" y2="390" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#36e08e"/><stop offset=".5" stop-color="#ffd35c"/><stop offset="1" stop-color="#ff7a1a"/></linearGradient>
+ <filter id="glow" x="-10%" y="-200%" width="120%" height="500%"><feGaussianBlur stdDeviation="10"/></filter>
+ <radialGradient id="vig" cx=".5" cy=".42" r=".8"><stop offset=".35" stop-color="#05080d" stop-opacity=".25"/><stop offset="1" stop-color="#05080d" stop-opacity=".85"/></radialGradient>
+</defs>
+<g clip-path="url(#field)">
+ <rect width="600" height="1000" fill="url(#turf)"/>
+ <rect width="600" height="1000" fill="url(#mow)"/>
+ <g fill="#fff" opacity=".42">
+  <rect y="98" width="600" height="4"/><rect y="198" width="600" height="4"/><rect y="298" width="600" height="4"/><rect y="398" width="600" height="4"/><rect y="498" width="600" height="4"/>
+ </g>
+ <g fill="#fff" opacity=".32">
+  <rect x="212" y="148" width="22" height="3"/><rect x="366" y="148" width="22" height="3"/><rect x="212" y="248" width="22" height="3"/><rect x="366" y="248" width="22" height="3"/>
+  <rect x="212" y="348" width="22" height="3"/><rect x="366" y="348" width="22" height="3"/><rect x="212" y="448" width="22" height="3"/><rect x="366" y="448" width="22" height="3"/>
+  <rect x="212" y="48" width="22" height="3"/><rect x="366" y="48" width="22" height="3"/>
+ </g>
+ <g fill="#fff" opacity=".3" font-family="Impact, 'Arial Black', sans-serif" font-size="58" font-weight="900" text-anchor="middle">
+  <text transform="translate(62 200) rotate(90)">4 0</text><text transform="translate(538 200) rotate(-90)">4 0</text>
+  <text transform="translate(62 400) rotate(90)">5 0</text>
+ </g>
+</g>
+<g clip-path="url(#court)">
+ <rect width="600" height="1000" fill="url(#wood)"/>
+ <rect width="600" height="1000" fill="url(#planks)"/>
+ <rect x="205" y="640" width="190" height="360" fill="#c6402a" opacity=".42"/>
+ <g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="5">
+  <rect x="205" y="640" width="190" height="360"/>
+  <circle cx="300" cy="640" r="95"/>
+  <path d="M 40 1000 L 40 860 A 260 260 0 0 1 560 860 L 560 1000"/>
+  <path d="M 255 950 A 45 45 0 0 0 345 950"/>
+ </g>
+ <rect x="560" y="390" width="40" height="610" fill="#1a0c03" opacity=".25"/>
+</g>
+<line x1="0" y1="610" x2="600" y2="390" stroke="url(#seam)" stroke-width="26" opacity=".75" filter="url(#glow)"/>
+<line x1="0" y1="610" x2="600" y2="390" stroke="url(#seam)" stroke-width="6"/>
+<rect width="600" height="1000" fill="#070b10" opacity=".38"/>
+<rect width="600" height="1000" fill="url(#vig)"/>
+</svg>

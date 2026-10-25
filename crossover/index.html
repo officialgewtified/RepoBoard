@@ -22,6 +22,15 @@
  --bg:#eef1f5;--panel:#ffffff;--raise:#f4f6f9;--line:#dbe1ea;--ink:#0f1b2d;--mute:#5c6a80;
  --led:#b56a00;--ledink:#fff;--go:#0b875c;--stop:#d23f3f;--paper:#fffdf6;--paperink:#1b1a17;--paperline:#e2dac6;
  --shadow:0 1px 2px rgba(15,27,45,.06),0 8px 24px rgba(15,27,45,.07);color-scheme:light}
+:root[data-theme="court"]{
+ --bg:#2a190d;--panel:#382212;--raise:#472c18;--line:#6a4425;--ink:#fff5ea;--mute:#d6b693;
+ --led:#ffb31a;--ledink:#1b1200;--go:#7ef0b6;--stop:#ff8f7d;--paper:#f6f1e4;--paperink:#1b1a17;--paperline:#d9d0bb;
+ --shadow:0 10px 30px rgba(0,0,0,.3);color-scheme:dark}
+/* Mix: turf up top, hardwood below, one glowing seam between them (court-mix.svg); panels sit on it in a deep neutral */
+:root[data-theme="mix"]{
+ --bg:#111814;--panel:#17201c;--raise:#212c27;--line:#344539;--ink:#f6f4ec;--mute:#b8c1b3;
+ --led:#ffa024;--ledink:#1c0e00;--go:#7ef0b6;--stop:#ff8f7d;--paper:#f6f1e4;--paperink:#1b1a17;--paperline:#d9d0bb;
+ --shadow:0 10px 30px rgba(0,0,0,.4);color-scheme:dark}
 :root[data-theme="bold"]{
  --bg:#0e3a28;--panel:#134631;--raise:#18553b;--line:#2c6d4d;--ink:#f3fff6;--mute:#a8ccb7;
  --led:#ffe14d;--ledink:#1b1800;--go:#8dffc6;--stop:#ff8f7d;--paper:#f6f1e4;--paperink:#1b1a17;--paperline:#d9d0bb;
@@ -348,6 +357,13 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 .rank{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--raise);font:800 13px/1 "Big Shoulders Display",Impact,sans-serif;margin-right:8px;vertical-align:1px}
 .prop .who{cursor:default}
 .lg{margin-right:2px}
+/* the Mix floor stays put while the page scrolls */
+:root[data-theme="mix"] body{background-image:none}
+:root[data-theme="mix"] body::after{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:#111814 url(court-mix.svg) center/cover no-repeat}
+.sheet .filters{flex-wrap:wrap}
+.cxlim{display:flex;gap:8px;align-items:flex-end}
+.cxlim label{flex:1;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mute);font-weight:600}
+.cxlim input{width:100%;border:0;background:var(--raise);padding:9px 10px;font-size:16px;font-weight:700;color:var(--ink)}
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
@@ -377,7 +393,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
  <rect x="-58" y="-4" width="116" height="8" rx="4" fill="#3b1500"/>
  <rect x="-47" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="-26" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="-5" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="16" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="37" y="-23" width="10" height="46" rx="5" fill="#3b1500"/>
 </g></svg>Crossover</h1>
-  <div class="stamp"><div id="stamp">Loading both boards…</div><span style="display:flex;gap:6px"><a class="iconbtn" href="../" style="text-decoration:none;color:inherit">Football</a><a class="iconbtn" href="../baseline/" style="text-decoration:none;color:inherit">Basketball</a></span></div>
+  <div class="stamp"><div id="stamp">Loading both boards…</div><span style="display:flex;gap:6px"><button class="iconbtn" id="openSettings">Settings</button></span></div>
  </div>
  <div id="banner"></div>
 </header>
@@ -385,6 +401,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <main class="wrap" id="view"><div class="fx-sk big"></div><div class="fx-sk big"></div><div class="fx-sk"></div><div class="fx-sk"></div></main>
 <div class="slip" id="slip"><div class="in" id="slipin"></div></div>
 <footer class="wrap fine">Crossover reads Gridline and Baseline and needs no Odds API key of its own. Chances are estimates from betting markets, corrected by each board's real results, not guarantees. For entertainment only. 21+ where legal (PrizePicks 18+ in some states). Gambling problem? Call 1-800-GAMBLER.</footer>
+<dialog id="settings"><div class="sheet" id="sheet"></div></dialog>
 <script>
 "use strict";
 const $=s=>document.querySelector(s);
@@ -394,7 +411,7 @@ const pct=p=>(p*100).toFixed(0)+"%";
 const sgn=x=>(x>=0?"+":"−")+Math.abs(x*100).toFixed(1)+"%";
 function Phi(x){const t=1/(1+.3275911*Math.abs(x)/Math.SQRT2),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x/2);return .5*(1+(x>=0?y:-y))}
 function PhiInv(p){p=clamp(p,1e-6,1-1e-6);let lo=-8,hi=8;for(let i=0;i<60;i++){const m=(lo+hi)/2;Phi(m)<p?lo=m:hi=m}return (lo+hi)/2}
-const PAY2=3,BE2=Math.sqrt(1/PAY2);   // a 2-pick Power Play pays 3x, so each pick needs about 57.7%
+let PAY2=3,BE2=Math.sqrt(1/PAY2);   // a 2-pick Power Play pays 3x, so each pick needs about 57.7%
 
 /* ---------- the two boards ---------- */
 const MK={player_pass_yds:"Pass Yards",player_rush_yds:"Rush Yards",player_reception_yds:"Receiving Yards",player_receptions:"Receptions",player_pass_tds:"Pass TDs",
@@ -425,8 +442,12 @@ let sportSel="all";try{sportSel=localStorage.getItem("cx_sport")||"all"}catch(e)
 function matchF(b,r){const g=b.GI[r.g];if(!g||!r.sd)return null;const o=r.sd==="a"?g.h:g.a,T=b.d.teams||{},S=T[g.sp+":"+o.tid],L=T[g.sp+":_league"];
  const ks=(b.match[r.mk]||[]).filter(k=>S&&L&&S[k]!=null&&L.avg[k]);if(!ks.length)return null;
  const m=ks.reduce((a,k)=>a+S[k]/L.avg[k],0)/ks.length,gp=S.gp||1;return 1+(m-1)*gp/(gp+3)}
-function boardP(b,r){let p=r.po;const f=r.rf,n=f?f.o+f.u:0;if(n)p=(10*p+n*(f.o+.5)/(n+1))/(10+n);
- const m=matchF(b,r);if(m)p=Phi(PhiInv(p)+r.ln*(m-1)*.5/b.sigma(r.mk,r.ln));return p}
+/* Crossover's settings (Settings sheet): how much recent games and matchups count, honest chances, mixed signals */
+const FORMK={off:0,light:20,normal:10,heavy:5},MATCHW={off:0,light:.25,normal:.5,heavy:.8};
+let CXS={form:"normal",match:"normal",honest:true,skipMixed:true};try{Object.assign(CXS,JSON.parse(localStorage.getItem("cx_set")||"{}"))}catch(e){}
+const cxSave=()=>{try{localStorage.setItem("cx_set",JSON.stringify(CXS))}catch(e){}};
+function boardP(b,r){let p=r.po;const f=r.rf,n=f?f.o+f.u:0,K=FORMK[CXS.form]??10,W=MATCHW[CXS.match]??.5;if(n&&K)p=(K*p+n*(f.o+.5)/(n+1))/(K+n);
+ const m=matchF(b,r);if(m&&W)p=Phi(PhiInv(p)+r.ln*(m-1)*W/b.sigma(r.mk,r.ln));return p}
 function mixed(b,r){const mkt=r.po>=.5,f=r.rf,n=f?f.o+f.u:0,h=n?f.o/n:.5;
  const fo=n>=4&&(h>=.5)!==mkt&&Math.abs(h-.5)>=.0999,fa=n>=4&&(h>=.5)===mkt&&Math.abs(h-.5)>=.0999;
  const m=matchF(b,r),mo=m!=null&&Math.abs(m-1)>=b.mixT&&((m>1)!==mkt);return fo||(mo&&!fa)}
@@ -447,7 +468,7 @@ function calib(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x
  b.cal=RANGES.map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length,w=s.filter(x=>x.hit).length,ep=n?s.reduce((a,x)=>a+x.p,0)/n:0;
   return{lo,hi,l,n,w,hr:n?w/n:null,ep}})}
 function corrected(b,p){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],F=b.fit||{a:0,b:.5};
- return{q:clamp(.5+F.a+F.b*(p-.5),.3,.8),c}}
+ return{q:CXS.honest?clamp(.5+F.a+F.b*(p-.5),.3,.8):p,c}}
 
 /* ---------- candidates from both boards ---------- */
 function etDay(ms){return new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/New_York"})}
@@ -460,7 +481,7 @@ function picks(){const out=[];
    const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p),mx=mixed(b,r);
    const team=r.sd?g[r.sd]:null,opp=r.sd?g[r.sd==="a"?"h":"a"]:null;
    const x={b,r,g,side,p,q,c,mx,team,opp,key:b.k+"|"+r.g+"|"+r.pl,tk:r.sd?r.g+"|"+r.sd:null};
-   if(mx)continue;   // the board's recent games or matchup point against the books: both boards skip these too
+   if(mx&&CXS.skipMixed)continue;   // the board's recent games or matchup point against the books: both boards skip these too
    if(!best[x.key]||best[x.key].q<q)best[x.key]=x}
   out.push(...Object.values(best))}
  return out.sort((a,b)=>b.q-a.q)}
@@ -505,7 +526,10 @@ function bankCard(){const fb=rawTix("pb_tickets"),bb=rawTix("bl_tickets"),cx=raw
   <div class="lset"><label>Weekly limit $<input id="limitamt" type="number" inputmode="decimal" min="0" step="1" value="${L||""}" placeholder="none"></label><button class="sm" data-limitsave>Save limit</button></div></div></section>`}
 
 /* ---------- your slip on Crossover: picks from both sports, names ready to copy ---------- */
-const XPAY={power:{2:3,3:5,4:10,5:20,6:37.5},flex:{3:[2.25,1.25],4:[5,1.5],5:[10,2,.4],6:[25,2,.4]}};
+const XPAY_STD={power:{2:3,3:5,4:10,5:20,6:37.5},flex:{3:[2.25,1.25],4:[5,1.5],5:[10,2,.4],6:[25,2,.4]}};
+let XPAY=JSON.parse(JSON.stringify(XPAY_STD));try{const v=JSON.parse(localStorage.getItem("cx_paytable")||"null");if(v&&v.power&&v.flex)XPAY=v}catch(e){}
+function payChanged(){PAY2=XPAY.power[2]||3;BE2=Math.sqrt(1/PAY2);try{localStorage.setItem("cx_paytable",JSON.stringify(XPAY))}catch(e){}}
+PAY2=XPAY.power[2]||3;BE2=Math.sqrt(1/PAY2);
 let XS=[],xOpen=false,XI={};try{XS=JSON.parse(localStorage.getItem("cx_slip")||"[]")||[]}catch(e){}
 const xkey=x=>x.b.k+"|"+x.r.g+"|"+x.r.mk+"|"+x.r.pl;
 const gameOf=x=>x.team&&x.opp?`${x.team.ab||x.team.n} ${x.r.sd==="a"?"at":"vs"} ${x.opp.ab||x.opp.n}`:`${x.g.a.ab||x.g.a.n} @ ${x.g.h.ab||x.g.h.n}`;
@@ -691,7 +715,50 @@ document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)r
  if(d.xsharepair){const P=LAST[d.xsharepair];if(P)xShare(P.legs.map(xItem),"power",t);return}
  if(d.xcopyall!==undefined){copyText(XS.map(xLegTxt).join("\n"),t);return}
  if(d.copy){const P=LAST[d.copy];if(P)copyText(P.legs.map(x=>`${x.r.pl} ${x.side==="o"?"More":"Less"} ${x.r.ln} ${MK[x.r.mk]||x.r.mk}`).join("\n"),t)}});
-(function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}if(!["dark","clean","bold"].includes(t))t="dark";document.documentElement.dataset.theme=t})();
+const THEMES=[["mix","Mix"],["dark","Night"],["clean","Day"],["bold","Field"],["court","Court"]];
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("cx_theme",t)}catch(e){}
+ const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()}
+(function(){let t="mix";try{t=localStorage.getItem("cx_theme")||"mix"}catch(e){}if(!THEMES.some(x=>x[0]===t))t="mix";setTheme(t)})();
+/* ---------- settings ---------- */
+function renderSettings(){const th=document.documentElement.dataset.theme,L=getLimit();
+ const pill=(k,on,attr,l)=>`<button class="pill ${on?"on":""}" ${attr}="${k}">${l}</button>`;
+ const lv=[["off","Off"],["light","Light"],["normal","Normal"],["heavy","Heavy"]];
+ const fx=n=>XPAY.flex[n].map((v,i)=>`<input data-cxpayf="${n}|${i}" type="number" step="0.05" value="${v}" aria-label="${n}-pick flex ${n-i} hits">`).join("")+(XPAY.flex[n].length<3?"<span></span>":"");
+ const cred=B.map(b=>{const c=b.d&&b.d.credits;return c&&c.remaining!=null?`${esc(b.name)}: ${Math.round(c.remaining)} left this month`:null}).filter(Boolean);
+ $("#sheet").innerHTML=`<h3>Settings</h3>
+ <h4>Look</h4><p>Mix is Crossover's own floor: football turf up top, a hardwood court below.</p><div class="filters">${THEMES.map(([k,l])=>pill(k,th===k,"data-cxth",l)).join("")}</div>
+ <h4>Chances</h4><p>Each board's chances are adjusted to match how its picks have really hit, the same way the boards show them. Untested boards are cut halfway toward 50%.</p>
+ <div class="filters">${pill("1",CXS.honest,"data-cxhonest","Adjusted for real records")}${pill("0",!CXS.honest,"data-cxhonest","Boards' raw math")}</div>
+ <h4>Recent games</h4><p>How much a player's last 10 games move the chance, for both sports. The betting market stays the base.</p>
+ <div class="filters">${lv.map(([k,l])=>pill(k,CXS.form===k,"data-cxform",l)).join("")}</div>
+ <h4>Matchups</h4><p>How much the opposing defense moves a prop, for both sports.</p>
+ <div class="filters">${lv.map(([k,l])=>pill(k,CXS.match===k,"data-cxmatch",l)).join("")}</div>
+ <div class="checks" style="grid-template-columns:1fr;margin-top:10px"><label><input type="checkbox" data-cxskip ${CXS.skipMixed?"checked":""}>Leave out picks where a board's books and recent games or matchup disagree</label></div>
+ <h4>PrizePicks payouts</h4><p>Standard payouts are filled in. If your app shows different numbers, change them here. For goblins and demons, type the payout on your slip instead.</p>
+ <div class="paygrid"><span></span><b>Power</b><span></span><span></span>${[2,3,4,5,6].map(n=>`<span>${n} picks</span><input data-cxpayp="${n}" type="number" step="0.05" value="${XPAY.power[n]}"><span></span><span></span>`).join("")}
+  <span></span><b>Flex: all</b><b>1 miss</b><b>2 misses</b>${[3,4,5,6].map(n=>`<span>${n} picks</span>${fx(n)}`).join("")}</div>
+ <div class="btns"><button class="btn" data-cxpayreset>Use standard payouts</button></div>
+ <h4>Weekly limit</h4><p>Shared with Gridline and Baseline. Every site warns you once you've put in more than this in a week.</p>
+ <div class="cxlim"><label>Weekly limit $<input id="cxlimit" type="number" inputmode="decimal" min="0" step="1" value="${L||""}" placeholder="none"></label><button class="btn" data-cxlimitsave>Save</button></div>
+ <h4>How Crossover picks</h4><div class="how"><p><b>Both boards:</b> Crossover reads Gridline's and Baseline's lines, recent games and matchups, and works out each pick's chance the same way the boards do, with your settings above.</p>
+ <p><b>The correction:</b> each board's chances are adjusted to match how its graded PrizePicks-line picks have really hit, so a board whose big numbers haven't held up can't outrank one that's been right.</p>
+ <p><b>Slips:</b> "The slip I'd build" is the two picks with the highest corrected chance from 2 different teams. A 2-pick Power Play needs ${pct(BE2)} per pick at ${PAY2}x.</p></div>
+ <h4>Odds API credits</h4><p>Crossover uses none of its own. ${cred.length?cred.join(". ")+".":"The boards' credit counts show up after their next update."}</p>
+ <div class="btns"><button class="btn go" data-cxclose>Done</button></div>`}
+$("#openSettings").onclick=()=>{renderSettings();$("#settings").showModal()};
+$("#settings").addEventListener("click",e=>{if(e.target.id==="settings")$("#settings").close()});
+document.addEventListener("click",e=>{const t=e.target.closest("button,input[type=checkbox]");if(!t||!t.closest("#sheet"))return;const d=t.dataset;
+ if(d.cxth){setTheme(d.cxth);renderSettings();return}
+ if(d.cxhonest!==undefined){CXS.honest=d.cxhonest==="1";cxSave();renderSettings();rerender();return}
+ if(d.cxform){CXS.form=d.cxform;cxSave();renderSettings();rerender();return}
+ if(d.cxmatch){CXS.match=d.cxmatch;cxSave();renderSettings();rerender();return}
+ if(d.cxskip!==undefined){CXS.skipMixed=t.checked;cxSave();rerender();return}
+ if(d.cxpayreset!==undefined){XPAY=JSON.parse(JSON.stringify(XPAY_STD));payChanged();renderSettings();rerender();return}
+ if(d.cxlimitsave!==undefined){const v=parseFloat($("#cxlimit").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(_){}t.textContent="Saved";rerender();return}
+ if(d.cxclose!==undefined){$("#settings").close();return}});
+document.addEventListener("change",e=>{const t=e.target,d=t.dataset;if(!t.closest||!t.closest("#sheet"))return;
+ if(d.cxpayp){const v=parseFloat(t.value);if(v>0){XPAY.power[d.cxpayp]=v;payChanged();rerender()}return}
+ if(d.cxpayf){const[n,i]=d.cxpayf.split("|"),v=parseFloat(t.value);if(v>=0){XPAY.flex[n][+i]=v;payChanged();rerender()}return}});
 
 Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),
  fetch(b.hist,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null)]).then(([d,h])=>{b.d=d&&Array.isArray(d.games)?d:null;b.h=h;
@@ -700,6 +767,6 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  $("#stamp").innerHTML=st;render()});
 </script>
 <script src="../share.js?v=2"></script>
-<script src="../fx.js?v=8"></script>
+<script src="../fx.js?v=9"></script>
 </body>
 </html>
