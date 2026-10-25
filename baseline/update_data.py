@@ -903,6 +903,14 @@ def write_brief(games, props, teams, site, url):
                 "p": round(p, 3), "sp": g["sp"],
                 "game": (f"{t['ab']} {'at' if r['sd'] == 'a' else 'vs'} {o['ab']}" if t and o else f"{g['a']['ab']} @ {g['h']['ab']}"),
                 "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"]}
+        why, mkt, fm = [], (r["po"] if side == "o" else 1 - r["po"]), r.get("rf")
+        if mkt >= .53: why.append(f"{r['nb']} books lean {item['side']} ({round(mkt * 100)}%)")
+        if fm and fm.get("n", 0) >= 3:
+            hit = fm["o"] if side == "o" else fm["u"]
+            if hit / fm["n"] >= .6: why.append(f"{'over' if side == 'o' else 'under'} {r['ln']} in {hit} of his last {fm['n']}")
+        if r.get("bm") is not None and (r["bm"] - r["ln"]) * (1 if side == "o" else -1) > 0 and abs((r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])) >= .15:
+            why.append(f"books have {r['bm']} vs PrizePicks {r['ln']}")
+        item["why"] = why
         if not is_mixed(r, teams, gbi) and (r["pl"] not in picks or picks[r["pl"]]["p"] < p):
             picks[r["pl"]] = item
         if r.get("bm") is not None:

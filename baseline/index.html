@@ -659,7 +659,7 @@ function propRow(r){
  return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?`<span class="tier mix">Mixed signals${recSpan("mixed")}</span>`:`<span class="tier ${tc==="t1"||earns(tk)?tc:"t1"}">${tl}${recSpan(tk)}</span>`}${agree(r)?`<span class="tier ${earns("agree")?"t3":"t1"}">All agree${recSpan("agree")}</span>`:""}</b>
   <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(gameTxt(r))}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${gapChip(r)} ${extraChips(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
-  ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
+  ${open?`<div class="pdet">${caseBlock(r)}${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
    <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table><button class="sm" data-player="${r.i}">Open player page</button></div>`:""}</div>`}
 
 function mlRow(x){const g=x.g,t=g[x.s],on=sel[g.id]===x.s,o=g[x.s==="a"?"h":"a"];
@@ -688,6 +688,7 @@ function renderTop(){
  const pg=[...new Set(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!T.onlyPP||r.pp)).map(r=>r.g))];
  const oneGame=pg.length===1?`<div class="card empty" style="margin-top:8px">Only ${esc(GI[pg[0]].a.n)} @ ${esc(GI[pg[0]].h.n)} has player props right now, so every pick comes from that game. Props for later games are pulled in the update before they tip off.</div>`:"";
  h+=recCard();
+ h+=caseSection(P.some(r=>r.pp));
  h+=gapSection();
  const RA=rec()&&rec().agree,be2=bePower(2);
  h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag.${RA&&RA.n?` So far these have gone <b>${wl(RA)}</b> (${pct(RA.w/RA.n)}) on PrizePicks lines${RA.w/RA.n<be2?`, below the ${pct(be2)} a 2-pick Power Play needs`:""}.`:" Their real record shows up here once some are graded."}</p>`;
@@ -1248,6 +1249,63 @@ function ckMore(p,mk){const out=[],V=ckVals(p,mk);
  if(HIST){const mine=HIST.props.filter(x=>x.sp===p.sp&&pnm(x.pl)===p.nm&&(x.hit===true||x.hit===false));
   if(mine.length){const w=mine.filter(x=>x.hit).length;out.push(`<div><span>Board's picks on him</span><b>${w}-${mine.length-w}</b><small>every stat, graded</small></div>`)}}
  return out.length?`<div class="ckmore">${out.join("")}</div>`:""}
+
+/* ---------- the case for a pick, in plain words: what's for it, what's against it, and how picks like it have done ---------- */
+function caseFor(r){
+ const g=GI[r.g],{side,p}=propSide(r),S=side==="o"?"More":"Less",O=side==="o"?"Less":"More",up=side==="o";
+ const pro=[],con=[],tags=[],ctags=[],lnT=Number.isInteger(r.ln)?r.ln:(+r.ln).toFixed(1);
+ // the sportsbooks
+ const mk=up?r.po:1-r.po,lo=up?r.lo:1-r.hi,hi=up?r.hi:1-r.lo;
+ if(mk>=.53){pro.push(`The sportsbooks lean ${S}: ${r.nb} book${r.nb===1?"":"s"} price it at ${pct(lo)}${pct(hi)!==pct(lo)?` to ${pct(hi)}`:""} at this line.`);tags.push("the sportsbooks")}
+ else if(mk<.5){con.push(`The sportsbooks lean ${O}, ${pct(1-mk)} at this line.`);ctags.push("the sportsbooks")}
+ else pro.push(`The sportsbooks have it close to even (${pct(mk)} ${S}).`);
+ // a line gap
+ const G=gapOf(r);
+ if(G){const t=`PrizePicks set the line at ${lnT}, but the books have ${r.bm}`;
+  if(G.side===side){pro.unshift(`${t}, so ${S} gets the better number.`);tags.unshift("a line gap")}else{con.push(`${t}, which favors ${O}.`);ctags.push("the line gap")}}
+ // his recent games
+ const f=r.rf;
+ if(f&&f.n>=3){const hit=up?f.o:f.u,rate=hit/f.n,word=up?"over":"under";
+  if(rate>=.6){pro.push(`He's gone ${word} ${lnT} in ${hit} of his last ${f.n}, averaging ${f.avg} over his last ${Math.min(5,f.v.length)}.`);tags.push(`his last ${f.n} games`)}
+  else if(rate<=.4){con.push(`He's only gone ${word} ${lnT} in ${hit} of his last ${f.n} (average ${f.avg}).`);ctags.push("his recent games")}
+  if(f.v.length>=4){const a=(f.v[0]+f.v[1])/2,b=f.v.slice(2).reduce((x,y)=>x+y,0)/(f.v.length-2);
+   if(b>0&&Math.abs(a-b)/b>=.2){const rising=a>b,txt=`His last 2 games (${f.v[0]}, ${f.v[1]}) are ${rising?"up":"down"} from before.`;(rising===up?pro:con).push(txt)}}
+  if(f.ha&&r.sd){const home=r.sd==="h",mine=home?f.ha[0]:f.ha[2],other=home?f.ha[2]:f.ha[0];
+   if(other>0&&Math.abs(mine-other)/other>=.15){const better=mine>other;(better===up?pro:con).push(`He averages ${mine} ${home?"at home":"on the road"} vs ${other} ${home?"on the road":"at home"}, and this game is ${home?"at home":"on the road"}.`)}}
+  if(f.us&&f.us.length>=3){const u=f.us,ua=(u[0]+u[1])/2,ub=u.slice(2).reduce((x,y)=>x+y,0)/(u.length-2);
+   if(ub>0&&Math.abs(ua-ub)/ub>=.15){const rising=ua>ub;(rising===up?pro:con).push(`${f.ul} are ${rising?"rising":"falling"}: ${u.join(", ")}, newest first.`);if(rising===up)tags.push(`${rising?"more":"fewer"} ${f.ul.toLowerCase()}`)}}}
+ // the matchup
+ const M=MATCHW[matchW]?matchup(r):null;
+ if(M&&Math.abs(M.m-1)>=.06){const soft=M.m>1,t=`${M.team.ab||M.team.n} ${DEF_LABEL[M.k]||"defense"} allows ${fmtv(M.val,1)} ${DEF_UNIT[M.k]||""}${M.rk?`, #${M.rk} fewest of ${M.n}`:""}.`;
+  if(soft===up){pro.push(`${soft?"Soft":"Tough"} matchup: ${t}`);tags.push(`a ${soft?"soft":"tough"} matchup`)}else{con.push(`${soft?"Soft":"Tough"} matchup: ${t}`);ctags.push("the matchup")}}
+ // who's playing
+ if(r.tmo&&r.tmo.length){(up?pro:con).push(`Teammates out: ${r.tmo.join(", ")}. More of the work could go to him.`);if(up)tags.push("teammates out")}
+ if(r.ij&&!/^active$/i.test(r.ij)){con.unshift(`He's listed ${r.ij}. Check his status before the game.`);ctags.unshift("his injury tag")}
+ // line moves since the board first pulled it
+ if(r.op!=null&&r.op!==r.ln){const fell=r.ln<r.op;(fell===up?pro:con).push(`PrizePicks moved the line from ${r.op} to ${r.ln}.`)}
+ if(r.obm!=null&&r.bm!=null&&r.obm!==r.bm){const rose=r.bm>r.obm;(rose===up?pro:con).push(`The books moved their line from ${r.obm} to ${r.bm}, so money has come in on ${rose?"More":"Less"}.`)}
+ // weather on passing and catching stats
+ const W=g&&g.wx;if(W&&/pass|recep/.test(r.mk)&&(W.w>=15||W.gu>=25||W.p>=60)){(up?con:pro).push(`Weather: ${W.w>=15||W.gu>=25?`wind ${W.w} mph, gusts ${W.gu}`:`${W.p}% chance of rain`}, which usually cuts passing.`)}
+ if(mixed(r))con.push("His recent games or the matchup point against the books, so the board's scanners skip this one.");
+ // how picks like this have really done
+ const [tc]=tier(p),R=rec(),key=agree(r)?"agree":RKEY[tc],a=R&&R[key],lab={agree:"All-signals-agree",strong:"Strong",playable:"Playable",thin:"Thin"}[key];
+ const bottom=a&&a.n?`The board gives it ${pct(p)}. ${lab} picks have really hit ${pct(a.w/a.n)} so far (${wl(a)}), and a 2-pick Power Play needs ${pct(bePower(2))}.`
+  :`The board gives it ${pct(p)}. Picks like this haven't been graded yet, so that number is untested.`;
+ const list=l=>l.length<=1?l.join(""):l.slice(0,-1).join(", ")+" and "+l[l.length-1];
+ const head=tags.length?`${list(tags.slice(0,3))} point${tags.length===1&&/^a /.test(tags[0])?"s":""} to ${S}.`:`A close call that leans ${S}.`;
+ return{side,S,p,pro,con,head:head.charAt(0).toUpperCase()+head.slice(1)+(ctags.length?` Against it: ${list(ctags.slice(0,2))}.`:""),bottom}}
+function caseBlock(r){const C=caseFor(r);
+ return `<div class="case"><b class="case-h">The case for ${C.S}</b><p class="case-s">${esc(C.head)}</p>
+  <ul class="pros">${C.pro.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${C.con.length?`<b class="case-h con">Against it</b><ul class="cons">${C.con.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+  <p class="case-b">${esc(C.bottom)}</p></div>`}
+// Top picks: the clearest cases on the board right now
+function caseSection(onlyPP){const C=spread(ppCandidates(onlyPP),1,3);if(!C.length)return"";
+ return `<h2>The case for today</h2><p class="lede">The three picks with the strongest case on the board right now, and why. Each one ends with how picks like it have really done.</p>
+ <div class="list">${C.map(x=>{const r=x.r,c=caseFor(r),lnT=Number.isInteger(r.ln)?r.ln:(+r.ln).toFixed(1),on=pps[r.k]===c.side;
+  return `<div class="card casecard"><div class="cch"><span><b>${esc(r.pl)}</b><small>${c.S} ${lnT} ${esc(MK[r.mk]||r.mk)}, ${esc(gameTxt(r))}, ${esc(when(GI[r.g]))}</small></span>
+   <button class="side-b rec ${on?"on":""}" data-pp="${r.i}|${c.side}" aria-pressed="${on}"><small>${c.S}</small><b>${pct(c.p)}</b><span class="ln">${lnT}</span></button></div>
+   <p class="case-s">${esc(c.head)}</p><ul class="pros">${c.pro.slice(0,3).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
+   ${c.con.length?`<ul class="cons">${c.con.slice(0,2).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}<p class="case-b">${esc(c.bottom)}</p></div>`}).join("")}</div>`}
 
 function renderSportBar(){
  const live2=G.filter(live),n=sp=>live2.filter(g=>sp==="all"||g.sp===sp).length;

@@ -276,6 +276,24 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 .fx-sk.big{height:160px;margin-top:18px}
 @keyframes fxSk{from{background-position:120% 0}to{background-position:-130% 0}}
 
+/* ---------- the case for a pick ---------- */
+.case{margin:2px 0 12px;padding:10px 12px;background:var(--raise);clip-path:var(--tile);color:var(--ink)}
+.case-h{display:block;font:italic 900 19px/1.1 var(--fd);font-stretch:68%;color:var(--go)}
+.case-h.con{color:var(--stop);margin-top:8px}
+.case-s{margin:4px 0 6px;font-size:14.5px;font-weight:650;line-height:1.35;color:var(--ink)}
+.case ul,.casecard ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13.5px;line-height:1.4;color:var(--mute)}
+.case li,.casecard li{position:relative;padding-left:18px}
+.pros li::before,.cons li::before{content:"";position:absolute;left:2px;top:.45em;width:9px;height:9px;clip-path:polygon(30% 0,100% 0,70% 100%,0 100%)}
+.pros li::before{background:var(--go)}
+.cons li::before{background:var(--stop)}
+.cons{margin-top:6px!important}
+.case-b{margin:9px 0 0;font-size:12.5px;color:var(--mute);border-top:1px solid var(--line);padding-top:8px}
+.casecard{padding:13px 14px}
+.cch{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.cch b{display:block;font-size:18px;font-weight:800;font-stretch:90%}
+.cch small{display:block;font-size:12.5px;color:var(--mute);margin-top:2px}
+.casecard .case-s{margin-top:10px}
+
 /* ---------- line gaps ---------- */
 .mchip.gap{background:color-mix(in srgb,var(--led) 18%,var(--raise));color:var(--led);font-weight:700}
 
