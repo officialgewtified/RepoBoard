@@ -467,12 +467,45 @@ function pairs(C,needMix){let best=null;const L=C.slice(0,40);
   const s=a.q*c.q;if(!best||s>best.s)best={s,legs:[a,c]}}
  return best}
 
+/* ---------- line gaps across both boards ---------- */
+// The PrizePicks line sits away from where the sportsbooks have it; measured against how much the stat usually swings.
+const GAPZ=.15;
+function gaps(){const out=[];for(const b of B){if(!b.d)continue;
+ for(const r of b.d.props||[]){const g=b.GI[r.g];if(!g||Date.parse(g.kick)<=Date.now()||(sportSel!=="all"&&g.sp!==sportSel))continue;
+  if(!r.pp||r.bm==null||r.nb<2||(r.ij&&/^(out|doubtful)/i.test(r.ij)))continue;const d=+(r.bm-r.ln).toFixed(2);if(!d)continue;
+  const z=d/b.sigma(r.mk,r.ln);if(Math.abs(z)<GAPZ)continue;const side=d>0?"o":"u",p=side==="o"?r.po:1-r.po,{q,c}=corrected(b,p);
+  out.push({b,r,g,side,p,q,c,z,gap:true,team:r.sd?g[r.sd]:null,opp:r.sd?g[r.sd==="a"?"h":"a"]:null,key:b.k+"|"+r.g+"|"+r.pl})}}
+ return out.sort((a,b)=>Math.abs(b.z)-Math.abs(a.z))}
+function gapRecAll(){let w=0,n=0;for(const b of B)for(const x of (b.h&&b.h.props)||[]){if(!x.pp||x.bm==null||x.act==null||x.act===x.ln)continue;
+ const d=x.bm-x.ln;if(!d||Math.abs(d/b.sigma(x.mk,x.ln))<GAPZ)continue;n++;if((x.act>x.ln)===(d>0))w++}return{w,n}}
+
+/* ---------- bankroll across both sports, and the weekly limit ---------- */
+const LIMKEY="arena_limit",money=x=>"$"+(+x).toFixed(2);
+function rawTix(k){try{const v=JSON.parse(localStorage.getItem(k)||"[]");return Array.isArray(v)?v:[]}catch(e){return[]}}
+const tRet=t=>t.r==="L"?0:+(t.ret??t.pay),tNet=t=>tRet(t)-(+t.stake||0);
+function tAt(t){if(t.day)return Date.parse(t.day+"T12:00:00");if(t.at)return t.at;const k=t.lg&&t.lg[0]&&t.lg[0].k;if(k)return Date.parse(k);const m=/^log-(\d+)/.exec(t.id||"");return m?+m[1]:null}
+function weekStart(ms){const d=new Date(ms);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
+function getLimit(){try{const v=parseFloat(localStorage.getItem(LIMKEY));return v>0?v:null}catch(e){return null}}
+function bankCard(){const fb=rawTix("pb_tickets"),bb=rawTix("bl_tickets"),all=[...fb,...bb];
+ const S=all.filter(t=>t.r&&tAt(t)).sort((a,b)=>tAt(a)-tAt(b));let v=0;const pts=S.length?[{t:tAt(S[0])-1,v:0}]:[];for(const t of S){v+=tNet(t);pts.push({t:tAt(t),v})}
+ const net=l=>l.filter(t=>t.r).reduce((a,t)=>a+tNet(t),0),ws=weekStart(Date.now()),wk=all.filter(t=>{const a=tAt(t);return a&&a>=ws}).reduce((a,t)=>a+(+t.stake||0),0),L=getLimit();
+ let chart=`<p class="fine">The chart starts once you have a settled ticket on either board.</p>`;
+ if(pts.length>=2){const W=340,H=120,xs=pts.map(p=>p.t),ys=pts.map(p=>p.v),x0=xs[0],x1=xs[xs.length-1],lo=Math.min(0,...ys),hi=Math.max(0,...ys);
+  const X=t=>6+(W-12)*(x1===x0?1:(t-x0)/(x1-x0)),Y=q=>H-8-(H-16)*(hi===lo?.5:(q-lo)/(hi-lo)),c=v>=0?"var(--go)":"var(--stop)",d=pts.map((p,i)=>(i?"L":"M")+X(p.t).toFixed(1)+" "+Y(p.v).toFixed(1)).join("");
+  chart=`<svg class="plc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Net over time"><line x1="0" x2="${W}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 5"/><path d="${d} L${X(x1).toFixed(1)} ${Y(0).toFixed(1)} L${X(x0).toFixed(1)} ${Y(0).toFixed(1)}Z" fill="${c}" opacity=".12"/><path d="${d}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="${X(x1).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="4.5" fill="${c}"/></svg>`}
+ const row=(l,n)=>`<div class="recrow"><span>${l}</span><span class="k">${n.c} settled</span><b class="${n.v>=0?"gold":"red"}">${n.v>=0?"+":"−"}${money(Math.abs(n.v))}</b></div>`;
+ return `<h2>Bankroll</h2><p class="lede">Every ticket you saved or logged on Gridline and Baseline, settled ones only.</p>
+ <section class="card bank"><div class="rchd"><span>Both sports<small>Net since your first ticket</small></span><b class="${v>=0?"gold":"red"}">${v>=0?"+":"−"}${money(Math.abs(v))}</b></div>${chart}
+  ${row("Football",{v:net(fb),c:fb.filter(t=>t.r).length})}${row("Basketball",{v:net(bb),c:bb.filter(t=>t.r).length})}
+  <div class="limit"><div class="lrow"><span>This week, both sports</span><b>${money(wk)}${L?` of ${money(L)}`:""}</b></div>${L?`<div class="lbar"><i style="width:${Math.min(100,wk/L*100).toFixed(0)}%" class="${wk>=L?"over":""}"></i></div>`:""}
+  <div class="lset"><label>Weekly limit $<input id="limitamt" type="number" inputmode="decimal" min="0" step="1" value="${L||""}" placeholder="none"></label><button class="sm" data-limitsave>Save limit</button></div></div></section>`}
+
 /* ---------- rendering ---------- */
 const lg=x=>`<span class="lg">${esc(x.g.sp)}</span>`;
 function pickRow(x,i){const lineTxt=Number.isInteger(x.r.ln)?x.r.ln:x.r.ln.toFixed(1),gm=x.team&&x.opp?`${esc(x.team.ab||x.team.n)} ${x.r.sd==="a"?"at":"vs"} ${esc(x.opp.ab||x.opp.n)}`:`${esc(x.g.a.ab||x.g.a.n)} @ ${esc(x.g.h.ab||x.g.h.n)}`;
  return `<div class="card prop"><div class="who"><b>${i!=null?`<span class="rank">${i+1}</span>`:""}${esc(x.r.pl)}${x.r.ij?`<span class="tier mix">${esc(x.r.ij)}</span>`:""}</b>
   <span class="m">${lg(x)}<span class="stat-name">${x.side==="o"?"More":"Less"} ${lineTxt} ${esc(MK[x.r.mk]||x.r.mk)}</span><span>${gm}</span><span>${esc(when(Date.parse(x.g.kick)))}</span></span>
-  <span class="m" style="margin-top:4px"><span>${esc(x.b.name)} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
+  ${x.gap?`<span class="mchip gap">PrizePicks ${x.r.ln}, books ${x.r.bm}</span>`:""}<span class="m" style="margin-top:4px"><span>${esc(x.b.name)}${x.gap?"'s books":""} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
   <div class="sides"><div class="side-b rec"><small>Crossover</small><b>${pct(x.q)}</b><span class="ln">${x.side==="o"?"More":"Less"}</span></div></div></div>`}
 function pairCard(P,title,lede,id){if(!P)return"";const[a,c]=P.legs,all=a.q*c.q,ev=all*PAY2-1;
  return `<h2>${title}</h2><p class="lede">${lede}</p><section class="card hero"><div class="kick"><div><h3>2-pick Power Play</h3><div class="sub">Pays ${PAY2}x if both hit</div></div><div class="ev ${ev>0?"":"neg"}">${pct(all)}</div></div>
@@ -498,11 +531,18 @@ function render(){
   if(mix&&(mix.legs[0].key!==(best&&best.legs[0].key)||mix.legs[1].key!==(best&&best.legs[1].key)))h+=pairCard(mix,"Best football + basketball","The best pair with one pick from each sport.","mix");
   h+=`<h2>Top picks across both</h2><p class="lede">Every prop from both boards with at least 2 books, ranked by Crossover's corrected chance. Picks where a board's own signals disagree are left out, as are players listed out or doubtful.</p>
   <div class="list">${C.slice(0,15).map((x,i)=>pickRow(x,i)).join("")}</div>`}
+ const GP=gaps().slice(0,6),GR=gapRecAll();
+ h+=`<h2>Line gaps across both</h2><p class="lede">PrizePicks has these lines away from where the sportsbooks have them, so the side shown gets the better number.${GR.n?` So far gap picks have gone <b>${GR.w}-${GR.n-GR.w}</b> (${pct(GR.w/GR.n)}).`:" Their record shows up once some are graded."}</p>`+
+  (GP.length?`<div class="list">${GP.map(x=>pickRow(x)).join("")}</div>`:`<div class="card empty">No PrizePicks line is far enough from the books right now.</div>`);
+ h+=bankCard();
+ const L=getLimit();if(L){const ws=weekStart(Date.now()),wk=[...rawTix("pb_tickets"),...rawTix("bl_tickets")].filter(t=>{const a=tAt(t);return a&&a>=ws}).reduce((a,t)=>a+(+t.stake||0),0);
+  if(wk>=L)h=`<div class="warn" style="margin-top:14px">You've put in ${money(wk)} this week across both sports, past your ${money(L)} weekly limit.</div>`+h}
  $("#view").innerHTML=h}
 function copyText(txt,btn){const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>{btn.textContent=o},1200)};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,()=>prompt("Copy this:",txt));else prompt("Copy this:",txt)}
 document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const d=t.dataset;
  if(d.sport){sportSel=d.sport;try{localStorage.setItem("cx_sport",sportSel)}catch(_){}render();return}
+ if(d.limitsave!==undefined){const v=parseFloat($("#limitamt").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(e){}const y=scrollY;render();scrollTo(0,y);return}
  if(d.copy){const P=LAST[d.copy];if(P)copyText(P.legs.map(x=>`${x.r.pl} ${x.side==="o"?"More":"Less"} ${x.r.ln} ${MK[x.r.mk]||x.r.mk}`).join("\n"),t)}});
 (function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}if(!["dark","clean","bold"].includes(t))t="dark";document.documentElement.dataset.theme=t})();
 

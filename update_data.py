@@ -1152,7 +1152,7 @@ def write_brief(games, props, teams, site, url):
         item = {"pl": r["pl"], "stat": MARKET_LABEL.get(r["mk"], r["mk"]), "side": "More" if side == "o" else "Less", "ln": r["ln"],
                 "p": round(p, 3), "sp": g["sp"],
                 "game": (f"{t['ab']} {'at' if r['sd'] == 'a' else 'vs'} {o['ab']}" if t and o else f"{g['a']['ab']} @ {g['h']['ab']}"),
-                "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p")}
+                "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"]}
         if not is_mixed(r, teams, gbi) and (r["pl"] not in picks or picks[r["pl"]]["p"] < p):
             picks[r["pl"]] = item
         if r.get("bm") is not None:

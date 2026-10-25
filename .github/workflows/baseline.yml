@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [baseline/settings.json, baseline/update_data.py]   # changing these runs an update right away
+    paths: [baseline/settings.json]   # changing the settings runs an update right away
 permissions:
   contents: write
 concurrency:
