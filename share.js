@@ -62,8 +62,8 @@ window.shareSlipImage=async function(o,btn){
  if(d._url)URL.revokeObjectURL(d._url);const url=d._url=URL.createObjectURL(blob);
  let canShare=false;try{canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){}
  d.innerHTML=`<div class="shr"><img src="${url}" alt="Your slip as a picture">
-  <p class="shr-t">${canShare?"Tap Share to text it, post it or save it to Photos.":"Save the picture, then send it from your photos."} You can also press and hold the picture to save it.</p>
-  <div class="shr-b">${canShare?'<button class="btn go" data-shr="share">Share</button>':""}<a class="btn${canShare?"":" go"}" href="${url}" download="${name}">Save image</a>
+  <p class="shr-t">${canShare?"Tap Share, then Save Image to put it in your Photos, or send it straight to a chat.":"Save the picture, then send it from your photos."}</p>
+  <div class="shr-b">${canShare?'<button class="btn go" data-shr="share">Share</button>':`<a class="btn go" href="${url}" download="${name}">Save image</a>`}
   ${o.text?'<button class="btn" data-shr="copy">Copy as text</button>':""}<button class="btn" data-shr="close">Done</button></div></div>`;
  d.onclick=async e=>{if(e.target===d){d.close();return}const b=e.target.closest("[data-shr]");if(!b)return;const k=b.dataset.shr;
   if(k==="close")d.close();

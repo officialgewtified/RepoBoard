@@ -1138,10 +1138,31 @@ def build_players(inj):
 
 
 # ---------- brief.json: a small summary for the morning message ----------
+def fit_cal(P):
+    """The honest-chances fit the pages use: chance = 50% + a + b x (board's chance - 50%), fitted to graded picks.
+    With nothing graded, b = 1/2 (half as far from a coin flip as the board says)."""
+    n, A = len(P), 30
+    if not n:
+        return 0.0, .5
+    xs = [x["p"] - .5 for x in P]; ys = [(1 if x["hit"] else 0) - .5 for x in P]
+    sx, sy = sum(xs), sum(ys); sxx = sum(u * u for u in xs); sxy = sum(u * v for u, v in zip(xs, ys))
+    B = A * sxx / n; a11, a22, b2 = n + A, sxx + B, sxy + B * .5; det = a11 * a22 - sx * sx
+    if det <= 1e-12:
+        b = .5; a = (sy - b * sx) / (n + A)
+    else:
+        a = (sy * a22 - sx * b2) / det; b = (a11 * b2 - sx * sy) / det
+        if b < .05 or b > 1:
+            b = min(1, max(.05, b)); a = (sy - b * sx) / (n + A)
+    return max(-.08, min(.08, a)), b
+
 def write_brief(games, props, teams, site, url):
     """Today's strongest picks, the biggest line gaps and last night's results, small enough to read in a text."""
     gbi = {g["id"]: g for g in games}
     picks, gaps = {}, []
+    h = load_json("history.json", {})
+    P = [x for x in h.get("props", []) if x.get("pp") and x.get("hit") in (True, False)]
+    ca, cb = fit_cal(P)
+    honest = lambda q: min(.8, max(.3, .5 + ca + cb * (q - .5)))   # chance on the board's side, adjusted for its record
     for r in props:
         g = gbi.get(r["g"])
         if not g or not r.get("pp") or r.get("nb", 0) < 2 or parse_t(g["kick"]) <= NOW:
@@ -1153,7 +1174,7 @@ def write_brief(games, props, teams, site, url):
         t = g[r["sd"]] if r.get("sd") else None
         o = g["h" if r.get("sd") == "a" else "a"] if r.get("sd") else None
         item = {"pl": r["pl"], "stat": MARKET_LABEL.get(r["mk"], r["mk"]), "side": "More" if side == "o" else "Less", "ln": r["ln"],
-                "p": round(p, 3), "sp": g["sp"],
+                "p": round(honest(p), 3), "raw": round(p, 3), "sp": g["sp"],
                 "game": (f"{t['ab']} {'at' if r['sd'] == 'a' else 'vs'} {o['ab']}" if t and o else f"{g['a']['ab']} @ {g['h']['ab']}"),
                 "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"]}
         why, mkt, fm = [], (r["po"] if side == "o" else 1 - r["po"]), r.get("rf")
@@ -1169,9 +1190,7 @@ def write_brief(games, props, teams, site, url):
         if r.get("bm") is not None:
             gz = (r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])
             if abs(gz) >= .15:
-                gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(pf if gz > 0 else 1 - pf, 3), books=r["bm"], gz=round(gz, 2)))
-    h = load_json("history.json", {})
-    P = [x for x in h.get("props", []) if x.get("pp") and x.get("hit") in (True, False)]
+                gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(honest(p) if (gz > 0) == (side == "o") else 1 - honest(p), 3), books=r["bm"], gz=round(gz, 2)))
     last_day = max((x["d"] for x in P), default=None)
     last = [x for x in P if x["d"] == last_day] if last_day else []
     brief = {"updated": iso(NOW), "site": site, "url": url,

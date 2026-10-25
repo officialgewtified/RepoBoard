@@ -408,6 +408,14 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 .hero .btns{flex-wrap:wrap}
 .hero .btns .btn.go{flex:1 1 100%}
 
+/* ---------- goblins and demons on the slip ---------- */
+.receipt .leg .alt{display:inline-block;margin-top:6px;border:0;padding:4px 9px;font:700 11.5px/1.2 var(--fd);letter-spacing:.02em;background:var(--panel);color:var(--mute);clip-path:var(--tile)}
+.receipt .leg .alt.gob{background:color-mix(in srgb,#2fd27a 24%,var(--panel));color:#3ee08e}
+.receipt .leg .alt.dem{background:color-mix(in srgb,#ff4d5e 24%,var(--panel));color:#ff6f7c}
+:root[data-theme="clean"] .receipt .leg .alt.gob{color:#0d8a4a}
+:root[data-theme="clean"] .receipt .leg .alt.dem{color:#c4283a}
+.receipt .tot input#payPP,.receipt .tot input#xpayin{width:96px}
+
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
  .fx-ripple,.fx-ring,.fx-spark{display:none}

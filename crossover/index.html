@@ -351,7 +351,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=7">
+<link rel="stylesheet" href="../fx.css?v=8">
 </head>
 <body>
 <header class="wrap top">
@@ -431,17 +431,23 @@ function mixed(b,r){const mkt=r.po>=.5,f=r.rf,n=f?f.o+f.u:0,h=n?f.o/n:.5;
  const fo=n>=4&&(h>=.5)!==mkt&&Math.abs(h-.5)>=.0999,fa=n>=4&&(h>=.5)===mkt&&Math.abs(h-.5)>=.0999;
  const m=matchF(b,r),mo=m!=null&&Math.abs(m-1)>=b.mixT&&((m>1)!==mkt);return fo||(mo&&!fa)}
 
-/* ---------- Crossover's correction: how each board's picks in the same chance range really did ---------- */
-// For every board, graded PrizePicks-line picks are split into three ranges of the chance the board gave them.
-// A pick's chance is moved by (real hit rate - chance the board expected) in its range, trusted more as more picks get graded (half weight at 30 picks).
-// Until a range has a record, the chance is cut halfway toward 50%: a new board's numbers haven't been tested, so they don't get to outrank tested ones.
+/* ---------- Crossover's correction: each board's chances, adjusted to match how its picks have really hit ---------- */
+// The same fit both boards use for their adjusted chances, so a pick shows the same number everywhere:
+// chance = 50% + a + b x (board's chance - 50%), fitted to the board's graded PrizePicks-line picks.
+// With nothing graded it assumes b = 1/2, cutting the chance halfway toward 50%: an untested board's numbers
+// don't get to outrank tested ones. The three ranges below are only for showing each range's record.
 const RANGES=[[0,.542,"Thin"],[.542,.591,"Playable"],[.591,1.01,"Strong"]];
-function calib(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x.hit===false));
+function fitCal(ps){const n=ps.length,A=30;if(!n)return{a:0,b:.5,n:0};
+ let sx=0,sy=0,sxx=0,sxy=0;for(const x of ps){const u=x.p-.5,v=(x.hit?1:0)-.5;sx+=u;sy+=v;sxx+=u*u;sxy+=u*v}
+ const B=A*sxx/n,a11=n+A,a22=sxx+B,b2=sxy+B*.5,det=a11*a22-sx*sx;let a,b;
+ if(det<=1e-12){b=.5;a=(sy-b*sx)/(n+A)}else{a=(sy*a22-sx*b2)/det;b=(a11*b2-sx*sy)/det;if(b<.05||b>1){b=clamp(b,.05,1);a=(sy-b*sx)/(n+A)}}
+ return{a:clamp(a,-.08,.08),b,n}}
+function calib(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x.hit===false));b.fit=fitCal(ps);
  b.all={n:ps.length,w:ps.filter(x=>x.hit).length,ep:ps.length?ps.reduce((a,x)=>a+x.p,0)/ps.length:null};
  b.cal=RANGES.map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length,w=s.filter(x=>x.hit).length,ep=n?s.reduce((a,x)=>a+x.p,0)/n:0;
   return{lo,hi,l,n,w,hr:n?w/n:null,ep}})}
-function corrected(b,p){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],w=c.n/(c.n+30),own=c.n?c.hr-c.ep:0,untested=-(p-.5)*.5;
- return{q:clamp(p+w*own+(1-w)*untested,.3,.75),c}}
+function corrected(b,p){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],F=b.fit||{a:0,b:.5};
+ return{q:clamp(.5+F.a+F.b*(p-.5),.3,.8),c}}
 
 /* ---------- candidates from both boards ---------- */
 function etDay(ms){return new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/New_York"})}
@@ -512,8 +518,20 @@ function xToggle(x){const k=xkey(x),i=XS.findIndex(s=>s.k===k);
  xSave()}
 let xMode=null,xStake=5;try{xStake=+(localStorage.getItem("cx_stake")||5)||5}catch(e){}
 function xDist(ps){let d=[1];for(const p of ps){const n=new Array(d.length+1).fill(0);for(let i=0;i<d.length;i++){n[i]+=d[i]*(1-p);n[i+1]+=d[i]*p}d=n}return d}
+/* goblins and demons: PrizePicks' easier (green) and harder (red) lines, More only, with a payout PrizePicks sets.
+   The slip takes the line and the payout the app shows; the chance moves from the regular line along the stat's spread. */
+let xPay=null,xPayTxt=null;try{xPay=JSON.parse(localStorage.getItem("cx_pay")||"null")}catch(e){}
+const ALT={gob:"Goblin",dem:"Demon"},fmtX=m=>+(+m).toFixed(2)+"x";
+const xSig=m=>m+"|"+XS.map(s=>s.k+":"+s.side+":"+s.ln).join(",");
+const xLegTxt=s=>`${s.pl} ${s.side==="o"?"More":"Less"} ${s.ln} ${MK[s.mk]||s.mk}${s.alt?` (${ALT[s.alt]})`:""}`;
+function xAlt(i,L){const s=XS[i];if(!s)return;if(s.ln0==null){s.ln0=s.ln;s.q0=s.q;s.side0=s.side}
+ if(L===s.ln0){s.ln=s.ln0;s.q=s.q0;s.side=s.side0;delete s.alt}
+ else{const b=B.find(b=>s.k.startsWith(b.k+"|")),sd=b?b.sigma(s.mk,s.ln0):Math.sqrt(Math.max(s.ln0,.5))+.6,qo=s.side0==="o"?s.q0:1-s.q0;
+  s.ln=L;s.side="o";s.q=clamp(Phi(PhiInv(qo)-(L-s.ln0)/sd),.02,.98);s.alt=L<s.ln0?"gob":"dem"}
+ xSave()}
 function xPlay(){const n=XS.length,pw=XPAY.power[n],fl=XPAY.flex[n];let m=xMode;if(m==="power"&&!pw)m=null;if(m==="flex"&&!fl)m=null;if(!m)m=pw?"power":fl?"flex":"power";
- const top=m==="power"?(pw||0):(fl?fl[0]:0);return{m,top,pw,fl}}
+ const std=m==="power"?(pw||0):(fl?fl[0]:0),cm=xPay&&xPay.sig===xSig(m)&&Math.abs(xPay.m-std)>.004?xPay.m:null;
+ return{m,top:cm||std,std,custom:!!cm,pw,fl}}
 /* saved Crossover tickets: graded from both boards' results */
 let XT=rawTix("cx_tickets");
 function xTSave(){try{localStorage.setItem("cx_tickets",JSON.stringify(XT))}catch(e){}}
@@ -543,24 +561,26 @@ function renderXSlip(){const el=$("#slip"),inn=$("#slipin");if(!el||!inn)return;
  el.classList.toggle("open",xOpen);
  const n=XS.length,all=XS.reduce((a,s)=>a*s.q,1),pw=XPAY.power[n],fl=XPAY.flex[n],teams=new Set(XS.map(s=>s.sp+"|"+(s.team||s.game))).size;
  const chev='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 15l6-6 6 6"/></svg>';
- inn.innerHTML=`<button class="sbar" data-xslipbar aria-expanded="${xOpen}"><span><span class="k">PrizePicks, ${n} pick${n>1?"s":""}</span><br><span class="c">${pct(all)} to hit all</span></span><span class="o">${pw?pw+"x":"—"}</span>${chev}</button>
+ inn.innerHTML=`<button class="sbar" data-xslipbar aria-expanded="${xOpen}"><span><span class="k">PrizePicks, ${n} pick${n>1?"s":""}</span><br><span class="c">${pct(all)} to hit all</span></span><span class="o">${pw?fmtX(xPlay().top):"—"}</span>${chev}</button>
  <div class="receipt"><h4>Your slip</h4><div class="ts">Tap a name to copy it, then paste it into PrizePicks search.</div>
- ${XS.map((s,i)=>`<div class="leg"><span><button class="cp" data-copyname="${esc(s.pl)}">${esc(s.pl)}</button><small>${s.side==="o"?"More":"Less"} ${s.ln} ${esc(MK[s.mk]||s.mk)}, ${esc(s.sp)} ${esc(s.game)}</small></span><b>${pct(s.q)}</b><button class="x" data-xrm="${i}" aria-label="Remove ${esc(s.pl)}">×</button></div>`).join("")}
- ${(()=>{const P=xPlay(),d=xDist(XS.map(s=>s.q)),flexWin=fl?fl.reduce((a,m,i)=>a+(m>1?(d[n-i]||0):0),0):0;
-  return `<div class="modes"><button class="mode ${P.m==="power"?"on":""}" data-xmode="power" ${pw?"":"disabled"}><b>Power ${pw?pw+"x":""}</b>${pw?`All must hit<br>${pct(all)} chance`:"Needs 2 to 6 picks"}</button><button class="mode ${P.m==="flex"?"on":""}" data-xmode="flex" ${fl?"":"disabled"}><b>Flex ${fl?fl[0]+"x top":""}</b>${fl?`Pays on ${n-fl.length+1}+ hits<br>${pct(flexWin)} to win money`:"Needs 3 to 6 picks"}</button></div>
-  <div class="tot"><span>Entry $<input id="xstake" type="number" inputmode="decimal" min="0" value="${xStake}"></span><b id="xpay">Max payout ${money(xStake*P.top)}</b></div>`})()}
+ ${XS.map((s,i)=>`<div class="leg"><span><button class="cp" data-copyname="${esc(s.pl)}">${esc(s.pl)}</button><small>${s.side==="o"?"More":"Less"} ${s.ln} ${esc(MK[s.mk]||s.mk)}, ${esc(s.sp)} ${esc(s.game)}</small><button class="alt ${s.alt||""}" data-xalt="${i}">${s.alt?`${ALT[s.alt]} · change`:"Goblin or demon?"}</button></span><b>${pct(s.q)}</b><button class="x" data-xrm="${i}" aria-label="Remove ${esc(s.pl)}">×</button></div>`).join("")}
+ ${(()=>{const P=xPlay(),d=xDist(XS.map(s=>s.q)),k=P.m==="flex"&&fl?P.top/fl[0]:1,flexWin=fl?fl.reduce((a,m,i)=>a+(m*k>1?(d[n-i]||0):0),0):0,alts=XS.some(s=>s.alt);
+  return `<div class="modes"><button class="mode ${P.m==="power"?"on":""}" data-xmode="power" ${pw?"":"disabled"}><b>Power ${pw?fmtX(P.m==="power"?P.top:pw):""}</b>${pw?`All must hit<br>${pct(all)} chance`:"Needs 2 to 6 picks"}</button><button class="mode ${P.m==="flex"?"on":""}" data-xmode="flex" ${fl?"":"disabled"}><b>Flex ${fl?fmtX(P.m==="flex"?P.top:fl[0])+" top":""}</b>${fl?`Pays on ${n-fl.length+1}+ hits<br>${pct(flexWin)} to win money`:"Needs 3 to 6 picks"}</button></div>
+  <div class="tot"><span>Entry $<input id="xstake" type="number" inputmode="decimal" min="0" value="${esc(xStake)}"></span><span>Pays $<input id="xpayin" type="number" inputmode="decimal" min="0" step="0.01" value="${xPayTxt!=null?esc(xPayTxt):((+xStake||0)*P.top).toFixed(2)}" aria-label="What PrizePicks says it pays"></span></div>
+  ${P.custom?`<div class="note">Using the payout you entered: ${fmtX(P.top)} instead of the usual ${fmtX(P.std)}. <button class="linkbtn" data-xpaystd>Use the usual payout</button></div>`
+   :alts?`<div class="note">Goblins and demons change the payout. Type what PrizePicks says it pays in Pays, so the numbers are right.</div>`:""}`})()}
  ${n>=2&&teams<2?'<div class="note bad" role="alert">Every pick is on one team. PrizePicks needs at least 2 different teams.</div>':""}
- <div class="note">Chances are Crossover's corrected ones.</div>
+ <div class="note">Chances are Crossover's corrected ones. Picked a goblin or demon? Tap that line under the name.</div>
  <div class="rbtns"><button data-xcopyall>Copy all picks</button><button data-xshare>Share image</button></div>
  <div class="rbtns"><button data-xclear>Clear</button><button class="go" data-xsave ${n<2||teams<2?"disabled":""}>Save ticket</button></div></div>`}
 /* share a slip as a picture (share.js builds it and opens the share sheet) */
-function xShare(items,mode,btn){const n=items.length;if(!n)return;const pw=XPAY.power[n],fl=XPAY.flex[n];
- if(mode==="power"&&!pw)mode="flex";if(mode==="flex"&&!fl)mode="power";const top=mode==="power"?(pw||0):(fl?fl[0]:0),st=+xStake||0;
- const rows=items.map(s=>({a:s.pl,b:`${s.side==="o"?"More":"Less"} ${s.ln} ${MK[s.mk]||s.mk}`,c:`${s.sp} ${s.game}`,p:s.q}));
+function xShare(items,mode,btn,topIn){const n=items.length;if(!n)return;const pw=XPAY.power[n],fl=XPAY.flex[n];
+ if(mode==="power"&&!pw)mode="flex";if(mode==="flex"&&!fl)mode="power";const top=topIn||(mode==="power"?(pw||0):(fl?fl[0]:0)),st=+xStake||0;
+ const rows=items.map(s=>({a:s.pl,b:`${s.side==="o"?"More":"Less"} ${s.ln} ${MK[s.mk]||s.mk}${s.alt?` · ${ALT[s.alt]}`:""}`,c:`${s.sp} ${s.game}`,p:s.q}));
  const recs=B.filter(b=>b.all&&b.all.n).map(b=>`${b.name} ${pct(b.all.w/b.all.n)} (${b.all.w}-${b.all.n-b.all.w})`);
  const record=`Chances are corrected by how each board's picks have really done.${recs.length?` PrizePicks-line record so far: ${recs.join(", ")}.`:""} A 2-pick Power Play needs ${pct(BE2)} per pick.`;
  const url=location.host+location.pathname.replace(/index\.html$/,""),head=`${n}-pick ${mode==="power"?"Power":"Flex"} Play`;
- shareSlipImage({site:"Crossover",head,rows,entry:st,pays:st*top,odds:top+"x",led:getComputedStyle(document.documentElement).getPropertyValue("--led").trim()||"#ffa024",
+ shareSlipImage({site:"Crossover",head,rows,entry:st,pays:st*top,odds:fmtX(top),led:getComputedStyle(document.documentElement).getPropertyValue("--led").trim()||"#ffa024",
   chanceLabel:"corrected chance",record,url,text:`Crossover: ${head}\n`+rows.map(r=>`${r.a} ${r.b}`).join("\n")+`\n${url}`,file:"crossover-slip.png"},btn)}
 function rerender(){const y=scrollY;render();scrollTo(0,y)}
 
@@ -569,7 +589,7 @@ const lg=x=>`<span class="lg">${esc(x.g.sp)}</span>`;
 function pickRow(x,i){const lineTxt=Number.isInteger(x.r.ln)?x.r.ln:x.r.ln.toFixed(1),gm=x.team&&x.opp?`${esc(x.team.ab||x.team.n)} ${x.r.sd==="a"?"at":"vs"} ${esc(x.opp.ab||x.opp.n)}`:`${esc(x.g.a.ab||x.g.a.n)} @ ${esc(x.g.h.ab||x.g.h.n)}`;
  return `<div class="card prop"><div class="who"><b>${i!=null?`<span class="rank">${i+1}</span>`:""}${esc(x.r.pl)}${x.r.ij?`<span class="tier mix">${esc(x.r.ij)}</span>`:""}</b>
   <span class="m">${lg(x)}<span class="stat-name">${x.side==="o"?"More":"Less"} ${lineTxt} ${esc(MK[x.r.mk]||x.r.mk)}</span><span>${gm}</span><span>${esc(when(Date.parse(x.g.kick)))}</span></span>
-  ${x.gap?`<span class="mchip gap">PrizePicks ${x.r.ln}, books ${x.r.bm}</span>`:""}<span class="m" style="margin-top:4px"><span>${esc(x.b.name)}${x.gap?"'s books":""} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
+  ${x.gap?`<span class="mchip gap">PrizePicks ${x.r.ln}, books ${x.r.bm}</span>`:""}<span class="m" style="margin-top:4px"><span>${esc(x.b.name)}${x.gap?"'s books":"'s math"} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
   <div class="sides">${(()=>{const k=xkey(x),on=xOn(x);XI[k]=x;return `<button class="side-b rec ${on?"on":""}" data-xp="${esc(k)}" aria-pressed="${on}"><small>${on?"On slip":"Add"}</small><b>${pct(x.q)}</b><span class="ln">${x.side==="o"?"More":"Less"}</span></button>`})()}</div></div>`}
 function pairCard(P,title,lede,id){if(!P)return"";const[a,c]=P.legs,all=a.q*c.q,ev=all*PAY2-1;
  return `<h2>${title}</h2><p class="lede">${lede}</p><section class="card hero"><div class="kick"><div><h3>2-pick Power Play</h3><div class="sub">Pays ${PAY2}x if both hit</div></div><div class="ev ${ev>0?"":"neg"}">${pct(all)}</div></div>
@@ -582,7 +602,7 @@ function recordCard(){const rows=B.map(b=>{const a=b.all;if(!b.d)return `<div cl
  const beat=B.some(b=>b.all&&b.all.n>=50&&b.all.w/b.all.n>=BE2);
  return `<section class="card rcard"><div class="rchd"><span>Both boards' real record<small>Picks on PrizePicks lines, graded after the game</small></span></div>
   <div style="margin-top:6px">${rows}</div>
-  <p class="fine" style="margin:8px 0 0"><b class="${beat?"gold":"red"}">${beat?"At least one board is beating break-even so far.":"Neither board is beating PrizePicks payouts yet."}</b> A 2-pick Power Play needs each pick to hit ${pct(BE2)}. Crossover can't make picks more accurate. It corrects each board's chance by how its picks in the same range really did, so a cold board's picks stop looking better than they've been.</p></section>`}
+  <p class="fine" style="margin:8px 0 0"><b class="${beat?"gold":"red"}">${beat?"At least one board is beating break-even so far.":"Neither board is beating PrizePicks payouts yet."}</b> A 2-pick Power Play needs each pick to hit ${pct(BE2)}. Crossover can't make picks more accurate. It adjusts each board's chances to match how its picks have really hit (the same adjustment the boards show), so a board whose big numbers haven't held up stops looking better than it's been.</p></section>`}
 /* ---------- is each board honest? what it said its picks would hit, against what they really hit ---------- */
 function honestyBoard(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x.hit===false));
  if(ps.length<20)return `<div class="recrow"><span>${esc(b.name)}<br><span class="k">${esc(b.sport)}</span></span><span class="k">${ps.length} graded</span><b>–</b></div><p class="fine" style="margin:0 0 6px">Needs 20 graded PrizePicks-line picks before this chart means anything.</p>`;
@@ -638,7 +658,12 @@ function render(){
  $("#view").innerHTML=h;renderXSlip()}
 function copyText(txt,btn){const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>{btn.textContent=o},1200)};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,()=>prompt("Copy this:",txt));else prompt("Copy this:",txt)}
-document.addEventListener("input",e=>{if(e.target.id==="xstake"){xStake=e.target.value;try{localStorage.setItem("cx_stake",xStake)}catch(_){}const P=xPlay(),el=$("#xpay");if(el)el.textContent="Max payout "+money((+xStake||0)*P.top)}});
+function xKeep(){const a=document.activeElement,id=a&&a.id,pos=a&&a.selectionStart;renderXSlip();if(id){const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}}}
+document.addEventListener("input",e=>{const t=e.target;
+ if(t.id==="xstake"){xStake=t.value;try{localStorage.setItem("cx_stake",xStake)}catch(_){}xPayTxt=null;xKeep();return}
+ if(t.id==="xpayin"){xPayTxt=t.value;const v=parseFloat(t.value),st=+xStake||0;
+  if(v>0&&st>0&&XS.length){xPay={sig:xSig(xPlay().m),m:+(v/st).toFixed(4)};try{localStorage.setItem("cx_pay",JSON.stringify(xPay))}catch(_){}}xKeep()}});
+document.addEventListener("change",e=>{if(e.target.id==="xpayin"){xPayTxt=null;renderXSlip()}});
 document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const d=t.dataset;
  if(d.sport){sportSel=d.sport;try{localStorage.setItem("cx_sport",sportSel)}catch(_){}render();return}
  if(d.limitsave!==undefined){const v=parseFloat($("#limitamt").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(e){}const y=scrollY;render();scrollTo(0,y);return}
@@ -649,18 +674,22 @@ document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)r
  if(d.xclear!==undefined){XS=[];xSave();xOpen=false;rerender();return}
  if(d.xmode){xMode=d.xmode;renderXSlip();return}
  if(d.xsave!==undefined){const n=XS.length,P=xPlay();if(n<2)return;const st=+xStake||0,ps=XS.map(s=>s.q),all=ps.reduce((a,v)=>a*v,1);
-  const dd=xDist(ps),fl=XPAY.flex[n],pw=P.m==="power"?all:(fl?fl.reduce((a,m,i)=>a+(m>1?(dd[n-i]||0):0),0):0);
-  XT.unshift({id:"cx-"+Date.now(),at:Date.now(),kind:"pp",mode:P.m==="power"?"Power":"Flex",legs:XS.map(s=>`${s.pl} ${s.side==="o"?"More":"Less"} ${s.ln} ${MK[s.mk]||s.mk}`),
-   lg:XS.map(s=>({pl:s.pl,mk:s.mk,ln:s.ln,side:s.side,sp:s.sp,k:s.kick})),odds:P.top+"x",stake:st,pay:(st*P.top).toFixed(2),p:all,pw,...(P.m==="flex"&&fl?{pt:fl.slice()}:{})});
-  xTSave();XS=[];xSave();xOpen=false;rerender();const s=document.querySelector("h2.fx-saved")||[...document.querySelectorAll("h2")].find(x=>x.textContent.startsWith("My Crossover"));if(s)s.scrollIntoView({behavior:"smooth",block:"start"});return}
+  const dd=xDist(ps),fl=XPAY.flex[n],k=P.m==="flex"&&fl?P.top/fl[0]:1,pw=P.m==="power"?all:(fl?fl.reduce((a,m,i)=>a+(m*k>1?(dd[n-i]||0):0),0):0);
+  XT.unshift({id:"cx-"+Date.now(),at:Date.now(),kind:"pp",mode:P.m==="power"?"Power":"Flex",legs:XS.map(xLegTxt),
+   lg:XS.map(s=>({pl:s.pl,mk:s.mk,ln:s.ln,side:s.side,sp:s.sp,k:s.kick,...(s.alt?{alt:s.alt}:{})})),odds:fmtX(P.top),stake:st,pay:(st*P.top).toFixed(2),p:all,pw,...(P.m==="flex"&&fl?{pt:fl.map(m=>+(m*k).toFixed(4))}:{})});
+  xTSave();XS=[];xSave();xPay=null;xPayTxt=null;try{localStorage.removeItem("cx_pay")}catch(_){}xOpen=false;rerender();const s=document.querySelector("h2.fx-saved")||[...document.querySelectorAll("h2")].find(x=>x.textContent.startsWith("My Crossover"));if(s)s.scrollIntoView({behavior:"smooth",block:"start"});return}
  if(d.xtw!==undefined){const t=XT[+d.xtw];if(!t)return;let v=+t.pay;if(t.r){const a=prompt("How much did it pay? $",(t.ret??t.pay));if(a===null)return;v=parseFloat(a);if(!(v>=0))return}
   t.ret=+v.toFixed(2);t.r=t.ret>0?"W":"L";delete t.auto;xTSave();rerender();return}
  if(d.xtl!==undefined){const t=XT[+d.xtl];if(!t)return;t.r="L";t.ret=0;delete t.auto;xTSave();rerender();return}
  if(d.xtd!==undefined){XT.splice(+d.xtd,1);xTSave();rerender();return}
  if(d.copyname!==undefined){copyText(d.copyname,t);return}
- if(d.xshare!==undefined){xShare(XS,xPlay().m,t);return}
+ if(d.xshare!==undefined){const P=xPlay();xShare(XS,P.m,t,P.top);return}
+ if(d.xalt!==undefined){const i=+d.xalt,s=XS[i];if(!s)return;const base=s.ln0!=null?s.ln0:s.ln;
+  const v=prompt(`${s.pl}, ${MK[s.mk]||s.mk}: type the line PrizePicks shows.\nGoblins (green) are lower than ${base} and demons (red) are higher; both are More only. Type ${base} for the regular line.`,s.ln);
+  if(v===null)return;const L=parseFloat(v);if(!isFinite(L)||L<0)return;xAlt(i,L);xPayTxt=null;renderXSlip();return}
+ if(d.xpaystd!==undefined){xPay=null;xPayTxt=null;try{localStorage.removeItem("cx_pay")}catch(_){}renderXSlip();return}
  if(d.xsharepair){const P=LAST[d.xsharepair];if(P)xShare(P.legs.map(xItem),"power",t);return}
- if(d.xcopyall!==undefined){copyText(XS.map(s=>`${s.pl} ${s.side==="o"?"More":"Less"} ${s.ln} ${MK[s.mk]||s.mk}`).join("\n"),t);return}
+ if(d.xcopyall!==undefined){copyText(XS.map(xLegTxt).join("\n"),t);return}
  if(d.copy){const P=LAST[d.copy];if(P)copyText(P.legs.map(x=>`${x.r.pl} ${x.side==="o"?"More":"Less"} ${x.r.ln} ${MK[x.r.mk]||x.r.mk}`).join("\n"),t)}});
 (function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}if(!["dark","clean","bold"].includes(t))t="dark";document.documentElement.dataset.theme=t})();
 
@@ -670,7 +699,7 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  const st=B.map(b=>`${esc(b.name)} <b>${b.d?new Date(b.d.updated).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}):"not loaded"}</b>`).join("<br>");
  $("#stamp").innerHTML=st;render()});
 </script>
-<script src="../share.js?v=1"></script>
-<script src="../fx.js?v=7"></script>
+<script src="../share.js?v=2"></script>
+<script src="../fx.js?v=8"></script>
 </body>
 </html>
