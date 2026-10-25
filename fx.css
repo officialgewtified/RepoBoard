@@ -481,71 +481,72 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 @keyframes kitPop{from{transform:translateX(-50%) scale(.6);opacity:0}}
 
 /* =========================================================================
-   Chrome: every button is a polished metal plate with real depth.
-   Gold chrome for the main action and whatever's picked; gunmetal for the rest (silver on Day).
-   Plates lift off the page with a shadow, catch a light sweep when tapped, and press in.
+   Glass: every button is a pane of frosted glass with a fine bright edge and a soft top light.
+   Picked things and the main action are glass tinted with the sport's color; everything else is clear.
    ========================================================================= */
 :root{
- --chrome-gm:linear-gradient(180deg,#6b778c 0%,#404b5f 15%,#283142 45%,#161c28 52%,#232c3c 76%,#3b4659 100%);
- --chrome-ag:linear-gradient(180deg,#ffffff 0%,#f0f3f7 15%,#c9d0d9 45%,#9ba3ae 52%,#cdd3db 76%,#f7f9fb 100%);
- --chrome-au:linear-gradient(180deg,#fffbea 0%,#ffeaa8 14%,color-mix(in srgb,var(--led) 78%,#fff 22%) 40%,color-mix(in srgb,var(--led) 74%,#4a2600 26%) 52%,var(--led) 72%,color-mix(in srgb,var(--led) 55%,#fff 45%) 100%);
- --bevel:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 0 rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.07);
- --bevel-au:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 0 rgba(90,40,0,.42),inset 0 0 0 1px rgba(255,255,255,.28);
- --lift:0 7px 14px -6px rgba(0,0,0,.75),0 2px 3px rgba(0,0,0,.4);
- --lift-au:0 9px 22px -8px color-mix(in srgb,var(--led) 75%,transparent),0 2px 3px rgba(0,0,0,.4);
- --press:inset 0 2px 6px rgba(0,0,0,.6),inset 0 -1px 0 rgba(255,255,255,.12);
- --plate-ink:#eef2f8;--plate-shadow:0 -1px 0 rgba(0,0,0,.6)}
-:root[data-theme="clean"]{--chrome-gm:var(--chrome-ag);--plate-ink:#18202d;--plate-shadow:0 1px 0 rgba(255,255,255,.8);
- --bevel:inset 0 1px 0 #fff,inset 0 -2px 0 rgba(30,40,60,.22),inset 0 0 0 1px rgba(20,30,50,.12);
- --lift:0 6px 14px -7px rgba(15,27,45,.45),0 1px 2px rgba(15,27,45,.25);--press:inset 0 2px 5px rgba(15,27,45,.35)}
+ --g-fill:linear-gradient(180deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.06) 48%,rgba(255,255,255,.035) 100%);
+ --g-edge:rgba(255,255,255,.16);
+ --g-glow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04),inset 0 0 18px -10px rgba(255,255,255,.35);
+ --g-lift:0 10px 24px -14px rgba(0,0,0,.8);
+ --g-tint:linear-gradient(180deg,color-mix(in srgb,var(--led) 92%,#fff 8%) 0%,color-mix(in srgb,var(--led) 78%,transparent) 55%,color-mix(in srgb,var(--led) 66%,transparent) 100%);
+ --g-tint-edge:color-mix(in srgb,var(--led) 55%,#fff 45%);
+ --g-tint-glow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(0,0,0,.12),inset 0 0 20px -8px rgba(255,255,255,.45);
+ --g-tint-lift:0 10px 26px -12px color-mix(in srgb,var(--led) 80%,transparent);
+ --g-ink:#f1f4fa}
+:root[data-theme="clean"]{
+ --g-fill:linear-gradient(180deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.7) 100%);--g-edge:rgba(15,27,45,.12);
+ --g-glow:inset 0 1px 0 #fff,inset 0 0 14px -8px rgba(255,255,255,.9);--g-lift:0 8px 20px -12px rgba(15,27,45,.35);--g-ink:#0f1b2d}
 
 .btn,.sm,.pill,.side-b,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn{
- clip-path:none;border:0;border-radius:12px;position:relative;overflow:hidden;isolation:isolate;
- background:var(--chrome-gm);color:var(--plate-ink);text-shadow:var(--plate-shadow);box-shadow:var(--bevel),var(--lift)}
+ clip-path:none;border:1px solid var(--g-edge);border-radius:14px;position:relative;overflow:hidden;isolation:isolate;
+ background:var(--g-fill);color:var(--g-ink);text-shadow:none;box-shadow:var(--g-glow),var(--g-lift)}
+/* panes that sit right on the page blur what's behind them */
+.pill,.net a,.iconbtn,.btn{-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
 .pill,.net a,.iconbtn{border-radius:999px}
-.side-b{border-radius:14px}
-.mode{color:color-mix(in srgb,var(--plate-ink) 75%,transparent)}
-.mode b,.side-b small,.side-b .ln{color:var(--plate-ink)}
-.pill .ct{opacity:.7}
-.net a{box-shadow:var(--bevel),var(--lift)}
-.net a.on{box-shadow:var(--bevel-au),var(--lift-au)}
-/* gold: the main action and whatever's picked */
+.side-b{border-radius:16px}
+.mode{color:color-mix(in srgb,var(--g-ink) 72%,transparent)}
+.mode b,.side-b small,.side-b .ln{color:var(--g-ink)}
+.pill .ct{opacity:.65}
+/* tinted glass: the main action and whatever's picked */
 .btn.go,.pill.on,.side-b.on,.mode.on,.receipt .rbtns .go,.net a.on,.shr-b .btn.go,.combo .use{
- background:var(--chrome-au);color:var(--ledink,#1b1200);text-shadow:0 1px 0 rgba(255,255,255,.45);box-shadow:var(--bevel-au),var(--lift-au)}
-.side-b.on b,.side-b.on small,.side-b.on .ln,.mode.on b,.net a.on i{color:var(--ledink,#1b1200);background-color:transparent}
+ background:var(--g-tint);border-color:var(--g-tint-edge);color:var(--ledink,#1b1200);box-shadow:var(--g-tint-glow),var(--g-tint-lift)}
+.side-b.on b,.side-b.on small,.side-b.on .ln,.mode.on b{color:var(--ledink,#1b1200)}
 .net a.on i{background:var(--ledink,#1b1200)}
-.mode.on{color:color-mix(in srgb,var(--ledink,#1b1200) 80%,transparent)}
-/* the board's side: a lit LED strip under the plate */
-.side-b.rec:not(.on){box-shadow:var(--bevel),var(--lift),inset 0 -3px 0 var(--led),0 0 14px -4px var(--led)}
-.side-b b{text-shadow:0 1px 0 rgba(0,0,0,.45)}
-.side-b.on b{text-shadow:0 1px 0 rgba(255,255,255,.4)}
-:root[data-theme="clean"] .side-b b{text-shadow:none}
-/* a light sweep crosses the plate when it's tapped; the main button catches one every few seconds */
+.mode.on{color:color-mix(in srgb,var(--ledink,#1b1200) 78%,transparent)}
+/* the board's side: its number lights up and the pane picks up a faint edge of the sport's color */
+.side-b.rec:not(.on){border-color:color-mix(in srgb,var(--led) 55%,transparent);box-shadow:var(--g-glow),var(--g-lift),inset 0 -2px 0 color-mix(in srgb,var(--led) 80%,transparent)}
+.side-b b{text-shadow:none}
+/* a faint glint crosses the pane when it's tapped */
 .btn::after,.sm::after,.pill::after,.side-b::after,.iconbtn::after,.mode::after,.tk .m button::after,.receipt .rbtns button::after,.net a::after,.shr-b .btn::after{
- content:"";position:absolute;inset:-2px;z-index:1;pointer-events:none;border-radius:inherit;
- background:linear-gradient(112deg,transparent 32%,rgba(255,255,255,.42) 47%,rgba(255,255,255,.1) 53%,transparent 64%);transform:translateX(-135%)}
-.fx-press::after{transform:translateX(135%);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.btn.go::after,.receipt .rbtns .go::after{animation:fxSheen 6s ease-in-out infinite}
-@keyframes fxSheen{0%,74%{transform:translateX(-135%)}90%,100%{transform:translateX(135%)}}
-/* pressing pushes the plate into the panel */
-:is(.btn,.sm,.pill,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn).fx-press{transform:translateY(2px) scale(.97);box-shadow:var(--press)}
-.side-b.fx-press{transform:translateY(2px) scale(.93);box-shadow:var(--press)}
-button:disabled.btn,button:disabled.mode,button:disabled.sm{opacity:.45;box-shadow:var(--bevel)}
-@media (hover:hover){:is(.btn,.sm,.pill,.side-b,.iconbtn,.mode,.net a):hover{filter:brightness(1.1) saturate(1.05)}}
-.filters{padding:3px 3px 12px;margin-bottom:-9px;margin-left:-3px;margin-right:-3px}   /* room for the plates' shadows inside the scrolling row */
-.pill{padding:8px 17px;box-shadow:var(--bevel),0 4px 7px -3px rgba(0,0,0,.6)}
-.pill.on{box-shadow:var(--bevel-au),0 4px 10px -4px color-mix(in srgb,var(--led) 85%,transparent)}
-:root[data-theme="clean"] .pill{box-shadow:var(--bevel),0 3px 6px -3px rgba(15,27,45,.35)}
-.sbar{background:var(--chrome-au);box-shadow:var(--bevel-au);color:var(--ledink,#1b1200)}
-/* the bottom bar's tab light becomes a gold rail */
-.seg .fx-ind{background:var(--chrome-au);height:4px!important;box-shadow:0 0 16px var(--led),0 0 3px var(--led)}
-/* inputs sit sunk into the panel, the opposite of a plate */
+ content:"";position:absolute;inset:-1px;z-index:1;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 62%);transform:translateX(-140%)}
+.fx-press::after{transform:translateX(140%);transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+/* pressing sinks the pane a little and dims its light */
+:is(.btn,.sm,.pill,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn).fx-press{transform:scale(.97);box-shadow:var(--g-glow)}
+.side-b.fx-press{transform:scale(.94);box-shadow:var(--g-glow)}
+button:disabled.btn,button:disabled.mode,button:disabled.sm{opacity:.45;box-shadow:none}
+@media (hover:hover){:is(.btn,.sm,.pill,.side-b,.iconbtn,.mode,.net a):hover{filter:brightness(1.12)}}
+.filters{padding:3px 3px 12px;margin-bottom:-9px;margin-left:-3px;margin-right:-3px}   /* room for the panes' shadows inside the scrolling row */
+.pill{padding:8px 17px;box-shadow:var(--g-glow),0 4px 10px -6px rgba(0,0,0,.6)}
+.pill.on{box-shadow:var(--g-tint-glow),0 4px 12px -6px color-mix(in srgb,var(--led) 85%,transparent)}
+.sbar{clip-path:none;border-radius:18px;border:1px solid var(--g-tint-edge);color:var(--ledink,#1b1200);box-shadow:var(--g-tint-glow),0 12px 30px -14px rgba(0,0,0,.8);
+ background:linear-gradient(180deg,color-mix(in srgb,var(--led) 96%,#fff 4%),color-mix(in srgb,var(--led) 88%,transparent));-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%)}
+/* the search bar and today's games are glass too */
+.askbar{clip-path:none;border-radius:16px;border:1px solid var(--g-edge);background:var(--g-fill);box-shadow:var(--g-glow),var(--g-lift);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.tg{clip-path:none;border-radius:14px;border:1px solid var(--g-edge);background:var(--g-fill);box-shadow:var(--g-glow);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.tg.mine{border-color:color-mix(in srgb,var(--led) 70%,transparent);box-shadow:var(--g-glow),0 0 14px -6px var(--led)}
+.seg .fx-ind{background:var(--led);height:3px!important;box-shadow:0 0 16px var(--led)}
+/* inputs: clear glass set into the panel */
 .search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.receipt input,.lset input,.cxlim input{
- border-radius:10px;clip-path:none;box-shadow:inset 0 2px 5px rgba(0,0,0,.45),inset 0 -1px 0 rgba(255,255,255,.06)}
-:root[data-theme="clean"] :is(.search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.receipt input,.lset input,.cxlim input){box-shadow:inset 0 2px 4px rgba(15,27,45,.18)}
+ border-radius:12px;clip-path:none;border:1px solid var(--g-edge);background:rgba(0,0,0,.18);box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
+:root[data-theme="clean"] :is(.search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.receipt input,.lset input,.cxlim input){background:rgba(255,255,255,.7);box-shadow:inset 0 1px 2px rgba(15,27,45,.12)}
+.search:focus,.ctrls input:focus,.ckline input:focus{border-color:color-mix(in srgb,var(--led) 70%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--led) 22%,transparent)}
+/* the win banner is tinted glass too */
+.kit-ban{background:var(--g-tint);border:1px solid var(--g-tint-edge);border-radius:20px;clip-path:none;box-shadow:var(--g-tint-glow),0 20px 50px -20px rgba(0,0,0,.7);
+ -webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);color:var(--ledink,#1b1200)}
 
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
  .fx-ripple,.fx-ring,.fx-spark{display:none}
- .btn::after,.receipt .rbtns .go::after{animation:none!important}
 }
