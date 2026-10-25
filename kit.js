@@ -1,7 +1,7 @@
-/* Kit: backup and restore for all three sites, and the win celebration. Shared by Gridline, Baseline and Crossover. */
+/* Kit: backup and restore for all the sites, pull to refresh, and the win celebration. Shared by Gridline, Baseline, Crossover and Early Bird. */
 window.Kit=(function(){
 "use strict";
-const KEEP=/^(pb_|bl_|cx_|arena_)/;          // everything the three sites save on this phone (they share it)
+const KEEP=/^(pb_|bl_|cx_|eb_|arena_)/;      // everything the sites save on this phone (they share it), Early Bird included
 const RM=matchMedia("(prefers-reduced-motion: reduce)");
 /* pull down from the top to refresh, on the home-screen version (in Safari, Safari already does this itself) */
 (function(){
