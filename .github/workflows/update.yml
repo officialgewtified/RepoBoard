@@ -2,9 +2,12 @@ name: Update board data
 on:
   schedule:
     # UTC times. Keep "schedule" in settings.json in sync with these.
-    - cron: "0 14 * * 2,4,5,6"
-    - cron: "0 15 * * 0"
+    # 05:17 UTC is about 12:17am Eastern (1:17am during daylight time), so the day's picks are ready by morning.
+    - cron: "17 5 * * 0,2,4,5,6"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [settings.json]   # changing the settings runs an update right away
 permissions:
   contents: write
 concurrency:

@@ -34,7 +34,7 @@ DEFAULTS = {
     "credit_reserve": 40,                # never spend below this (keeps game lines running)
     "props_refresh_hours": 10,           # reuse props fetched more recently than this
     # Scheduled runs in UTC: [weekday (Mon=0), hour, weight]. Keep in sync with .github/workflows/update.yml
-    "schedule": [[1, 14, 1], [3, 14, 1], [4, 14, 1], [5, 14, 3], [6, 15, 3]],
+    "schedule": [[1, 5, 1], [3, 5, 1], [4, 5, 1], [5, 5, 3], [6, 5, 3]],
 }
 
 MARKET_LABEL = {

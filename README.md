@@ -6,7 +6,7 @@ NFL and college football moneylines from every sportsbook in the feed, PrizePick
 1. Make a GitHub account and a new public repo. Upload every file in this folder, including the .github folder.
 2. Get a key at https://the-odds-api.com and add it in the repo under Settings > Secrets and variables > Actions as ODDS_API_KEY.
 3. Settings > Pages > Deploy from branch > main > / (root). Your board lives at https://YOUR-NAME.github.io/REPO-NAME/
-4. Actions tab > "Update board data" > Run workflow once. After that it runs Tue, Thu, Fri, Sat and Sunday morning on its own.
+4. Actions tab > "Update board data" > Run workflow once. After that it runs on its own around 12am Eastern on Tue, Thu, Fri, Sat and Sun, so the day's picks are ready when you wake up.
 
 ## What's on the board
 - **Check any player's pick:** the search bar at the top. Type any NFL or college player's name, pick the stat and enter the PrizePicks line, and the board says how it feels (Likes, Leans, Coin flip, Mixed or Stay away) and why: sportsbook prices when the board pulled them, his recent games against your line, the matchup, injuries and whether it clears what a 2-pick Power Play needs. Players without sportsbook lines are judged on recent games and the matchup only, so they top out at a lean. If the PrizePicks tab search finds no prop, it offers to check the player anyway.
