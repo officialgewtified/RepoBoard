@@ -348,7 +348,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=6">
+<link rel="stylesheet" href="../fx.css?v=7">
 </head>
 <body>
 <header class="wrap top">
@@ -1188,45 +1188,20 @@ function bankCard(){const pts=plPoints(tickets),L=getLimit(),s=weekStake(),used=
   <p class="fine">The limit counts every entry you put in from Monday on, on Gridline, Baseline and Crossover together. The slip warns you as you get close.</p></div></section>`}
 
 /* ---------- share a slip as an image ---------- */
-function cutPath(x,X,Y,w,h,c){x.beginPath();x.moveTo(X+c,Y);x.lineTo(X+w,Y);x.lineTo(X+w,Y+h-c);x.lineTo(X+w-c,Y+h);x.lineTo(X,Y+h);x.lineTo(X,Y+c);x.closePath()}
 async function shareSlip(btn){
  const kind=$("#slip").dataset.kind,Q=ppLegs(),L=mlLegs();
  const rows=kind==="pp"?Q.map(q=>({a:q.r.pl,b:`${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`,c:gameTxt(q.r),p:q.p}))
   :L.map(l=>({a:teamName(l.g[l.s]),b:`Moneyline ${fmtML(l.ml)}`,c:`${l.g.a.n} @ ${l.g.h.n}`,p:l.p}));
  if(!rows.length)return;
- const o=btn.textContent;btn.textContent="Making image…";
  const n=rows.length,st=kind==="pp"?(+stakePP||0):(+stakeML||0);let head,mult,pay;
  if(kind==="pp"){const ps=Q.map(q=>q.p),ep=evPower(ps),ef=evFlex(ps);let mode=ui.ppMode;if(!mode)mode=ep!=null&&(ef==null||ep>=ef)?"power":"flex";
   const top=mode==="power"?(PAY.power[n]||0):(PAY.flex[n]?PAY.flex[n][0]:0);head=`${n}-pick ${mode==="power"?"Power":"Flex"} Play`;mult=top+"x";pay=st*top}
  else{const D=L.reduce((a,l)=>a*dec(l.ml),1);head=n>1?`${n}-leg parlay`:"Moneyline";mult=n>1?amer(D):fmtML(L[0].ml);pay=st*D}
- const css=getComputedStyle(document.documentElement),led=(css.getPropertyValue("--led").trim()||"#ffb420");
- const W=1080,rowH=168,H=316+n*(rowH+18)+290,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
- try{await Promise.all([document.fonts.load('italic 900 80px Archivo'),document.fonts.load('700 40px Archivo'),document.fonts.load('500 30px Archivo')])}catch(e){}
- const font=(f,stretch)=>{x.font=f+' Archivo, system-ui, sans-serif';try{x.fontStretch=stretch||"normal"}catch(e){}};
- // night background with the sport's light
- let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#0e192b");g.addColorStop(1,"#070d18");x.fillStyle=g;x.fillRect(0,0,W,H);
- const rg=x.createRadialGradient(W*.22,120,0,W*.22,120,W*.75);rg.addColorStop(0,led+"55");rg.addColorStop(1,led+"00");x.fillStyle=rg;x.fillRect(0,0,W,H);
- // name and play
- font("italic 900 92px","condensed");x.fillStyle=led;x.shadowColor=led;x.shadowBlur=30;x.fillText(SITENAME.toUpperCase(),64,150);x.shadowBlur=0;
- x.fillStyle="#f1f4fa";font("italic 900 62px","condensed");x.fillText(head,64,240);
- x.fillStyle=led;x.beginPath();x.moveTo(64,268);x.lineTo(150,268);x.lineTo(144,280);x.lineTo(58,280);x.closePath();x.fill();
- // picks
- let y=316;for(const r of rows){cutPath(x,64,y,W-128,rowH,22);x.fillStyle="#17253d";x.fill();
-  x.fillStyle="#f1f4fa";font("800 46px","semi-condensed");x.fillText(r.a,100,y+62,W-420);
-  x.fillStyle=led;font("700 34px");x.fillText(r.b,100,y+108,W-420);
-  x.fillStyle="#8999b6";font("500 28px");x.fillText(r.c,100,y+146,W-420);
-  x.textAlign="right";x.fillStyle="#f1f4fa";font("italic 900 74px","condensed");x.fillText(pct(r.p),W-104,y+104);
-  x.fillStyle="#8999b6";font("600 24px");x.fillText("board's chance",W-104,y+140);x.textAlign="left";y+=rowH+18}
- // money
- const box=(bx,label,val)=>{cutPath(x,bx,y+10,300,150,18);x.fillStyle="#0e192b";x.fill();x.fillStyle="#8999b6";font("600 26px");x.fillText(label,bx+28,y+56);
-  x.fillStyle="#f1f4fa";font("italic 900 64px","condensed");x.fillText(val,bx+28,y+128)};
- box(64,"Entry",money(st));box(390,"Pays",money(pay));box(716,"Odds",mult);
- x.fillStyle="#56657f";font("500 22px");x.fillText("Chances are estimates, not guarantees. 21+ where legal. Gambling problem? Call 1-800-GAMBLER.",64,H-48,W-128);
- const blob=await new Promise(r=>cv.toBlob(r,"image/png"));btn.textContent=o;if(!blob)return;
- const file=new File([blob],`${SITENAME.toLowerCase()}-slip.png`,{type:"image/png"});
- if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:`${SITENAME} slip`})}catch(e){}return}
- const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;document.body.appendChild(a);a.click();
- setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000)}
+ const a=rec()&&rec().all,url=location.host+location.pathname.replace(/index\.html$/,"");
+ const record=kind!=="pp"?"":a&&a.n?`${SITENAME}'s picks on PrizePicks lines have hit ${pct(a.w/a.n)} so far (${a.w}-${a.n-a.w}). A 2-pick Power Play needs ${pct(bePower(2))} per pick.`:`${SITENAME}'s picks don't have a graded record yet.`;
+ const text=`${SITENAME}: ${head}\n`+rows.map(r=>`${r.a} ${r.b}`).join("\n")+`\n${url}`;
+ await shareSlipImage({site:SITENAME,head,rows,entry:st,pays:pay,odds:mult,led:getComputedStyle(document.documentElement).getPropertyValue("--led").trim()||"#ffb420",
+  chanceLabel:"board's chance",record,url,text,file:`${SITENAME.toLowerCase()}-slip.png`},btn)}
 
 /* ---------- player pages: the player sheet, opened from any pick ---------- */
 function openPlayer(r){ckOpen("");const p=ckPeople().find(x=>x.rows.includes(r));if(!p){CK.q=r.pl;ckDraw();return}
@@ -1639,6 +1614,7 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
-<script src="../fx.js?v=6"></script>
+<script src="../share.js?v=1"></script>
+<script src="../fx.js?v=7"></script>
 </body>
 </html>

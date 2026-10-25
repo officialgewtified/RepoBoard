@@ -396,6 +396,18 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 .cp3{border-top:1px dashed var(--line);margin-bottom:2px}
 .cpcard .sm{width:100%}
 
+/* ---------- share a slip as a picture ---------- */
+#sharedlg{border:0;padding:0;background:transparent;width:calc(100vw - 24px);max-width:440px;max-height:calc(100dvh - 24px);color:var(--ink);overflow:visible}
+#sharedlg .shr{background:var(--panel);clip-path:var(--shape);padding:14px;display:flex;flex-direction:column;gap:10px;max-height:calc(100dvh - 24px);overflow:auto;box-sizing:border-box;
+ animation:fxSheet .45s var(--spring)}
+#sharedlg img{display:block;width:100%;height:auto;max-height:56dvh;object-fit:contain;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+.shr-t{margin:0;font-size:13px;color:var(--mute);line-height:1.4}
+.shr-b{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shr-b .btn{display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;color:var(--ink);font-size:15px;margin:0}
+.shr-b .btn.go{grid-column:1/-1;color:var(--ledink)}
+.hero .btns{flex-wrap:wrap}
+.hero .btns .btn.go{flex:1 1 100%}
+
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
  .fx-ripple,.fx-ring,.fx-spark{display:none}
