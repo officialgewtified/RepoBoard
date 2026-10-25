@@ -1,0 +1,10 @@
+{
+ "_help": "Baseline settings. prop_markets: which player stats to pull (each costs 1 Odds API credit per game). Options: player_points, player_rebounds, player_assists, player_threes, player_points_rebounds_assists, player_points_rebounds, player_points_assists, player_rebounds_assists, player_blocks, player_steals, player_blocks_steals, player_turnovers. daily_credits: 'auto' spreads what's left this month (above the reserve) evenly over the days left, or set a number. credit_reserve: credits always kept so game lines never stop. schedule: [hour UTC, weight], every day; must match .github/workflows/baseline.yml.",
+ "prop_markets": ["player_points", "player_rebounds", "player_assists"],
+ "daily_credits": "auto",
+ "prop_credits_per_run": "auto",
+ "credit_reserve": 30,
+ "props_refresh_hours": 10,
+ "days_ahead": {"NBA": 2, "CBB": 2},
+ "schedule": [[5, 1]]
+}

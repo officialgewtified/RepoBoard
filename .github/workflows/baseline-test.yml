@@ -1,0 +1,41 @@
+name: Baseline test run
+on:
+  push:
+    branches: [baseline-test]
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python baseline/update_data.py > baseline/run.log 2>&1 || echo "FAILED" >> baseline/run.log
+      - run: |
+          python - <<'PY' > baseline/probe.txt 2>&1 || true
+          import requests, json
+          b="https://site.api.espn.com/apis/site/v2/sports/basketball/"
+          sb=requests.get(b+"nba/scoreboard",timeout=30).json()
+          ev=sb["events"][0]; c=ev["competitions"][0]
+          print("NBA today events:",len(sb["events"]))
+          print("odds sample:",json.dumps(c.get("odds"),indent=0)[:2500])
+          print("competitor keys:",list(c["competitors"][0].keys()))
+          print("records:",c["competitors"][0].get("records"))
+          inj=requests.get(b+"nba/injuries",timeout=30).json()
+          t=inj.get("injuries",[{}])[0]; print("injury team:",t.get("displayName"), json.dumps(t.get("injuries",[])[:2])[:800])
+          sb2=requests.get(b+"mens-college-basketball/scoreboard",params={"dates":"20261103","groups":50,"limit":500},timeout=30).json()
+          print("CBB Nov 3 events:",len(sb2.get("events",[])))
+          y=requests.get(b+"nba/scoreboard",params={"dates":"20261024"},timeout=30).json()
+          e=y["events"][0]["id"]; s=requests.get(b+"nba/summary",params={"event":e},timeout=30).json()
+          st=s["boxscore"]["players"][0]["statistics"][0]
+          print("labels:",st.get("labels")); print("keys:",st.get("keys")); print("athlete0:",json.dumps(st["athletes"][0])[:600])
+          print("dnp sample:",[ (a.get("didNotPlay"),a.get("reason"),a.get("stats")) for a in st["athletes"] if not a.get("stats")][:2])
+          PY
+      - run: |
+          git config user.name "board-bot"
+          git config user.email "board-bot@users.noreply.github.com"
+          git add -f baseline/
+          git commit -m "Baseline test output" && git push
