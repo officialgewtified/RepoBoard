@@ -349,7 +349,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/bebas-neue.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=13">
+<link rel="stylesheet" href="../fx.css?v=14">
 </head>
 <body>
 <header class="wrap top">
@@ -1446,13 +1446,15 @@ function corrNote(Q){const out=[];for(let i=0;i<Q.length;i++)for(let j=i+1;j<Q.l
 
 /* ---------- live sweat tracker: every open ticket from all three sites against ESPN's live box scores (live.js, no credits) ---------- */
 const OWN=SITENAME==="Baseline"?"bb":"fb",OWNKEY=OWN==="bb"?"bl_tickets":"pb_tickets";
-let LIVE={},liveBusy=false,liveAgain=false,OTHER=null;       // OTHER: the other board's games and props, for its tickets and today's scores
+let LIVE={},liveBusy=false,liveAgain=false,OTHER=null;       // OTHER: the other board's games and props, for the other-sport legs of Crossover tickets
 function loadOther(){return fetch(OWN==="fb"?"baseline/data.json":"../data.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(!d||!Array.isArray(d.games))return;
  const GI2={};d.games.forEach(g=>{GI2[g.id]={...g,t:Date.parse(g.kick)}});OTHER={k:OWN==="fb"?"bb":"fb",d,GI:GI2,props:d.props||[]};
  liveRefresh();scRefresh(true);const a=document.activeElement;if(!(a&&a.matches("input,select,textarea"))&&!document.querySelector("dialog[open]"))keep()}).catch(()=>{})}
 const SRC=[["pb_tickets","fb","Gridline"],["bl_tickets","bb","Baseline"],["cx_tickets",null,"Crossover"]];
 window.gameMine=()=>{const S=new Set();for(const o of openTix())for(const l of o.L)if(l&&l.pl)S.add(Live.nm(l.pl));for(const k in pps){const r=PI[k];if(r)S.add(Live.nm(r.pl))}return S};
 const sportBoard=sp=>sp==="NBA"||sp==="CBB"?"bb":"fb";
+// the other board's data is only fetched when a Crossover ticket also has a leg in the other sport
+const needOther=()=>openTix().some(o=>!o.own&&o.L.some(l=>l&&l.sp&&sportBoard(l.sp)!==OWN));
 function boardOf(k){return k===OWN?{props:P,GI}:OTHER&&OTHER.k===k?OTHER:null}
 function openTix(){const out=[];for(const[k,bk,name]of SRC){const own=k===OWNKEY,list=own?tickets:rawTix(k);if(!own&&bk)continue;   // the other board's tickets stay on that board
  for(const t of list){if(t.r||!Array.isArray(t.legs)||(t.kind&&t.kind!=="pp"))continue;const L=own?legsOf(t):(Array.isArray(t.lg)?t.lg:null);if(!L||!L.length)continue;if(!own&&!L.some(l=>l&&sportBoard(l.sp)===OWN))continue;out.push({t,L,bk,name,own})}}return out}
@@ -1829,7 +1831,7 @@ function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.s
 (function(){let t="dark";try{t=localStorage.getItem("bl_theme")||"dark"}catch(e){}if(!["dark","clean","bold","mix"].includes(t))t="dark";setTheme(t)})();
 
 render();
-fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render();liveRefresh();injRefresh(true);scRefresh(true);loadOther();
+fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render();liveRefresh();injRefresh(true);scRefresh(true);if(needOther())loadOther();
   const pq=new URLSearchParams(location.search).get("player");if(pq){history.replaceState(null,"",location.pathname);setTimeout(()=>openPlayerByName(pq),50)}})
  .catch(()=>{window.LOADFAIL=1;$("#stamp").textContent="Couldn't load the board";render()});
 /* tickets.json: tickets added by hand (ones that never got saved from the slip). Each id is added once, so deleting it here keeps it gone. */
@@ -1845,8 +1847,8 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&!do
 </script>
 <script src="../share.js?v=3"></script>
 <script src="../live.js?v=3"></script>
-<script src="../kit.js?v=1"></script>
+<script src="../kit.js?v=2"></script>
 <script src="../game.js?v=1"></script>
-<script src="../fx.js?v=12"></script>
+<script src="../fx.js?v=13"></script>
 </body>
 </html>

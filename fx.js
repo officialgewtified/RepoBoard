@@ -98,7 +98,7 @@ function placeInd(){document.querySelectorAll(".seg").forEach(seg=>{const on=seg
  if(ind.style.left!==L||ind.style.width!==W)Object.assign(ind.style,{left:L,top:on.offsetTop+"px",width:W,height:on.offsetHeight+"px"});
  if(first){void ind.offsetWidth;ind.style.transition="";seg.classList.add("fx-has-ind")}})}
 addEventListener("resize",placeInd);
-document.querySelectorAll(".seg").forEach(s=>new MutationObserver(placeInd).observe(s,{subtree:true,attributes:true,attributeFilter:["class"]}));
+document.querySelectorAll(".seg").forEach(s=>new MutationObserver(()=>placeSoon()).observe(s,{subtree:true,attributes:true,attributeFilter:["class"]}));
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(placeInd);
 
 /* ---------- headline numbers count up like a scoreboard when a tab opens ---------- */
@@ -110,12 +110,15 @@ function countUp(root){root.querySelectorAll(".rchd b,.hero .ev,.hero .stat b,.r
 
 /* ---------- one quick light-up when a page or tab opens; any other redraw shows instantly ---------- */
 const view=document.getElementById("view");let opened=false,enterTimer=0;
-function mark(){let i=0;for(const c of view.children){c.style.setProperty("--i",i++);
-  for(const box of c.matches(".list,.res")?[c]:c.querySelectorAll(":scope > .list,:scope > .res"))[...box.children].forEach((x,j)=>x.style.setProperty("--i",i+j))}}
+// only the first dozen things light up (that's about a screenful); the rest just appear, so a long list doesn't animate hundreds of rows offscreen
+const MAXA=12;
+function mark(){let i=0;for(const c of view.children){const k=i++;if(k>=MAXA){c.classList.add("fxq");continue}c.style.setProperty("--i",k);
+  for(const box of c.matches(".list,.res")?[c]:c.querySelectorAll(":scope > .list,:scope > .res"))[...box.children].forEach((x,j)=>{if(j>=MAXA)x.classList.add("fxq");else x.style.setProperty("--i",k+j)})}}
+let indQ=false;const placeSoon=()=>{if(indQ)return;indQ=true;requestAnimationFrame(()=>{indQ=false;placeInd()})};   // read positions once, with the frame's own layout
 if(view)new MutationObserver(()=>{
- placeInd();
+ placeSoon();
  if(!fx()||!view.children.length||view.querySelector(".fx-sk"))return;
- if(!opened||enterNext){opened=true;enterNext=false;view.classList.remove("fx-enter");void view.offsetWidth;mark();view.classList.add("fx-enter");countUp(view);
+ if(!opened||enterNext){opened=true;enterNext=false;mark();view.classList.add("fx-enter");countUp(view);   // the rows are new, so they animate without a restart
   clearTimeout(enterTimer);enterTimer=setTimeout(()=>view.classList.remove("fx-enter"),900)}
  else if(view.classList.contains("fx-enter")){view.classList.remove("fx-enter");clearTimeout(enterTimer)}}).observe(view,{childList:true});
 

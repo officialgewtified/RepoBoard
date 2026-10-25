@@ -3,6 +3,27 @@ window.Kit=(function(){
 "use strict";
 const KEEP=/^(pb_|bl_|cx_|arena_)/;          // everything the three sites save on this phone (they share it)
 const RM=matchMedia("(prefers-reduced-motion: reduce)");
+/* pull down from the top to refresh, on the home-screen version (in Safari, Safari already does this itself) */
+(function(){
+ let standalone=false;try{standalone=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches}catch(e){}
+ if(!standalone||!("ontouchstart" in window))return;
+ const GO=80;let el=null,svg=null,x0=0,y0=0,on=false,live=false,d=0,busy=false;
+ function ind(){if(el)return el;el=document.createElement("div");el.className="kit-ptr";el.setAttribute("aria-hidden","true");
+  el.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M19.5 3.8v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  document.body.appendChild(el);svg=el.firstChild;return el}
+ function show(){const e=ind(),k=Math.min(1,d/GO);e.classList.add("pull");e.classList.toggle("ready",d>=GO);
+  e.style.transform=`translateY(${Math.min(d*.6,96).toFixed(1)}px)`;e.style.opacity=Math.min(1,d/36).toFixed(2);svg.style.transform=`rotate(${(k*300).toFixed(0)}deg)`}
+ function hide(){if(!el)return;el.classList.remove("pull","ready");el.style.transform="";el.style.opacity=""}
+ const skip=t=>busy||window.scrollY>0||document.querySelector("dialog[open]")||(document.activeElement&&document.activeElement.matches("input,textarea,select"))||(t&&t.closest&&t.closest("#slip.open,.kit-cheer"));
+ addEventListener("touchstart",e=>{on=false;live=false;d=0;if(e.touches.length!==1||skip(e.target))return;on=true;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+ addEventListener("touchmove",e=>{if(!on)return;const dx=e.touches[0].clientX-x0,dy=e.touches[0].clientY-y0;
+  if(!live){if(Math.abs(dx)<8&&Math.abs(dy)<8)return;if(dy<=0||Math.abs(dx)>dy){on=false;return}live=true}   // only a pull straight down counts
+  d=Math.max(0,dy);show()},{passive:true});
+ addEventListener("touchend",()=>{if(!on||!live){on=false;return}on=false;live=false;
+  if(d>=GO){busy=true;const e=ind();e.classList.remove("pull");e.classList.add("spin");e.style.transform="translateY(56px)";e.style.opacity="1";setTimeout(()=>location.reload(),220)}
+  else hide()},{passive:true});
+ addEventListener("touchcancel",()=>{on=false;live=false;hide()},{passive:true});
+})();
 function snapshot(){const data={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(KEEP.test(k))data[k]=localStorage.getItem(k)}}catch(e){}return data}
 return{
  /* save a backup file: on a phone the share menu offers Save to Files; elsewhere it downloads */

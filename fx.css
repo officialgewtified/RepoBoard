@@ -5,8 +5,8 @@
    Reduced motion turns all motion off. */
 
 /* ---------- type: Archivo, one family; condensed italic for numbers and headings ---------- */
-@font-face{font-family:"Archivo";src:url(fonts/archivo.woff) format("woff");font-weight:100 900;font-stretch:62% 125%;font-style:normal;font-display:swap}
-@font-face{font-family:"Archivo";src:url(fonts/archivo-italic.woff) format("woff");font-weight:100 900;font-stretch:62% 125%;font-style:italic;font-display:swap}
+@font-face{font-family:"Archivo";src:url(fonts/archivo.woff) format("woff");font-weight:400 900;font-stretch:62% 100%;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo";src:url(fonts/archivo-italic.woff) format("woff");font-weight:400 900;font-stretch:62% 100%;font-style:italic;font-display:swap}
 
 /* ---------- tokens ---------- */
 :root{
@@ -237,6 +237,7 @@ button:disabled{transform:none!important}
 @keyframes fxMeter{from{transform:scaleX(0)}}
 #view.fx-enter .form rect{transform-box:fill-box;transform-origin:bottom;animation:fxBar .6s var(--spring) both;animation-delay:.18s}
 @keyframes fxBar{from{transform:scaleY(0)}}
+#view.fx-enter .fxq,#view.fx-enter .fxq *{animation:none!important}   /* past the first screenful: no light-up, just there */
 
 /* ---------- the name: thrown in once when the page opens; tap the ball to spin it ---------- */
 [data-sport="fb"] .mark .bars{animation:fxThrow .9s var(--spring) both}
@@ -479,6 +480,16 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 .kit-ban b{display:block;font:italic 900 40px/1 var(--fd);font-stretch:66%}
 .kit-ban small{display:block;margin-top:6px;font-weight:700;font-size:14px}
 @keyframes kitPop{from{transform:translateX(-50%) scale(.6);opacity:0}}
+
+/* ---------- pull to refresh (home-screen version) ---------- */
+.kit-ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) - 46px);z-index:150;width:42px;height:42px;margin-left:-21px;border-radius:50%;
+ display:grid;place-items:center;background:var(--raise,#17253d);color:var(--ink,#fff);box-shadow:0 8px 20px -8px rgba(0,0,0,.7);opacity:0;pointer-events:none;
+ transition:transform .3s var(--out),opacity .2s,background-color .15s}
+.kit-ptr.pull{transition:background-color .15s}
+.kit-ptr.ready{background:var(--led);color:var(--ledink,#1b1200)}
+.kit-ptr svg{display:block;transition:none}
+.kit-ptr.spin svg{animation:kitSpin .7s linear infinite}
+@keyframes kitSpin{to{transform:rotate(360deg)}}
 
 /* =========================================================================
    Solid: flat rounded buttons, no shine or blur. Dark gray until picked; picked is solid gold with bold text.
