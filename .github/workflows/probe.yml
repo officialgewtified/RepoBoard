@@ -1,0 +1,10 @@
+name: Probe ESPN access (temporary)
+on:
+  push:
+    paths: [".github/workflows/probe.yml", ".github/probe.sh"]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/probe.sh
