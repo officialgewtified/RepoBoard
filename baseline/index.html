@@ -1129,7 +1129,7 @@ document.addEventListener("keydown",e=>{if(CK&&e.target.id==="ckq"&&e.key==="Ent
 
 function renderSportBar(){
  const live2=G.filter(live),n=sp=>live2.filter(g=>sp==="all"||g.sp===sp).length;
- $("#sportbar").innerHTML=[["all","All"],["NBA","NBA"],["CBB","College"]].map(([k,l])=>`<button class="pill ${ui.sport===k?"on":""}" data-sport="${k}">${l}<span class="ct">${n(k)}</span></button>`).join("");
+ $("#sportbar").innerHTML=[["all","All"],["NBA","NBA"],["CBB","College"]].map(([k,l])=>`<button class="pill ${ui.sport===k?"on":""}" data-sport="${k}">${l}<span class="ct">${n(k)}</span></button>`).join("")+`<a class="pill" href="../crossover/" style="text-decoration:none;margin-left:auto">Both sports</a>`;
  document.querySelectorAll("[data-tab]").forEach(b=>{b.classList.toggle("on",b.dataset.tab===ui.tab);b.setAttribute("aria-selected",b.dataset.tab===ui.tab)})}
 
 /* ---------- slip ---------- */

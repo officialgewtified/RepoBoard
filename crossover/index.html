@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1626">
+<title>Crossover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Crossover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+/* ---------- themes ---------- */
+:root,:root[data-theme="dark"]{
+ --bg:#0d1626;--panel:#142035;--raise:#1b2a44;--line:#26385a;--ink:#edf1f7;--mute:#8e9cb6;
+ --led:#ffb31a;--ledink:#1b1200;--go:#38d99a;--stop:#ff6b6b;--paper:#f6f1e4;--paperink:#1b1a17;--paperline:#d9d0bb;
+ --shadow:0 1px 0 rgba(255,255,255,.04) inset,0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+:root[data-theme="clean"]{
+ --bg:#eef1f5;--panel:#ffffff;--raise:#f4f6f9;--line:#dbe1ea;--ink:#0f1b2d;--mute:#5c6a80;
+ --led:#b56a00;--ledink:#fff;--go:#0b875c;--stop:#d23f3f;--paper:#fffdf6;--paperink:#1b1a17;--paperline:#e2dac6;
+ --shadow:0 1px 2px rgba(15,27,45,.06),0 8px 24px rgba(15,27,45,.07);color-scheme:light}
+:root[data-theme="bold"]{
+ --bg:#0e3a28;--panel:#134631;--raise:#18553b;--line:#2c6d4d;--ink:#f3fff6;--mute:#a8ccb7;
+ --led:#ffe14d;--ledink:#1b1800;--go:#8dffc6;--stop:#ff8f7d;--paper:#f6f1e4;--paperink:#1b1a17;--paperline:#d9d0bb;
+ --shadow:0 10px 30px rgba(0,0,0,.3);color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.4 "Barlow",-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--led);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+.num{font-family:"Big Shoulders Display",Impact,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:.3px}
+
+/* ---------- header ---------- */
+.top{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+.brand{display:flex;flex-direction:column;align-items:center;gap:12px}
+.mark{font:900 36px/0.9 "Big Shoulders Display",Impact,sans-serif;letter-spacing:1px;margin:0;text-transform:uppercase}
+.mark{display:flex;align-items:flex-end;justify-content:center;gap:10px}
+.mark .bars{width:58px;height:44px;flex:none;margin-bottom:0;color:var(--ink);overflow:visible}
+.stamp{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--mute);text-align:left;line-height:1.3}
+.stamp b{color:var(--ink);font-weight:600}
+.iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 10px;font-size:13px;font-weight:600}
+.warn{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--stop) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--stop) 40%,transparent);font-size:13px}
+
+/* sticky tabs */
+.tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0 10px;padding-top:max(12px,env(safe-area-inset-top,0px))}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:9px 4px;font-weight:600;font-size:14px;color:var(--mute)}
+.seg button.on{background:var(--raise);color:var(--ink);box-shadow:inset 0 -2px 0 var(--led)}
+.filters{display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.pill{flex:none;border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--mute)}
+.pill.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pill .ct{opacity:.6;margin-left:4px;font-weight:500}
+
+/* ---------- sections ---------- */
+h2{font:800 24px/1 "Big Shoulders Display",Impact,sans-serif;letter-spacing:.4px;margin:26px 0 4px}
+.lede{color:var(--mute);font-size:13px;margin:0 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.empty{padding:18px;color:var(--mute);font-size:14px;text-align:center}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+.search{flex:1;min-width:140px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:9px 12px;font-size:16px}
+select.sel{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 10px;font-size:14px;font-weight:600}
+
+/* ---------- hero lineup ---------- */
+.hero{padding:16px;position:relative;overflow:hidden}
+.hero .kick{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.hero h3{margin:0;font:800 20px/1.05 "Big Shoulders Display",Impact,sans-serif;letter-spacing:.3px}
+.hero .ev{font:900 44px/0.9 "Big Shoulders Display",Impact,sans-serif;color:var(--led)}
+.hero .ev.neg{color:var(--mute)}
+.hero .sub{font-size:13px;color:var(--mute);margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.stat{background:var(--raise);border-radius:10px;padding:8px 10px}
+.stat small{display:block;font-size:12px;color:var(--mute)}
+.stat b{font:800 22px/1.1 "Big Shoulders Display",Impact,sans-serif}
+.btn{border:1px solid var(--line);background:var(--raise);border-radius:12px;padding:11px 14px;font-weight:700;font-size:15px}
+.btn.go{background:var(--led);color:var(--ledink);border-color:var(--led)}
+.btn.wide{width:100%}
+.btns{display:flex;gap:8px;margin-top:12px}
+.btns .btn{flex:1}
+.fine{font-size:12px;color:var(--mute);margin:8px 0 0}
+.hero .list{gap:0;margin-top:4px}
+.hero .list .prop{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:10px 0}
+
+/* ---------- prop rows ---------- */
+.list{display:flex;flex-direction:column;gap:8px}
+.prop{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 12px}
+.who{border:0;background:transparent;padding:0;text-align:left;min-width:0}
+.who b{display:block;font-size:16px;font-weight:700;line-height:1.15}
+.who .m{display:flex;flex-wrap:wrap;gap:0 10px;font-size:12.5px;color:var(--mute);margin-top:2px}
+.who .m .stat-name{color:var(--ink);font-weight:600}
+.pdet{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:8px;font-size:13px;color:var(--mute)}
+.pdet table.books{margin:4px 0 0}
+.sides{display:flex;gap:6px}
+.side-b{min-width:64px;border:1.5px solid var(--line);background:transparent;border-radius:12px;padding:6px 8px;text-align:center;line-height:1.05}
+.side-b small{display:block;font-size:11.5px;font-weight:600;color:var(--mute)}
+.side-b b{display:block;font:800 20px/1.05 "Big Shoulders Display",Impact,sans-serif}
+.side-b .ln{font-size:12px;font-weight:600;color:var(--mute)}
+.side-b.rec{border-color:color-mix(in srgb,var(--led) 70%,transparent)}
+.side-b.rec b{color:var(--led)}
+.side-b.on{background:var(--led);border-color:var(--led);color:var(--ledink)}
+.side-b.on b,.side-b.on small,.side-b.on .ln{color:var(--ledink)}
+.tier{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.tier.t3{background:color-mix(in srgb,var(--go) 22%,transparent);color:var(--go)}
+.tier.t2{background:color-mix(in srgb,var(--led) 20%,transparent);color:var(--led)}
+.tier.t1{background:var(--raise);color:var(--mute)}
+.tier.mix{background:color-mix(in srgb,var(--stop) 20%,transparent);color:var(--stop)}
+.tier .trec{font-weight:600;opacity:.8;margin-left:3px}
+/* the board's real record */
+.rcard{padding:12px 14px;margin-top:14px}
+.rchd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;font-weight:700;font-size:15px}
+.rchd small{display:block;font-weight:500;font-size:12px;color:var(--mute);margin-top:2px}
+.rchd b{font:900 36px/0.9 "Big Shoulders Display",Impact,sans-serif}
+.rcard .stats{margin:10px 0 8px}
+.lede b{color:var(--ink)}
+/* players hitting every week */
+.plnow{border-top:1px solid var(--line);padding:6px 12px 8px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.plnow div{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.plnow .k{display:block;color:var(--mute);font-size:12px}
+.plnow .sm.on{background:var(--led);color:var(--ledink);border-color:var(--led)}
+.honest{padding:10px 12px;font-size:13px;color:var(--mute);margin-top:10px}
+.honest b{color:var(--ink)}
+.form{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;line-height:1.25;color:var(--mute)}
+.form svg{flex:none}
+.mchip{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;border-radius:7px;padding:2px 7px;line-height:1.3}
+.mchip.soft{background:color-mix(in srgb,var(--go) 16%,transparent);color:var(--go)}
+.mchip.tough{background:color-mix(in srgb,var(--stop) 16%,transparent);color:var(--stop)}
+.mchip.even{background:var(--raise);color:var(--mute)}
+.mchip.warn{background:color-mix(in srgb,var(--led) 16%,transparent);color:var(--led)}
+.recrow{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline}
+.recrow b{font:800 18px/1 "Big Shoulders Display",Impact,sans-serif}
+.recrow .k{font-size:12px;color:var(--mute)}
+.reclist{font-size:12.5px;color:var(--mute)}
+.reclist div{padding:4px 0;border-bottom:1px dashed var(--line)}
+.key{margin-top:8px;font-size:12.5px;color:var(--mute)}
+.key b{color:var(--led);font-weight:700;margin-left:4px}
+.mt{margin:10px 0 2px!important}
+.mtab td:first-child{font-size:12.5px}
+.vd{font-size:11.5px;font-weight:700}.vd.ss{color:var(--led)}.vd.eo{color:var(--go)}.vd.ed{color:var(--stop)}
+.ppmark{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:5px;padding:0 4px;color:var(--mute)}
+
+/* ---------- games ---------- */
+.game{padding:12px 12px 10px}
+.gmeta{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mute);margin-bottom:8px;flex-wrap:wrap}
+.lg{font-weight:800;font-size:11px;border-radius:5px;padding:1px 6px;background:var(--raise);color:var(--ink);letter-spacing:.5px}
+.gmeta .when{color:var(--ink);font-weight:600}
+.gmeta .flag{margin-left:auto;font-weight:700;color:var(--led)}
+.team{position:relative;display:grid;grid-template-columns:38px 1fr auto 48px;gap:10px;align-items:center;width:100%;border:1.5px solid var(--line);background:var(--raise);border-radius:12px;padding:8px 10px;text-align:left;margin-top:6px;overflow:hidden}
+.team.on{border-color:var(--led);box-shadow:0 0 0 1px var(--led) inset}
+.chip{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font:800 13px/1 "Big Shoulders Display",Impact,sans-serif;letter-spacing:.3px;background:var(--tc,#556);color:var(--tx,#fff)}
+.tn b{display:block;font-size:16px;font-weight:700;line-height:1.1}
+.tn small{font-size:12.5px;color:var(--mute)}
+.tn .rk{color:var(--led);font-weight:800;margin-right:3px}
+.price{text-align:right;line-height:1}
+.price b{font:800 24px/1 "Big Shoulders Display",Impact,sans-serif;color:var(--led)}
+.price small{display:block;font-size:11.5px;color:var(--mute);margin-top:2px}
+.pct{text-align:right;font:700 18px/1 "Big Shoulders Display",Impact,sans-serif}
+.meter{position:absolute;left:0;bottom:0;height:3px;background:var(--led);opacity:.55}
+.team.on .meter{opacity:1}
+.gfoot{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-top:8px;font-size:12.5px;color:var(--mute)}
+.gfoot .wx{display:flex;align-items:flex-start;gap:5px;flex:1 1 220px;min-width:0}
+.gfoot .wx svg{margin-top:1px}
+.gfoot .wx svg{flex:none}
+.val{flex:none;font-weight:700;color:var(--go)}
+.linkbtn{margin-left:auto;flex:none;border:0;background:transparent;color:var(--ink);font-weight:600;font-size:13px;padding:4px 2px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.details{border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;font-size:13px}
+.details p{margin:0 0 8px}
+.details .k{color:var(--mute)}
+table.books{width:100%;border-collapse:collapse;font-size:13.5px;margin:4px 0 10px}
+table.books td,table.books th{padding:5px 4px;border-bottom:1px solid var(--line);text-align:right}
+table.books th{color:var(--mute);font-weight:600;font-size:12px}
+table.books td:first-child,table.books th:first-child{text-align:left}
+table.books .best{color:var(--led);font-weight:700}
+table.books .off{opacity:.45}
+.adj{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sm{border:1px solid var(--line);background:transparent;border-radius:9px;padding:6px 10px;font-size:13px;font-weight:600}
+
+/* ---------- picks list (moneylines) ---------- */
+.row{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:10px 12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:14px}
+.row.on{border-color:var(--led)}
+.row .r b{display:block;text-align:right;font:800 22px/1 "Big Shoulders Display",Impact,sans-serif;color:var(--led)}
+.row .r small{display:block;text-align:right;font-size:12px;color:var(--mute);margin-top:2px}
+.row .r .g{color:var(--go);font-weight:700}
+
+/* ---------- scanner ---------- */
+.scanner{padding:12px}
+.ctrls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ctrls label{font-size:12px;color:var(--mute);font-weight:600;display:flex;flex-direction:column;gap:4px}
+.ctrls select,.ctrls input{width:100%;border:1px solid var(--line);background:var(--raise);border-radius:10px;padding:9px 8px;font-size:16px;font-weight:600}
+.res{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.combo{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--raise)}
+.combo .hd{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.combo .hd b{font:800 22px/1 "Big Shoulders Display",Impact,sans-serif;color:var(--led)}
+.combo .hd span{font-size:13px;color:var(--mute);text-align:right}
+.combo ul{margin:6px 0 8px;padding:0;list-style:none;font-size:14px}
+.combo li{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+.combo li span:last-child{color:var(--mute);white-space:nowrap}
+.combo .use{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:6px 12px;font-weight:700;font-size:13px}
+.scanned{font-size:12px;color:var(--mute);margin-top:8px}
+.gold{color:var(--go)}.red{color:var(--stop)}
+
+/* ---------- ticket slip ---------- */
+.slip{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none}
+.slip .in{max-width:720px;margin:0 auto;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));pointer-events:auto}
+.sbar{width:100%;display:flex;align-items:center;gap:10px;border:0;border-radius:14px;padding:12px 14px;background:var(--led);color:var(--ledink);box-shadow:0 10px 30px rgba(0,0,0,.35);text-align:left}
+.sbar .k{font-weight:700;font-size:14px}
+.sbar .o{margin-left:auto;font:900 24px/1 "Big Shoulders Display",Impact,sans-serif}
+.sbar .c{font-weight:700;font-size:13px;opacity:.85}
+.sbar svg{transition:transform .2s}
+.slip.open .sbar svg{transform:rotate(180deg)}
+.receipt{display:none;margin-top:8px;max-height:min(70vh,560px);overflow:auto;background:var(--paper);color:var(--paperink);border-radius:4px 4px 14px 14px;padding:16px 16px 14px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;position:relative;box-shadow:0 14px 40px rgba(0,0,0,.4);
+ -webkit-mask:radial-gradient(circle 6px at 8px 0,transparent 5.5px,#000 6px) 0 0/16px 100% repeat-x;mask:radial-gradient(circle 6px at 8px 0,transparent 5.5px,#000 6px) 0 0/16px 100% repeat-x}
+.slip.open .receipt{display:block}
+.receipt h4{margin:0 0 2px;font:600 13px/1.2 "IBM Plex Mono",monospace;letter-spacing:2px;text-align:center}
+.receipt .ts{text-align:center;font-size:11px;opacity:.6;margin-bottom:10px}
+.receipt .leg{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--paperline)}
+.receipt .leg small{display:block;opacity:.6;font-size:11px}
+.receipt .cp{border:0;background:transparent;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;text-align:left}
+.receipt .x{border:0;background:transparent;color:var(--paperink);opacity:.5;font-size:16px;padding:0 2px}
+.receipt .tot{display:flex;justify-content:space-between;padding:4px 0}
+.receipt .tot b{font-weight:600}
+.receipt .big{font:900 30px/1 "Big Shoulders Display",Impact,sans-serif}
+.receipt input{width:72px;border:1px solid var(--paperline);background:#fff;border-radius:6px;padding:3px 6px;font:600 16px "IBM Plex Mono",monospace;color:var(--paperink)}
+.receipt .rbtns{display:flex;gap:8px;margin-top:12px}
+.receipt .rbtns button{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--paperink);background:transparent;color:var(--paperink);font:700 14px "Barlow",sans-serif}
+.receipt .rbtns .go{background:var(--paperink);color:var(--paper)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.mode{border:1.5px solid var(--paperline);border-radius:10px;padding:8px;text-align:left;background:transparent;color:var(--paperink);font:400 12px/1.35 "IBM Plex Mono",monospace}
+.mode b{display:block;font:700 14px "Barlow",sans-serif}
+.mode.on{border-color:var(--paperink);background:#fff}
+.mode:disabled{opacity:.4}
+.note{font-size:11.5px;opacity:.75;margin-top:8px;line-height:1.4}
+.note.bad{opacity:1;font-weight:700;color:var(--stop);border:1.5px solid var(--stop);border-radius:8px;padding:6px 8px}
+.receipt .rbtns button:disabled{opacity:.35}
+
+/* ---------- tickets ---------- */
+.tk{padding:12px;font-size:14px}
+.tk .hd{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.tk .lg2{font-size:13px;color:var(--mute);margin-top:4px}
+.tk .m{display:flex;gap:6px;margin-top:8px}
+.tk .m button{flex:1;border:1px solid var(--line);background:transparent;border-radius:9px;padding:7px;font-weight:600;font-size:13px}
+.tk.W{border-color:var(--go)}.tk.L{border-color:var(--stop)}.tk.PT{border-color:var(--led)}
+.tk .res{font-size:13px;margin-top:8px;color:var(--mute)}
+.tk .res b{color:var(--ink)}.tk .res.W b{color:var(--go)}.tk .res.L b{color:var(--stop)}.tk .res.PT b{color:var(--led)}
+/* what a ticket paid */
+.filters.chips{flex-wrap:wrap;overflow:visible}
+.lgl{display:flex;flex-direction:column;gap:3px;margin-top:6px;font-size:13px;color:var(--mute)}
+.lgl div{display:flex;gap:8px;align-items:baseline}
+.lgl .mk{flex:none;width:14px;text-align:center;font-weight:800}
+.lgl .ok .mk{color:var(--go)}.lgl .no .mk{color:var(--stop)}
+.lgl .ok span:last-child,.lgl .no span:last-child{color:var(--ink)}
+.record{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+/* check a pick */
+.askbar{width:100%;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 12px;font-size:15px;font-weight:600;color:var(--mute);text-align:left}
+.askbar svg{flex:none;color:var(--led)}
+.cklist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ckrow{display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--raise);border-radius:12px;padding:10px 12px}
+.ckrow b{display:block;font-size:16px;line-height:1.2}
+.ckrow small{display:block;color:var(--mute);font-size:12.5px;margin-top:1px}
+.ckrow .tier{flex:none;margin:0}
+.ckhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:12px}
+.ckhead b{display:block;font-size:20px;line-height:1.15}
+.ckhead small{display:block;color:var(--mute);font-size:13px;margin-top:2px}
+.ckline{display:flex;align-items:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
+.ckline label{font-size:12px;color:var(--mute);font-weight:600;display:flex;flex-direction:column;gap:4px}
+.ckline input{width:120px;border:1px solid var(--line);background:var(--raise);border-radius:10px;padding:9px 10px;font-size:18px;font-weight:700}
+.ckline .k{font-size:12.5px;color:var(--mute);padding-bottom:10px}
+.ckv{margin-top:12px;padding:12px}
+.feel{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:var(--raise);border-left:4px solid var(--mute)}
+.feel small{display:block;font-size:11.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.feel .hl{display:block;font:800 30px/1.05 "Big Shoulders Display",Impact,sans-serif}
+.feel .sides{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.feel .side-b{min-width:0;padding:8px}
+.feel.good{border-color:var(--go)}.feel.good .hl{color:var(--go)}
+.feel.ok{border-color:var(--led)}.feel.ok .hl{color:var(--led)}
+.feel.mix{border-color:var(--stop)}
+.feel.no{border-color:var(--stop)}.feel.no .hl{color:var(--stop)}
+.why{margin:12px 0 0;padding:0 0 0 18px;font-size:13.5px;color:var(--mute);display:flex;flex-direction:column;gap:7px}
+.why b{color:var(--ink);font-weight:600}
+.why .mchip,.why .form{margin-top:4px}
+.cklog{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.cklog span{font-size:12px;border-radius:7px;padding:2px 7px;background:var(--panel);border:1px solid var(--line)}
+.cklog .ov{color:var(--go);border-color:color-mix(in srgb,var(--go) 45%,transparent)}
+.ckshow{display:inline-block;margin-top:6px;border:0;background:transparent;padding:0;color:var(--ink);font-weight:600;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.hrow .iconbtn{flex:none;margin-bottom:4px}
+/* log a ticket */
+.ltlegs{display:flex;flex-direction:column;gap:8px}
+.ltleg{border:1px solid var(--line);background:var(--raise);border-radius:12px;padding:8px}
+.ltleg input{min-width:0;width:100%;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 9px;font-size:16px;font-weight:600}
+.ltleg .r1{display:flex;gap:6px;align-items:center}
+.ltleg .r1 input{flex:1}
+.ltleg .r1 .odds{flex:0 0 84px}
+.ltleg .r2{display:grid;grid-template-columns:84px 1fr 30px;gap:6px;margin-top:6px}
+.ltleg .ms{align-self:stretch}
+.ltleg .x{flex:none;border:0;background:transparent;color:var(--mute);font-size:24px;line-height:1;padding:0 4px}
+.ms{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.ms button{border:0;background:var(--panel);padding:0 9px;font-size:13px;font-weight:700;color:var(--mute)}
+.ms button.on{background:var(--led);color:var(--ledink)}
+.filters .gap{flex:none;width:6px}
+/* players */
+.pcard{padding:0;overflow:hidden}
+.phd{width:100%;display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:0;background:transparent;padding:11px 12px;text-align:left;color:var(--ink)}
+.pn b{display:block;font-size:15px}
+.pn small{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.pdots{display:flex;gap:2px}
+.pm{display:inline-block;width:14px;text-align:center;font-weight:800;font-size:12px;color:var(--mute)}
+.pm.ok{color:var(--go)}.pm.no{color:var(--stop)}
+.prec{font:800 20px/1 "Big Shoulders Display",Impact,sans-serif;min-width:34px;text-align:right}
+.plog{border-top:1px solid var(--line);padding:4px 12px 8px;font-size:13px}
+.plog div{display:grid;grid-template-columns:14px 74px 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--line)}
+.plog div:last-child{border-bottom:0}
+.plog .k{color:var(--mute);font-size:12px}
+.seg button{white-space:nowrap}
+@media (max-width:400px){.seg button{font-size:12.5px;padding:9px 2px}.pdots .pm{width:11px}}
+@media (max-width:370px){.seg button{font-size:11.5px;padding:9px 1px}}
+.sm:disabled{opacity:.4}
+
+/* ---------- settings ---------- */
+dialog{border:0;padding:0;background:transparent;max-width:min(560px,94vw);width:100%;color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;max-height:84vh;overflow:auto}
+.sheet h3{font:800 22px/1 "Big Shoulders Display",Impact,sans-serif;margin:4px 0 12px}
+.sheet h4{margin:16px 0 6px;font-size:14px}
+.sheet p{font-size:13px;color:var(--mute);margin:0 0 8px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.checks label{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;font-weight:600}
+.checks input{width:18px;height:18px;accent-color:var(--led)}
+.paygrid{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;font-size:13px}
+.paygrid input{width:100%;border:1px solid var(--line);background:var(--raise);border-radius:8px;padding:6px;font-size:16px}
+.how{font-size:13px;color:var(--mute)}
+.how b{color:var(--ink)}
+footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
+/* opened from the home screen: keep the status bar readable on the light theme */
+@media (display-mode:standalone){:root[data-theme="clean"] body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#0f1b2d;z-index:50}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* footballs and basketballs in the background */
+body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22%3E%3Cg transform=%22translate(52 58) rotate(-28) scale(1.15)%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(184 150) rotate(-20) scale(1.0)%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%222.2%22%3E%3Ccircle r=%2217%22/%3E%3Cpath d=%22M0-17V17M-17 0H17M-11-13C-6-6-6 6-11 13M11-13C6-6 6 6 11 13%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(60 200) rotate(20) scale(0.9)%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%222.2%22%3E%3Ccircle r=%2217%22/%3E%3Cpath d=%22M0-17V17M-17 0H17M-11-13C-6-6-6 6-11 13M11-13C6-6 6 6 11 13%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(190 40) rotate(24) scale(0.9)%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3C/svg%3E");background-attachment:fixed}
+:root[data-theme="clean"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22%3E%3Cg transform=%22translate(52 58) rotate(-28) scale(1.15)%22 fill=%22none%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(184 150) rotate(-20) scale(1.0)%22 fill=%22none%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%222.2%22%3E%3Ccircle r=%2217%22/%3E%3Cpath d=%22M0-17V17M-17 0H17M-11-13C-6-6-6 6-11 13M11-13C6-6 6 6 11 13%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(60 200) rotate(20) scale(0.9)%22 fill=%22none%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%222.2%22%3E%3Ccircle r=%2217%22/%3E%3Cpath d=%22M0-17V17M-17 0H17M-11-13C-6-6-6 6-11 13M11-13C6-6 6 6 11 13%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(190 40) rotate(24) scale(0.9)%22 fill=%22none%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3C/svg%3E")}
+.tabs{background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+
+@media (min-width:760px){.mark{font-size:52px}}
+.rank{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--raise);font:800 13px/1 "Big Shoulders Display",Impact,sans-serif;margin-right:8px;vertical-align:1px}
+.prop .who{cursor:default}
+.lg{margin-right:2px}
+</style>
+</head>
+<body>
+<header class="wrap top">
+ <div class="brand">
+  <h1 class="mark"><svg class="bars" viewBox="-190 -170 420 340" aria-hidden="true"><defs><linearGradient id="bf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB21E"/><stop offset="1" stop-color="#FF6A00"/></linearGradient>
+ <filter id="gf" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter>
+ <clipPath id="cf"><path d="M -160 0 C -115 -34, -70 -88, 0 -88 C 70 -88, 115 -34, 160 0 C 115 34, 70 88, 0 88 C -70 88, -115 34, -160 0 Z"/></clipPath><radialGradient id="bb" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFE3A0"/><stop offset=".4" stop-color="#FFA21E"/><stop offset="1" stop-color="#F05A00"/></radialGradient>
+ <filter id="gb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="24"/></filter>
+ <clipPath id="cb"><circle r="128"/></clipPath></defs><g transform="translate(62 -26) scale(.78)">
+ <circle r="128" fill="#FF7A00" opacity=".75" filter="url(#gb)"/>
+ <circle r="128" fill="url(#bb)"/>
+ <g clip-path="url(#cb)" fill="none" stroke="#3b1500" stroke-width="10" stroke-linecap="round"><path d="M 0 -128 L 0 128" /><path d="M -128 0 L 128 0" /><path d="M -88 -93 C -42 -50, -42 50, -88 93" /><path d="M 88 -93 C 42 -50, 42 50, 88 93" /></g>
+ <ellipse cx="-38" cy="-62" rx="52" ry="26" fill="#ffffff" opacity=".16" transform="rotate(-30 -38 -62)"/>
+</g><g transform="translate(-58 34) scale(.72) rotate(-32)">
+ <path d="M -160 0 C -115 -34, -70 -88, 0 -88 C 70 -88, 115 -34, 160 0 C 115 34, 70 88, 0 88 C -70 88, -115 34, -160 0 Z" fill="#FF8A00" opacity=".7" filter="url(#gf)"/>
+ <path d="M -160 0 C -115 -34, -70 -88, 0 -88 C 70 -88, 115 -34, 160 0 C 115 34, 70 88, 0 88 C -70 88, -115 34, -160 0 Z" fill="#0f0e10" stroke="#0f0e10" stroke-width="34" stroke-linejoin="round"/>
+ <path d="M -160 0 C -115 -34, -70 -88, 0 -88 C 70 -88, 115 -34, 160 0 C 115 34, 70 88, 0 88 C -70 88, -115 34, -160 0 Z" fill="url(#bf)" stroke="url(#bf)" stroke-width="10" stroke-linejoin="round"/>
+ <g clip-path="url(#cf)">
+  <rect x="-110" y="-90" width="12" height="180" fill="#3b1500" opacity=".85"/>
+  <rect x="98" y="-90" width="12" height="180" fill="#3b1500" opacity=".85"/>
+  <ellipse cx="-30" cy="-50" rx="90" ry="20" fill="#ffffff" opacity=".18"/>
+ </g>
+ <rect x="-58" y="-4" width="116" height="8" rx="4" fill="#3b1500"/>
+ <rect x="-47" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="-26" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="-5" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="16" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="37" y="-23" width="10" height="46" rx="5" fill="#3b1500"/>
+</g></svg>Crossover</h1>
+  <div class="stamp"><div id="stamp">Loading both boards…</div><span style="display:flex;gap:6px"><a class="iconbtn" href="../" style="text-decoration:none;color:inherit">Football</a><a class="iconbtn" href="../baseline/" style="text-decoration:none;color:inherit">Basketball</a></span></div>
+ </div>
+ <div id="banner"></div>
+</header>
+<nav class="tabs"><div class="wrap"><div class="filters" id="sportbar" style="margin-top:0"></div></div></nav>
+<main class="wrap" id="view"></main>
+<footer class="wrap fine">Crossover reads Gridline and Baseline and needs no Odds API key of its own. Chances are estimates from betting markets, corrected by each board's real results, not guarantees. For entertainment only. 21+ where legal (PrizePicks 18+ in some states). Gambling problem? Call 1-800-GAMBLER.</footer>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const pct=p=>(p*100).toFixed(0)+"%";
+const sgn=x=>(x>=0?"+":"−")+Math.abs(x*100).toFixed(1)+"%";
+function Phi(x){const t=1/(1+.3275911*Math.abs(x)/Math.SQRT2),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x/2);return .5*(1+(x>=0?y:-y))}
+function PhiInv(p){p=clamp(p,1e-6,1-1e-6);let lo=-8,hi=8;for(let i=0;i<60;i++){const m=(lo+hi)/2;Phi(m)<p?lo=m:hi=m}return (lo+hi)/2}
+const PAY2=3,BE2=Math.sqrt(1/PAY2);   // a 2-pick Power Play pays 3x, so each pick needs about 57.7%
+
+/* ---------- the two boards ---------- */
+const MK={player_pass_yds:"Pass Yards",player_rush_yds:"Rush Yards",player_reception_yds:"Receiving Yards",player_receptions:"Receptions",player_pass_tds:"Pass TDs",
+ player_pass_completions:"Completions",player_pass_attempts:"Pass Attempts",player_rush_attempts:"Rush Attempts",player_pass_interceptions:"Interceptions",
+ player_rush_reception_yds:"Rush + Rec Yards",player_pass_rush_yds:"Pass + Rush Yards",
+ player_points:"Points",player_rebounds:"Rebounds",player_assists:"Assists",player_threes:"3-PT Made",player_points_rebounds_assists:"Pts+Rebs+Asts",
+ player_points_rebounds:"Pts+Rebs",player_points_assists:"Pts+Asts",player_rebounds_assists:"Rebs+Asts",player_blocks:"Blocked Shots",player_steals:"Steals",
+ player_blocks_steals:"Blks+Stls",player_turnovers:"Turnovers"};
+const B=[
+ {k:"fb",name:"Gridline",sport:"Football",url:"../",data:"../data.json",hist:"../history.json",mixT:.12,
+  match:{player_rush_yds:["rush_a","ypc_a"],player_rush_attempts:["rush_a"],player_reception_yds:["pass_a","ypa_a"],player_receptions:["pass_a"],
+   player_pass_yds:["pass_a","ypa_a"],player_pass_tds:["ppg_a","pass_a"],player_pass_completions:["pass_a"],player_pass_attempts:["pass_a"],
+   player_pass_interceptions:["take"],player_rush_reception_yds:["rush_a","pass_a"],player_pass_rush_yds:["pass_a","rush_a"]},
+  sigma(mk,L){if(mk==="player_pass_yds")return Math.max(40,.28*L);if(mk==="player_rush_yds")return 9+.38*L;if(mk==="player_reception_yds")return 8+.48*L;
+   if(mk==="player_rush_reception_yds")return 10+.42*L;if(mk==="player_pass_rush_yds")return Math.max(42,10+.26*L);
+   if(/receptions|tds|completions|attempts|interceptions/.test(mk))return Math.sqrt(Math.max(L,.5))+.6;return 8+.4*L}},
+ {k:"bb",name:"Baseline",sport:"Basketball",url:"../baseline/",data:"../baseline/data.json",hist:"../baseline/history.json",mixT:.06,
+  match:{player_points:["ppg_a"],player_rebounds:["reb_a"],player_assists:["ast_a"],player_threes:["tpm_a"],player_points_rebounds_assists:["ppg_a","reb_a","ast_a"],
+   player_points_rebounds:["ppg_a","reb_a"],player_points_assists:["ppg_a","ast_a"],player_rebounds_assists:["reb_a","ast_a"],player_steals:["pace"],
+   player_blocks:["pace"],player_blocks_steals:["pace"],player_turnovers:["pace"]},
+  sigma(mk,L){const S={player_points:1.5+.24*L,player_points_rebounds_assists:2+.175*L,player_points_rebounds:1.8+.2*L,player_points_assists:1.8+.2*L,
+   player_rebounds_assists:1+.24*L};return S[mk]!=null?S[mk]:Math.sqrt(Math.max(L,.5))+.3}}];
+const SPORTS=[["all","All"],["NFL","NFL"],["CFB","College FB"],["NBA","NBA"],["CBB","College BB"]];
+
+let sportSel="all";try{sportSel=localStorage.getItem("cx_sport")||"all"}catch(e){}
+
+/* ---------- each board's chance, same math as the board at its default settings ---------- */
+function matchF(b,r){const g=b.GI[r.g];if(!g||!r.sd)return null;const o=r.sd==="a"?g.h:g.a,T=b.d.teams||{},S=T[g.sp+":"+o.tid],L=T[g.sp+":_league"];
+ const ks=(b.match[r.mk]||[]).filter(k=>S&&L&&S[k]!=null&&L.avg[k]);if(!ks.length)return null;
+ const m=ks.reduce((a,k)=>a+S[k]/L.avg[k],0)/ks.length,gp=S.gp||1;return 1+(m-1)*gp/(gp+3)}
+function boardP(b,r){let p=r.po;const f=r.rf,n=f?f.o+f.u:0;if(n)p=(10*p+n*(f.o+.5)/(n+1))/(10+n);
+ const m=matchF(b,r);if(m)p=Phi(PhiInv(p)+r.ln*(m-1)*.5/b.sigma(r.mk,r.ln));return p}
+function mixed(b,r){const mkt=r.po>=.5,f=r.rf,n=f?f.o+f.u:0,h=n?f.o/n:.5;
+ const fo=n>=4&&(h>=.5)!==mkt&&Math.abs(h-.5)>=.0999,fa=n>=4&&(h>=.5)===mkt&&Math.abs(h-.5)>=.0999;
+ const m=matchF(b,r),mo=m!=null&&Math.abs(m-1)>=b.mixT&&((m>1)!==mkt);return fo||(mo&&!fa)}
+
+/* ---------- Crossover's correction: how each board's picks in the same chance range really did ---------- */
+// For every board, graded PrizePicks-line picks are split into three ranges of the chance the board gave them.
+// A pick's chance is moved by (real hit rate - chance the board expected) in its range, trusted more as more picks get graded (half weight at 30 picks).
+const RANGES=[[0,.542,"Thin"],[.542,.591,"Playable"],[.591,1.01,"Strong"]];
+function calib(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x.hit===false));
+ b.all={n:ps.length,w:ps.filter(x=>x.hit).length,ep:ps.length?ps.reduce((a,x)=>a+x.p,0)/ps.length:null};
+ b.cal=RANGES.map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length,w=s.filter(x=>x.hit).length,ep=n?s.reduce((a,x)=>a+x.p,0)/n:0;
+  return{lo,hi,l,n,w,hr:n?w/n:null,ep,shift:n?(w/n-ep)*n/(n+30):0}})}
+function corrected(b,p){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0];return{q:clamp(p+c.shift,.3,.75),c}}
+
+/* ---------- candidates from both boards ---------- */
+function etDay(ms){return new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/New_York"})}
+function when(t){const d=new Date(t),n=new Date(),k=x=>x.toDateString(),tm=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);
+ const day=k(d)===k(n)?"Today":k(d)===k(tm)?"Tomorrow":d.toLocaleDateString([],{weekday:"short"});return day+" "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
+function picks(){const out=[];
+ for(const b of B){if(!b.d)continue;const anyPP=(b.d.props||[]).some(r=>r.pp),best={};
+  for(const r of b.d.props||[]){const g=b.GI[r.g];if(!g||Date.parse(g.kick)<=Date.now())continue;if(sportSel!=="all"&&g.sp!==sportSel)continue;
+   if(anyPP&&!r.pp)continue;if(r.nb<2)continue;if(r.ij&&/^(out|doubtful)/i.test(r.ij))continue;
+   const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p),mx=mixed(b,r);
+   const team=r.sd?g[r.sd]:null,opp=r.sd?g[r.sd==="a"?"h":"a"]:null;
+   const x={b,r,g,side,p,q,c,mx,team,opp,key:b.k+"|"+r.g+"|"+r.pl,tk:r.sd?r.g+"|"+r.sd:null};
+   if(mx)continue;   // the board's recent games or matchup point against the books: both boards skip these too
+   if(!best[x.key]||best[x.key].q<q)best[x.key]=x}
+  out.push(...Object.values(best))}
+ return out.sort((a,b)=>b.q-a.q)}
+function pairs(C,needMix){let best=null;const L=C.slice(0,40);
+ for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],c=L[j];
+  if(needMix&&a.b.k===c.b.k)continue;
+  if(a.r.g===c.r.g&&(!a.tk||!c.tk||a.tk===c.tk))continue;   // PrizePicks needs 2 different teams
+  const s=a.q*c.q;if(!best||s>best.s)best={s,legs:[a,c]}}
+ return best}
+
+/* ---------- rendering ---------- */
+const lg=x=>`<span class="lg">${esc(x.g.sp)}</span>`;
+function pickRow(x,i){const lineTxt=Number.isInteger(x.r.ln)?x.r.ln:x.r.ln.toFixed(1),gm=x.team&&x.opp?`${esc(x.team.ab||x.team.n)} ${x.r.sd==="a"?"at":"vs"} ${esc(x.opp.ab||x.opp.n)}`:`${esc(x.g.a.ab||x.g.a.n)} @ ${esc(x.g.h.ab||x.g.h.n)}`;
+ const moved=Math.abs(x.q-x.p)>=.005;
+ return `<div class="card prop"><div class="who"><b>${i!=null?`<span class="rank">${i+1}</span>`:""}${esc(x.r.pl)}${x.r.ij?`<span class="tier mix">${esc(x.r.ij)}</span>`:""}</b>
+  <span class="m">${lg(x)}<span class="stat-name">${x.side==="o"?"More":"Less"} ${lineTxt} ${esc(MK[x.r.mk]||x.r.mk)}</span><span>${gm}</span><span>${esc(when(Date.parse(x.g.kick)))}</span></span>
+  <span class="m" style="margin-top:4px"><span>${esc(x.b.name)} said ${pct(x.p)}${moved?`, its ${x.c.l} picks have really hit ${x.c.hr!=null?pct(x.c.hr):"–"} (${x.c.w}-${x.c.n-x.c.w})`:x.c.n?"":", no graded picks to correct by yet"}</span></span></div>
+  <div class="sides"><div class="side-b rec"><small>Crossover</small><b>${pct(x.q)}</b><span class="ln">${x.side==="o"?"More":"Less"}</span></div></div></div>`}
+function pairCard(P,title,lede,id){if(!P)return"";const[a,c]=P.legs,all=a.q*c.q,ev=all*PAY2-1;
+ return `<h2>${title}</h2><p class="lede">${lede}</p><section class="card hero"><div class="kick"><div><h3>2-pick Power Play</h3><div class="sub">Pays ${PAY2}x if both hit</div></div><div class="ev ${ev>0?"":"neg"}">${pct(all)}</div></div>
+  <div class="stats"><div class="stat"><small>Both hit</small><b>${pct(all)}</b></div><div class="stat"><small>Expected return</small><b class="${ev>0?"gold":"red"}">${sgn(ev)}</b></div><div class="stat"><small>Needs per pick</small><b>${pct(BE2)}</b></div></div>
+  <div class="list">${P.legs.map(x=>pickRow(x)).join("")}</div>
+  <button class="btn go wide" style="margin-top:12px" data-copy="${id}">Copy picks</button>
+  <p class="fine">${ev>0?"By Crossover's corrected chances this beats the payout, but these are still estimates.":"Even the best pair doesn't beat the 3x payout by Crossover's corrected chances."}</p></section>`}
+function recordCard(){const rows=B.map(b=>{const a=b.all;if(!b.d)return `<div class="recrow"><span>${esc(b.name)}<br><span class="k">${esc(b.sport)}</span></span><span class="k">not loaded</span><b>–</b></div>`;
+  const hr=a&&a.n?a.w/a.n:null;return `<div class="recrow"><span>${esc(b.name)}<br><span class="k">${esc(b.sport)} · board expected ${a&&a.ep!=null?pct(a.ep):"–"}</span></span><span class="k">${a&&a.n?`${a.w}-${a.n-a.w}`:"no graded picks yet"}</span><b class="${hr==null?"":hr>=BE2?"gold":"red"}">${hr==null?"–":pct(hr)}</b></div>`}).join("");
+ const beat=B.some(b=>b.all&&b.all.n>=50&&b.all.w/b.all.n>=BE2);
+ return `<section class="card rcard"><div class="rchd"><span>Both boards' real record<small>Picks on PrizePicks lines, graded after the game</small></span></div>
+  <div style="margin-top:6px">${rows}</div>
+  <p class="fine" style="margin:8px 0 0"><b class="${beat?"gold":"red"}">${beat?"At least one board is beating break-even so far.":"Neither board is beating PrizePicks payouts yet."}</b> A 2-pick Power Play needs each pick to hit ${pct(BE2)}. Crossover can't make picks more accurate. It corrects each board's chance by how its picks in the same range really did, so a cold board's picks stop looking better than they've been.</p></section>`}
+let LAST={};
+function render(){
+ const live=sp=>B.reduce((a,b)=>a+(b.d?b.d.games.filter(g=>Date.parse(g.kick)>Date.now()&&(sp==="all"||g.sp===sp)).length:0),0);
+ $("#sportbar").innerHTML=SPORTS.filter(([k])=>k==="all"||live(k)).map(([k,l])=>`<button class="pill ${sportSel===k?"on":""}" data-sport="${k}">${l}<span class="ct">${live(k)}</span></button>`).join("");
+ const C=picks(),best=pairs(C,false),mix=sportSel==="all"?pairs(C,true):null;LAST={best,mix};
+ let h=recordCard();
+ if(!C.length)h+=`<div class="card empty" style="margin-top:14px">No player props on either board right now. Each board pulls them in its overnight update for that day's games.</div>`;
+ else{
+  h+=pairCard(best,"Best 2-pick","The two picks with the highest corrected chance, from 2 different teams.","best");
+  if(mix&&(mix.legs[0].key!==(best&&best.legs[0].key)||mix.legs[1].key!==(best&&best.legs[1].key)))h+=pairCard(mix,"Best football + basketball","The best pair with one pick from each sport.","mix");
+  h+=`<h2>Top picks across both</h2><p class="lede">Every prop from both boards with at least 2 books, ranked by Crossover's corrected chance. Picks where a board's own signals disagree are left out, as are players listed out or doubtful.</p>
+  <div class="list">${C.slice(0,15).map((x,i)=>pickRow(x,i)).join("")}</div>`}
+ $("#view").innerHTML=h}
+function copyText(txt,btn){const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>{btn.textContent=o},1200)};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,()=>prompt("Copy this:",txt));else prompt("Copy this:",txt)}
+document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const d=t.dataset;
+ if(d.sport){sportSel=d.sport;try{localStorage.setItem("cx_sport",sportSel)}catch(_){}render();return}
+ if(d.copy){const P=LAST[d.copy];if(P)copyText(P.legs.map(x=>`${x.r.pl} ${x.side==="o"?"More":"Less"} ${x.r.ln} ${MK[x.r.mk]||x.r.mk}`).join("\n"),t)}});
+(function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}if(!["dark","clean","bold"].includes(t))t="dark";document.documentElement.dataset.theme=t})();
+
+Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),
+ fetch(b.hist,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null)]).then(([d,h])=>{b.d=d&&Array.isArray(d.games)?d:null;b.h=h;
+ if(b.d){b.GI={};b.d.games.forEach(g=>b.GI[g.id]=g)}calib(b)}))).then(()=>{
+ const st=B.map(b=>`${esc(b.name)} <b>${b.d?new Date(b.d.updated).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}):"not loaded"}</b>`).join("<br>");
+ $("#stamp").innerHTML=st;render()});
+</script>
+</body>
+</html>
