@@ -943,7 +943,7 @@ def update_history(games, props, teams):
         h["pending"][f"p|{r['g']}|{r['mk']}|{r['pl']}"] = {
             "t": "p", "sp": g["sp"], "kick": g["kick"], "pl": r["pl"], "mk": r["mk"], "ln": r["ln"], "pp": r["pp"],
             "nb": r["nb"], "po": r["po"], "side": "o" if pf >= .5 else "u", "p": round(max(pf, 1 - pf), 4),
-            "mx": is_mixed(r, teams, gbi), "ag": all_agree(r, teams, gbi, pf), "aid": r["aid"]}
+            "mx": is_mixed(r, teams, gbi), "ag": all_agree(r, teams, gbi, pf), "aid": r["aid"], "bm": r.get("bm")}
     for g in games:
         if g.get("eid") and parse_t(g["kick"]) > NOW:
             h["pending"][f"m|{g['id']}"] = {"t": "m", "sp": g["sp"], "kick": g["kick"], "eid": g["eid"],
@@ -971,7 +971,7 @@ def update_history(games, props, teams):
             res = None if act == x["ln"] else ((act > x["ln"]) == (x["side"] == "o"))
             h["props"].append({"d": x["kick"][:10], "sp": x["sp"], "pl": x["pl"], "mk": x["mk"], "ln": x["ln"],
                                "pp": x["pp"], "nb": x["nb"], "po": x["po"], "side": x["side"], "p": x["p"],
-                               "mx": x["mx"], "ag": x.get("ag", False), "act": act, "hit": res})
+                               "mx": x["mx"], "ag": x.get("ag", False), "act": act, "hit": res, "bm": x.get("bm")})
         else:
             day = kick.astimezone(ET).strftime("%Y%m%d")
             sc = final_scores(x["sp"], day).get(x["eid"])
@@ -1133,6 +1133,44 @@ def build_players(inj):
     return True
 
 
+
+# ---------- brief.json: a small summary for the morning message ----------
+def write_brief(games, props, teams, site, url):
+    """Today's strongest picks, the biggest line gaps and last night's results, small enough to read in a text."""
+    gbi = {g["id"]: g for g in games}
+    picks, gaps = {}, []
+    for r in props:
+        g = gbi.get(r["g"])
+        if not g or not r.get("pp") or r.get("nb", 0) < 2 or parse_t(g["kick"]) <= NOW:
+            continue
+        if r.get("ij") and r["ij"].lower().startswith(("out", "doubtful")):
+            continue
+        pf = board_prob(r, teams, gbi)
+        side, p = ("o", pf) if pf >= .5 else ("u", 1 - pf)
+        t = g[r["sd"]] if r.get("sd") else None
+        o = g["h" if r.get("sd") == "a" else "a"] if r.get("sd") else None
+        item = {"pl": r["pl"], "stat": MARKET_LABEL.get(r["mk"], r["mk"]), "side": "More" if side == "o" else "Less", "ln": r["ln"],
+                "p": round(p, 3), "sp": g["sp"],
+                "game": (f"{t['ab']} {'at' if r['sd'] == 'a' else 'vs'} {o['ab']}" if t and o else f"{g['a']['ab']} @ {g['h']['ab']}"),
+                "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p")}
+        if not is_mixed(r, teams, gbi) and (r["pl"] not in picks or picks[r["pl"]]["p"] < p):
+            picks[r["pl"]] = item
+        if r.get("bm") is not None:
+            gz = (r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])
+            if abs(gz) >= .15:
+                gaps.append(dict(item, side="More" if gz > 0 else "Less", books=r["bm"], gz=round(gz, 2)))
+    h = load_json("history.json", {})
+    P = [x for x in h.get("props", []) if x.get("pp") and x.get("hit") in (True, False)]
+    last_day = max((x["d"] for x in P), default=None)
+    last = [x for x in P if x["d"] == last_day] if last_day else []
+    brief = {"updated": iso(NOW), "site": site, "url": url,
+             "top": sorted(picks.values(), key=lambda x: -x["p"])[:5],
+             "gaps": sorted(gaps, key=lambda x: -abs(x["gz"]))[:3],
+             "last": {"day": last_day, "w": sum(1 for x in last if x["hit"]), "l": sum(1 for x in last if not x["hit"])},
+             "record": {"w": sum(1 for x in P if x["hit"]), "n": len(P)}}
+    with open(os.path.join(HERE, "brief.json"), "w") as fh:
+        json.dump(brief, fh, separators=(",", ":"))
+
 def main():
     s = settings()
     overrides = load_json("overrides.json", {})
@@ -1149,6 +1187,10 @@ def main():
     except Exception as e:
         print("track record failed:", e)
         record = None
+    try:
+        if games: write_brief(games, props, teams, "Gridline", "https://officialgewtified.github.io/RepoBoard/")
+    except Exception as e:
+        print("brief failed:", e)
     try:
         build_players(inj)
     except Exception as e:

@@ -351,7 +351,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=2">
+<link rel="stylesheet" href="../fx.css?v=3">
 </head>
 <body>
 <header class="wrap top">
@@ -657,10 +657,10 @@ function propRow(r){
  // each label carries its real record (hits-misses on PrizePicks lines); it only gets its color once results back it up
  const tk=RKEY[tc];
  return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?`<span class="tier mix">Mixed signals${recSpan("mixed")}</span>`:`<span class="tier ${tc==="t1"||earns(tk)?tc:"t1"}">${tl}${recSpan(tk)}</span>`}${agree(r)?`<span class="tier ${earns("agree")?"t3":"t1"}">All agree${recSpan("agree")}</span>`:""}</b>
-  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(gameTxt(r))}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${extraChips(r)}</button>
+  <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(gameTxt(r))}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${gapChip(r)} ${extraChips(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
   ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
-   <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table></div>`:""}</div>`}
+   <table class="books"><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr>${r.bl.map(b=>`<tr><td>${esc(bname(b[0]))}</td><td>${b[1]}</td><td>${fmtML(b[2])}</td><td>${fmtML(b[3])}</td></tr>`).join("")}</table><button class="sm" data-player="${r.i}">Open player page</button></div>`:""}</div>`}
 
 function mlRow(x){const g=x.g,t=g[x.s],on=sel[g.id]===x.s,o=g[x.s==="a"?"h":"a"];
  return `<button class="row ${on?"on":""}" data-pick="${esc(g.id)}|${x.s}">${chip(t)}<span class="tn"><b>${esc(teamName(t))}</b><small>${x.s==="a"?"at":"vs"} ${esc(teamName(o))}, ${esc(when(g))}</small></span>
@@ -688,6 +688,7 @@ function renderTop(){
  const pg=[...new Set(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!T.onlyPP||r.pp)).map(r=>r.g))];
  const oneGame=pg.length===1?`<div class="card empty" style="margin-top:8px">Only ${esc(GI[pg[0]].a.n)} @ ${esc(GI[pg[0]].h.n)} has player props right now, so every pick comes from that game. Props for later games are pulled in the update before they tip off.</div>`:"";
  h+=recCard();
+ h+=gapSection();
  const RA=rec()&&rec().agree,be2=bePower(2);
  h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag.${RA&&RA.n?` So far these have gone <b>${wl(RA)}</b> (${pct(RA.w/RA.n)}) on PrizePicks lines${RA.w/RA.n<be2?`, below the ${pct(be2)} a 2-pick Power Play needs`:""}.`:" Their real record shows up here once some are graded."}</p>`;
  h+=ag.length?`<div class="list">${ag.map(propRow).join("")}</div>`:`<div class="card empty">No pick has every signal lined up right now. That's normal; it means skip rather than force it.</div>`;
@@ -743,7 +744,7 @@ function renderGames(){
 
 function renderPP(){
  const R=ui.pp.res,hasPP=P.some(r=>r.pp);
- let list=P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!ui.ppOnly||r.pp)&&(ui.stat==="all"||r.mk===ui.stat)&&(!ui.agreeOnly||agree(r)));
+ let list=P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!ui.ppOnly||r.pp)&&(ui.stat==="all"||r.mk===ui.stat)&&(!ui.agreeOnly||agree(r))&&(!ui.gapOnly||gapOf(r)));
  if(ui.pq){const q=ui.pq.toLowerCase();list=list.filter(r=>r.pl.toLowerCase().includes(q)||[GI[r.g].a.n,GI[r.g].h.n].some(s=>s.toLowerCase().includes(q)))}
  if(ui.psort==="time")list.sort((a,b)=>(GI[a.g].t||0)-(GI[b.g].t||0)||propSide(b).p-propSide(a).p);else list.sort((a,b)=>propSide(b).p-propSide(a).p);
  const stats=[...new Set(P.map(r=>r.mk))];
@@ -763,7 +764,7 @@ function renderPP(){
  <div class="filters"><button class="pill ${ui.stat==="all"?"on":""}" data-stat="all">All stats</button>${stats.map(s=>`<button class="pill ${ui.stat===s?"on":""}" data-stat="${s}">${esc(MK[s]||s)}</button>`).join("")}</div>
  <div class="toolbar" style="margin-top:8px"><input class="search" id="pq" type="search" placeholder="Find a player or team" value="${esc(ui.pq)}">
   <select class="sel" id="psort"><option value="p" ${ui.psort==="p"?"selected":""}>Strongest</option><option value="time" ${ui.psort==="time"?"selected":""}>Tip-off</option></select></div>
- ${hasPP?`<div class="filters"><button class="pill ${ui.ppOnly?"on":""}" data-pponly>PrizePicks lines only</button><button class="pill ${ui.agreeOnly?"on":""}" data-agreeonly>All signals agree</button></div>`:(P.length?`<p class="fine">PrizePicks lines weren't in this update, so these use the sportsbook line. Compare with the app before you play.</p>`:"")}
+ ${hasPP?`<div class="filters"><button class="pill ${ui.ppOnly?"on":""}" data-pponly>PrizePicks lines only</button><button class="pill ${ui.agreeOnly?"on":""}" data-agreeonly>All signals agree</button><button class="pill ${ui.gapOnly?"on":""}" data-gaponly>Line gaps</button></div>`:(P.length?`<p class="fine">PrizePicks lines weren't in this update, so these use the sportsbook line. Compare with the app before you play.</p>`:"")}
  <div class="list" style="margin-top:10px">${list.length?list.slice(0,ui.limit).map(propRow).join(""):`<div class="card empty">${ui.pq?`No props on the board match "${esc(ui.pq)}".<br><button class="btn go" style="margin-top:10px" data-check="${esc(ui.pq)}">Check ${esc(ui.pq)} anyway</button>`:P.length?"No props match.":"No player props in this update. They're pulled for games that start before the next update."}</div>`}</div>
  ${list.length>ui.limit?`<button class="btn wide" style="margin-top:10px" data-moreprops>Show more (${list.length-ui.limit} left)</button>`:""}`}
 
@@ -780,7 +781,7 @@ function renderRecord(){const R=DATA&&DATA.record;
   ${recRow("Last 7 days",P.week)}
   ${recRow("Strong picks",P.strong,"59%+ chance")}${recRow("Playable picks",P.playable,"54 to 59%")}${recRow("Thin picks",P.thin,"under 54%")}
   ${recRow("Picks the scanners would use",P.scanner,"Playable or better, 2+ books, no mixed signals")}
-  ${recRow("All signals agree",P.agree)}${recRow("Clean signals",P.clean)}${recRow("Mixed signals",P.mixed,"books and recent games or matchup disagreed")}
+  ${recRow("All signals agree",P.agree)}${recRow("Line gaps",rec()&&rec().gap,"on the side the gap favors")}${recRow("Clean signals",P.clean)}${recRow("Mixed signals",P.mixed,"books and recent games or matchup disagreed")}
   ${recRow("More picks",P.more)}${recRow("Less picks",P.less)}${recRow("NBA",P.nba)}${recRow("College",P.cbb)}${stat}
   ${M.all.n?`${recRow("Game winners (favorites)",M.all,M.all.ep?`board expected ${pct(M.all.ep)}`:"")}${recRow("Favorites 50 to 60%",M.b50)}${recRow("Favorites 60 to 70%",M.b60)}${recRow("Favorites 70 to 80%",M.b70)}${recRow("Favorites 80%+",M.b80)}`:""}
  </section>
@@ -795,7 +796,7 @@ function renderTix(){
  const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.reduce((a,t)=>a+tRet(t),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.pw??t.p??0),0);
  return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}${pu?"-"+pu:""}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
  <p class="fine">${tickets.length-S.length} open. Tickets grade themselves after each update when the board tracked every pick. Tap Won or Edit payout on any ticket to enter what it really paid, like a smaller payout after a tie. A win means it made money, so a Flex that pays back less than you put in counts as a loss. Expected wins is how many the odds said would make money.</p>`:""}
- ${renderRecord()}<h2>Saved tickets</h2>
+ ${bankCard()}${renderRecord()}<h2>Saved tickets</h2>
  <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>{const n=t.r?tNet(t):0,cls=!t.r?"":n>0?"W":tRet(t)>0?"PT":"L",flex=t.kind==="pp"&&t.mode==="Flex",ti=tieInfo(t);
   return `<div class="card tk ${cls}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
   ${legRows(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":n===0&&tRet(t)>0?"Refund":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`
@@ -813,7 +814,7 @@ function rec(){if(!HIST)return null;const k=HIST.props.length+"|"+BE.lo+"|"+BE.h
  const agg=f=>{let w=0,n=0,e=0;for(const x of ps)if(f(x)){n++;if(x.hit)w++;e+=x.p}return{w,n,ep:n?e/n:null}};
  RC={all:agg(()=>true),week:agg(x=>x.d>=wk),agree:agg(x=>x.ag),strong:agg(x=>x.p>=BE.hi),playable:agg(x=>x.p>=BE.lo&&x.p<BE.hi),
   thin:agg(x=>x.p<BE.lo),mixed:agg(x=>x.mx),clean:agg(x=>!x.mx)};
- RCkey=k;return RC}
+ RC.gap=gapRec();RCkey=k;return RC}
 const RKEY={t3:"strong",t2:"playable",t1:"thin"};
 const wl=a=>a&&a.n?`${a.w}-${a.n-a.w}`:"";
 // a label earns its color when it beats what a 2-pick Power Play needs, by enough picks that it isn't luck (one standard error)
@@ -907,7 +908,7 @@ function renderWeekly(){const{L,cw,cl}=weeklyList(),n=cw+cl;
   return `<div class="card pcard"><button class="phd" data-plopen="${esc(p.k)}" aria-expanded="${!!open}"><span class="pn"><b>${esc(p.pl)}</b><small>${esc(p.sp==="CBB"?"College":p.sp)} · hit ${p.green} of ${p.weeks} weeks</small></span>
    <span class="pdots" aria-hidden="true">${last.map(plMark).join("")}</span><span class="prec ${p.rate>=.55?"gold":""}">${p.w}-${p.l}</span></button>
    ${now.length?`<div class="plnow">${now.map(r=>{const s=propSide(r),on=pps[r.k]===s.side;return `<div><span><b>${s.side==="o"?"More":"Less"} ${r.ln} ${esc(MK[r.mk]||r.mk)}</b>${r.pp?"":' <span class="ppmark">Book line</span>'}<span class="k">${esc(gameTxt(r))}, ${esc(when(GI[r.g]))} · board ${pct(s.p)}</span></span><button class="sm ${on?"on":""}" data-pp="${r.i}|${s.side}" aria-pressed="${on}">${on?"On slip":"Add"}</button></div>`}).join("")}</div>`:""}
-   ${open?`<div class="plog">${p.g.map(x=>`<div>${plMark(x)}<span>${esc(dayTxt(x.d))}</span><span>${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk||"")}</span><span class="k">had ${x.act}</span></div>`).join("")}</div>`:""}</div>`}).join("")}</div>
+   ${open?`<div class="plog">${p.g.map(x=>`<div>${plMark(x)}<span>${esc(dayTxt(x.d))}</span><span>${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk||"")}</span><span class="k">had ${x.act}</span></div>`).join("")}<button class="sm" data-plpage="${esc(p.pl)}">Open player page</button></div>`:""}</div>`}).join("")}</div>
  ${L.length>ui.plLimit?`<button class="btn wide" style="margin-top:10px" data-plmore>Show more (${L.length-ui.plLimit} left)</button>`:""}`;
  return h}
 function renderPlayers(){if(ui.plWeekly)return renderWeekly();const L=playerList(),mine=ui.plMine;
@@ -922,7 +923,7 @@ function renderPlayers(){if(ui.plWeekly)return renderWeekly();const L=playerList
  <div class="list" style="margin-top:10px">${L.slice(0,ui.plLimit).map(p=>{const open=ui.plopen[p.k],last=p.g.slice(0,10);   /* newest first, same as the game log */
   return `<div class="card pcard"><button class="phd" data-plopen="${esc(p.k)}" aria-expanded="${!!open}"><span class="pn"><b>${esc(p.pl)}</b><small>${esc([p.sp==="CBB"?"College":p.sp,[p.n?p.n+" graded":"",p.pu?p.pu+" push":"",p.op?p.op+" waiting":""].filter(Boolean).join(", ")].filter(Boolean).join(" · "))}</small></span>
    <span class="pdots" aria-hidden="true">${last.map(plMark).join("")}</span><span class="prec ${p.n&&p.rate>=.55?"gold":p.n&&p.rate<.45?"red":""}">${p.n?`${p.w}-${p.l}`:"–"}</span></button>
-   ${open?`<div class="plog">${p.g.map(x=>`<div>${plMark(x)}<span>${esc(dayTxt(x.d))}</span><span>${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk||"")}</span><span class="k">${x.open?"not graded":`had ${x.act}`}</span></div>`).join("")}</div>`:""}</div>`}).join("")}</div>
+   ${open?`<div class="plog">${p.g.map(x=>`<div>${plMark(x)}<span>${esc(dayTxt(x.d))}</span><span>${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk||"")}</span><span class="k">${x.open?"not graded":`had ${x.act}`}</span></div>`).join("")}<button class="sm" data-plpage="${esc(p.pl)}">Open player page</button></div>`:""}</div>`}).join("")}</div>
  ${L.length>ui.plLimit?`<button class="btn wide" style="margin-top:10px" data-plmore>Show more (${L.length-ui.plLimit} left)</button>`:""}`;
  return h}
 
@@ -1089,7 +1090,7 @@ function ckVerdict(){const p=CK.p,mk=CK.mk,ln=CK.ln,J=ckJudge(p,mk,ln),nx=p.next
  if(J.out)why.push(`<b>He's listed ${esc(J.ij)}.</b> If he doesn't play, PrizePicks usually voids the pick, but don't count on it.`);
  if(J.src==="books"){why.push(`<b>Sportsbooks:</b> ${r.nb} book${r.nb===1?"":"s"} price ${r.pp?"the PrizePicks line":"this stat"} at ${r.ln}, with More at ${pct(r.lo)} to ${pct(r.hi)}.${J.shift?` Your line is ${Math.abs(J.shift)} ${J.shift>0?"higher":"lower"} than ${r.ln}, so the chance is moved to match.`:""}`)}
  else why.push(`<b>No sportsbook lines for him in this update</b>, so this comes from his recent games${nx&&nx.sd?" and the matchup":""} only. Treat it as a lean, not a lock.`);
- if(J.n)why.push(`<b>Recent games:</b> over ${lnTxt} in ${J.o} of his last ${J.n}${J.u+J.o<J.n?` (${J.n-J.o-J.u} right on it)`:""}. Median ${med(J.v)}.${ckGames(J.V,ln)}`);
+ if(J.n)why.push(`<b>Recent games:</b> over ${lnTxt} in ${J.o} of his last ${J.n}${J.u+J.o<J.n?` (${J.n-J.o-J.u} right on it)`:""}. Median ${med(J.v)}.${ckChart(J.V,ln)}`);
  if(g&&nx.sd){const pr={g:g.id,sd:nx.sd,mk,ln,ij:null,op:null};const mc=MATCHW[matchW]?matchChip(pr):"",xc=extraChips(pr);
   if(mc||xc)why.push(`<b>Matchup:</b><br>${mc} ${xc}`);
   if(g[nx.sd].imp!=null)why.push(`His team is expected to score <b>${g[nx.sd].imp}</b> points.`)}
@@ -1100,7 +1101,7 @@ function ckVerdict(){const p=CK.p,mk=CK.mk,ln=CK.ln,J=ckJudge(p,mk,ln),nx=p.next
  if(J.all)why.push(`<b>All signals agree:</b> the books, his recent games and the matchup point the same way.${RA&&RA.n?` Picks like this have really gone ${wl(RA)} (${pct(RA.w/RA.n)}) on PrizePicks lines.`:""}`);
  if(!J.out&&J.cls!=="flat")why.push(`By the board's math it ${J.ps>=be2?"clears":"falls short of"} the ${pct(be2)} each pick needs on a 2-pick Power Play.${rec()&&rec().all.n?` The board's PrizePicks picks have really hit ${pct(rec().all.w/rec().all.n)}.`:""}`);
  return `<section class="card ckv"><div class="feel ${J.cls}"><div><small>The board${J.src==="books"?"":" · recent games only"}</small><b class="hl">${esc(J.head)}</b></div><div class="sides">${sideBox("o")}${sideBox("u")}</div></div>
-  <ul class="why">${why.map(x=>`<li>${x}</li>`).join("")}</ul>
+  <ul class="why">${why.map(x=>`<li>${x}</li>`).join("")}</ul>${ckMore(p,mk)}
   ${slip?`<p class="fine">Tap More or Less to add it to your lineup.</p>`:r?`<p class="fine">Set the line back to ${r.ln} to add it to your lineup.</p>`:""}</section>`}
 function ckVerdictDraw(){const el=$("#ckv");if(el&&CK&&CK.p)el.innerHTML=ckVerdict()}
 function ckDraw(){const el=$("#ckbody");if(!el||!CK)return;const p=CK.p;
@@ -1126,10 +1127,127 @@ function ckOpen(q){CK={q:q||"",p:null,mk:null,ln:0.5,all:false};
   <input class="search" id="ckq" type="search" placeholder="Player name" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search" aria-label="Player name" value="${esc(CK.q)}" style="width:100%">
   <div id="ckbody"></div><div class="btns"><button class="btn" data-ckclose>Done</button></div>`;
  ckDraw();$("#check").showModal();const i=$("#ckq");i.focus();i.setSelectionRange(i.value.length,i.value.length);
- if(PJ===null&&!PJload)PJload=fetch("players.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{PJ=j&&j.players?j:false}).catch(()=>{PJ=false}).finally(()=>{if(CK&&!CK.p)ckDraw()})}
+ if(PJ===null&&!PJload)PJload=fetch("players.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{PJ=j&&j.players?j:false}).catch(()=>{PJ=false}).finally(()=>{if(!CK)return;if(!CK.p){ckDraw();return}const o=CK.p,np=ckPeople().find(x=>(o.aid&&x.aid===o.aid)||(x.nm===o.nm&&x.sp===o.sp));if(np&&np!==o){CK.p=np;ckDraw()}})}
 $("#check").addEventListener("close",()=>{CK=null});
 $("#check").addEventListener("click",e=>{if(e.target.id==="check")$("#check").close()});
 document.addEventListener("keydown",e=>{if(CK&&e.target.id==="ckq"&&e.key==="Enter"){const f=ckFind(CK.q)[0];if(f){e.preventDefault();ckSelect(f.key);e.target.blur()}}});
+
+/* ======================================================================
+   Extras: line gaps, bankroll and weekly limit, sharing a slip, player pages.
+   The same block runs on Gridline and Baseline.
+   ====================================================================== */
+const SPORTNAME=document.documentElement.dataset.sport==="bb"?"Basketball":"Football";
+const SITENAME=document.documentElement.dataset.sport==="bb"?"Baseline":"Gridline";
+
+/* ---------- line gaps: the PrizePicks line sits away from where the sportsbooks have it ---------- */
+// The gap is measured in units of how much the stat usually swings, so half a rebound and 5 receiving yards compare fairly.
+const GAPZ=.15;
+function gapOf(r){if(!r||!r.pp||r.bm==null||r.nb<2)return null;const d=+(r.bm-r.ln).toFixed(2);if(!d)return null;
+ const z=d/sigmaFor(r.mk,r.ln);return Math.abs(z)>=GAPZ?{d,z,side:d>0?"o":"u",p:d>0?r.po:1-r.po}:null}
+function gapChip(r){const G=gapOf(r);if(!G)return"";
+ return `<span class="mchip gap">Line gap: books have ${r.bm}, so ${G.side==="o"?"More":"Less"} gets the better number</span>`}
+function gapRec(){if(!HIST)return null;let w=0,n=0;
+ for(const x of HIST.props){if(!x.pp||x.bm==null||x.act==null||x.act===x.ln)continue;const d=x.bm-x.ln;
+  if(!d||Math.abs(d/sigmaFor(x.mk,x.ln))<GAPZ)continue;n++;if((x.act>x.ln)===(d>0))w++}
+ return{w,n,ep:null}}
+function gapList(){return P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&gapOf(r)).sort((a,b)=>Math.abs(gapOf(b).z)-Math.abs(gapOf(a).z))}
+function gapSection(){const L=spread(gapList(),2,6,r=>r.g),R=rec()&&rec().gap;
+ return `<h2>Line gaps</h2><p class="lede">PrizePicks has these lines away from where the sportsbooks have them, so one side gets a better number than the books give. It's the one place a pick can really be mispriced.${R&&R.n?` So far gap picks have gone <b>${wl(R)}</b> (${pct(R.w/R.n)}) on the side the gap favors.`:" Their real record shows up once some are graded."}</p>`+
+  (L.length?`<div class="list">${L.map(propRow).join("")}</div>`:`<div class="card empty">No PrizePicks line is far enough from the books right now.</div>`)}
+
+/* ---------- bankroll: money over time and a weekly limit, shared by all three sites ---------- */
+const LIMKEY="arena_limit";
+function rawTix(k){try{const v=JSON.parse(localStorage.getItem(k)||"[]");return Array.isArray(v)?v:[]}catch(e){return[]}}
+function tAt(t){if(t.day)return Date.parse(t.day+"T12:00:00");if(t.at)return t.at;const k=t.lg&&t.lg[0]&&t.lg[0].k;if(k)return Date.parse(k);
+ const m=/^log-(\d+)/.exec(t.id||"");return m?+m[1]:null}
+function weekStart(ms){const d=new Date(ms);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}   // Monday
+function allTix(){return[...rawTix("pb_tickets"),...rawTix("bl_tickets")]}
+function weekStake(){const ws=weekStart(Date.now());return allTix().filter(t=>{const a=tAt(t);return a&&a>=ws}).reduce((a,t)=>a+(+t.stake||0),0)}
+function getLimit(){try{const v=parseFloat(localStorage.getItem(LIMKEY));return v>0?v:null}catch(e){return null}}
+function limitNote(){const L=getLimit();if(!L)return"";const s=weekStake();if(s<L*.8)return"";
+ return s>=L?`<div class="note bad" role="alert">You've put in ${money(s)} this week, past your ${money(L)} weekly limit.</div>`
+  :`<div class="note">You've put in ${money(s)} of your ${money(L)} weekly limit.</div>`}
+function limitBar(){let el=document.getElementById("limitbar");if(!el){const b=$("#banner");if(!b)return;el=document.createElement("div");el.id="limitbar";b.after(el)}
+ const L=getLimit(),s=L?weekStake():0;
+ el.innerHTML=L&&s>=L?`<div class="warn">You've put in ${money(s)} this week across both sports, past your ${money(L)} weekly limit.</div>`:""}
+function plPoints(list){const S=list.filter(t=>t.r&&tAt(t)).sort((a,b)=>tAt(a)-tAt(b));let v=0;const pts=[];
+ if(S.length)pts.push({t:tAt(S[0])-1,v:0});for(const t of S){v+=tNet(t);pts.push({t:tAt(t),v})}return pts}
+function plChart(pts){if(pts.length<2)return `<p class="fine">The chart starts once you have a settled ticket.</p>`;
+ const W=340,H=120,xs=pts.map(p=>p.t),ys=pts.map(p=>p.v),x0=xs[0],x1=xs[xs.length-1],lo=Math.min(0,...ys),hi=Math.max(0,...ys);
+ const X=t=>6+(W-12)*(x1===x0?1:(t-x0)/(x1-x0)),Y=v=>H-8-(H-16)*(hi===lo?.5:(v-lo)/(hi-lo)),last=ys[ys.length-1],c=last>=0?"var(--go)":"var(--stop)";
+ const d=pts.map((p,i)=>(i?"L":"M")+X(p.t).toFixed(1)+" "+Y(p.v).toFixed(1)).join("");
+ return `<svg class="plc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Net over time, now ${last>=0?"up":"down"} ${money(Math.abs(last))}">
+  <line x1="0" x2="${W}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 5"/>
+  <path d="${d} L${X(x1).toFixed(1)} ${Y(0).toFixed(1)} L${X(x0).toFixed(1)} ${Y(0).toFixed(1)}Z" fill="${c}" opacity=".12"/>
+  <path d="${d}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="${X(x1).toFixed(1)}" cy="${Y(last).toFixed(1)}" r="4.5" fill="${c}"/></svg>`}
+function bankCard(){const pts=plPoints(tickets),L=getLimit(),s=weekStake(),used=L?Math.min(1,s/L):0,last=pts.length?pts[pts.length-1].v:0;
+ return `<section class="card bank"><div class="rchd"><span>Bankroll<small>${SPORTNAME} tickets you saved or logged, settled ones only</small></span><b class="${last>=0?"gold":"red"}">${last>=0?"+":"−"}${money(Math.abs(last))}</b></div>${plChart(pts)}
+  <div class="limit"><div class="lrow"><span>This week, both sports</span><b>${money(s)}${L?` of ${money(L)}`:""}</b></div>${L?`<div class="lbar"><i style="width:${(used*100).toFixed(0)}%" class="${s>=L?"over":""}"></i></div>`:""}
+  <div class="lset"><label>Weekly limit $<input id="limitamt" type="number" inputmode="decimal" min="0" step="1" value="${L||""}" placeholder="none"></label><button class="sm" data-limitsave>Save limit</button></div>
+  <p class="fine">The limit counts every entry you put in from Monday on, on Gridline and Baseline together. The slip warns you as you get close.</p></div></section>`}
+
+/* ---------- share a slip as an image ---------- */
+function cutPath(x,X,Y,w,h,c){x.beginPath();x.moveTo(X+c,Y);x.lineTo(X+w,Y);x.lineTo(X+w,Y+h-c);x.lineTo(X+w-c,Y+h);x.lineTo(X,Y+h);x.lineTo(X,Y+c);x.closePath()}
+async function shareSlip(btn){
+ const kind=$("#slip").dataset.kind,Q=ppLegs(),L=mlLegs();
+ const rows=kind==="pp"?Q.map(q=>({a:q.r.pl,b:`${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`,c:gameTxt(q.r),p:q.p}))
+  :L.map(l=>({a:teamName(l.g[l.s]),b:`Moneyline ${fmtML(l.ml)}`,c:`${l.g.a.n} @ ${l.g.h.n}`,p:l.p}));
+ if(!rows.length)return;
+ const o=btn.textContent;btn.textContent="Making image…";
+ const n=rows.length,st=kind==="pp"?(+stakePP||0):(+stakeML||0);let head,mult,pay;
+ if(kind==="pp"){const ps=Q.map(q=>q.p),ep=evPower(ps),ef=evFlex(ps);let mode=ui.ppMode;if(!mode)mode=ep!=null&&(ef==null||ep>=ef)?"power":"flex";
+  const top=mode==="power"?(PAY.power[n]||0):(PAY.flex[n]?PAY.flex[n][0]:0);head=`${n}-pick ${mode==="power"?"Power":"Flex"} Play`;mult=top+"x";pay=st*top}
+ else{const D=L.reduce((a,l)=>a*dec(l.ml),1);head=n>1?`${n}-leg parlay`:"Moneyline";mult=n>1?amer(D):fmtML(L[0].ml);pay=st*D}
+ const css=getComputedStyle(document.documentElement),led=(css.getPropertyValue("--led").trim()||"#ffb420");
+ const W=1080,rowH=168,H=316+n*(rowH+18)+290,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+ try{await Promise.all([document.fonts.load('italic 900 80px Archivo'),document.fonts.load('700 40px Archivo'),document.fonts.load('500 30px Archivo')])}catch(e){}
+ const font=(f,stretch)=>{x.font=f+' Archivo, system-ui, sans-serif';try{x.fontStretch=stretch||"normal"}catch(e){}};
+ // night background with the sport's light
+ let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#0e192b");g.addColorStop(1,"#070d18");x.fillStyle=g;x.fillRect(0,0,W,H);
+ const rg=x.createRadialGradient(W*.22,120,0,W*.22,120,W*.75);rg.addColorStop(0,led+"55");rg.addColorStop(1,led+"00");x.fillStyle=rg;x.fillRect(0,0,W,H);
+ // name and play
+ font("italic 900 92px","condensed");x.fillStyle=led;x.shadowColor=led;x.shadowBlur=30;x.fillText(SITENAME.toUpperCase(),64,150);x.shadowBlur=0;
+ x.fillStyle="#f1f4fa";font("italic 900 62px","condensed");x.fillText(head,64,240);
+ x.fillStyle=led;x.beginPath();x.moveTo(64,268);x.lineTo(150,268);x.lineTo(144,280);x.lineTo(58,280);x.closePath();x.fill();
+ // picks
+ let y=316;for(const r of rows){cutPath(x,64,y,W-128,rowH,22);x.fillStyle="#17253d";x.fill();
+  x.fillStyle="#f1f4fa";font("800 46px","semi-condensed");x.fillText(r.a,100,y+62,W-420);
+  x.fillStyle=led;font("700 34px");x.fillText(r.b,100,y+108,W-420);
+  x.fillStyle="#8999b6";font("500 28px");x.fillText(r.c,100,y+146,W-420);
+  x.textAlign="right";x.fillStyle="#f1f4fa";font("italic 900 74px","condensed");x.fillText(pct(r.p),W-104,y+104);
+  x.fillStyle="#8999b6";font("600 24px");x.fillText("board's chance",W-104,y+140);x.textAlign="left";y+=rowH+18}
+ // money
+ const box=(bx,label,val)=>{cutPath(x,bx,y+10,300,150,18);x.fillStyle="#0e192b";x.fill();x.fillStyle="#8999b6";font("600 26px");x.fillText(label,bx+28,y+56);
+  x.fillStyle="#f1f4fa";font("italic 900 64px","condensed");x.fillText(val,bx+28,y+128)};
+ box(64,"Entry",money(st));box(390,"Pays",money(pay));box(716,"Odds",mult);
+ x.fillStyle="#56657f";font("500 22px");x.fillText("Chances are estimates, not guarantees. 21+ where legal. Gambling problem? Call 1-800-GAMBLER.",64,H-48,W-128);
+ const blob=await new Promise(r=>cv.toBlob(r,"image/png"));btn.textContent=o;if(!blob)return;
+ const file=new File([blob],`${SITENAME.toLowerCase()}-slip.png`,{type:"image/png"});
+ if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:`${SITENAME} slip`})}catch(e){}return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;document.body.appendChild(a);a.click();
+ setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000)}
+
+/* ---------- player pages: the player sheet, opened from any pick ---------- */
+function openPlayer(r){ckOpen("");const p=ckPeople().find(x=>x.rows.includes(r));if(!p){CK.q=r.pl;ckDraw();return}
+ ckSelect(p.key);CK.mk=r.mk;CK.ln=r.ln;ckDraw()}
+function openPlayerByName(name){ckOpen(name);const ex=ckFind(name).filter(x=>pnm(x.n)===pnm(name));if(ex.length===1)ckSelect(ex[0].key)}
+// his last games against the line, oldest on the left
+function ckChart(V,ln){const v=V.v.slice(0,10).reverse(),g=V.g?V.g.slice(0,10).reverse():null;if(v.length<2)return ckGames(V,ln);
+ const W=320,H=150,top=18,bot=34,n=v.length,step=(W-16)/n,bw=Math.min(24,step*.64),mx=Math.max(ln*1.5,...v,1),Y=q=>top+(H-top-bot)*(1-q/mx);
+ const bars=v.map((q,i)=>{const cx=8+step*i+step/2,y=Y(q),ov=q>ln;
+  const lab=g?(()=>{const d=String(g[i][0]);return `<text x="${cx.toFixed(1)}" y="${H-18}" class="cx">${g[i][2]?"vs ":"@"}${esc(g[i][1])}</text><text x="${cx.toFixed(1)}" y="${H-6}" class="cx dim">${+d.slice(4,6)}/${+d.slice(6)}</text>`})():"";
+  return `<rect x="${(cx-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2,H-bot-y).toFixed(1)}" class="${ov?"ov":"un"}"/><text x="${cx.toFixed(1)}" y="${(y-4).toFixed(1)}" class="cv">${q}</text>${lab}`}).join("");
+ return `<svg class="ckc" viewBox="0 0 ${W} ${H}" role="img" aria-label="His last ${n} games against the line ${ln}">${bars}<line x1="2" x2="${W-2}" y1="${Y(ln).toFixed(1)}" y2="${Y(ln).toFixed(1)}" class="lnl"/><text x="${W-2}" y="${(Y(ln)-5).toFixed(1)}" class="lnt">${ln}</text></svg>`}
+// splits, usage and the board's record on him
+function ckMore(p,mk){const out=[],V=ckVals(p,mk);
+ if(V.g&&V.v.length>=3){const f=h=>{const xs=V.v.filter((_,i)=>V.g[i][2]===h);return xs.length?{a:(xs.reduce((a,b)=>a+b,0)/xs.length).toFixed(1),n:xs.length}:null},Hm=f(1),Aw=f(0);
+  if(Hm&&Aw)out.push(`<div><span>Home / away average</span><b>${Hm.a} / ${Aw.a}</b><small>${Hm.n} home, ${Aw.n} away</small></div>`)}
+ if(PJ&&PJ.cols&&p.box){const has=k=>PJ.cols.includes(k),uk=has("min")?["min","Minutes"]:/rush/.test(mk)?["ra","Carries"]:/pass/.test(mk)?["pa","Pass attempts"]:/recep/.test(mk)?["rec","Catches"]:null;
+  if(uk){const i=PJ.cols.indexOf(uk[0]),xs=p.box.g.slice(0,5).map(gm=>gm[i]);if(xs.some(q=>q>0))out.push(`<div><span>${uk[1]}, last ${xs.length}</span><b>${xs.join(", ")}</b><small>newest first</small></div>`)}}
+ if(HIST){const mine=HIST.props.filter(x=>x.sp===p.sp&&pnm(x.pl)===p.nm&&(x.hit===true||x.hit===false));
+  if(mine.length){const w=mine.filter(x=>x.hit).length;out.push(`<div><span>Board's picks on him</span><b>${w}-${mine.length-w}</b><small>every stat, graded</small></div>`)}}
+ return out.length?`<div class="ckmore">${out.join("")}</div>`:""}
 
 function renderSportBar(){
  const live2=G.filter(live),n=sp=>live2.filter(g=>sp==="all"||g.sp===sp).length;
@@ -1158,6 +1276,7 @@ function renderSlip(){
   <div class="tot"><span>Stake $<input id="stakeML" type="number" inputmode="decimal" value="${st}" min="0"></span><b>Pays ${money(st*D)}</b></div>
   <div class="tot"><span>Chance all hit</span><b>${pct(Pp)} (${oneIn(Pp)})</b></div>
   <div class="tot"><span>Expected back</span><b>${money(st*Pp*D)} (${sgn(Pp*D-1)})</b></div>
+  ${limitNote()}<div class="rbtns"><button data-share>Share image</button></div>
   <div class="rbtns"><button data-clear="ml">Clear</button><button class="go" data-save="ml">Save ticket</button></div>`;
  }else{
   const n=Q.length,ps=Q.map(q=>q.p),all=ps.reduce((a,p)=>a*p,1),st=+stakePP||0;
@@ -1175,7 +1294,7 @@ function renderSlip(){
   ${n<2?'<div class="note">PrizePicks needs at least 2 picks from at least 2 different teams.</div>'
    :tt===false?`<div class="note bad" role="alert">Every pick is a ${esc(one?(one.ab||one.n):"same-team")} player. PrizePicks won't take a lineup from one team, so swap one for a player on another team.</div>`
    :tt===null?'<div class="note">Check these aren\'t all on the same team. PrizePicks needs at least 2 different teams.</div>':""}${same&&tt!==false?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}
-  <div class="rbtns"><button data-copyall>Copy picks</button></div>
+  ${limitNote()}<div class="rbtns"><button data-copyall>Copy picks</button><button data-share>Share image</button></div>
   <div class="note">Tap a name to copy it, then paste it into PrizePicks search.</div>
   <div class="rbtns"><button data-clear="pp">Clear</button><button class="go" data-save="pp" data-mode="${mode}" ${tt===false?"disabled":""}>Save ticket</button></div>`;
  }
@@ -1214,6 +1333,7 @@ function render(){
  renderSportBar();
  const v=$("#view");v.innerHTML=!DATA?skel():ui.tab==="games"?renderGames():ui.tab==="pp"?renderPP():ui.tab==="tix"?renderTix():ui.tab==="players"?renderPlayers():renderTop();
  renderSlip();
+ limitBar();
  document.body.style.paddingBottom=$("#slipin").innerHTML?"":"40px";
 }
 function stampText(){if(!DATA)return;const u=new Date(DATA.updated),age=(Date.now()-u)/36e5;
@@ -1231,6 +1351,8 @@ document.addEventListener("click",e=>{
  if(d.pick){const[id,s]=d.pick.split("|");if(sel[id]===s)delete sel[id];else sel[id]=s;ui.kind="ml";save();keep();return}
  if(d.pp){const[i,s]=d.pp.split("|"),r=P[+i];if(!r)return;if(pps[r.k]===s)delete pps[r.k];else pps[r.k]=s;ui.kind="pp";save();keep();if(CK)ckVerdictDraw();return}
  if(d.check!==undefined){ckOpen(d.check);return}
+ if(d.player!==undefined){const r=P[+d.player];if(r)openPlayer(r);return}
+ if(d.plpage!==undefined){openPlayerByName(d.plpage);return}
  if(CK&&t.closest("#check")){
   if(d.ckpick!==undefined){ckSelect(d.ckpick);return}
   if(d.ckmk){CK.mk=d.ckmk;CK.ln=ckDefLine(CK.p,CK.mk);ckDraw();return}
@@ -1246,19 +1368,22 @@ document.addEventListener("click",e=>{
  if(d.stat){ui.stat=d.stat;ui.limit=60;keep();return}
  if(d.pponly!==undefined){ui.ppOnly=!ui.ppOnly;keep();return}
  if(d.agreeonly!==undefined){ui.agreeOnly=!ui.agreeOnly;ui.limit=60;keep();return}
+ if(d.gaponly!==undefined){ui.gapOnly=!ui.gapOnly;ui.limit=60;keep();return}
  if(d.moreprops!==undefined){ui.limit+=60;keep();return}
  if(d.slip!==undefined){ui.slipOpen=!ui.slipOpen;renderSlip();return}
  if(d.copyname!==undefined){copyText(d.copyname,t);return}
+ if(d.share!==undefined){shareSlip(t);return}
+ if(d.limitsave!==undefined){const v=parseFloat($("#limitamt").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(e){}keep();return}
  if(d.copyall!==undefined){copyText(ppLegs().map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`).join("\n"),t);return}
  if(d.ppmode){ui.ppMode=d.ppmode;renderSlip();return}
  if(d.clear){if(d.clear==="ml")sel={};else pps={};ui.ppMode=null;save();keep();return}
  if(d.save){
   if(d.save==="ml"){const L=mlLegs();if(!L.length)return;const D=L.reduce((a,l)=>a*dec(l.ml),1),st=+stakeML||0;
    const pa=L.reduce((a,l)=>a*l.p,1);
-   tickets.unshift({kind:"ml",legs:L.map(l=>teamName(l.g[l.s])+" "+fmtML(l.ml)),lg:L.map(l=>({a:l.g.a.n,h:l.g.h.n,s:l.s,k:l.g.kick})),odds:L.length>1?amer(D):fmtML(L[0].ml),stake:st,pay:(st*D).toFixed(2),p:pa,pw:pa});sel={}}
+   tickets.unshift({kind:"ml",at:Date.now(),legs:L.map(l=>teamName(l.g[l.s])+" "+fmtML(l.ml)),lg:L.map(l=>({a:l.g.a.n,h:l.g.h.n,s:l.s,k:l.g.kick})),odds:L.length>1?amer(D):fmtML(L[0].ml),stake:st,pay:(st*D).toFixed(2),p:pa,pw:pa});sel={}}
   else{const Q=ppLegs();const n=Q.length;if(n<2||twoTeams(Q.map(q=>q.r))===false)return;/* PrizePicks won't take a one-team lineup */const mode=d.mode,st=+stakePP||0,top=mode==="power"?PAY.power[n]:PAY.flex[n][0];
    const ps=Q.map(q=>q.p),pa=ps.reduce((a,v)=>a*v,1);
-   tickets.unshift({kind:"pp",mode:mode==="power"?"Power":"Flex",legs:Q.map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`),lg:Q.map(q=>({pl:q.r.pl,mk:q.r.mk,ln:q.r.ln,side:q.s,k:GI[q.r.g]&&GI[q.r.g].kick})),
+   tickets.unshift({kind:"pp",at:Date.now(),mode:mode==="power"?"Power":"Flex",legs:Q.map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`),lg:Q.map(q=>({pl:q.r.pl,mk:q.r.mk,ln:q.r.ln,side:q.s,k:GI[q.r.g]&&GI[q.r.g].kick})),
     odds:top+"x",stake:st,pay:(st*top).toFixed(2),p:pa,pw:mode==="power"?pa:profit(ps,"flex"),...(mode==="power"?{}:{pt:PAY.flex[n].slice()})});pps={}}
   LS.set("bl_tickets",tickets);save();ui.slipOpen=false;ui.ppMode=null;keep();return}
  if(d.scanml!==undefined){ui.ml.K=+$("#mlK").value;ui.ml.min=clamp(parseFloat($("#mlMin").value)||0,0,99);ui.ml.by=$("#mlBy").value;
@@ -1346,6 +1471,6 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
-<script src="../fx.js?v=2"></script>
+<script src="../fx.js?v=3"></script>
 </body>
 </html>

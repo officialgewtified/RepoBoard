@@ -67,7 +67,7 @@ h2::before{content:"";flex:none;width:12px;height:22px;background:var(--led);cli
 .net a{display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 4px;background:var(--panel);clip-path:var(--para);
  color:var(--mute);text-decoration:none;font-weight:700;font-stretch:88%;font-size:13.5px;-webkit-tap-highlight-color:transparent;
  transition:transform .38s var(--spring),background-color .18s,color .18s}
-.net a:active{transform:scale(.95);transition-duration:.06s}
+.net a.fx-press{transform:scale(.95);transition-duration:.06s}
 .net a.on{background:var(--raise);color:var(--ink);box-shadow:inset 0 -3px 0 var(--led)}
 .net a i{width:17px;height:17px;flex:none;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
 .net a.on i{background:var(--led)}
@@ -77,7 +77,7 @@ h2::before{content:"";flex:none;width:12px;height:22px;background:var(--led);cli
 .stamp a.iconbtn,#sportbar a.pill[href*="crossover"]{display:none}
 
 /* ---------- the filter row stays at the top; the tabs live in an app bar at the bottom ---------- */
-.tabs{box-shadow:0 14px 18px -14px rgba(0,0,0,.7);background:color-mix(in srgb,var(--bg) 94%,transparent);padding-bottom:8px;
+.tabs{position:static;box-shadow:none;background:transparent;padding-bottom:8px;
  backdrop-filter:none;-webkit-backdrop-filter:none}   /* a blur here would trap the bottom bar inside this row */
 .tabs .filters{margin-top:0}
 .seg{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);gap:0;
@@ -88,7 +88,7 @@ h2::before{content:"";flex:none;width:12px;height:22px;background:var(--led);cli
  font-size:11px;font-weight:650;font-stretch:90%;letter-spacing:0;color:var(--mute)}
 .seg button::before{content:"";width:24px;height:24px;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
 .seg button.on{color:var(--led);background:transparent;box-shadow:none}
-.seg button:active{transform:scale(.88)}
+.seg button.fx-press{transform:scale(.88)}
 .seg .fx-ind{position:absolute;z-index:0;top:0!important;height:3px!important;background:var(--led);box-shadow:0 0 14px var(--led);pointer-events:none;
  transform:scaleX(.42);transition:left .45s var(--spring),width .45s var(--spring)}
 .seg.fx-has-ind button{position:relative;z-index:1}
@@ -128,6 +128,8 @@ body:has(.seg):has(#slipin:empty){padding-bottom:calc(86px + env(safe-area-inset
 /* the big record and hero numbers glow like a scoreboard */
 .hero .ev,.rchd b{font-size:50px;font-weight:900;text-shadow:0 0 26px currentColor}
 .rchd b.red,.hero .ev.neg{text-shadow:none}
+.rchd b{white-space:nowrap}
+.bank .rchd b{font-size:40px}
 .hero h3{font-size:24px;font-weight:900}
 .rchd{font-weight:750;font-stretch:92%}
 
@@ -200,12 +202,12 @@ body:has(.seg):has(#slipin:empty){padding-bottom:calc(86px + env(safe-area-inset
 /* ---------- everything you can tap presses in and springs back ---------- */
 button,.pill,a.iconbtn,.askbar,.checks label{-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none;
  transition:transform .38s var(--spring),background-color .18s ease,color .18s ease,box-shadow .18s ease}
-:is(button,.pill,a.iconbtn,.checks label):active{transform:scale(.94);transition-duration:.06s}
-:is(.team,.row,.askbar,.ckrow,.phd,.sbar,.btn.wide):active{transform:scale(.975)}
-.side-b:active{transform:scale(.9)}
+:is(button,.pill,a.iconbtn,.checks label).fx-press{transform:scale(.94);transition-duration:.06s}
+:is(.team,.row,.askbar,.ckrow,.phd,.sbar,.btn.wide).fx-press{transform:scale(.975)}
+.side-b.fx-press{transform:scale(.9)}
 .prop{transition:transform .38s var(--spring)}
-.prop:has(> .who:active){transform:scale(.985)}
-.who:active{transform:none}
+.prop:has(> .who.fx-press){transform:scale(.985)}
+.who.fx-press{transform:none}
 button:disabled{transform:none!important}
 @media (hover:hover){.pill:hover,.seg button:hover,.side-b:hover,.team:hover,.row:hover,.btn:hover{filter:brightness(1.12)}}
 
@@ -273,6 +275,40 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
  background-size:250% 100%;animation:fxSk 1.3s linear infinite}
 .fx-sk.big{height:160px;margin-top:18px}
 @keyframes fxSk{from{background-position:120% 0}to{background-position:-130% 0}}
+
+/* ---------- line gaps ---------- */
+.mchip.gap{background:color-mix(in srgb,var(--led) 18%,var(--raise));color:var(--led);font-weight:700}
+
+/* ---------- bankroll ---------- */
+.bank{padding:12px 14px;margin-top:14px}
+.plc{display:block;width:100%;height:auto;margin:10px 0 4px}
+.limit{margin-top:6px}
+.lrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px;color:var(--mute)}
+.lrow b{color:var(--ink);font-weight:750}
+.lbar{height:8px;margin-top:7px;background:var(--raise);clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)}
+.lbar i{display:block;height:100%;background:var(--go);transition:width .6s var(--out)}
+.lbar i.over{background:var(--stop)}
+.lset{display:flex;align-items:flex-end;gap:8px;margin-top:10px}
+.lset label{flex:1;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mute);font-weight:600}
+.lset input{width:100%;border:0;background:var(--raise);clip-path:var(--tile);box-shadow:inset 0 -2px 0 var(--line);padding:9px 10px;font-size:16px;font-weight:700}
+.lset .sm{padding:10px 14px}
+
+/* ---------- player pages ---------- */
+.pdet .sm,.plog .sm{margin-top:10px}
+.plog .sm{width:100%}
+.ckc{display:block;width:100%;height:auto;margin-top:8px}
+.ckc rect.ov{fill:var(--go)}
+.ckc rect.un{fill:var(--mute);opacity:.45}
+.ckc .cv{font:700 11px var(--fd);fill:var(--ink);text-anchor:middle}
+.ckc .cx{font:600 9px var(--fd);fill:var(--mute);text-anchor:middle}
+.ckc .dim{opacity:.7}
+.ckc .lnl{stroke:var(--led);stroke-width:1.5;stroke-dasharray:5 4}
+.ckc .lnt{font:800 11px var(--fd);fill:var(--led);text-anchor:end}
+.ckmore{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px}
+.ckmore div{background:var(--raise);clip-path:var(--tile);padding:9px 11px;display:flex;flex-direction:column;gap:2px}
+.ckmore span{font-size:12px;color:var(--mute);font-weight:600}
+.ckmore b{font:italic 900 22px/1.1 var(--fd);font-stretch:68%}
+.ckmore small{font-size:11.5px;color:var(--mute)}
 
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
