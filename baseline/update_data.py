@@ -411,10 +411,10 @@ def prop_budget(s):
     rem = CRED["remaining"]
     if rem is None:
         return 0, 0
-    reserve = float(s["credit_reserve"])
-    today = NOW.astimezone(ET).date()
-    nxt = (today.replace(day=28) + dt.timedelta(days=4)).replace(day=1)
+    today = NOW.date()
+    nxt = (today.replace(day=28) + dt.timedelta(days=4)).replace(day=1)   # credits reset on the 1st
     days_left = max(1, (nxt - today).days)
+    reserve = min(float(s["credit_reserve"]), 5.0 + 2.0 * days_left)     # shrinks near the end so nothing is wasted
     runs = max(1, len(s["schedule"]))
     cfg = s.get("daily_credits", "auto")
     if cfg == "auto":

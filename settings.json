@@ -1,5 +1,5 @@
 {
- "_help": "Board settings. prop_markets: which player stats to pull (each costs 1 Odds API credit per game). weekly_credits: 'auto' gives every football week (Tue-Mon) the same share of your monthly credits ((quota - reserve) x 7/31), or set a number; game lines (2 credits per update) come out of it first and props get the rest. Unused credits roll from weekday updates to the weekend. prop_credits_per_run: optional cap per update. credit_reserve: credits always kept so game lines never stop. schedule must match .github/workflows/update.yml (UTC; weekday 0=Mon; weight = share of the week's prop credits).",
+ "_help": "Board settings. prop_markets: which player stats to pull (each costs 1 Odds API credit per game). Credits reset on the 1st of every month, so the board spreads what's left evenly over every update still to come this month, by weight (a Sunday update gets 4 times a weekday one); anything an update doesn't use stays for later. prop_credits_per_run: optional cap per update. credit_reserve: safety credits kept so game lines never stop (it shrinks near the end of the month). schedule must match .github/workflows/update.yml (UTC; weekday 0=Mon; weight = share of the credits).",
  "prop_markets": [
   "player_pass_yds",
   "player_rush_yds",
@@ -7,7 +7,6 @@
   "player_receptions",
   "player_rush_reception_yds"
  ],
- "weekly_credits": "auto",
  "prop_credits_per_run": "auto",
  "credit_reserve": 40,
  "props_refresh_hours": 10,
@@ -39,7 +38,7 @@
   [
    6,
    5,
-   3
+   4
   ]
  ]
 }

@@ -19,11 +19,11 @@ NFL and college football moneylines from every sportsbook in the feed, PrizePick
 - **Settings:** theme, which sportsbooks you can use, and PrizePicks payouts (edit them if your state's are different).
 
 ## Odds API credits
-- Games update 5 times every week (Tue, Thu, Fri, Sat, Sun). Game lines cost 2 credits per update, and a reserve is always kept so they never stop.
-- Player props cost 1 credit per stat per game. The default 5 stats (pass, rush, receiving yards, receptions, rush + rec yards) cost 5 credits per game. A stat a game has no lines for doesn't cost anything.
-- Every football week (Tuesday to Monday) gets the same share of your monthly credits: about 104 on the free plan (500 a month, minus the reserve). Game lines come out of that first and props get the rest, about 94 a week. Manual runs count against the same weekly amount.
-- Within a week, weekday updates use a little and anything left rolls to Saturday (college) and Sunday (NFL). That's roughly 8 to 12 games of props each weekend on the free plan, NFL and ranked college teams first.
-- Because each week has a fixed allowance, props keep coming every week no matter what day your credits reset. A paid plan raises the allowance automatically.
+- Credits reset on the 1st of every month. Each update spreads what's left evenly over every update still to come that month, so nothing runs out early and almost nothing is wasted at the reset.
+- Updates are weighted by how big the slate is: Sunday (NFL plus Monday night) gets 4 shares, Saturday (college) 3, and Tue, Thu and Fri 1 each. Anything an update doesn't use stays in the pot for later in the month.
+- Game lines cost 2 credits per update and are always held back first. A small safety reserve is kept too, and it shrinks near the end of the month.
+- Player props cost 1 credit per stat per game. The default 5 stats cost 5 credits per game; fewer stats means more games get props.
+- On the free plan that's about 7 to 10 NFL games of props each Sunday and 5 to 7 college games each Saturday. A paid plan raises it automatically.
 - Props are pulled for games that start before the next update, so each game is only paid for once.
 - Change any of this in `settings.json`.
 

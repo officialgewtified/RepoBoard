@@ -29,12 +29,11 @@ PROP_BOOKS = ["prizepicks", "draftkings", "fanduel", "betmgm", "betrivers", "esp
 DEFAULTS = {
     "days_ahead": {"NFL": 8, "CFB": 6},
     "prop_markets": ["player_pass_yds", "player_rush_yds", "player_reception_yds", "player_receptions"],
-    "weekly_credits": "auto",            # "auto" = monthly quota x 7/30.4, or a number
     "prop_credits_per_run": "auto",      # optional cap per run
     "credit_reserve": 40,                # never spend below this (keeps game lines running)
     "props_refresh_hours": 10,           # reuse props fetched more recently than this
     # Scheduled runs in UTC: [weekday (Mon=0), hour, weight]. Keep in sync with .github/workflows/update.yml
-    "schedule": [[1, 5, 1], [3, 5, 1], [4, 5, 1], [5, 5, 3], [6, 5, 3]],
+    "schedule": [[1, 5, 1], [3, 5, 1], [4, 5, 1], [5, 5, 3], [6, 5, 4]],
 }
 
 MARKET_LABEL = {
@@ -477,43 +476,44 @@ def week_start(t):
     d = t.date()
     return d - dt.timedelta(days=(d.weekday() - 1) % 7)
 
-def prop_budget(s, ledger, lines_spent):
-    """Credits this run may spend on props.
+def month_end(t):
+    """First day of next month (UTC). The Odds API resets credits on the 1st of every month."""
+    d = t.date()
+    return (d.replace(day=28) + dt.timedelta(days=4)).replace(day=1)
 
-    Every football week (Tue-Mon) gets the same allowance: (monthly quota - reserve) x 7/31,
-    so even a 31-day month never touches the reserve. Everything spent in the week (game lines, props, manual runs)
-    is counted against it, credits are held back for the game-line updates still to come that
-    week, and the rest is split by run weight; anything a run doesn't use rolls to the next one.
+def prop_budget(s):
+    """Credits this run may spend on props, spread evenly through the end of the month.
+
+    Credits reset on the 1st, so whatever is left now (minus the game-line updates still to come this
+    month and a small safety reserve) is shared among every scheduled run left this month by weight:
+    a big-slate run (Saturday, Sunday) gets more than a weekday one. Anything a run doesn't use stays
+    in the pot for the rest of the month, and the reserve shrinks near the end so nothing is wasted.
     """
-    rem, used = CRED["remaining"], CRED["used"] or 0.0
+    rem = CRED["remaining"]
     if rem is None:
-        return 0, 0.0, 0.0
+        return 0, 0.0, 0
     sched = s["schedule"]
-    cfg_week = s.get("weekly_credits", "auto")
-    reserve = float(s["credit_reserve"])
-    week_total = max(0.0, rem + used - reserve) * 7 / 31 if cfg_week == "auto" else float(cfg_week)
-    wk = str(week_start(NOW))
-    spent = (float(ledger.get("spent", 0)) if ledger.get("week") == wk else 0.0) + lines_spent
-
     def run_time(d, hr):
         return dt.datetime(d.year, d.month, d.day, hr, tzinfo=dt.timezone.utc)
     # This run's weight: the scheduled run it belongs to (within 3 hours), else 1 for a manual run.
     w_now = next((wt for wd, hr, wt in sched if NOW.weekday() == wd
                   and abs((NOW - run_time(NOW.date(), hr)).total_seconds()) < 3 * 3600), 1)
     w_rest, runs_left = w_now, 0
-    end = week_start(NOW) + dt.timedelta(days=7)
+    end = month_end(NOW)
     d = NOW.date()
     while d < end:
         for wd, hr, wt in sched:
             if d.weekday() == wd and run_time(d, hr) > NOW + dt.timedelta(hours=3):
                 w_rest += wt; runs_left += 1
         d += dt.timedelta(days=1)
-    left = max(0.0, week_total - spent - 2.0 * runs_left)
-    allot = left * w_now / w_rest
-    cap = max(0.0, rem - reserve)
+    days_left = (end - NOW.date()).days
+    reserve = min(float(s["credit_reserve"]), 5.0 + 2.0 * days_left)
+    pot = max(0.0, rem - reserve - 2.0 * runs_left)
+    budget = pot * w_now / w_rest
     cfg_run = s.get("prop_credits_per_run", "auto")
-    budget = min(allot, cap, float(cfg_run) if isinstance(cfg_run, (int, float)) else allot)
-    return int(budget), week_total, spent
+    if isinstance(cfg_run, (int, float)):
+        budget = min(budget, float(cfg_run))
+    return int(budget), pot, runs_left
 
 def window_end(s):
     """Fetch props for games that start before the next scheduled run (+1h), so no game is fetched twice."""
@@ -533,11 +533,10 @@ def build_props(s, events):
     for r in prev.get("props", []):
         prev_by.setdefault(r.get("g"), []).append(r)
     markets = [m for m in s["prop_markets"] if m in MARKET_LABEL]
-    ledger = prev.get("ledger", {})
-    budget, week_total, spent_week = prop_budget(s, ledger, CRED["spent"])
+    budget, pot, runs_left = prop_budget(s)
     end = window_end(s)
-    print(f"prop budget this run: {budget} credits (weekly allowance {week_total:.0f}, "
-          f"used this week incl. this run's game lines {spent_week:.0f}); window until {iso(end)}; remaining {CRED['remaining']}")
+    print(f"prop budget this run: {budget} credits (pot for the rest of the month {pot:.0f}, "
+          f"{runs_left} more runs this month); window until {iso(end)}; remaining {CRED['remaining']}")
     start_spent = CRED["spent"]
 
     def prio(item):
@@ -601,8 +600,7 @@ def build_props(s, events):
             r.setdefault("op", r["ln"]); r.setdefault("obm", r["bm"])
     print(f"props: fetched {fetched} games this run, {len(rows)} prop lines total, "
           f"{sum(1 for r in rows if r['pp'])} with PrizePicks lines")
-    new_ledger = {"week": str(week_start(NOW)), "spent": round(spent_week + CRED["spent"] - start_spent, 1),
-                  "allowance": round(week_total, 1)}
+    new_ledger = {"month": NOW.strftime("%Y-%m"), "budget": budget, "pot": round(pot, 1), "runs_left": runs_left}
     return rows, budget, new_ledger
 
 
@@ -1145,8 +1143,6 @@ def main():
         attach_form(props, {g["id"]: g for g in games}, inj)
     else:
         props, budget, ledger = [], 0, load_json("data.json", {}).get("ledger", {})
-        if ledger.get("week") == str(week_start(NOW)):
-            ledger["spent"] = round(float(ledger.get("spent", 0)) + CRED["spent"], 1)
     teams = build_team_stats(games) if games else {}
     try:
         record = update_history(games, props, teams) if games else None

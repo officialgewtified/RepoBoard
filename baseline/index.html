@@ -1202,7 +1202,7 @@ function renderSettings(){
  <p><b>PrizePicks:</b> sportsbook over/under prices on the same player stat are de-vigged and adjusted to the exact PrizePicks line, then combined across books. His last 10 games against that line and the opposing defense's numbers in that stat then nudge the chance, and picks where they point against the books are flagged as mixed signals.</p>
  <p><b>Matchups:</b> every team's points, rebounds, assists and threes, made and allowed, plus pace, come from its box scores and are ranked against the whole league. Game details show each offense against the other defense and call out the edges. A pick needs to land about ${pct(BE.lo)} to ${pct(BE.hi)} of the time to beat PrizePicks payouts.</p>
  <p><b>Scanners:</b> every combination of the strongest picks is scored by expected return, treating each pick as independent.</p></div>
- ${c&&c.remaining!=null?`<h4>Odds API credits</h4><p>${Math.round(c.remaining)} left this month. The last update used ${Math.round(c.spent)}.</p>`:""}
+ ${c&&c.remaining!=null?`<h4>Odds API credits</h4><p>${Math.round(c.remaining)} left this month. The last update used ${Math.round(c.spent)}. Credits reset on the 1st, so the board spreads what's left evenly over every update until then, with bigger game days getting a bigger share.</p>`:""}
  <div class="btns"><button class="btn go" data-closesettings>Done</button></div>`}
 
 /* ---------- main render ---------- */
