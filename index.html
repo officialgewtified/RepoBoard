@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d1626">
-<title>Signal</title>
+<title>Gridline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-title" content="Signal">
+<meta name="apple-mobile-web-app-title" content="Gridline">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -44,7 +44,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .brand{display:flex;flex-direction:column;align-items:center;gap:12px}
 .mark{font:900 36px/0.9 "Big Shoulders Display",Impact,sans-serif;letter-spacing:1px;margin:0;text-transform:uppercase}
 .mark{display:flex;align-items:flex-end;justify-content:center;gap:10px}
-.mark .bars{width:44px;height:38px;flex:none;margin-bottom:0;color:var(--ink)}
+.mark .bars{width:52px;height:40px;flex:none;margin-bottom:0;color:var(--ink);overflow:visible}
 .stamp{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--mute);text-align:left;line-height:1.3}
 .stamp b{color:var(--ink);font-weight:600}
 .iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 10px;font-size:13px;font-weight:600}
@@ -113,6 +113,21 @@ select.sel{border:1px solid var(--line);background:var(--panel);border-radius:10
 .tier.t2{background:color-mix(in srgb,var(--led) 20%,transparent);color:var(--led)}
 .tier.t1{background:var(--raise);color:var(--mute)}
 .tier.mix{background:color-mix(in srgb,var(--stop) 20%,transparent);color:var(--stop)}
+.tier .trec{font-weight:600;opacity:.8;margin-left:3px}
+/* the board's real record */
+.rcard{padding:12px 14px;margin-top:14px}
+.rchd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;font-weight:700;font-size:15px}
+.rchd small{display:block;font-weight:500;font-size:12px;color:var(--mute);margin-top:2px}
+.rchd b{font:900 36px/0.9 "Big Shoulders Display",Impact,sans-serif}
+.rcard .stats{margin:10px 0 8px}
+.lede b{color:var(--ink)}
+/* players hitting every week */
+.plnow{border-top:1px solid var(--line);padding:6px 12px 8px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.plnow div{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.plnow .k{display:block;color:var(--mute);font-size:12px}
+.plnow .sm.on{background:var(--led);color:var(--ledink);border-color:var(--led)}
+.honest{padding:10px 12px;font-size:13px;color:var(--mute);margin-top:10px}
+.honest b{color:var(--ink)}
 .form{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;line-height:1.25;color:var(--mute)}
 .form svg{flex:none}
 .mchip{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;border-radius:7px;padding:2px 7px;line-height:1.3}
@@ -327,14 +342,32 @@ footer.fine{padding:24px 0 8px;font-size:12px;color:var(--mute);line-height:1.5}
 /* opened from the home screen: keep the status bar readable on the light theme */
 @media (display-mode:standalone){:root[data-theme="clean"] body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#0f1b2d;z-index:50}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* footballs in the background */
+body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22%3E%3Cg transform=%22translate(52 58) rotate(-28) scale(1.2)%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(186 150) rotate(24) scale(1.0)%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(96 214) rotate(-60) scale(0.85)%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cpath d=%22M0 120H240%22 stroke=%22rgba(255,255,255,0.085)%22 stroke-width=%221.2%22 stroke-dasharray=%226 10%22/%3E%3C/svg%3E");background-attachment:fixed}
+:root[data-theme="clean"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22%3E%3Cg transform=%22translate(52 58) rotate(-28) scale(1.2)%22 fill=%22none%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(186 150) rotate(24) scale(1.0)%22 fill=%22none%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cg transform=%22translate(96 214) rotate(-60) scale(0.85)%22 fill=%22none%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%222.2%22%3E%3Cpath d=%22M-26 0C-19-7-11-14 0-14C11-14 19-7 26 0C19 7 11 14 0 14C-11 14-19 7-26 0Z%22/%3E%3Cpath d=%22M-9 0H9M-6-3.5V3.5M-2-3.5V3.5M2-3.5V3.5M6-3.5V3.5%22 stroke-width=%221.8%22/%3E%3C/g%3E%3Cpath d=%22M0 120H240%22 stroke=%22rgba(15,27,45,0.08)%22 stroke-width=%221.2%22 stroke-dasharray=%226 10%22/%3E%3C/svg%3E")}
+.tabs{background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+
 @media (min-width:760px){.mark{font-size:52px}}
 </style>
 </head>
 <body>
 <header class="wrap top">
  <div class="brand">
-  <h1 class="mark"><svg class="bars" viewBox="-4 -4 48 42" aria-hidden="true"><defs><linearGradient id="mkg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB21E"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><filter id="mkf" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter></defs><g filter="url(#mkf)" opacity=".75" fill="#FF8A00"><rect x="11" y="14" width="7" height="20" rx="3.5"/><rect x="22" y="7" width="7" height="27" rx="3.5"/><rect x="33" y="0" width="7" height="34" rx="3.5"/></g><rect x="0" y="22" width="7" height="12" rx="3.5" fill="currentColor" opacity=".22"/><rect x="11" y="14" width="7" height="20" rx="3.5" fill="url(#mkg)"/><rect x="22" y="7" width="7" height="27" rx="3.5" fill="url(#mkg)"/><rect x="33" y="0" width="7" height="34" rx="3.5" fill="url(#mkg)"/></svg>Signal</h1>
-  <div class="stamp"><div id="stamp">Loading lines…</div><button class="iconbtn" id="openSettings">Settings</button></div>
+  <h1 class="mark"><svg class="bars" viewBox="-200 -150 400 300" aria-hidden="true"><defs><linearGradient id="bf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB21E"/><stop offset="1" stop-color="#FF6A00"/></linearGradient>
+ <filter id="gf" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter>
+ <clipPath id="cf"><path d="M -160 0 C -115 -34, -70 -88, 0 -88 C 70 -88, 115 -34, 160 0 C 115 34, 70 88, 0 88 C -70 88, -115 34, -160 0 Z"/></clipPath></defs><g transform="scale(1) rotate(-32)">
+ <path d="M -160 0 C -115 -34, -70 -88, 0 -88 C 70 -88, 115 -34, 160 0 C 115 34, 70 88, 0 88 C -70 88, -115 34, -160 0 Z" fill="#FF8A00" opacity=".7" filter="url(#gf)"/>
+ 
+ <path d="M -160 0 C -115 -34, -70 -88, 0 -88 C 70 -88, 115 -34, 160 0 C 115 34, 70 88, 0 88 C -70 88, -115 34, -160 0 Z" fill="url(#bf)" stroke="url(#bf)" stroke-width="10" stroke-linejoin="round"/>
+ <g clip-path="url(#cf)">
+  <rect x="-110" y="-90" width="12" height="180" fill="#3b1500" opacity=".85"/>
+  <rect x="98" y="-90" width="12" height="180" fill="#3b1500" opacity=".85"/>
+  <ellipse cx="-30" cy="-50" rx="90" ry="20" fill="#ffffff" opacity=".18"/>
+ </g>
+ <rect x="-58" y="-4" width="116" height="8" rx="4" fill="#3b1500"/>
+ <rect x="-47" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="-26" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="-5" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="16" y="-23" width="10" height="46" rx="5" fill="#3b1500"/><rect x="37" y="-23" width="10" height="46" rx="5" fill="#3b1500"/>
+</g></svg>Gridline</h1>
+  <div class="stamp"><div id="stamp">Loading lines…</div><span style="display:flex;gap:6px"><a class="iconbtn" href="hoops/" style="text-decoration:none;color:inherit">Basketball</a><button class="iconbtn" id="openSettings">Settings</button></span></div>
   <button class="askbar" data-check=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Check any player's pick</button>
  </div>
  <div id="banner"></div>
@@ -387,7 +420,7 @@ let pps=LS.get("pb_pps",{});      // propKey -> "o"|"u"
 let tickets=LS.get("pb_tickets",[]);
 const ui={popen:{},tab:LS.get("pb_tab","top"),sport:LS.get("pb_sport","all"),day:"all",gsort:"time",q:"",pq:"",stat:"all",psort:"p",ppOnly:true,open:{},slipOpen:false,kind:"ml",ppMode:null,limit:60,
  ml:{K:3,min:35,by:"value",res:null},pp:{size:"auto",mode:"best",per:1,goal:"ev",res:null},
- plMine:LS.get("pb_plmine",false),plq:"",plsort:"last",plopen:{},plLimit:40};
+ plMine:LS.get("pb_plmine",false),plWeekly:LS.get("pb_plweekly",false),plq:"",plsort:"last",plopen:{},plLimit:40};
 let stakeML=LS.get("pb_stake",2),stakePP=LS.get("pb_ppstake",5);
 
 const bname=k=>{const t=DATA&&DATA.books&&DATA.books[k];return ((t&&t!==k?t:null)||BOOKNAME[k]||k).replace(/\.ag$/,"")};
@@ -627,7 +660,9 @@ function propRow(r){
  const g=GI[r.g],{side,p}=propSide(r),[tc,tl]=tier(p),cur=pps[r.k],open=ui.popen[r.k];
  const lineTxt=Number.isInteger(r.ln)?r.ln:r.ln.toFixed(1);
  const btn=s=>{const q=pFinal(r),pp=s==="o"?q:1-q;return `<button class="side-b ${side===s?"rec":""} ${cur===s?"on":""}" data-pp="${r.i}|${s}" aria-pressed="${cur===s}"><small>${s==="o"?"More":"Less"}</small><b>${pct(pp)}</b><span class="ln">${lineTxt}</span></button>`};
- return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?'<span class="tier mix">Mixed signals</span>':`<span class="tier ${tc}">${tl}</span>`}${agree(r)?'<span class="tier t3">All signals agree</span>':""}</b>
+ // each label carries its real record (hits-misses on PrizePicks lines); it only gets its color once results back it up
+ const tk=RKEY[tc];
+ return `<div class="card prop"><button class="who" data-pinfo="${r.i}" aria-expanded="${!!open}"><b>${esc(r.pl)}${mixed(r)?`<span class="tier mix">Mixed signals${recSpan("mixed")}</span>`:`<span class="tier ${tc==="t1"||earns(tk)?tc:"t1"}">${tl}${recSpan(tk)}</span>`}${agree(r)?`<span class="tier ${earns("agree")?"t3":"t1"}">All agree${recSpan("agree")}</span>`:""}</b>
   <span class="m"><span class="stat-name">${esc(MK[r.mk]||r.mk)}</span><span>${r.nb} book${r.nb===1?"":"s"}</span><span>${esc(gameTxt(r))}</span><span>${esc(when(g))}</span>${r.pp?"":'<span class="ppmark">Book line</span>'}</span>${formStrip(r)}${matchChip(r)} ${extraChips(r)}</button>
   <div class="sides">${btn("o")}${btn("u")}</div>
   ${open?`<div class="pdet">${r.pp?`PrizePicks line ${lineTxt}.`:`No PrizePicks line in the feed; ${lineTxt} is the middle sportsbook line.`} Books put More at ${pct(r.lo)} to ${pct(r.hi)} on this line${r.rf&&FORMK[formW]?`; with his last ${formN(r)} games counted it's ${pct(pOver(r))}`:""}${matchup(r)&&MATCHW[matchW]?`; after the matchup it's ${pct(pFinal(r))}`:""}.${mixed(r)?" The books and his recent games point opposite ways, so the scanners skip this pick.":""}${r.rf?`<br>Recent games, newest first: ${r.rf.v.join(", ")}. Median ${r.rf.med??"-"}.`:""}${r.rf&&r.rf.ha?`<br>Home ${r.rf.ha[0]} avg (${r.rf.ha[1]} games), away ${r.rf.ha[2]} avg (${r.rf.ha[3]}). This game he's ${r.sd==="h"?"home":"away"}.`:""}${r.rf&&r.rf.us?`<br>${esc(r.rf.ul)}, last ${r.rf.us.length} games: ${r.rf.us.join(", ")}.`:""}${r.sd&&GI[r.g][r.sd].imp!=null?`<br>His team is expected to score ${GI[r.g][r.sd].imp} points.`:""}${r.tmo?`<br>Teammates out: ${esc(r.tmo.join(", "))}.`:""}${r.obm!=null&&r.bm!=null&&r.obm!==r.bm?`<br>Book line moved ${r.obm} \u2192 ${r.bm} since it was first pulled.`:""}
@@ -658,12 +693,15 @@ function renderTop(){
  const ag=spread(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&agree(r)&&(!T.onlyPP||r.pp)).sort((a,b)=>propSide(b).p-propSide(a).p),2,8,r=>r.g);   // at most 2 per game while other games have picks
  const pg=[...new Set(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!T.onlyPP||r.pp)).map(r=>r.g))];
  const oneGame=pg.length===1?`<div class="card empty" style="margin-top:8px">Only ${esc(GI[pg[0]].a.n)} @ ${esc(GI[pg[0]].h.n)} has player props right now, so every pick comes from that game. Props for later games are pulled in the update before they kick off.</div>`:"";
- h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag. These are the board's most solid picks, but solid isn't certain: check the Track record on the Tickets tab to see how often they really hit.</p>`;
+ h+=recCard();
+ const RA=rec()&&rec().agree,be2=bePower(2);
+ h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag.${RA&&RA.n?` So far these have gone <b>${wl(RA)}</b> (${pct(RA.w/RA.n)}) on PrizePicks lines${RA.w/RA.n<be2?`, below the ${pct(be2)} a 2-pick Power Play needs`:""}.`:" Their real record shows up here once some are graded."}</p>`;
  h+=ag.length?`<div class="list">${ag.map(propRow).join("")}</div>`:`<div class="card empty">No pick has every signal lined up right now. That's normal; it means skip rather than force it.</div>`;
  if(hero){const n=hero.picks.length,pos=hero.ev>0;
   h+=`<h2>Best PrizePicks lineup</h2><p class="lede">${pos?"The lineup with the highest expected return at standard payouts.":"No lineup beats PrizePicks' payouts right now. This is the closest one."}</p>
   <section class="card hero"><div class="kick"><div><h3>${n}-pick ${hero.mode==="power"?"Power Play":"Flex Play"}</h3><div class="sub">Expected return per entry</div></div><div class="ev ${pos?"":"neg"}">${sgn(hero.ev)}</div></div>
   <div class="stats"><div class="stat"><small>Wins money</small><b>${pct(profit(hero.picks.map(x=>x.p),hero.mode))}</b></div><div class="stat"><small>Hits all</small><b>${pct(hero.all)}</b></div><div class="stat"><small>Top payout</small><b>${hero.mode==="power"?PAY.power[n]:PAY.flex[n][0]}x</b></div></div>
+  ${(()=>{const a=rec()&&rec().all,need=hero.mode==="power"?bePower(n):beFlex(n);return a&&a.n?`<p class="fine" style="margin:0 0 4px">Expected return uses the board's chances. Its PrizePicks picks have really hit <b>${pct(a.w/a.n)}</b>; this lineup needs about ${pct(need)} per pick.</p>`:""})()}
   <div class="list">${hero.picks.map(x=>propRow(x.r)).join("")}</div>
   <button class="btn go wide" style="margin-top:12px" data-usepp="top|0">Put this lineup on the slip</button>
   <p class="fine">Scanned ${T.pp.n.toLocaleString()} lineups from the ${T.pp.pool} strongest ${T.onlyPP?"PrizePicks lines":"props"}, one pick per game.</p></section>`;
@@ -671,7 +709,8 @@ function renderTop(){
   if(sizes.length>1)h+=`<h2>Best lineup by size</h2><p class="lede">Fewer picks hit more often. More picks pay more.</p><div class="res">${sizes.map(s=>comboPP(T.pp.bySize[s],s,"size")).join("")}</div>`;
  }else if(P.length===0){h+=`<h2>PrizePicks</h2><div class="card empty">No PrizePicks lines in this update. Props are pulled for games that start before the next update.</div>`}
  const props=spread(ppCandidates(T.onlyPP),2,8);
- if(props.length)h+=`<h2>Strongest picks</h2><p class="lede">Highest chance to land, from sportsbook prop prices compared to the PrizePicks line. Picks need at least two books, and no more than 2 come from one game while other games have picks.</p>${oneGame}<div class="list">${props.map(x=>propRow(x.r)).join("")}</div>`;
+ const RS=rec()&&rec().strong;
+ if(props.length)h+=`<h2>Strongest picks</h2><p class="lede">Highest chance by the board's math, from sportsbook prop prices compared to the PrizePicks line.${RS&&RS.n?` Picks it rated Strong have really gone <b>${wl(RS)}</b> (${pct(RS.w/RS.n)}).`:""} Picks need at least two books, and no more than 2 come from one game while other games have picks.</p>${oneGame}<div class="list">${props.map(x=>propRow(x.r)).join("")}</div>`;
  const C=mlCandidates();
  const value=C.filter(x=>x.e>1.005).sort((a,b)=>b.e-a.e).slice(0,6);
  h+=`<h2>Best-priced moneylines</h2><p class="lede">Your best available price is better than the fair price across every book.</p>`;
@@ -742,7 +781,8 @@ function renderRecord(){const R=DATA&&DATA.record;
  const stat=Object.entries(P.stat||{}).map(([k,a])=>recRow(MK[k]||k,a)).join("");
  return `<h2>Track record</h2><p class="lede">Every pick the board made before kickoff, graded after the game${R.since?` since ${esc(R.since)}`:""}. Gold means it's hitting at least as often as the board said it would.</p>
  <section class="card" style="padding:4px 14px 10px">
-  ${recRow("All PrizePicks-style picks",P.all,P.all.ep?`board expected ${pct(P.all.ep)}`:"")}
+  ${recRow("On real PrizePicks lines",P.pp,`a 2-pick Power needs ${pct(bePower(2))}${P.pp&&P.pp.ep?`; board expected ${pct(P.pp.ep)}`:""}`)}
+  ${recRow("All picks, incl. sportsbook-only lines",P.all,P.all.ep?`board expected ${pct(P.all.ep)}`:"")}
   ${recRow("Last 7 days",P.week)}
   ${recRow("Strong picks",P.strong,"59%+ chance")}${recRow("Playable picks",P.playable,"54 to 59%")}${recRow("Thin picks",P.thin,"under 54%")}
   ${recRow("Picks the scanners would use",P.scanner,"Playable or better, 2+ books, no mixed signals")}
@@ -770,6 +810,28 @@ function renderTix(){
 
 /* ---------- auto-grade open tickets from the board's graded results (history.json) ---------- */
 let HIST=null;
+
+/* ---------- each label's real record on PrizePicks lines (from history.json) ---------- */
+// Shown next to every label, so a label only looks good once its graded results back it up.
+let RC=null,RCkey="";
+function rec(){if(!HIST)return null;const k=HIST.props.length+"|"+BE.lo+"|"+BE.hi;if(RC&&RCkey===k)return RC;
+ const ps=HIST.props.filter(x=>x.pp&&(x.hit===true||x.hit===false)),wk=addDays(etDay(Date.now()),-7);
+ const agg=f=>{let w=0,n=0,e=0;for(const x of ps)if(f(x)){n++;if(x.hit)w++;e+=x.p}return{w,n,ep:n?e/n:null}};
+ RC={all:agg(()=>true),week:agg(x=>x.d>=wk),agree:agg(x=>x.ag),strong:agg(x=>x.p>=BE.hi),playable:agg(x=>x.p>=BE.lo&&x.p<BE.hi),
+  thin:agg(x=>x.p<BE.lo),mixed:agg(x=>x.mx),clean:agg(x=>!x.mx)};
+ RCkey=k;return RC}
+const RKEY={t3:"strong",t2:"playable",t1:"thin"};
+const wl=a=>a&&a.n?`${a.w}-${a.n-a.w}`:"";
+// a label earns its color when it beats what a 2-pick Power Play needs, by enough picks that it isn't luck (one standard error)
+function earns(k){const R=rec(),a=R&&R[k];if(!a||a.n<50)return false;const hr=a.w/a.n;return hr-Math.sqrt(hr*(1-hr)/a.n)>=bePower(2)}
+function recSpan(k){const R=rec(),a=R&&R[k];return a&&a.n?`<span class="trec">${wl(a)}</span>`:""}
+function recCard(){const R=rec(),a=R&&R.all,be=bePower(2);if(!a||!a.n)return"";
+ const hr=a.w/a.n,lo=hr-Math.sqrt(hr*(1-hr)/a.n);
+ const v=a.n>=50&&lo>=be?["gold","Beating break-even so far."]:hr>=be?["","Ahead of break-even, but too few picks to trust yet."]
+  :["red","Not beating PrizePicks payouts yet, so treat every pick below as close to a coin flip."];
+ return `<section class="card rcard"><div class="rchd"><span>Board's real record<small>Every pick it made on a PrizePicks line, graded after the game</small></span><b class="${v[0]}">${pct(hr)}</b></div>
+  <div class="stats"><div class="stat"><small>Hits-misses</small><b>${wl(a)}</b></div><div class="stat"><small>Last 7 days</small><b>${R.week.n?wl(R.week):"–"}</b></div><div class="stat"><small>Needs per pick</small><b>${pct(be)}</b></div></div>
+  <p class="fine" style="margin:0"><b class="${v[0]}">${v[1]}</b> A 2-pick Power Play pays 3x, so each pick has to hit ${pct(be)} of the time to break even. The board expected ${pct(a.ep)} on these. The numbers on each label below are that label's real hits-misses.</p></section>`}
 const pnm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z ]/g,"").replace(/\b(jr|sr|ii|iii|iv|v)\b/g,"").replace(/\s+/g," ").trim();
 const mkOf=s=>Object.keys(MK).find(k=>MK[k].toLowerCase()===String(s||"").trim().toLowerCase())||null;
 const etDay=ms=>new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/New_York"});
@@ -823,10 +885,40 @@ function playerList(){const rows=ui.plMine?myLegs():(HIST?HIST.props:[]);const b
  const by2={rate:(a,b)=>b.rate-a.rate||b.n-a.n,most:(a,b)=>b.n-a.n||b.rate-a.rate,last:(a,b)=>b.last.localeCompare(a.last)||b.n-a.n};
  return L.sort(by2[ui.plsort]||by2.last)}
 function plMark(x){return x.open?'<span class="pm op" aria-label="Not graded yet">•</span>':x.hit===true?'<span class="pm ok" aria-label="Hit">✓</span>':x.hit===false?'<span class="pm no" aria-label="Miss">✕</span>':'<span class="pm pu" aria-label="Push">–</span>'}
-function renderPlayers(){const L=playerList(),mine=ui.plMine;
+/* players whose picks came in every week they were on the board */
+const wkOf=d=>{const wd=new Date(d+"T12:00:00Z").getUTCDay();return addDays(d,-((wd+5)%7))};   // football week: Tuesday to Monday
+function weeklyList(){const by={};let cw=0,cl=0;
+ for(const r of HIST?HIST.props:[]){if(r.hit!==true&&r.hit!==false)continue;if(r.sp&&!inSport(r.sp))continue;
+  const k=(r.sp||"")+"|"+pnm(r.pl),p=by[k]=by[k]||{k,pl:r.pl,sp:r.sp,wk:{},g:[]},w=wkOf(r.d),x=p.wk[w]=p.wk[w]||[0,0];x[r.hit?0:1]++;p.g.push(r)}
+ const all=Object.values(by);
+ for(const p of all){const ws=Object.keys(p.wk).sort();p.weeks=ws.length;p.green=ws.filter(w=>p.wk[w][0]>p.wk[w][1]).length;
+  p.w=p.g.filter(x=>x.hit).length;p.l=p.g.length-p.w;p.n=p.g.length;p.rate=p.w/p.n;p.pu=0;p.op=0;
+  p.g.sort((a,b)=>(b.d||"").localeCompare(a.d||""));
+  // does a winning week carry over? count his record in the week after every winning week
+  for(let i=1;i<ws.length;i++){const a=p.wk[ws[i-1]];if(a[0]>a[1]){cw+=p.wk[ws[i]][0];cl+=p.wk[ws[i]][1]}}}
+ let L=all.filter(p=>p.weeks>=2&&p.green===p.weeks);
+ if(ui.plq){const q=pnm(ui.plq);L=L.filter(p=>pnm(p.pl).includes(q))}
+ L.sort((a,b)=>b.weeks-a.weeks||b.rate-a.rate||b.n-a.n);
+ return{L,cw,cl}}
+function renderWeekly(){const{L,cw,cl}=weeklyList(),n=cw+cl;
+ let h=`<h2>Hit every week</h2><p class="lede">Players whose picks came in every week the board graded them, at least 2 weeks. A week counts as a hit when more of his picks hit than missed. The side shown is the one the board leaned.</p>
+ <div class="filters"><button class="pill" data-plmode="board">Board picks</button><button class="pill" data-plmode="mine">My picks</button><button class="pill on" data-plmode="weekly">Hit every week</button></div>
+ <div class="card honest">${n>=20?`<b>Does it carry over?</b> After a winning week, players went <b>${cw}-${cl}</b> (${pct(cw/n)}) the next week${cw/n<bePower(2)?`, which is below the ${pct(bePower(2))} a 2-pick Power needs. A hot streak hasn't predicted the next week`:""}.`
+  :`<b>Too early to trust.</b> After a winning week, players have gone ${cw}-${cl} the next week. That's ${n} pick${n===1?"":"s"}, too few to know if streaks carry over, so treat this list as history, not a prediction.`}</div>
+ <div class="toolbar" style="margin-top:8px"><input class="search" id="plq" type="search" placeholder="Find a player" value="${esc(ui.plq)}"></div>`;
+ if(!L.length)return h+`<div class="card empty">${ui.plq?"No player matches.":"No player has hit every week yet. This fills in as more weeks get graded."}</div>`;
+ h+=`<div class="list" style="margin-top:10px">${L.slice(0,ui.plLimit).map(p=>{const open=ui.plopen[p.k],last=p.g.slice(0,10);
+  const now=P.filter(r=>live(GI[r.g])&&r.sp===p.sp&&pnm(r.pl)===pnm(p.pl)).sort((a,b)=>propSide(b).p-propSide(a).p);
+  return `<div class="card pcard"><button class="phd" data-plopen="${esc(p.k)}" aria-expanded="${!!open}"><span class="pn"><b>${esc(p.pl)}</b><small>${esc(p.sp==="CFB"?"College":p.sp)} · hit ${p.green} of ${p.weeks} weeks</small></span>
+   <span class="pdots" aria-hidden="true">${last.map(plMark).join("")}</span><span class="prec ${p.rate>=.55?"gold":""}">${p.w}-${p.l}</span></button>
+   ${now.length?`<div class="plnow">${now.map(r=>{const s=propSide(r),on=pps[r.k]===s.side;return `<div><span><b>${s.side==="o"?"More":"Less"} ${r.ln} ${esc(MK[r.mk]||r.mk)}</b>${r.pp?"":' <span class="ppmark">Book line</span>'}<span class="k">${esc(gameTxt(r))}, ${esc(when(GI[r.g]))} · board ${pct(s.p)}</span></span><button class="sm ${on?"on":""}" data-pp="${r.i}|${s.side}" aria-pressed="${on}">${on?"On slip":"Add"}</button></div>`}).join("")}</div>`:""}
+   ${open?`<div class="plog">${p.g.map(x=>`<div>${plMark(x)}<span>${esc(dayTxt(x.d))}</span><span>${x.side==="o"?"More":"Less"} ${x.ln} ${esc(MK[x.mk]||x.mk||"")}</span><span class="k">had ${x.act}</span></div>`).join("")}</div>`:""}</div>`}).join("")}</div>
+ ${L.length>ui.plLimit?`<button class="btn wide" style="margin-top:10px" data-plmore>Show more (${L.length-ui.plLimit} left)</button>`:""}`;
+ return h}
+function renderPlayers(){if(ui.plWeekly)return renderWeekly();const L=playerList(),mine=ui.plMine;
  const w=L.reduce((a,p)=>a+p.w,0),l=L.reduce((a,p)=>a+p.l,0),op=L.reduce((a,p)=>a+p.op,0);
  let h=`<h2>Players</h2><p class="lede">${mine?"Every player on your saved PrizePicks tickets and whether your pick on him hit.":"Every player prop the board pulled, graded after the game. A hit means the side the board leaned before kickoff came in."} Ties on the line show as a push.</p>
- <div class="filters"><button class="pill ${mine?"":"on"}" data-plmine="0">Board picks</button><button class="pill ${mine?"on":""}" data-plmine="1">My picks</button></div>
+ <div class="filters"><button class="pill ${mine?"":"on"}" data-plmode="board">Board picks</button><button class="pill ${mine?"on":""}" data-plmode="mine">My picks</button><button class="pill" data-plmode="weekly">Hit every week</button></div>
  <div class="toolbar" style="margin-top:8px"><input class="search" id="plq" type="search" placeholder="Find a player" value="${esc(ui.plq)}">
   <select class="sel" id="plsort"><option value="last" ${ui.plsort==="last"?"selected":""}>Latest</option><option value="rate" ${ui.plsort==="rate"?"selected":""}>Best hit rate</option><option value="most" ${ui.plsort==="most"?"selected":""}>Most picks</option></select></div>`;
  if(!L.length){h+=`<div class="card empty">${ui.plq?"No player matches.":mine?"Players from your saved PrizePicks tickets show up here. Save a lineup from the slip or tap Log a ticket on the Tickets tab.":"Players show up here once their games are graded, after the next update."}</div>`;return h}
@@ -996,7 +1088,7 @@ function ckJudge(p,mk,ln){
  const ij=ckInj(p),out=ij&&/out|reserve|doubtful|suspend/i.test(ij);
  let head,cls;
  if(out){head="Stay away";cls="no"}
- else if(src==="books"){if(ps<BE.lo){head="Coin flip";cls="flat"}else if(mix){head=`Mixed, leans ${S}`;cls="mix"}else if(ps>=BE.hi){head=(all?"Loves ":"Likes ")+S;cls="good"}else{head=`Leans ${S}`;cls="ok"}}
+ else if(src==="books"){if(ps<BE.lo){head="Coin flip";cls="flat"}else if(mix){head=`Mixed, leans ${S}`;cls="mix"}else if(ps>=BE.hi){head="Likes "+S;cls="good"}else{head=`Leans ${S}`;cls="ok"}}
  else{if(ps<.56){head="No real lean";cls="flat"}else if(mix){head=`Mixed, leans ${S}`;cls="mix"}else{head=`Leans ${S}`;cls="ok"}}
  return{r,q,src,shift,side,ps,S,head,cls,mix,all,ij,out,v,V,o,u,n}}
 function ckGames(V,ln){if(!V.g)return V.v.length?`<div class="cklog">${V.v.map(x=>`<span class="${x>ln?"ov":""}">${x}</span>`).join("")}</div>`:"";
@@ -1020,8 +1112,9 @@ function ckVerdict(){const p=CK.p,mk=CK.mk,ln=CK.ln,J=ckJudge(p,mk,ln),nx=p.next
  if(r&&r.tmo&&r.tmo.length)why.push(`Teammates out: ${esc(r.tmo.join(", "))}.`);
  if(J.ij&&!J.out)why.push(`<span class="mchip tough">${esc(J.ij)}</span> Check his status before kickoff.`);
  if(J.mix&&J.cls!=="flat")why.push(J.src==="books"?"The books and his recent games point opposite ways, so the board's scanners skip this pick.":`His recent games point ${J.side==="o"?"Less":"More"} at this line, but the matchup tips it ${J.S}.`);
- if(J.all)why.push("<b>All signals agree:</b> the books, his recent games and the matchup point the same way.");
- if(!J.out&&J.cls!=="flat")why.push(`${J.ps>=be2?"Clears":"Falls short of"} the ${pct(be2)} each pick needs on a 2-pick Power Play.`);
+ const RA=rec()&&rec().agree;
+ if(J.all)why.push(`<b>All signals agree:</b> the books, his recent games and the matchup point the same way.${RA&&RA.n?` Picks like this have really gone ${wl(RA)} (${pct(RA.w/RA.n)}) on PrizePicks lines.`:""}`);
+ if(!J.out&&J.cls!=="flat")why.push(`By the board's math it ${J.ps>=be2?"clears":"falls short of"} the ${pct(be2)} each pick needs on a 2-pick Power Play.${rec()&&rec().all.n?` The board's PrizePicks picks have really hit ${pct(rec().all.w/rec().all.n)}.`:""}`);
  return `<section class="card ckv"><div class="feel ${J.cls}"><div><small>The board${J.src==="books"?"":" · recent games only"}</small><b class="hl">${esc(J.head)}</b></div><div class="sides">${sideBox("o")}${sideBox("u")}</div></div>
   <ul class="why">${why.map(x=>`<li>${x}</li>`).join("")}</ul>
   ${slip?`<p class="fine">Tap More or Less to add it to your lineup.</p>`:r?`<p class="fine">Set the line back to ${r.ln} to add it to your lineup.</p>`:""}</section>`}
@@ -1200,7 +1293,7 @@ document.addEventListener("click",e=>{
  if(d.tl!==undefined){const tk=tickets[+d.tl];tk.r="L";tk.ret=0;delete tk.auto;LS.set("pb_tickets",tickets);keep();return}
  if(d.td!==undefined){tickets.splice(+d.td,1);LS.set("pb_tickets",tickets);keep();return}
  if(d.logtix!==undefined){openLog();return}
- if(d.plmine!==undefined){ui.plMine=d.plmine==="1";LS.set("pb_plmine",ui.plMine);ui.plLimit=40;keep();return}
+ if(d.plmode!==undefined){ui.plWeekly=d.plmode==="weekly";if(!ui.plWeekly){ui.plMine=d.plmode==="mine";LS.set("pb_plmine",ui.plMine)}LS.set("pb_plweekly",ui.plWeekly);ui.plLimit=40;keep();return}
  if(d.plopen!==undefined){ui.plopen[d.plopen]=!ui.plopen[d.plopen];keep();return}
  if(d.plmore!==undefined){ui.plLimit+=40;keep();return}
  if(lt&&t.closest("#logtix")){
@@ -1265,7 +1358,7 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
   if(have){for(const k in t)if(!(k in have)){have[k]=t[k];n++}continue}
   if(seen.has(t.id))continue;seen.add(t.id);tickets.unshift(t);n++}
  LS.set("pb_imported",[...seen]);if(n){LS.set("pb_tickets",tickets);keep()}}).catch(()=>{}).finally(()=>
- fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();if(ui.tab==="tix"||ui.tab==="players")keep()}}).catch(()=>{}));
+ fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
 </body>

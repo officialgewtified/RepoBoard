@@ -1,4 +1,4 @@
-"""Builds data.json for the Parlay Board.
+"""Builds data.json for Gridline (football).
 
 What it pulls each run:
   * NFL and college football moneylines from every US sportsbook in the feed (1 credit per sport)

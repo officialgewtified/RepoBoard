@@ -1,6 +1,6 @@
 {
- "name": "Signal",
- "short_name": "Signal",
+ "name": "Gridline",
+ "short_name": "Gridline",
  "description": "NFL and college odds, PrizePicks picks and parlay scanners.",
  "start_url": "./",
  "scope": "./",

@@ -1,4 +1,4 @@
-# Signal (auto-updating)
+# Gridline (auto-updating)
 
 NFL and college football moneylines from every sportsbook in the feed, PrizePicks lines checked against sportsbook player props, and scanners that score every parlay and PrizePicks lineup combination.
 
