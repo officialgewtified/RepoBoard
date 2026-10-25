@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070d18">
 <title>Crossover</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -354,7 +351,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=3">
+<link rel="stylesheet" href="../fx.css?v=4">
 </head>
 <body>
 <header class="wrap top">
@@ -386,6 +383,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </header>
 <nav class="tabs"><div class="wrap"><div class="filters" id="sportbar" style="margin-top:0"></div></div></nav>
 <main class="wrap" id="view"><div class="fx-sk big"></div><div class="fx-sk big"></div><div class="fx-sk"></div><div class="fx-sk"></div></main>
+<div class="slip" id="slip"><div class="in" id="slipin"></div></div>
 <footer class="wrap fine">Crossover reads Gridline and Baseline and needs no Odds API key of its own. Chances are estimates from betting markets, corrected by each board's real results, not guarantees. For entertainment only. 21+ where legal (PrizePicks 18+ in some states). Gambling problem? Call 1-800-GAMBLER.</footer>
 <script>
 "use strict";
@@ -500,18 +498,45 @@ function bankCard(){const fb=rawTix("pb_tickets"),bb=rawTix("bl_tickets"),all=[.
   <div class="limit"><div class="lrow"><span>This week, both sports</span><b>${money(wk)}${L?` of ${money(L)}`:""}</b></div>${L?`<div class="lbar"><i style="width:${Math.min(100,wk/L*100).toFixed(0)}%" class="${wk>=L?"over":""}"></i></div>`:""}
   <div class="lset"><label>Weekly limit $<input id="limitamt" type="number" inputmode="decimal" min="0" step="1" value="${L||""}" placeholder="none"></label><button class="sm" data-limitsave>Save limit</button></div></div></section>`}
 
+/* ---------- your slip on Crossover: picks from both sports, names ready to copy ---------- */
+const XPAY={power:{2:3,3:5,4:10,5:20,6:37.5},flex:{3:[2.25,1.25],4:[5,1.5],5:[10,2,.4],6:[25,2,.4]}};
+let XS=[],xOpen=false,XI={};try{XS=JSON.parse(localStorage.getItem("cx_slip")||"[]")||[]}catch(e){}
+const xkey=x=>x.b.k+"|"+x.r.g+"|"+x.r.mk+"|"+x.r.pl;
+const gameOf=x=>x.team&&x.opp?`${x.team.ab||x.team.n} ${x.r.sd==="a"?"at":"vs"} ${x.opp.ab||x.opp.n}`:`${x.g.a.ab||x.g.a.n} @ ${x.g.h.ab||x.g.h.n}`;
+function xSave(){try{localStorage.setItem("cx_slip",JSON.stringify(XS))}catch(e){}}
+function xItem(x){return{k:xkey(x),pl:x.r.pl,mk:x.r.mk,ln:x.r.ln,side:x.side,q:x.q,sp:x.g.sp,team:x.team?(x.team.ab||x.team.n):null,game:gameOf(x),kick:x.g.kick}}
+const xOn=x=>XS.some(s=>s.k===xkey(x)&&s.side===x.side);
+function xToggle(x){const k=xkey(x),i=XS.findIndex(s=>s.k===k);
+ if(i>=0&&XS[i].side===x.side)XS.splice(i,1);
+ else{const it=xItem(x);XS=XS.filter(s=>s.k!==k&&!(s.pl===it.pl&&s.sp===it.sp));XS.push(it)}   // one pick per player
+ xSave()}
+function renderXSlip(){const el=$("#slip"),inn=$("#slipin");if(!el||!inn)return;
+ XS=XS.filter(s=>Date.parse(s.kick)>Date.now());
+ if(!XS.length){inn.innerHTML="";el.classList.remove("open");return}
+ el.classList.toggle("open",xOpen);
+ const n=XS.length,all=XS.reduce((a,s)=>a*s.q,1),pw=XPAY.power[n],fl=XPAY.flex[n],teams=new Set(XS.map(s=>s.sp+"|"+(s.team||s.game))).size;
+ const chev='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 15l6-6 6 6"/></svg>';
+ inn.innerHTML=`<button class="sbar" data-xslipbar aria-expanded="${xOpen}"><span><span class="k">PrizePicks, ${n} pick${n>1?"s":""}</span><br><span class="c">${pct(all)} to hit all</span></span><span class="o">${pw?pw+"x":"—"}</span>${chev}</button>
+ <div class="receipt"><h4>Your slip</h4><div class="ts">Tap a name to copy it, then paste it into PrizePicks search.</div>
+ ${XS.map((s,i)=>`<div class="leg"><span><button class="cp" data-copyname="${esc(s.pl)}">${esc(s.pl)}</button><small>${s.side==="o"?"More":"Less"} ${s.ln} ${esc(MK[s.mk]||s.mk)}, ${esc(s.sp)} ${esc(s.game)}</small></span><b>${pct(s.q)}</b><button class="x" data-xrm="${i}" aria-label="Remove ${esc(s.pl)}">×</button></div>`).join("")}
+ <div class="modes"><div class="mode ${pw?"on":""}"><b>Power ${pw?pw+"x":""}</b>${pw?`All must hit<br>${pct(all)} chance`:"Needs 2 to 6 picks"}</div><div class="mode"><b>Flex ${fl?fl[0]+"x top":""}</b>${fl?`Pays on ${n-fl.length+1}+ hits`:"Needs 3 to 6 picks"}</div></div>
+ ${n>=2&&teams<2?'<div class="note bad" role="alert">Every pick is on one team. PrizePicks needs at least 2 different teams.</div>':""}
+ <div class="note">Chances are Crossover's corrected ones.</div>
+ <div class="rbtns"><button data-xclear>Clear</button><button class="go" data-xcopyall>Copy all picks</button></div></div>`}
+function rerender(){const y=scrollY;render();scrollTo(0,y)}
+
 /* ---------- rendering ---------- */
 const lg=x=>`<span class="lg">${esc(x.g.sp)}</span>`;
 function pickRow(x,i){const lineTxt=Number.isInteger(x.r.ln)?x.r.ln:x.r.ln.toFixed(1),gm=x.team&&x.opp?`${esc(x.team.ab||x.team.n)} ${x.r.sd==="a"?"at":"vs"} ${esc(x.opp.ab||x.opp.n)}`:`${esc(x.g.a.ab||x.g.a.n)} @ ${esc(x.g.h.ab||x.g.h.n)}`;
  return `<div class="card prop"><div class="who"><b>${i!=null?`<span class="rank">${i+1}</span>`:""}${esc(x.r.pl)}${x.r.ij?`<span class="tier mix">${esc(x.r.ij)}</span>`:""}</b>
   <span class="m">${lg(x)}<span class="stat-name">${x.side==="o"?"More":"Less"} ${lineTxt} ${esc(MK[x.r.mk]||x.r.mk)}</span><span>${gm}</span><span>${esc(when(Date.parse(x.g.kick)))}</span></span>
   ${x.gap?`<span class="mchip gap">PrizePicks ${x.r.ln}, books ${x.r.bm}</span>`:""}<span class="m" style="margin-top:4px"><span>${esc(x.b.name)}${x.gap?"'s books":""} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
-  <div class="sides"><div class="side-b rec"><small>Crossover</small><b>${pct(x.q)}</b><span class="ln">${x.side==="o"?"More":"Less"}</span></div></div></div>`}
+  <div class="sides">${(()=>{const k=xkey(x),on=xOn(x);XI[k]=x;return `<button class="side-b rec ${on?"on":""}" data-xp="${esc(k)}" aria-pressed="${on}"><small>${on?"On slip":"Add"}</small><b>${pct(x.q)}</b><span class="ln">${x.side==="o"?"More":"Less"}</span></button>`})()}</div></div>`}
 function pairCard(P,title,lede,id){if(!P)return"";const[a,c]=P.legs,all=a.q*c.q,ev=all*PAY2-1;
  return `<h2>${title}</h2><p class="lede">${lede}</p><section class="card hero"><div class="kick"><div><h3>2-pick Power Play</h3><div class="sub">Pays ${PAY2}x if both hit</div></div><div class="ev ${ev>0?"":"neg"}">${pct(all)}</div></div>
   <div class="stats"><div class="stat"><small>Both hit</small><b>${pct(all)}</b></div><div class="stat"><small>Expected return</small><b class="${ev>0?"gold":"red"}">${sgn(ev)}</b></div><div class="stat"><small>Needs per pick</small><b>${pct(BE2)}</b></div></div>
   <div class="list">${P.legs.map(x=>pickRow(x)).join("")}</div>
-  <button class="btn go wide" style="margin-top:12px" data-copy="${id}">Copy picks</button>
+  <div class="btns"><button class="btn" data-copy="${id}">Copy picks</button><button class="btn go" data-xslip="${id}">Put on my slip</button></div>
   <p class="fine">${ev>0?"By Crossover's corrected chances this beats the payout, but these are still estimates.":"Even the best pair doesn't beat the 3x payout by Crossover's corrected chances."}</p></section>`}
 function recordCard(){const rows=B.map(b=>{const a=b.all;if(!b.d)return `<div class="recrow"><span>${esc(b.name)}<br><span class="k">${esc(b.sport)}</span></span><span class="k">not loaded</span><b>–</b></div>`;
   const hr=a&&a.n?a.w/a.n:null;return `<div class="recrow"><span>${esc(b.name)}<br><span class="k">${esc(b.sport)} · board expected ${a&&a.ep!=null?pct(a.ep):"–"}</span></span><span class="k">${a&&a.n?`${a.w}-${a.n-a.w}`:"no graded picks yet"}</span><b class="${hr==null?"":hr>=BE2?"gold":"red"}">${hr==null?"–":pct(hr)}</b></div>`}).join("");
@@ -527,8 +552,8 @@ function render(){
  let h=recordCard();
  if(!C.length)h+=`<div class="card empty" style="margin-top:14px">No player props on either board right now. Each board pulls them in its overnight update for that day's games.</div>`;
  else{
-  h+=pairCard(best,"Best 2-pick","The two picks with the highest corrected chance, from 2 different teams.","best");
-  if(mix&&(mix.legs[0].key!==(best&&best.legs[0].key)||mix.legs[1].key!==(best&&best.legs[1].key)))h+=pairCard(mix,"Best football + basketball","The best pair with one pick from each sport.","mix");
+  h+=pairCard(best,"The slip I'd build","If you asked me for one slip right now, it's this one: the two picks with the highest corrected chance, from 2 different teams.","best");
+  if(mix&&(mix.legs[0].key!==(best&&best.legs[0].key)||mix.legs[1].key!==(best&&best.legs[1].key)))h+=pairCard(mix,"The one I'd build with both sports","My pick for a slip with one football and one basketball player.","mix");
   h+=`<h2>Top picks across both</h2><p class="lede">Every prop from both boards with at least 2 books, ranked by Crossover's corrected chance. Picks where a board's own signals disagree are left out, as are players listed out or doubtful.</p>
   <div class="list">${C.slice(0,15).map((x,i)=>pickRow(x,i)).join("")}</div>`}
  const GP=gaps().slice(0,6),GR=gapRecAll();
@@ -537,12 +562,19 @@ function render(){
  h+=bankCard();
  const L=getLimit();if(L){const ws=weekStart(Date.now()),wk=[...rawTix("pb_tickets"),...rawTix("bl_tickets")].filter(t=>{const a=tAt(t);return a&&a>=ws}).reduce((a,t)=>a+(+t.stake||0),0);
   if(wk>=L)h=`<div class="warn" style="margin-top:14px">You've put in ${money(wk)} this week across both sports, past your ${money(L)} weekly limit.</div>`+h}
- $("#view").innerHTML=h}
+ $("#view").innerHTML=h;renderXSlip()}
 function copyText(txt,btn){const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>{btn.textContent=o},1200)};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,()=>prompt("Copy this:",txt));else prompt("Copy this:",txt)}
 document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const d=t.dataset;
  if(d.sport){sportSel=d.sport;try{localStorage.setItem("cx_sport",sportSel)}catch(_){}render();return}
  if(d.limitsave!==undefined){const v=parseFloat($("#limitamt").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(e){}const y=scrollY;render();scrollTo(0,y);return}
+ if(d.xp!==undefined){const x=XI[d.xp];if(x){xToggle(x);rerender()}return}
+ if(d.xslip!==undefined){const P=LAST[d.xslip];if(P){XS=P.legs.map(xItem);xSave();xOpen=true;rerender()}return}
+ if(d.xslipbar!==undefined){xOpen=!xOpen;renderXSlip();return}
+ if(d.xrm!==undefined){XS.splice(+d.xrm,1);xSave();rerender();return}
+ if(d.xclear!==undefined){XS=[];xSave();xOpen=false;rerender();return}
+ if(d.copyname!==undefined){copyText(d.copyname,t);return}
+ if(d.xcopyall!==undefined){copyText(XS.map(s=>`${s.pl} ${s.side==="o"?"More":"Less"} ${s.ln} ${MK[s.mk]||s.mk}`).join("\n"),t);return}
  if(d.copy){const P=LAST[d.copy];if(P)copyText(P.legs.map(x=>`${x.r.pl} ${x.side==="o"?"More":"Less"} ${x.r.ln} ${MK[x.r.mk]||x.r.mk}`).join("\n"),t)}});
 (function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}if(!["dark","clean","bold"].includes(t))t="dark";document.documentElement.dataset.theme=t})();
 
@@ -552,6 +584,6 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  const st=B.map(b=>`${esc(b.name)} <b>${b.d?new Date(b.d.updated).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}):"not loaded"}</b>`).join("<br>");
  $("#stamp").innerHTML=st;render()});
 </script>
-<script src="../fx.js?v=3"></script>
+<script src="../fx.js?v=4"></script>
 </body>
 </html>

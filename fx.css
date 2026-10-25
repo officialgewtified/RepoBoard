@@ -101,6 +101,8 @@ h2::before{content:"";flex:none;width:12px;height:22px;background:var(--led);cli
 .slip{bottom:calc(60px + env(safe-area-inset-bottom,0px))}
 .slip .in{padding-bottom:8px}
 .receipt{max-height:min(56vh,540px)}
+body:not(:has(.seg)) .slip{bottom:0}
+body:not(:has(.seg)) .slip .in{padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
 body:has(.seg){padding-bottom:calc(168px + env(safe-area-inset-bottom,0px))!important}
 body:has(.seg):has(#slipin:empty){padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))!important}
 
@@ -257,8 +259,36 @@ button:disabled{transform:none!important}
 @keyframes fxSlipIn{from{transform:translateY(130%)}}
 .fx-tick{animation:fxTick .45s var(--spring)}
 @keyframes fxTick{40%{transform:scale(1.35)}}
-.receipt.fx-print{animation:fxPrint .5s var(--out)}
-@keyframes fxPrint{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+.receipt.fx-print{animation:fxPrint .42s var(--out)}
+@keyframes fxPrint{from{transform:translateY(16px);opacity:0}}
+
+/* ---------- the slip opened: a broadcast panel, not paper ---------- */
+.receipt{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 84%,#fff 16%),var(--panel) 72px);color:var(--ink);
+ font-family:var(--fd);font-size:14px;border-radius:0;-webkit-mask:none;mask:none;clip-path:var(--shape);box-shadow:none;padding:16px 14px 14px}
+.receipt h4{font:italic 900 26px/1 var(--fd);font-stretch:64%;letter-spacing:0;text-align:left;margin:0;color:var(--ink)}
+.receipt .ts{text-align:left;font-size:12px;color:var(--mute);opacity:1;margin:4px 0 12px}
+.receipt .leg{grid-template-columns:1fr auto auto;border:0;background:var(--raise);clip-path:var(--tile);padding:10px 10px 10px 12px;margin-bottom:6px;gap:10px}
+.receipt .leg small{display:block;opacity:1;color:var(--mute);font-size:12.5px;margin-top:2px}
+.receipt .leg b{font:italic 900 24px/1 var(--fd);font-stretch:66%;color:var(--led)}
+.receipt .cp{font:800 16px/1.2 var(--fd);font-stretch:92%;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.receipt .cp::after{content:"";width:13px;height:13px;flex:none;background:var(--mute);
+ -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'><rect x='8' y='8' width='12' height='12' rx='2'/><path d='M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3'/></svg>") center/contain no-repeat;
+ mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'><rect x='8' y='8' width='12' height='12' rx='2'/><path d='M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3'/></svg>") center/contain no-repeat}
+.receipt .x{color:var(--mute);opacity:1;font-size:20px;padding:0 4px}
+.receipt .tot{padding:7px 0;color:var(--mute);align-items:baseline}
+.receipt .tot b{color:var(--ink);font-weight:750}
+.receipt .big{font:italic 900 34px/1 var(--fd);font-stretch:64%;color:var(--led)}
+.receipt input{width:84px;border:0;background:var(--raise);clip-path:var(--tile);box-shadow:inset 0 -2px 0 var(--line);color:var(--ink);font:700 16px var(--fd);padding:6px 8px}
+.modes{gap:6px;margin:10px 0}
+.mode{border:0;background:var(--raise);color:var(--mute);font:500 12.5px/1.45 var(--fd);clip-path:var(--tile);padding:10px 11px;border-radius:0}
+.mode b{color:var(--ink);font:italic 900 21px/1.1 var(--fd);font-stretch:66%;margin-bottom:2px}
+.mode.on{background:var(--raise);box-shadow:inset 0 -3px 0 var(--led);color:var(--ink)}
+.mode.on b{color:var(--led)}
+.receipt .rbtns{gap:6px;margin-top:10px}
+.receipt .rbtns button{border:0;border-radius:0;background:var(--raise);color:var(--ink);font:750 14px var(--fd);clip-path:var(--tile);padding:12px}
+.receipt .rbtns .go{background:linear-gradient(180deg,color-mix(in srgb,var(--led) 75%,#fff 25%),var(--led) 55%);color:var(--ledink)}
+.receipt .note{color:var(--mute);opacity:1;font-size:12.5px}
+.receipt .note.bad{color:var(--stop);border:0;border-radius:0;background:color-mix(in srgb,var(--stop) 14%,var(--raise));clip-path:var(--tile);padding:8px 10px}
 
 /* ---------- sheets ---------- */
 dialog::backdrop{background:rgba(3,7,14,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}

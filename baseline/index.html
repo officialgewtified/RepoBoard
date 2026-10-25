@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070d18">
 <title>Baseline</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -351,7 +348,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=3">
+<link rel="stylesheet" href="../fx.css?v=4">
 </head>
 <body>
 <header class="wrap top">
@@ -1328,7 +1325,7 @@ function renderSlip(){
  if(kind==="ml"){
   const D=L.reduce((a,l)=>a*dec(l.ml),1),Pp=L.reduce((a,l)=>a*l.p,1),st=+stakeML||0;
   bar=`<span><span class="k">Parlay, ${L.length} leg${L.length>1?"s":""}</span><br><span class="c">${pct(Pp)} to hit</span></span><span class="o">${L.length>1?amer(D):fmtML(L[0].ml)}</span>${chev}`;
-  body=`<h4>PARLAY TICKET</h4><div class="ts">${esc(now)}</div>
+  body=`<h4>Parlay</h4><div class="ts">${esc(now)}</div>
   ${L.map(l=>`<div class="leg"><span>${esc(teamName(l.g[l.s]))} ML<small>${esc(l.g.a.n)} @ ${esc(l.g.h.n)}, ${esc(bname(l.book))}, ${pct(l.p)}</small></span><b>${fmtML(l.ml)}</b><button class="x" data-pick="${esc(l.g.id)}|${l.s}" aria-label="Remove">×</button></div>`).join("")}
   <div class="tot" style="margin-top:8px"><span>Odds</span><b class="big">${amer(D)}</b></div>
   <div class="tot"><span>Stake $<input id="stakeML" type="number" inputmode="decimal" value="${st}" min="0"></span><b>Pays ${money(st*D)}</b></div>
@@ -1344,7 +1341,7 @@ function renderSlip(){
   const games=new Set(Q.map(q=>q.r.g)).size,same=games<n,tt=n>=2?twoTeams(Q.map(q=>q.r)):null,one=tt===false?teamOf(Q[0].r):null;
   const top=mode==="power"?(PAY.power[n]||0):(PAY.flex[n]?PAY.flex[n][0]:0);
   bar=`<span><span class="k">PrizePicks, ${n} pick${n>1?"s":""}</span><br><span class="c">${pct(all)} to hit all</span></span><span class="o">${top?top+"x":"—"}</span>${chev}`;
-  body=`<h4>PRIZEPICKS LINEUP</h4><div class="ts">${esc(now)}</div>
+  body=`<h4>PrizePicks lineup</h4><div class="ts">${esc(now)}</div>
   ${Q.map(q=>`<div class="leg"><span><button class="cp" data-copyname="${esc(q.r.pl)}">${esc(q.r.pl)}</button><small>${q.s==="o"?"More":"Less"} ${q.r.ln} ${esc(MK[q.r.mk]||q.r.mk)}, ${esc(gameTxt(q.r))}</small></span><b>${pct(q.p)}</b><button class="x" data-pp="${q.r.i}|${q.s}" aria-label="Remove">×</button></div>`).join("")}
   <div class="modes"><button class="mode ${mode==="power"?"on":""}" data-ppmode="power" ${ep==null?"disabled":""}><b>Power ${PAY.power[n]?PAY.power[n]+"x":""}</b>${ep==null?"Needs 2 to 6 picks":`All must hit<br>${pct(all)} chance<br>Return ${sgn(ep)}`}</button>
    <button class="mode ${mode==="flex"?"on":""}" data-ppmode="flex" ${ef==null?"disabled":""}><b>Flex ${PAY.flex[n]?PAY.flex[n][0]+"x top":""}</b>${ef==null?"Needs 3 to 6 picks":`Pays on ${n-PAY.flex[n].length+1}+ hits<br>${pct(profit(ps,"flex"))} to win money<br>Return ${sgn(ef)}`}</button></div>
@@ -1529,6 +1526,6 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
-<script src="../fx.js?v=3"></script>
+<script src="../fx.js?v=4"></script>
 </body>
 </html>
