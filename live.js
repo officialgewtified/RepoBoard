@@ -38,6 +38,8 @@ const VAL={player_pass_yds:P=>P.pass_yds,player_pass_tds:P=>P.pass_td,player_pas
 
 return{
  nm,
+ /* the whole ESPN game summary (box score, plays, drives, leaders, injuries) */
+ async raw(sp,eid,maxAge=20000){if(!PATH[sp]||!eid)throw new Error("no game");return getJSON(`${API}${PATH[sp]}/summary?event=${eid}`,maxAge)},
  /* a game's live box score (cached for maxAge ms) */
  async game(sp,eid,maxAge=30000){if(!PATH[sp]||!eid)throw new Error("no game");return parse(await getJSON(`${API}${PATH[sp]}/summary?event=${eid}`,maxAge))},
  /* a player's number for a PrizePicks stat; players who haven't touched the ball yet aren't in a football box score, so they count as 0 */

@@ -548,6 +548,41 @@ h2::before{height:27px}
 .hrow h2{margin-bottom:6px}
 .hrow .iconbtn{flex:none;margin-bottom:8px}
 
+/* ---------- game sheet: tap a game for stats and plays ---------- */
+button.tg{font:inherit;color:inherit;text-align:left;cursor:pointer}
+.lvl [data-game]{cursor:pointer}
+.gsheet{padding-bottom:12px}
+.ghead{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:4px 0 12px}
+.gt{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;min-width:0}
+.gt img{width:44px;height:44px;object-fit:contain}
+.gt b{font-family:var(--fh);font-size:26px;letter-spacing:.03em;line-height:1}
+.gt small{font-size:11.5px;color:var(--mute);line-height:1.25}
+.gsc{display:flex;align-items:center;gap:12px}
+.gsc b{font:italic 900 40px/1 var(--fd);font-stretch:66%;min-width:30px;text-align:center}
+.gsc span{font-size:12px;font-weight:750;color:var(--mute);text-align:center;display:flex;align-items:center;gap:5px;max-width:96px;text-transform:uppercase;letter-spacing:.02em}
+.gsc span.live{color:var(--stop)}
+.gsc span i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--stop);animation:fxLive 1.4s ease-in-out infinite}
+.gbody{margin-top:10px}
+.gstats{display:flex;flex-direction:column;gap:9px}
+.gstat{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;gap:6px;font-size:13px;position:relative;padding-bottom:6px}
+.gstat b{font-weight:800;font-size:15px}.gstat b:last-of-type{text-align:right}
+.gstat span{text-align:center;color:var(--mute);font-size:12px}
+.gstat i{position:absolute;left:0;right:0;bottom:0;height:3px;background:color-mix(in srgb,var(--mute) 30%,transparent);border-radius:2px;overflow:hidden}
+.gstat i em{display:block;height:100%;background:var(--led)}
+.gstat.gh b{font-family:var(--fh);font-size:20px;letter-spacing:.03em}
+.gbox{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 10px}
+.gbox th{text-align:right;color:var(--mute);font-weight:700;font-size:11.5px;padding:4px 4px;border-bottom:1px solid var(--line)}
+.gbox th:first-child,.gbox td:first-child{text-align:left}
+.gbox td{text-align:right;padding:5px 4px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);font-variant-numeric:tabular-nums}
+.gbox tr.me td{color:var(--led);font-weight:800}
+.gplays{display:flex;flex-direction:column;gap:2px;max-height:52vh;overflow:auto}
+.gplays div{font-size:13px;line-height:1.4;padding:7px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.gplays div span{display:block;font-size:11px;font-weight:750;color:var(--mute);letter-spacing:.02em}
+.gplays .sc{color:var(--ink);font-weight:700}.gplays .sc span{color:var(--led)}
+.glead{display:flex;flex-direction:column;gap:3px;font-size:13px;margin:6px 0 10px}
+.glead > b{font-family:var(--fh);font-size:18px;letter-spacing:.03em}
+.glead em{color:var(--stop);font-style:normal;font-weight:700}
+
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
  .fx-ripple,.fx-ring,.fx-spark{display:none}

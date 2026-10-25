@@ -349,7 +349,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/bebas-neue.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=12">
+<link rel="stylesheet" href="../fx.css?v=13">
 </head>
 <body>
 <header class="wrap top">
@@ -1445,6 +1445,7 @@ function loadOther(){return fetch(OWN==="fb"?"baseline/data.json":"../data.json"
  const GI2={};d.games.forEach(g=>{GI2[g.id]={...g,t:Date.parse(g.kick)}});OTHER={k:OWN==="fb"?"bb":"fb",d,GI:GI2,props:d.props||[]};
  liveRefresh();scRefresh(true);const a=document.activeElement;if(!(a&&a.matches("input,select,textarea"))&&!document.querySelector("dialog[open]"))keep()}).catch(()=>{})}
 const SRC=[["pb_tickets","fb","Gridline"],["bl_tickets","bb","Baseline"],["cx_tickets",null,"Crossover"]];
+window.gameMine=()=>{const S=new Set();for(const o of openTix())for(const l of o.L)if(l&&l.pl)S.add(Live.nm(l.pl));for(const k in pps){const r=PI[k];if(r)S.add(Live.nm(r.pl))}return S};
 const sportBoard=sp=>sp==="NBA"||sp==="CBB"?"bb":"fb";
 function boardOf(k){return k===OWN?{props:P,GI}:OTHER&&OTHER.k===k?OTHER:null}
 function openTix(){const out=[];for(const[k,bk,name]of SRC){const own=k===OWNKEY,list=own?tickets:rawTix(k);
@@ -1466,7 +1467,7 @@ function liveRows(t,L,bk){L=L||legsOf(t);const X=L.map(l=>liveLeg(l,bk));if(!X.s
  return `<div class="lgl lvl">${t.legs.map((txt,i)=>{const x=X[i],l=L[i];if(!x)return `<div class="na"><span class="mk">–</span><span>${esc(txt)}<small>Not started</small></span></div>`;
   const c={ok:"ok",no:"no",live:"lv",push:"na",dnp:"na"}[x.j.c],mk={ok:"✓",no:"✕",live:"●",push:"=",dnp:"–"}[x.j.c];
   const v=x.s.v,top=Math.max(l.ln*1.3,v,1),pctw=x.s.dnp?0:Math.max(3,Math.min(100,v/top*100)),mark=Math.min(100,l.ln/top*100);
-  return `<div class="${c}"><span class="mk">${mk}</span><span>${esc(txt)}<small>${x.s.dnp?esc(x.s.dnp):`${v} so far · ${esc(x.j.t)}`} · ${esc(x.d.completed?"Final":x.d.detail)}</small>${x.s.dnp?"":`<i class="lvbar ${l.side}"><b style="width:${pctw.toFixed(0)}%"></b><em style="left:${mark.toFixed(0)}%"></em></i>`}</span><b class="lvv">${x.s.dnp?"DNP":v}</b></div>`}).join("")}</div>`}
+  return `<div class="${c}" data-game="${esc(x.g.sp)}|${esc(x.g.eid)}"><span class="mk">${mk}</span><span>${esc(txt)}<small>${x.s.dnp?esc(x.s.dnp):`${v} so far · ${esc(x.j.t)}`} · ${esc(x.d.completed?"Final":x.d.detail)}</small>${x.s.dnp?"":`<i class="lvbar ${l.side}"><b style="width:${pctw.toFixed(0)}%"></b><em style="left:${mark.toFixed(0)}%"></em></i>`}</span><b class="lvv">${x.s.dnp?"DNP":v}</b></div>`}).join("")}</div>`}
 function sweatSection(){const open=openTix().filter(o=>o.L.some(l=>liveLeg(l,o.bk)));if(!open.length)return"";
  return `<h2>Sweating now</h2><p class="lede">Every open ticket from all three sites with games going, from ESPN's live box scores. Updates about every 40 seconds.</p>
  <div class="list">${open.map(({t,L,bk,name})=>{const X=L.map(l=>liveLeg(l,bk)),hit=X.filter(x=>x&&x.j.c==="ok").length,miss=X.filter(x=>x&&x.j.c==="no").length;
@@ -1555,8 +1556,8 @@ function myGameIds(){const ids=new Set();for(const{L,bk}of openTix())for(const l
 function scoreTxt(g){const s=SC[g.eid];if(!s||s.state==="pre")return null;return{live:s.state==="in",fin:s.completed,a:s.a.score,h:s.h.score,d:s.completed?"Final":s.detail}}
 function ticker(){const T=todayGames();if(!T.length)return"";const mine=myGameIds();
  return `<div class="ticker" aria-label="Today's games">${T.map(g=>{const s=scoreTxt(g);
-  return `<div class="tg ${s?(s.live?"live":"fin"):""} ${mine.has(g.id)?"mine":""}"><span class="tt">${s?(s.live?`<i></i>${esc(s.d)}`:esc(s.d)):`${esc(g.sp)} ${esc(new Date(g.t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}))}`}</span>
-   <span class="tr"><b>${esc(g.a.ab||g.a.n)}</b>${s?`<em>${esc(s.a)}</em>`:""}</span><span class="tr"><b>${esc(g.h.ab||g.h.n)}</b>${s?`<em>${esc(s.h)}</em>`:""}</span></div>`}).join("")}</div>`}
+  return `<button class="tg ${s?(s.live?"live":"fin"):""} ${mine.has(g.id)?"mine":""}" data-game="${esc(g.sp)}|${esc(g.eid||"")}" aria-label="${esc(g.a.n)} at ${esc(g.h.n)}: stats and plays"><span class="tt">${s?(s.live?`<i></i>${esc(s.d)}`:esc(s.d)):`${esc(g.sp)} ${esc(new Date(g.t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}))}`}</span>
+   <span class="tr"><b>${esc(g.a.ab||g.a.n)}</b>${s?`<em>${esc(s.a)}</em>`:""}</span><span class="tr"><b>${esc(g.h.ab||g.h.n)}</b>${s?`<em>${esc(s.h)}</em>`:""}</span></button>`}).join("")}</div>`}
 function scoresSection(){const T=todayGames().filter(g=>scoreTxt(g));if(!T.length)return"";
  return `<h2>Scores</h2><p class="lede">Today's games that have started, from ESPN. Gold edge: you have a pick in it.</p><div class="ticker big">${T.map(g=>{const s=scoreTxt(g),mine=myGameIds().has(g.id);
   return `<div class="tg ${s.live?"live":"fin"} ${mine?"mine":""}"><span class="tt">${s.live?"<i></i>":""}${esc(s.d)}</span><span class="tr"><b>${esc(g.a.n)}</b><em>${esc(s.a)}</em></span><span class="tr"><b>${esc(g.h.n)}</b><em>${esc(s.h)}</em></span></div>`}).join("")}</div>`}
@@ -1816,8 +1817,9 @@ setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&!document.activeElement.matches("input,select")){stampText();keep()}});   // back from another app: drop games that started
 </script>
 <script src="../share.js?v=3"></script>
-<script src="../live.js?v=2"></script>
+<script src="../live.js?v=3"></script>
 <script src="../kit.js?v=1"></script>
-<script src="../fx.js?v=11"></script>
+<script src="../game.js?v=1"></script>
+<script src="../fx.js?v=12"></script>
 </body>
 </html>
