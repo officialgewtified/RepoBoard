@@ -1,0 +1,30 @@
+{
+ "name": "Baseline",
+ "short_name": "Baseline",
+ "description": "NBA and college basketball odds, PrizePicks picks and parlay scanners.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#0d1626",
+ "theme_color": "#0d1626",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

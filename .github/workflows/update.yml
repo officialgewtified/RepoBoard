@@ -32,5 +32,5 @@ jobs:
           if [ -f players.json ]; then git add players.json; fi
           git diff --staged --quiet && exit 0
           git commit -m "Update data"
-          git pull --rebase origin ${{ github.ref_name }}
-          git push
+          for i in 1 2 3; do git pull --rebase origin ${{ github.ref_name }} && git push && exit 0; sleep 10; done
+          exit 1
