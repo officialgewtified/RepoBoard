@@ -348,7 +348,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=4">
+<link rel="stylesheet" href="../fx.css?v=5">
 </head>
 <body>
 <header class="wrap top">
@@ -1159,7 +1159,7 @@ function rawTix(k){try{const v=JSON.parse(localStorage.getItem(k)||"[]");return 
 function tAt(t){if(t.day)return Date.parse(t.day+"T12:00:00");if(t.at)return t.at;const k=t.lg&&t.lg[0]&&t.lg[0].k;if(k)return Date.parse(k);
  const m=/^log-(\d+)/.exec(t.id||"");return m?+m[1]:null}
 function weekStart(ms){const d=new Date(ms);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}   // Monday
-function allTix(){return[...rawTix("pb_tickets"),...rawTix("bl_tickets")]}
+function allTix(){return[...rawTix("pb_tickets"),...rawTix("bl_tickets"),...rawTix("cx_tickets")]}
 function weekStake(){const ws=weekStart(Date.now());return allTix().filter(t=>{const a=tAt(t);return a&&a>=ws}).reduce((a,t)=>a+(+t.stake||0),0)}
 function getLimit(){try{const v=parseFloat(localStorage.getItem(LIMKEY));return v>0?v:null}catch(e){return null}}
 function limitNote(){const L=getLimit();if(!L)return"";const s=weekStake();if(s<L*.8)return"";
@@ -1183,7 +1183,7 @@ function bankCard(){const pts=plPoints(tickets),L=getLimit(),s=weekStake(),used=
  return `<section class="card bank"><div class="rchd"><span>Bankroll<small>${SPORTNAME} tickets you saved or logged, settled ones only</small></span><b class="${last>=0?"gold":"red"}">${last>=0?"+":"−"}${money(Math.abs(last))}</b></div>${plChart(pts)}
   <div class="limit"><div class="lrow"><span>This week, both sports</span><b>${money(s)}${L?` of ${money(L)}`:""}</b></div>${L?`<div class="lbar"><i style="width:${(used*100).toFixed(0)}%" class="${s>=L?"over":""}"></i></div>`:""}
   <div class="lset"><label>Weekly limit $<input id="limitamt" type="number" inputmode="decimal" min="0" step="1" value="${L||""}" placeholder="none"></label><button class="sm" data-limitsave>Save limit</button></div>
-  <p class="fine">The limit counts every entry you put in from Monday on, on Gridline and Baseline together. The slip warns you as you get close.</p></div></section>`}
+  <p class="fine">The limit counts every entry you put in from Monday on, on Gridline, Baseline and Crossover together. The slip warns you as you get close.</p></div></section>`}
 
 /* ---------- share a slip as an image ---------- */
 function cutPath(x,X,Y,w,h,c){x.beginPath();x.moveTo(X+c,Y);x.lineTo(X+w,Y);x.lineTo(X+w,Y+h-c);x.lineTo(X+w-c,Y+h);x.lineTo(X,Y+h);x.lineTo(X,Y+c);x.closePath()}
@@ -1526,6 +1526,6 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
-<script src="../fx.js?v=4"></script>
+<script src="../fx.js?v=5"></script>
 </body>
 </html>
