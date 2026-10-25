@@ -1682,6 +1682,7 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  LS.set("pb_imported",[...seen]);if(n){LS.set("pb_tickets",tickets);keep()}}).catch(()=>{}).finally(()=>
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&!document.activeElement.matches("input,select")){stampText();keep()}});   // back from another app: drop games that started
 </script>
 <script src="share.js?v=2"></script>
 <script src="fx.js?v=9"></script>

@@ -746,6 +746,9 @@ function renderSettings(){const th=document.documentElement.dataset.theme,L=getL
  <h4>Odds API credits</h4><p>Crossover uses none of its own. ${cred.length?cred.join(". ")+".":"The boards' credit counts show up after their next update."}</p>
  <div class="btns"><button class="btn go" data-cxclose>Done</button></div>`}
 $("#openSettings").onclick=()=>{renderSettings();$("#settings").showModal()};
+/* once a game starts its picks drop off and the next best take their place: redraw every minute and whenever you come back to the page */
+function tick(){if(!B.some(b=>b.d)||document.hidden)return;const a=document.activeElement;if(a&&a.matches&&a.matches("input,select,textarea"))return;rerender()}
+setInterval(tick,60*1000);document.addEventListener("visibilitychange",tick);
 $("#settings").addEventListener("click",e=>{if(e.target.id==="settings")$("#settings").close()});
 document.addEventListener("click",e=>{const t=e.target.closest("button,input[type=checkbox]");if(!t||!t.closest("#sheet"))return;const d=t.dataset;
  if(d.cxth){setTheme(d.cxth);renderSettings();return}
