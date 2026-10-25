@@ -88,6 +88,7 @@ function checks(c){const F={};const set=(k,level,t,d)=>{const o=F[k];if(!o||LV[l
  else if(c.rc&&c.rc.lp!=null){const p=c.rc.lp;
   if(p>=90)set("lp","ok","Pool money is locked",`${Math.round(p)}% of the pool is locked or burned, so it can't be pulled.`);
   else if(p>=50)set("lp","warn","Pool money partly unlocked",`Only ${Math.round(p)}% of the pool is locked. The rest could be pulled.`);
+  else if(c.ageH>720&&c.liq>2e5)set("lp","warn","Pool money isn't all locked",`${Math.round(p)}% is locked. That's common for older coins where lots of people add to the pool, but the unlocked part can still be pulled.`);
   else set("lp","bad","Pool money isn't locked",`Only ${Math.round(p)}% is locked, so the creator could pull the money out of the pool (a rug pull).`)}
  else set("lp","na","Couldn't check the pool lock");
  if(c.top10!=null){const t=c.top10;
