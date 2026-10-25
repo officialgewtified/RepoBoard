@@ -349,6 +349,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 
 @media (min-width:760px){.mark{font-size:52px}}
 </style>
+<link rel="stylesheet" href="fx.css?v=1">
 </head>
 <body>
 <header class="wrap top">
@@ -1225,9 +1226,10 @@ function renderSettings(){
  <div class="btns"><button class="btn go" data-closesettings>Done</button></div>`}
 
 /* ---------- main render ---------- */
+function skel(){return window.LOADFAIL?`<div class="card empty" style="margin-top:20px">The board didn't load. Check your connection and pull down to refresh.</div>`:'<div class="fx-sk big"></div><div class="fx-sk"></div><div class="fx-sk"></div><div class="fx-sk"></div>'}
 function render(){
  renderSportBar();
- const v=$("#view");v.innerHTML=ui.tab==="games"?renderGames():ui.tab==="pp"?renderPP():ui.tab==="tix"?renderTix():ui.tab==="players"?renderPlayers():renderTop();
+ const v=$("#view");v.innerHTML=!DATA?skel():ui.tab==="games"?renderGames():ui.tab==="pp"?renderPP():ui.tab==="tix"?renderTix():ui.tab==="players"?renderPlayers():renderTop();
  renderSlip();
  document.body.style.paddingBottom=$("#slipin").innerHTML?"":"40px";
 }
@@ -1350,7 +1352,7 @@ function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.s
 
 render();
 fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render()})
- .catch(()=>{$("#stamp").textContent="Couldn't load data.json";render()});
+ .catch(()=>{window.LOADFAIL=1;$("#stamp").textContent="Couldn't load the board";render()});
 /* tickets.json: tickets added by hand (ones that never got saved from the slip). Each id is added once, so deleting it here keeps it gone. */
 fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!Array.isArray(j.add))return;
  const seen=new Set(LS.get("pb_imported",[]));let n=0;
@@ -1361,5 +1363,6 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
+<script src="fx.js?v=1"></script>
 </body>
 </html>

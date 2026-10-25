@@ -352,6 +352,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 .prop .who{cursor:default}
 .lg{margin-right:2px}
 </style>
+<link rel="stylesheet" href="../fx.css?v=1">
 </head>
 <body>
 <header class="wrap top">
@@ -382,7 +383,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
  <div id="banner"></div>
 </header>
 <nav class="tabs"><div class="wrap"><div class="filters" id="sportbar" style="margin-top:0"></div></div></nav>
-<main class="wrap" id="view"></main>
+<main class="wrap" id="view"><div class="fx-sk big"></div><div class="fx-sk big"></div><div class="fx-sk"></div><div class="fx-sk"></div></main>
 <footer class="wrap fine">Crossover reads Gridline and Baseline and needs no Odds API key of its own. Chances are estimates from betting markets, corrected by each board's real results, not guarantees. For entertainment only. 21+ where legal (PrizePicks 18+ in some states). Gambling problem? Call 1-800-GAMBLER.</footer>
 <script>
 "use strict";
@@ -508,5 +509,6 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  const st=B.map(b=>`${esc(b.name)} <b>${b.d?new Date(b.d.updated).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}):"not loaded"}</b>`).join("<br>");
  $("#stamp").innerHTML=st;render()});
 </script>
+<script src="../fx.js?v=1"></script>
 </body>
 </html>
