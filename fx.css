@@ -203,7 +203,7 @@ body:has(.seg):has(#slipin:empty){padding-bottom:calc(86px + env(safe-area-inset
 
 /* ---------- everything you can tap presses in and springs back ---------- */
 button,.pill,a.iconbtn,.askbar,.checks label{-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none;
- transition:transform .38s var(--spring),background-color .18s ease,color .18s ease,box-shadow .18s ease}
+ transition:transform .3s var(--spring)}
 :is(button,.pill,a.iconbtn,.checks label).fx-press{transform:scale(.94);transition-duration:.06s}
 :is(.team,.row,.askbar,.ckrow,.phd,.sbar,.btn.wide).fx-press{transform:scale(.975)}
 .side-b.fx-press{transform:scale(.9)}
@@ -481,70 +481,72 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 @keyframes kitPop{from{transform:translateX(-50%) scale(.6);opacity:0}}
 
 /* =========================================================================
-   Glass: every button is a pane of frosted glass with a fine bright edge and a soft top light.
-   Picked things and the main action are glass tinted with the sport's color; everything else is clear.
+   Solid: flat rounded buttons, no shine or blur. Dark gray until picked; picked is solid gold with bold text.
    ========================================================================= */
-:root{
- --g-fill:linear-gradient(180deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.06) 48%,rgba(255,255,255,.035) 100%);
- --g-edge:rgba(255,255,255,.16);
- --g-glow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04),inset 0 0 18px -10px rgba(255,255,255,.35);
- --g-lift:0 10px 24px -14px rgba(0,0,0,.8);
- --g-tint:linear-gradient(180deg,color-mix(in srgb,var(--led) 92%,#fff 8%) 0%,color-mix(in srgb,var(--led) 78%,transparent) 55%,color-mix(in srgb,var(--led) 66%,transparent) 100%);
- --g-tint-edge:color-mix(in srgb,var(--led) 55%,#fff 45%);
- --g-tint-glow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(0,0,0,.12),inset 0 0 20px -8px rgba(255,255,255,.45);
- --g-tint-lift:0 10px 26px -12px color-mix(in srgb,var(--led) 80%,transparent);
- --g-ink:#f1f4fa}
-:root[data-theme="clean"]{
- --g-fill:linear-gradient(180deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.7) 100%);--g-edge:rgba(15,27,45,.12);
- --g-glow:inset 0 1px 0 #fff,inset 0 0 14px -8px rgba(255,255,255,.9);--g-lift:0 8px 20px -12px rgba(15,27,45,.35);--g-ink:#0f1b2d}
+:root{--b-fill:color-mix(in srgb,var(--ink) 10%,var(--panel));--b-fill-2:color-mix(in srgb,var(--ink) 15%,var(--panel));--b-ink:var(--ink)}
+:root[data-theme="clean"]{--b-fill:#e8ecf2;--b-fill-2:#dde2ea}
 
 .btn,.sm,.pill,.side-b,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn{
- clip-path:none;border:1px solid var(--g-edge);border-radius:14px;position:relative;overflow:hidden;isolation:isolate;
- background:var(--g-fill);color:var(--g-ink);text-shadow:none;box-shadow:var(--g-glow),var(--g-lift)}
-/* panes that sit right on the page blur what's behind them */
-.pill,.net a,.iconbtn,.btn{-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
+ clip-path:none;border:0;border-radius:12px;position:relative;overflow:hidden;
+ background:var(--b-fill);color:var(--b-ink);text-shadow:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .pill,.net a,.iconbtn{border-radius:999px}
-.side-b{border-radius:16px}
-.mode{color:color-mix(in srgb,var(--g-ink) 72%,transparent)}
-.mode b,.side-b small,.side-b .ln{color:var(--g-ink)}
-.pill .ct{opacity:.65}
-/* tinted glass: the main action and whatever's picked */
+.side-b{border-radius:14px}
+.btn,.receipt .rbtns button,.shr-b .btn{font-weight:750}
+.mode{color:color-mix(in srgb,var(--b-ink) 70%,transparent)}
+.mode b,.side-b small,.side-b .ln{color:var(--b-ink)}
+.pill .ct{opacity:.6}
+/* picked, and the main action: solid gold, bold */
 .btn.go,.pill.on,.side-b.on,.mode.on,.receipt .rbtns .go,.net a.on,.shr-b .btn.go,.combo .use{
- background:var(--g-tint);border-color:var(--g-tint-edge);color:var(--ledink,#1b1200);box-shadow:var(--g-tint-glow),var(--g-tint-lift)}
+ background:var(--led);color:var(--ledink,#1b1200);font-weight:800;box-shadow:none}
+.pill.on .ct{opacity:.75}
 .side-b.on b,.side-b.on small,.side-b.on .ln,.mode.on b{color:var(--ledink,#1b1200)}
 .net a.on i{background:var(--ledink,#1b1200)}
-.mode.on{color:color-mix(in srgb,var(--ledink,#1b1200) 78%,transparent)}
-/* the board's side: its number lights up and the pane picks up a faint edge of the sport's color */
-.side-b.rec:not(.on){border-color:color-mix(in srgb,var(--led) 55%,transparent);box-shadow:var(--g-glow),var(--g-lift),inset 0 -2px 0 color-mix(in srgb,var(--led) 80%,transparent)}
+.mode.on{color:color-mix(in srgb,var(--ledink,#1b1200) 80%,transparent)}
+/* the board's side: its number is gold with a thin gold line under the button */
+.side-b.rec:not(.on){box-shadow:inset 0 -3px 0 var(--led)}
 .side-b b{text-shadow:none}
-/* a faint glint crosses the pane when it's tapped */
-.btn::after,.sm::after,.pill::after,.side-b::after,.iconbtn::after,.mode::after,.tk .m button::after,.receipt .rbtns button::after,.net a::after,.shr-b .btn::after{
- content:"";position:absolute;inset:-1px;z-index:1;pointer-events:none;border-radius:inherit;
- background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 62%);transform:translateX(-140%)}
-.fx-press::after{transform:translateX(140%);transition:transform .7s cubic-bezier(.2,.7,.2,1)}
-/* pressing sinks the pane a little and dims its light */
-:is(.btn,.sm,.pill,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn).fx-press{transform:scale(.97);box-shadow:var(--g-glow)}
-.side-b.fx-press{transform:scale(.94);box-shadow:var(--g-glow)}
-button:disabled.btn,button:disabled.mode,button:disabled.sm{opacity:.45;box-shadow:none}
-@media (hover:hover){:is(.btn,.sm,.pill,.side-b,.iconbtn,.mode,.net a):hover{filter:brightness(1.12)}}
-.filters{padding:3px 3px 12px;margin-bottom:-9px;margin-left:-3px;margin-right:-3px}   /* room for the panes' shadows inside the scrolling row */
-.pill{padding:8px 17px;box-shadow:var(--g-glow),0 4px 10px -6px rgba(0,0,0,.6)}
-.pill.on{box-shadow:var(--g-tint-glow),0 4px 12px -6px color-mix(in srgb,var(--led) 85%,transparent)}
-.sbar{clip-path:none;border-radius:18px;border:1px solid var(--g-tint-edge);color:var(--ledink,#1b1200);box-shadow:var(--g-tint-glow),0 12px 30px -14px rgba(0,0,0,.8);
- background:linear-gradient(180deg,color-mix(in srgb,var(--led) 96%,#fff 4%),color-mix(in srgb,var(--led) 88%,transparent));-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%)}
-/* the search bar and today's games are glass too */
-.askbar{clip-path:none;border-radius:16px;border:1px solid var(--g-edge);background:var(--g-fill);box-shadow:var(--g-glow),var(--g-lift);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-.tg{clip-path:none;border-radius:14px;border:1px solid var(--g-edge);background:var(--g-fill);box-shadow:var(--g-glow);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.tg.mine{border-color:color-mix(in srgb,var(--led) 70%,transparent);box-shadow:var(--g-glow),0 0 14px -6px var(--led)}
-.seg .fx-ind{background:var(--led);height:3px!important;box-shadow:0 0 16px var(--led)}
-/* inputs: clear glass set into the panel */
+/* a tap darkens the button and presses it in, with nothing to wait for */
+:is(.btn,.sm,.pill,.side-b,.iconbtn,.mode,.tk .m button,.combo .use,.receipt .rbtns button,.net a,.shr-b .btn).fx-press{transform:scale(.96);filter:brightness(.88)}
+.side-b.fx-press{transform:scale(.93)}
+button:disabled.btn,button:disabled.mode,button:disabled.sm{opacity:.45}
+@media (hover:hover){:is(.btn,.sm,.pill,.side-b,.iconbtn,.mode,.net a):hover{filter:brightness(1.08)}}
+.filters{padding:2px 0 4px;margin-bottom:-2px}
+.pill{padding:8px 16px}
+.sbar{clip-path:none;border-radius:16px;border:0;background:var(--led);color:var(--ledink,#1b1200);box-shadow:0 10px 26px -14px rgba(0,0,0,.8);-webkit-backdrop-filter:none;backdrop-filter:none}
+.seg .fx-ind{background:var(--led);height:3px!important;box-shadow:0 0 12px var(--led)}
+.askbar{clip-path:none;border-radius:14px;border:0;background:var(--b-fill);box-shadow:none}
+.tg{clip-path:none;border-radius:12px;border:0;background:var(--b-fill);box-shadow:none}
+.tg.mine{box-shadow:inset 0 0 0 2px var(--led)}
 .search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.receipt input,.lset input,.cxlim input{
- border-radius:12px;clip-path:none;border:1px solid var(--g-edge);background:rgba(0,0,0,.18);box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
-:root[data-theme="clean"] :is(.search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.receipt input,.lset input,.cxlim input){background:rgba(255,255,255,.7);box-shadow:inset 0 1px 2px rgba(15,27,45,.12)}
-.search:focus,.ctrls input:focus,.ckline input:focus{border-color:color-mix(in srgb,var(--led) 70%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--led) 22%,transparent)}
-/* the win banner is tinted glass too */
-.kit-ban{background:var(--g-tint);border:1px solid var(--g-tint-edge);border-radius:20px;clip-path:none;box-shadow:var(--g-tint-glow),0 20px 50px -20px rgba(0,0,0,.7);
- -webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);color:var(--ledink,#1b1200)}
+ border-radius:12px;clip-path:none;border:0;background:var(--b-fill);box-shadow:none}
+.search:focus,.ctrls input:focus,.ckline input:focus{box-shadow:0 0 0 2px var(--led)}
+.kit-ban{background:var(--led);border:0;border-radius:20px;clip-path:none;box-shadow:0 20px 50px -20px rgba(0,0,0,.7);color:var(--ledink,#1b1200)}
+
+/* ---------- headers: Bebas Neue, bold broadcast caps; body text stays Archivo ---------- */
+@font-face{font-family:"Bebas Neue";src:url(fonts/bebas-neue.woff) format("woff");font-weight:400;font-style:normal;font-display:swap}
+:root{--fh:"Bebas Neue","Archivo",system-ui,sans-serif}
+h2,.hero h3,.sheet h3,.sheet h4,.rchd > span,.rp-h,.case-h,.receipt h4,.kit-ban b,.ckhead b{font-family:var(--fh);font-style:normal;font-weight:400;font-stretch:100%;
+ -webkit-text-stroke:.55px currentColor;paint-order:stroke fill}
+h2{font-size:40px;line-height:.95;letter-spacing:.025em}
+h2::before{height:27px}
+.hero h3{font-size:31px;letter-spacing:.02em}
+.sheet h3{font-size:40px;letter-spacing:.02em}
+.sheet h4{font-size:22px;letter-spacing:.04em;margin:18px 0 6px}
+.rchd > span{font-size:27px;line-height:1;letter-spacing:.02em}
+.rchd > span small{font-family:var(--fd);font-size:12.5px;letter-spacing:0;line-height:1.35;margin-top:5px;-webkit-text-stroke:0}
+.rp-h{font-size:20px;letter-spacing:.06em;text-transform:none}
+.case-h{font-size:24px;letter-spacing:.02em}
+.receipt h4{font-size:32px;letter-spacing:.02em}
+.kit-ban b{font-size:50px;letter-spacing:.02em}
+.ckhead b{font-size:26px;letter-spacing:.02em}
+
+/* ---------- log a ticket (Crossover) ---------- */
+#logxsheet textarea{width:100%;box-sizing:border-box;border:0;border-radius:12px;background:var(--b-fill,var(--raise));color:var(--ink);font:500 16px/1.4 var(--fd);padding:10px 12px;resize:vertical;margin-top:4px}
+.logprev{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:13px}
+.logprev .ok{color:var(--go)}.logprev .no{color:var(--stop)}
+.hrow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.hrow h2{margin-bottom:6px}
+.hrow .iconbtn{flex:none;margin-bottom:8px}
 
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}

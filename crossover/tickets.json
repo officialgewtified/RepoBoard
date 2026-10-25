@@ -1,0 +1,22 @@
+{
+ "_help": "Tickets placed without saving them on Crossover. The page adds each one to My Crossover tickets once (by id), so deleting it there keeps it gone. Fields: mode 'Power' or 'Flex', legs (text), lg (each pick: player, stat key, line, side o/u, sport, start time; used for live tracking and auto-grading), odds, stake, pay (max payout), p (chance every pick hits by Crossover's corrected chances).",
+ "add": [
+  {
+   "id": "cx-log-2026-10-25-rui-jones",
+   "at": 1792946700000,
+   "day": "2026-10-25",
+   "kind": "pp",
+   "mode": "Power",
+   "legs": ["Rui Hachimura More 4.5 Rebounds", "Aaron Jones More 2.5 Receptions"],
+   "lg": [
+    {"pl": "Rui Hachimura", "mk": "player_rebounds", "ln": 4.5, "side": "o", "sp": "NBA", "k": "2026-10-25T23:10:00Z"},
+    {"pl": "Aaron Jones", "mk": "player_receptions", "ln": 2.5, "side": "o", "sp": "NFL", "k": "2026-10-25T17:00:00Z"}
+   ],
+   "odds": "3x",
+   "stake": 5,
+   "pay": "15.00",
+   "p": 0.336,
+   "pw": 0.336
+  }
+ ]
+}
