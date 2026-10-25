@@ -1,121 +1,277 @@
-/* Arena FX: the shared look and motion layer for Gridline, Baseline and Crossover.
-   Loaded after each page's own styles. Everything that moves answers a touch, except one light-up when a page opens.
-   Reduced motion turns all of it off. */
-:root{--spring:cubic-bezier(.34,1.56,.64,1);--out:cubic-bezier(.16,1,.3,1);--glow:color-mix(in srgb,var(--led) 55%,transparent)}
+/* Broadcast: the shared look for Gridline, Baseline and Crossover.
+   Loaded after each page's own styles and overrides them. Built like a TV sports package:
+   cut-corner panels, slanted tabs, condensed italic numbers, one LED accent per sport.
+   Everything that moves answers a touch, except one quick light-up when a tab opens.
+   Reduced motion turns all motion off. */
 
-/* ---------- arena lighting behind the page ---------- */
+/* ---------- type: Archivo, one family; condensed italic for numbers and headings ---------- */
+@font-face{font-family:"Archivo";src:url(fonts/archivo.woff) format("woff");font-weight:100 900;font-stretch:62% 125%;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo";src:url(fonts/archivo-italic.woff) format("woff");font-weight:100 900;font-stretch:62% 125%;font-style:italic;font-display:swap}
+
+/* ---------- tokens ---------- */
+:root{
+ --fd:"Archivo",system-ui,-apple-system,sans-serif;
+ --spring:cubic-bezier(.34,1.56,.64,1);--out:cubic-bezier(.16,1,.3,1);
+ --cut:14px;--cut-s:7px;--slant:9px;
+ --shape:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+ --shape-in:polygon(calc(var(--cut) - .6px) 0,100% 0,100% calc(100% - var(--cut) + .6px),calc(100% - var(--cut) + .6px) 100%,0 100%,0 calc(var(--cut) - .6px));
+ --tile:polygon(var(--cut-s) 0,100% 0,100% calc(100% - var(--cut-s)),calc(100% - var(--cut-s)) 100%,0 100%,0 var(--cut-s));
+ --para:polygon(var(--slant) 0,100% 0,calc(100% - var(--slant)) 100%,0 100%);
+ --glow:color-mix(in srgb,var(--led) 50%,transparent)}
+/* stadium night */
+:root,:root[data-theme="dark"]{--bg:#070d18;--panel:#0e192b;--raise:#17253d;--line:#24375a;--ink:#f1f4fa;--mute:#8999b6;--go:#35e2a0;--stop:#ff5b6c}
+/* each sport's LED color */
+:root[data-sport="fb"]{--led:#ffb420}
+:root[data-sport="bb"]{--led:#ff8b2c;--ledink:#1d0c00}
+:root[data-sport="x"]{--led:#ffa024;--ledink:#1c0e00}
+:root[data-sport="fb"][data-theme="clean"]{--led:#b56a00}
+:root[data-sport="bb"][data-theme="clean"],:root[data-sport="x"][data-theme="clean"]{--led:#c25200;--ledink:#fff}
+
+/* ---------- base ---------- */
 html{background:var(--bg)}
-body{background-color:transparent}
-body::before{content:"";position:fixed;left:-25%;right:-25%;top:-18vh;height:75vh;z-index:-1;pointer-events:none;
- background:radial-gradient(42% 46% at 28% 34%,color-mix(in srgb,var(--led) 20%,transparent),transparent 72%),
-  radial-gradient(36% 40% at 78% 22%,color-mix(in srgb,var(--go) 10%,transparent),transparent 70%)}
-:root[data-theme="clean"] body::before{opacity:.6}
+body{font-family:var(--fd);font-weight:450;font-stretch:100%;letter-spacing:-.003em;background-color:transparent;background-attachment:scroll;
+ -webkit-user-select:none;user-select:none}
+input,textarea,.receipt,table,.pdet,.details,.why,.how,.lede,.fine{-webkit-user-select:text;user-select:text}
+button,input,select{font-family:var(--fd)}
+/* arena light behind the page */
+body::before{content:"";position:fixed;left:-30%;right:-30%;top:-22vh;height:72vh;z-index:-1;pointer-events:none;
+ background:radial-gradient(40% 44% at 26% 36%,color-mix(in srgb,var(--led) 17%,transparent),transparent 72%),
+  radial-gradient(34% 40% at 80% 18%,color-mix(in srgb,var(--go) 7%,transparent),transparent 70%)}
+:root[data-theme="clean"] body::before{opacity:.5}
+:focus-visible{outline:2px solid var(--led);outline-offset:-3px}
 
-/* ---------- the name lights up once when the page opens ---------- */
-.mark{text-shadow:0 0 24px color-mix(in srgb,var(--led) 35%,transparent)}
-.mark .bars{cursor:pointer;filter:drop-shadow(0 6px 14px color-mix(in srgb,var(--led) 40%,transparent))}
-[data-sport="fb"] .mark .bars{animation:fxThrow 1s var(--spring) both}
-[data-sport="bb"] .mark .bars{animation:fxDrop 1.1s linear both}
-[data-sport="x"] .mark .bars{animation:fxPopIn .8s var(--spring) both}
-@keyframes fxThrow{from{transform:translateX(-60px) rotate(-320deg) scale(.6);opacity:0}}
-@keyframes fxDrop{0%{transform:translateY(-70px);opacity:0}35%{transform:translateY(0) scale(1.08,.86);opacity:1}55%{transform:translateY(-18px) scale(.96,1.04)}72%{transform:translateY(0) scale(1.04,.94)}84%{transform:translateY(-5px)}100%{transform:none}}
-@keyframes fxPopIn{from{transform:scale(.2) rotate(-40deg);opacity:0}}
-.mark .bars.fx-spin{animation:fxSpin .9s var(--spring)}
-[data-sport="bb"] .mark .bars.fx-spin{animation:fxDrop .9s linear}
-@keyframes fxSpin{from{transform:rotate(-360deg) scale(.8)}}
+/* numbers and headings: condensed italic, like a score bug */
+.num,.mark,h2,.hero h3,.hero .ev,.stat b,.side-b b,.rchd b,.recrow b,.chip,.price b,.pct,.row .r b,.combo .hd b,.sbar .o,
+.receipt .big,.feel .hl,.prec,.sheet h3,.rank{font-family:var(--fd);font-style:italic;font-stretch:66%;font-variant-numeric:tabular-nums;letter-spacing:0}
+.mode b,.receipt .rbtns button{font-family:var(--fd)}
 
-/* ---------- surfaces ---------- */
-.card{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 90%,#fff 10%) 0,var(--panel) 46px);
- border-color:color-mix(in srgb,var(--line) 80%,#fff 20%)}
-:root[data-theme="clean"] .card{background:var(--panel);border-color:var(--line)}
-.hero,.rcard{border-color:color-mix(in srgb,var(--led) 38%,var(--line));
- box-shadow:0 0 0 1px color-mix(in srgb,var(--led) 14%,transparent),0 22px 50px -24px var(--glow),var(--shadow)}
-.hero .ev,.rchd b{text-shadow:0 0 22px currentColor}
+/* ---------- header ---------- */
+.mark{font-size:46px;font-weight:900;font-stretch:62%;letter-spacing:.015em;gap:12px;
+ text-shadow:0 0 28px color-mix(in srgb,var(--led) 30%,transparent)}
+.mark .bars{width:50px;height:44px;cursor:pointer;filter:drop-shadow(0 6px 16px color-mix(in srgb,var(--led) 45%,transparent))}
+.stamp{font-size:12.5px;font-stretch:92%}
+.iconbtn{border:0;border-radius:0;background:var(--raise);clip-path:var(--para);padding:8px 16px;font-weight:650;font-stretch:92%}
+.askbar{border:0;border-radius:0;background:var(--panel);clip-path:var(--tile);padding:13px 14px;font-weight:550;
+ box-shadow:inset 0 0 0 1px var(--line)}
+.warn{border:0;border-radius:0;clip-path:var(--tile);border-left:4px solid var(--stop)}
+
+/* ---------- section headings: a slanted LED tab, then the title ---------- */
+h2{font-size:31px;font-weight:900;font-stretch:64%;line-height:.95;margin:32px 0 6px;display:flex;align-items:center;gap:10px}
+h2::before{content:"";flex:none;width:12px;height:22px;background:var(--led);clip-path:polygon(45% 0,100% 0,55% 100%,0 100%);
+ box-shadow:0 0 12px var(--led)}
+.lede{font-size:13.5px;line-height:1.45;margin-bottom:12px}
+.fine{font-size:12px}
+
+/* ---------- switch between the three sites ---------- */
+.net{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%;margin-bottom:4px}
+.net a{display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 4px;background:var(--panel);clip-path:var(--para);
+ color:var(--mute);text-decoration:none;font-weight:700;font-stretch:88%;font-size:13.5px;-webkit-tap-highlight-color:transparent;
+ transition:transform .38s var(--spring),background-color .18s,color .18s}
+.net a:active{transform:scale(.95);transition-duration:.06s}
+.net a.on{background:var(--raise);color:var(--ink);box-shadow:inset 0 -3px 0 var(--led)}
+.net a i{width:17px;height:17px;flex:none;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
+.net a.on i{background:var(--led)}
+.net .fb{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'><path d='M4.5 19.5c-1.4-4.8.6-10.7 4.6-13.3 3-1.9 7.2-2.5 10.4-1.7 1.4 4.8-.6 10.7-4.6 13.3-3 1.9-7.2 2.5-10.4 1.7z'/><path d='M9 15l6-6M10.2 11.4l2.4 2.4M12.4 9.2l2.4 2.4'/></svg>")}
+.net .bb{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='8.5'/><path d='M12 3.5v17M3.5 12h17M6.2 5.8c2.6 3.3 2.6 9.1 0 12.4M17.8 5.8c-2.6 3.3-2.6 9.1 0 12.4'/></svg>")}
+.net .x{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'><circle cx='15.5' cy='9' r='5.5'/><path d='M2.8 19.8c-.7-2.7.4-5.9 2.6-7.3 1.7-1 4-1.4 5.8-.9.7 2.7-.4 5.9-2.6 7.3-1.7 1-4 1.4-5.8.9z'/></svg>")}
+.stamp a.iconbtn,#sportbar a.pill[href*="crossover"]{display:none}
+
+/* ---------- the filter row stays at the top; the tabs live in an app bar at the bottom ---------- */
+.tabs{box-shadow:0 14px 18px -14px rgba(0,0,0,.7);background:color-mix(in srgb,var(--bg) 94%,transparent);padding-bottom:8px;
+ backdrop-filter:none;-webkit-backdrop-filter:none}   /* a blur here would trap the bottom bar inside this row */
+.tabs .filters{margin-top:0}
+.seg{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);gap:0;
+ padding:5px max(8px,calc((100vw - 720px) / 2)) calc(3px + env(safe-area-inset-bottom,0px));
+ background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+ border:0;border-radius:0;clip-path:none;box-shadow:0 -1px 0 var(--line),0 -18px 30px -20px rgba(0,0,0,.9)}
+.seg button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 6px;border-radius:0;clip-path:none;background:transparent;
+ font-size:11px;font-weight:650;font-stretch:90%;letter-spacing:0;color:var(--mute)}
+.seg button::before{content:"";width:24px;height:24px;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
+.seg button.on{color:var(--led);background:transparent;box-shadow:none}
+.seg button:active{transform:scale(.88)}
+.seg .fx-ind{position:absolute;z-index:0;top:0!important;height:3px!important;background:var(--led);box-shadow:0 0 14px var(--led);pointer-events:none;
+ transform:scaleX(.42);transition:left .45s var(--spring),width .45s var(--spring)}
+.seg.fx-has-ind button{position:relative;z-index:1}
+.seg [data-tab="top"]{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'><path d='M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6l-5.4 2.9 1.2-6-4.5-4.2 6.1-.7z'/></svg>")}
+.seg [data-tab="games"]{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'><rect x='3' y='5' width='18' height='13' rx='1.5'/><path d='M12 5v13M7 9.5v4M17 9.5v4M9 21h6'/></svg>")}
+.seg [data-tab="pp"]{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='8.5'/><circle cx='12' cy='12' r='4.5'/><circle cx='12' cy='12' r='1.2' fill='black'/></svg>")}
+.seg [data-tab="tix"]{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'><path d='M3.5 7h17v3a2 2 0 0 0 0 4v3h-17v-3a2 2 0 0 0 0-4z'/><path d='M14.5 7.5v1.5M14.5 11.2v1.6M14.5 15v1.5'/></svg>")}
+.seg [data-tab="players"]{--ico:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><circle cx='12' cy='8' r='3.8'/><path d='M4.8 20c.9-3.8 3.8-5.8 7.2-5.8s6.3 2 7.2 5.8'/></svg>")}
+/* the slip sits on top of the app bar */
+.slip{bottom:calc(60px + env(safe-area-inset-bottom,0px))}
+.slip .in{padding-bottom:8px}
+.receipt{max-height:min(56vh,540px)}
+body:has(.seg){padding-bottom:calc(168px + env(safe-area-inset-bottom,0px))!important}
+body:has(.seg):has(#slipin:empty){padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))!important}
+
+/* filters */
+.filters{gap:6px}
+.pill{border:0;border-radius:0;clip-path:var(--para);background:var(--raise);padding:7px 16px;font-weight:650;font-stretch:92%;color:var(--mute)}
+.pill.on{background:var(--led);color:var(--ledink);box-shadow:none}
+.pill .ct{opacity:.65}
+
+/* ---------- panels: cut corners with a fine edge ---------- */
+.card{position:relative;isolation:isolate;background:transparent;border:0;border-radius:0;box-shadow:none;--edge:var(--line);--fill:var(--panel)}
+.card::before,.card::after{content:"";position:absolute;z-index:-1;pointer-events:none}
+.card::before{inset:0;background:var(--edge);clip-path:var(--shape)}
+.card::after{inset:1px;clip-path:var(--shape-in);
+ background:linear-gradient(180deg,color-mix(in srgb,var(--fill) 86%,#fff 14%) 0,var(--fill) 44px,var(--fill))}
+:root[data-theme="clean"] .card::after{background:var(--fill)}
+.hero .list .prop::before,.hero .list .prop::after{display:none}
+.hero,.rcard{--edge:linear-gradient(135deg,var(--led),color-mix(in srgb,var(--led) 25%,var(--line)) 45%,var(--line) 75%);
+ filter:drop-shadow(0 18px 30px color-mix(in srgb,var(--led) 22%,transparent))}
+.tk.W{--edge:var(--go)}.tk.L{--edge:var(--stop)}.tk.PT{--edge:var(--led)}
+.pcard{overflow:visible}
+.pcard .phd,.pcard .plog,.pcard .plnow{position:relative}
+.list{gap:10px}
+
+/* the big record and hero numbers glow like a scoreboard */
+.hero .ev,.rchd b{font-size:50px;font-weight:900;text-shadow:0 0 26px currentColor}
 .rchd b.red,.hero .ev.neg{text-shadow:none}
-.stat{background:color-mix(in srgb,var(--raise) 85%,transparent);border:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
-.seg{background:color-mix(in srgb,var(--panel) 80%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.hero h3{font-size:24px;font-weight:900}
+.rchd{font-weight:750;font-stretch:92%}
+
+/* ---------- tiles inside panels: filled, small cut corners, no outlines ---------- */
+.stat,.team,.row,.combo,.ckrow,.ltleg,.feel,.btn,.sm,.combo .use,.tk .m button,.search,select.sel,.ctrls select,.ctrls input,.ckline input,
+.paygrid input,.ltleg input,.checks label,.mchip,.ms{border-radius:0;clip-path:var(--tile)}
+.stat{background:var(--raise);border:0;padding:9px 11px}
+.stat small{font-stretch:92%;font-weight:550}
+.stat b{font-size:26px;font-weight:900}
+.search,select.sel,.ctrls select,.ctrls input,.ckline input,.paygrid input,.ltleg input{border:0;background:var(--raise);box-shadow:inset 0 -2px 0 var(--line)}
+.search:focus,.ctrls input:focus,.ckline input:focus,.ltleg input:focus{box-shadow:inset 0 -2px 0 var(--led);outline:0}
+.checks label{border:0;background:var(--raise)}
+.btn{border:0;background:var(--raise);font-weight:750;font-stretch:95%;padding:13px 16px}
+.btn.go,.combo .use{position:relative;overflow:hidden}
+.btn.go{background:linear-gradient(180deg,color-mix(in srgb,var(--led) 75%,#fff 25%),var(--led) 55%);color:var(--ledink);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.sm,.tk .m button,.combo .use{border:0;background:var(--raise);font-weight:650}
+.combo{border:0;background:var(--raise)}
+.combo .use{background:var(--panel)}
+.ckrow{border:0;background:var(--raise)}
+.ltleg{border:0}
+.feel{border-left-width:5px}
+.feel small{text-transform:none;letter-spacing:0;font-size:12px;font-stretch:92%}
+.feel .side-b{background:var(--panel)}
+.ltleg input{background:var(--panel)}
+.ms{border:0;background:var(--panel)}
+.cklog span{border:0;border-radius:0;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);background:var(--raise);padding:3px 10px}
+.cklog .ov{background:color-mix(in srgb,var(--go) 18%,var(--raise));color:var(--go)}
+.mchip{padding:3px 9px}
+
+/* team badges: slanted plates in team colors */
+.chip{width:46px;height:36px;border-radius:0;clip-path:var(--para);font-size:15px;font-weight:900;font-stretch:70%}
+.team{border:0;background:var(--raise);padding:9px 11px;grid-template-columns:46px 1fr auto 52px}
+.team.on{background:color-mix(in srgb,var(--led) 16%,var(--raise));box-shadow:inset 3px 0 0 var(--led)}
+.team .meter{height:3px;opacity:.6}
+.tn b{font-weight:750;font-stretch:92%;font-size:16.5px}
+.price b{font-size:27px;font-weight:900}
+.pct{font-size:21px;font-weight:850}
+.lg{border-radius:0;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);padding:2px 9px;font-weight:800;letter-spacing:.02em}
+.row{border:0;background:var(--raise)}
+.row.on{background:color-mix(in srgb,var(--led) 16%,var(--raise));box-shadow:inset 3px 0 0 var(--led)}
+.row .r b{font-size:25px;font-weight:900}
+
+/* labels on picks */
+.tier{border-radius:0;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);padding:2px 9px;font-weight:750;font-stretch:90%;font-size:11.5px}
+.ppmark{border:0;border-radius:0;background:var(--raise);clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%);padding:1px 7px}
+
+/* ---------- a pick ---------- */
+.prop{padding:12px 14px;gap:12px}
+.who b{font-size:17px;font-weight:800;font-stretch:90%;letter-spacing:-.005em}
+.who .m{font-size:12.5px;font-stretch:94%}
+.who .m .stat-name{font-weight:700}
+/* More / Less: the money buttons */
+.sides{gap:7px}
+.side-b{position:relative;min-width:70px;border:0;border-radius:0;clip-path:var(--tile);background:var(--raise);padding:7px 9px 8px}
+.side-b small{font-weight:650;font-stretch:90%;font-size:11.5px}
+.side-b b{font-size:25px;font-weight:900;line-height:1}
+.side-b .ln{font-weight:650}
+.side-b.rec{box-shadow:inset 0 -3px 0 var(--led)}
+.side-b.rec b{color:var(--led)}
+.side-b.on{background:linear-gradient(180deg,color-mix(in srgb,var(--led) 72%,#fff 28%),var(--led) 60%);box-shadow:none}
+.side-b.on b,.side-b.on small,.side-b.on .ln{color:var(--ledink)}
+
+/* ---------- track record and players ---------- */
+.recrow{padding:10px 0}
+.recrow b{font-size:22px;font-weight:900}
+.prec{font-size:24px;font-weight:900}
+.pn b{font-weight:750;font-stretch:92%}
 
 /* ---------- everything you can tap presses in and springs back ---------- */
-button,.pill,a.iconbtn,.askbar,.checks label{-webkit-tap-highlight-color:transparent;touch-action:manipulation;
- transition:transform .42s var(--spring),box-shadow .25s ease,background-color .2s ease,border-color .2s ease,color .2s ease}
-:is(button,.pill,a.iconbtn,.askbar,.checks label):active{transform:scale(.94);transition-duration:.07s}
+button,.pill,a.iconbtn,.askbar,.checks label{-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none;
+ transition:transform .38s var(--spring),background-color .18s ease,color .18s ease,box-shadow .18s ease}
+:is(button,.pill,a.iconbtn,.checks label):active{transform:scale(.94);transition-duration:.06s}
 :is(.team,.row,.askbar,.ckrow,.phd,.sbar,.btn.wide):active{transform:scale(.975)}
 .side-b:active{transform:scale(.9)}
-.prop{transition:transform .42s var(--spring)}
+.prop{transition:transform .38s var(--spring)}
 .prop:has(> .who:active){transform:scale(.985)}
 .who:active{transform:none}
 button:disabled{transform:none!important}
-
-/* the main buttons */
-.btn.go,.combo .use{position:relative;overflow:hidden}
-.btn.go{background:linear-gradient(180deg,color-mix(in srgb,var(--led) 78%,#fff 22%),var(--led) 55%);
- box-shadow:0 8px 22px -8px var(--glow),inset 0 1px 0 rgba(255,255,255,.35)}
-.btn.go:active{box-shadow:0 2px 26px -2px var(--glow),inset 0 1px 0 rgba(255,255,255,.35)}
-
-/* picked sides glow like a lit scoreboard */
-.side-b{position:relative}
-.side-b.rec{box-shadow:0 0 16px -6px var(--glow)}
-.side-b.on{box-shadow:0 0 0 1px var(--led),0 0 26px -2px var(--glow);
- background:linear-gradient(180deg,color-mix(in srgb,var(--led) 80%,#fff 20%),var(--led))}
-.team.on{box-shadow:0 0 0 1px var(--led) inset,0 0 28px -6px var(--glow)}
-.row.on{box-shadow:0 0 0 1px var(--led),0 0 24px -8px var(--glow)}
-.pill.on{box-shadow:0 0 18px -6px color-mix(in srgb,var(--ink) 60%,transparent)}
-
-/* ---------- the tab highlight slides to the tab you tap ---------- */
-.seg{position:relative}
-.seg .fx-ind{position:absolute;z-index:0;border-radius:9px;background:var(--raise);box-shadow:inset 0 -2px 0 var(--led),0 0 18px -6px var(--glow);
- transition:left .5s var(--spring),width .5s var(--spring);pointer-events:none}
-.seg.fx-has-ind button{position:relative;z-index:1}
-.seg.fx-has-ind button.on{background:transparent;box-shadow:none}
+@media (hover:hover){.pill:hover,.seg button:hover,.side-b:hover,.team:hover,.row:hover,.btn:hover{filter:brightness(1.12)}}
 
 /* ---------- touch light, pops and sparks (drawn on a layer above the page) ---------- */
 #fx{position:fixed;inset:0;pointer-events:none;z-index:100;overflow:hidden}
 .fx-ripple{position:fixed;overflow:hidden;pointer-events:none;z-index:100}
-.fx-ripple i{position:absolute;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--led) 42%,transparent) 0,transparent 68%);
- transform:scale(0);animation:fxRip .6s var(--out) forwards}
+.fx-ripple i{position:absolute;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--led) 40%,transparent) 0,transparent 68%);
+ transform:scale(0);animation:fxRip .55s var(--out) forwards}
 @keyframes fxRip{70%{opacity:1}to{transform:scale(1);opacity:0}}
-.fx-pop{animation:fxPop .52s var(--spring)}
-@keyframes fxPop{0%{transform:scale(.88)}45%{transform:scale(1.13)}100%{transform:scale(1)}}
-.fx-ring{position:fixed;pointer-events:none;z-index:100;border:2px solid var(--led);box-shadow:0 0 16px var(--glow);animation:fxRing .55s var(--out) forwards}
-@keyframes fxRing{from{opacity:.95}to{opacity:0;transform:scale(1.35)}}
+.fx-pop{animation:fxPop .48s var(--spring)}
+@keyframes fxPop{0%{transform:scale(.88)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
+.fx-ring{position:fixed;pointer-events:none;z-index:100;background:color-mix(in srgb,var(--led) 45%,transparent);animation:fxRing .5s var(--out) forwards}
+@keyframes fxRing{from{opacity:.9}to{opacity:0;transform:scale(1.4,1.6)}}
 .fx-spark{position:fixed;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--led);pointer-events:none;z-index:100;
  box-shadow:0 0 12px 1px var(--led);animation:fxSpark .7s var(--out) forwards}
-.fx-spark.fb{width:15px;height:9px;margin:-4.5px 0 0 -7.5px;border-radius:50%/50%;background:linear-gradient(90deg,#ff8a00,#ffd27a,#ff8a00)}
+.fx-spark.fb{width:15px;height:9px;margin:-4.5px 0 0 -7.5px;background:linear-gradient(90deg,#ff8a00,#ffd27a,#ff8a00)}
 .fx-spark.bb{width:12px;height:12px;margin:-6px 0 0 -6px;background:radial-gradient(circle at 35% 30%,#ffe3a0,#ff8a1e 60%,#d94e00)}
 .fx-spark.w{background:#fff;box-shadow:0 0 10px 2px #fff;width:5px;height:5px;margin:-2.5px 0 0 -2.5px}
 @keyframes fxSpark{0%{transform:translate(0,0) scale(1.1);opacity:1}65%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot,0deg)) scale(.35);opacity:0}}
 
-/* ---------- one light-up when a tab opens: cards switch on like arena lights ---------- */
-#view.fx-enter > *,#view.fx-enter .list > *,#view.fx-enter .res > *{animation:fxOn .62s var(--out) both;
- animation-delay:calc(min(var(--i,0),12) * 42ms - var(--el,0ms))}
-@keyframes fxOn{0%{opacity:0;transform:translateY(12px)}30%{opacity:.75}38%{opacity:.35}52%{opacity:1}100%{opacity:1;transform:none}}
-#view.fx-enter .meter{transform-origin:left;animation:fxMeter 1s var(--out) both;animation-delay:.2s}
+/* ---------- one quick light-up when a tab opens ---------- */
+#view.fx-enter > *,#view.fx-enter .list > *,#view.fx-enter .res > *{animation:fxOn .42s var(--out) both;animation-delay:calc(min(var(--i,0),10) * 30ms)}
+@keyframes fxOn{from{opacity:0;transform:translateY(10px)}}
+#view.fx-enter .meter{transform-origin:left;animation:fxMeter .8s var(--out) both;animation-delay:.15s}
 @keyframes fxMeter{from{transform:scaleX(0)}}
-#view.fx-enter .form rect{transform-box:fill-box;transform-origin:bottom;animation:fxBar .7s var(--spring) both;animation-delay:.25s}
+#view.fx-enter .form rect{transform-box:fill-box;transform-origin:bottom;animation:fxBar .6s var(--spring) both;animation-delay:.18s}
 @keyframes fxBar{from{transform:scaleY(0)}}
 
-/* ---------- the slip slides up, its count ticks, and the ticket prints ---------- */
-.sbar{position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.4),0 0 34px -6px var(--glow);
- background:linear-gradient(180deg,color-mix(in srgb,var(--led) 80%,#fff 20%),var(--led) 60%)}
-.sbar.fx-in{animation:fxSlipIn .6s var(--spring)}
+/* ---------- the name: thrown in once when the page opens; tap the ball to spin it ---------- */
+[data-sport="fb"] .mark .bars{animation:fxThrow .9s var(--spring) both}
+[data-sport="bb"] .mark .bars{animation:fxDrop 1s linear both}
+[data-sport="x"] .mark .bars{animation:fxPopIn .7s var(--spring) both}
+@keyframes fxThrow{from{transform:translateX(-50px) rotate(-300deg) scale(.6);opacity:0}}
+@keyframes fxDrop{0%{transform:translateY(-60px);opacity:0}35%{transform:translateY(0) scale(1.08,.88);opacity:1}55%{transform:translateY(-15px) scale(.97,1.03)}72%{transform:translateY(0) scale(1.03,.95)}84%{transform:translateY(-4px)}100%{transform:none}}
+@keyframes fxPopIn{from{transform:scale(.2) rotate(-40deg);opacity:0}}
+.mark .bars.fx-spin{animation:fxSpin .85s var(--spring)}
+[data-sport="bb"] .mark .bars.fx-spin{animation:fxDrop .85s linear}
+@keyframes fxSpin{from{transform:rotate(-360deg) scale(.8)}}
+
+/* ---------- the slip: slides up, its count ticks, the ticket prints ---------- */
+.sbar{position:relative;overflow:hidden;border-radius:0;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+ background:linear-gradient(180deg,color-mix(in srgb,var(--led) 75%,#fff 25%),var(--led) 60%);box-shadow:none;padding:13px 16px}
+.slip .in{filter:drop-shadow(0 12px 24px rgba(0,0,0,.45)) drop-shadow(0 0 22px color-mix(in srgb,var(--led) 30%,transparent))}
+.sbar .k{font-weight:750;font-stretch:92%}
+.sbar .o{font-size:28px;font-weight:900;display:inline-block}
+.sbar.fx-in{animation:fxSlipIn .55s var(--spring)}
 @keyframes fxSlipIn{from{transform:translateY(130%)}}
-.sbar .o{display:inline-block}
-.fx-tick{animation:fxTick .5s var(--spring)}
+.fx-tick{animation:fxTick .45s var(--spring)}
 @keyframes fxTick{40%{transform:scale(1.35)}}
-.receipt.fx-print{animation:fxPrint .55s var(--out)}
-@keyframes fxPrint{from{clip-path:inset(0 0 100% 0);transform:translateY(-10px)}to{clip-path:inset(0 0 0 0)}}
+.receipt.fx-print{animation:fxPrint .5s var(--out)}
+@keyframes fxPrint{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
 
-/* ---------- sheets rise in over a blurred page ---------- */
-dialog::backdrop{background:rgba(4,8,16,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-dialog[open] .sheet{animation:fxSheet .5s var(--spring)}
-@keyframes fxSheet{from{transform:translateY(46px) scale(.96);opacity:0}}
-.sheet{box-shadow:0 30px 80px -20px rgba(0,0,0,.6),0 0 0 1px color-mix(in srgb,var(--led) 18%,transparent)}
+/* ---------- sheets ---------- */
+dialog::backdrop{background:rgba(3,7,14,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.sheet{border:0;border-radius:0;clip-path:var(--shape);background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 88%,#fff 12%),var(--panel) 60px)}
+.sheet h3{font-size:30px;font-weight:900}
+dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
+@keyframes fxSheet{from{transform:translateY(40px) scale(.97);opacity:0}}
+.ckhead b{font-weight:800;font-stretch:92%}
+.feel .hl{font-size:34px;font-weight:900}
 
-/* ---------- loading: lights warming up ---------- */
-.fx-sk{height:92px;border-radius:16px;margin-top:10px;border:1px solid var(--line);
- background:linear-gradient(100deg,var(--panel) 30%,color-mix(in srgb,var(--panel) 80%,var(--led) 20%) 50%,var(--panel) 70%);
+/* ---------- loading: panels warming up ---------- */
+.fx-sk{height:96px;margin-top:10px;clip-path:var(--shape);
+ background:linear-gradient(100deg,var(--panel) 30%,color-mix(in srgb,var(--panel) 78%,var(--led) 22%) 50%,var(--panel) 70%);
  background-size:250% 100%;animation:fxSk 1.3s linear infinite}
-.fx-sk.big{height:150px;margin-top:16px}
+.fx-sk.big{height:160px;margin-top:18px}
 @keyframes fxSk{from{background-position:120% 0}to{background-position:-130% 0}}
 
 @media (prefers-reduced-motion:reduce){

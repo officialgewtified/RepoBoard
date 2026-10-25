@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-sport="x">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d1626">
+<meta name="theme-color" content="#070d18">
 <title>Crossover</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -352,7 +352,9 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 .prop .who{cursor:default}
 .lg{margin-right:2px}
 </style>
-<link rel="stylesheet" href="../fx.css?v=1">
+<link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="../fx.css?v=2">
 </head>
 <body>
 <header class="wrap top">
@@ -434,12 +436,14 @@ function mixed(b,r){const mkt=r.po>=.5,f=r.rf,n=f?f.o+f.u:0,h=n?f.o/n:.5;
 /* ---------- Crossover's correction: how each board's picks in the same chance range really did ---------- */
 // For every board, graded PrizePicks-line picks are split into three ranges of the chance the board gave them.
 // A pick's chance is moved by (real hit rate - chance the board expected) in its range, trusted more as more picks get graded (half weight at 30 picks).
+// Until a range has a record, the chance is cut halfway toward 50%: a new board's numbers haven't been tested, so they don't get to outrank tested ones.
 const RANGES=[[0,.542,"Thin"],[.542,.591,"Playable"],[.591,1.01,"Strong"]];
 function calib(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x.hit===false));
  b.all={n:ps.length,w:ps.filter(x=>x.hit).length,ep:ps.length?ps.reduce((a,x)=>a+x.p,0)/ps.length:null};
  b.cal=RANGES.map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length,w=s.filter(x=>x.hit).length,ep=n?s.reduce((a,x)=>a+x.p,0)/n:0;
-  return{lo,hi,l,n,w,hr:n?w/n:null,ep,shift:n?(w/n-ep)*n/(n+30):0}})}
-function corrected(b,p){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0];return{q:clamp(p+c.shift,.3,.75),c}}
+  return{lo,hi,l,n,w,hr:n?w/n:null,ep}})}
+function corrected(b,p){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],w=c.n/(c.n+30),own=c.n?c.hr-c.ep:0,untested=-(p-.5)*.5;
+ return{q:clamp(p+w*own+(1-w)*untested,.3,.75),c}}
 
 /* ---------- candidates from both boards ---------- */
 function etDay(ms){return new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/New_York"})}
@@ -466,10 +470,9 @@ function pairs(C,needMix){let best=null;const L=C.slice(0,40);
 /* ---------- rendering ---------- */
 const lg=x=>`<span class="lg">${esc(x.g.sp)}</span>`;
 function pickRow(x,i){const lineTxt=Number.isInteger(x.r.ln)?x.r.ln:x.r.ln.toFixed(1),gm=x.team&&x.opp?`${esc(x.team.ab||x.team.n)} ${x.r.sd==="a"?"at":"vs"} ${esc(x.opp.ab||x.opp.n)}`:`${esc(x.g.a.ab||x.g.a.n)} @ ${esc(x.g.h.ab||x.g.h.n)}`;
- const moved=Math.abs(x.q-x.p)>=.005;
  return `<div class="card prop"><div class="who"><b>${i!=null?`<span class="rank">${i+1}</span>`:""}${esc(x.r.pl)}${x.r.ij?`<span class="tier mix">${esc(x.r.ij)}</span>`:""}</b>
   <span class="m">${lg(x)}<span class="stat-name">${x.side==="o"?"More":"Less"} ${lineTxt} ${esc(MK[x.r.mk]||x.r.mk)}</span><span>${gm}</span><span>${esc(when(Date.parse(x.g.kick)))}</span></span>
-  <span class="m" style="margin-top:4px"><span>${esc(x.b.name)} said ${pct(x.p)}${moved?`, its ${x.c.l} picks have really hit ${x.c.hr!=null?pct(x.c.hr):"–"} (${x.c.w}-${x.c.n-x.c.w})`:x.c.n?"":", no graded picks to correct by yet"}</span></span></div>
+  <span class="m" style="margin-top:4px"><span>${esc(x.b.name)} said ${pct(x.p)}${x.c.n?`, its ${x.c.l} picks have really hit ${pct(x.c.hr)} (${x.c.w}-${x.c.n-x.c.w})`:", no graded picks yet, so it's cut toward 50% until it has a record"}</span></span></div>
   <div class="sides"><div class="side-b rec"><small>Crossover</small><b>${pct(x.q)}</b><span class="ln">${x.side==="o"?"More":"Less"}</span></div></div></div>`}
 function pairCard(P,title,lede,id){if(!P)return"";const[a,c]=P.legs,all=a.q*c.q,ev=all*PAY2-1;
  return `<h2>${title}</h2><p class="lede">${lede}</p><section class="card hero"><div class="kick"><div><h3>2-pick Power Play</h3><div class="sub">Pays ${PAY2}x if both hit</div></div><div class="ev ${ev>0?"":"neg"}">${pct(all)}</div></div>
@@ -509,6 +512,6 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  const st=B.map(b=>`${esc(b.name)} <b>${b.d?new Date(b.d.updated).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}):"not loaded"}</b>`).join("<br>");
  $("#stamp").innerHTML=st;render()});
 </script>
-<script src="../fx.js?v=1"></script>
+<script src="../fx.js?v=2"></script>
 </body>
 </html>

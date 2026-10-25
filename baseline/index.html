@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-sport="bb">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d1626">
+<meta name="theme-color" content="#070d18">
 <title>Baseline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -349,7 +349,9 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 
 @media (min-width:760px){.mark{font-size:52px}}
 </style>
-<link rel="stylesheet" href="../fx.css?v=1">
+<link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="../fx.css?v=2">
 </head>
 <body>
 <header class="wrap top">
@@ -693,7 +695,7 @@ function renderTop(){
   h+=`<h2>Best PrizePicks lineup</h2><p class="lede">${pos?"The lineup with the highest expected return at standard payouts.":"No lineup beats PrizePicks' payouts right now. This is the closest one."}</p>
   <section class="card hero"><div class="kick"><div><h3>${n}-pick ${hero.mode==="power"?"Power Play":"Flex Play"}</h3><div class="sub">Expected return per entry</div></div><div class="ev ${pos?"":"neg"}">${sgn(hero.ev)}</div></div>
   <div class="stats"><div class="stat"><small>Wins money</small><b>${pct(profit(hero.picks.map(x=>x.p),hero.mode))}</b></div><div class="stat"><small>Hits all</small><b>${pct(hero.all)}</b></div><div class="stat"><small>Top payout</small><b>${hero.mode==="power"?PAY.power[n]:PAY.flex[n][0]}x</b></div></div>
-  ${(()=>{const a=rec()&&rec().all,need=hero.mode==="power"?bePower(n):beFlex(n);return a&&a.n?`<p class="fine" style="margin:0 0 4px">Expected return uses the board's chances. Its PrizePicks picks have really hit <b>${pct(a.w/a.n)}</b>; this lineup needs about ${pct(need)} per pick.</p>`:""})()}
+  ${(()=>{const a=rec()&&rec().all,need=hero.mode==="power"?bePower(n):beFlex(n);return a&&a.n?`<p class="fine" style="margin:0 0 4px">Expected return uses the board's chances. Its PrizePicks picks have really hit <b>${pct(a.w/a.n)}</b>; this lineup needs about ${pct(need)} per pick.</p>`:`<p class="fine" style="margin:0 0 4px">Expected return uses the board's chances, and this board has no graded picks yet, so they haven't been tested against real results. Treat this number as a guess.</p>`})()}
   <div class="list">${hero.picks.map(x=>propRow(x.r)).join("")}</div>
   <button class="btn go wide" style="margin-top:12px" data-usepp="top|0">Put this lineup on the slip</button>
   <p class="fine">Scanned ${T.pp.n.toLocaleString()} lineups from the ${T.pp.pool} strongest ${T.onlyPP?"PrizePicks lines":"props"}, one pick per game.</p></section>`;
@@ -817,7 +819,8 @@ const wl=a=>a&&a.n?`${a.w}-${a.n-a.w}`:"";
 // a label earns its color when it beats what a 2-pick Power Play needs, by enough picks that it isn't luck (one standard error)
 function earns(k){const R=rec(),a=R&&R[k];if(!a||a.n<50)return false;const hr=a.w/a.n;return hr-Math.sqrt(hr*(1-hr)/a.n)>=bePower(2)}
 function recSpan(k){const R=rec(),a=R&&R[k];return a&&a.n?`<span class="trec">${wl(a)}</span>`:""}
-function recCard(){const R=rec(),a=R&&R.all,be=bePower(2);if(!a||!a.n)return"";
+function recCard(){const R=rec(),a=R&&R.all,be=bePower(2);if(!R)return"";
+ if(!a.n)return `<section class="card rcard"><div class="rchd"><span>Board's real record<small>No picks graded yet. Results show up here the morning after the first games, so until then every chance below is untested.</small></span><b>–</b></div></section>`;
  const hr=a.w/a.n,lo=hr-Math.sqrt(hr*(1-hr)/a.n);
  const v=a.n>=50&&lo>=be?["gold","Beating break-even so far."]:hr>=be?["","Ahead of break-even, but too few picks to trust yet."]
   :["red","Not beating PrizePicks payouts yet, so treat every pick below as close to a coin flip."];
@@ -1343,6 +1346,6 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
-<script src="../fx.js?v=1"></script>
+<script src="../fx.js?v=2"></script>
 </body>
 </html>
