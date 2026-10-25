@@ -351,7 +351,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=5">
+<link rel="stylesheet" href="../fx.css?v=6">
 </head>
 <body>
 <header class="wrap top">
@@ -574,6 +574,40 @@ function recordCard(){const rows=B.map(b=>{const a=b.all;if(!b.d)return `<div cl
  return `<section class="card rcard"><div class="rchd"><span>Both boards' real record<small>Picks on PrizePicks lines, graded after the game</small></span></div>
   <div style="margin-top:6px">${rows}</div>
   <p class="fine" style="margin:8px 0 0"><b class="${beat?"gold":"red"}">${beat?"At least one board is beating break-even so far.":"Neither board is beating PrizePicks payouts yet."}</b> A 2-pick Power Play needs each pick to hit ${pct(BE2)}. Crossover can't make picks more accurate. It corrects each board's chance by how its picks in the same range really did, so a cold board's picks stop looking better than they've been.</p></section>`}
+/* ---------- is each board honest? what it said its picks would hit, against what they really hit ---------- */
+function honestyBoard(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x.hit===false));
+ if(ps.length<20)return `<div class="recrow"><span>${esc(b.name)}<br><span class="k">${esc(b.sport)}</span></span><span class="k">${ps.length} graded</span><b>–</b></div><p class="fine" style="margin:0 0 6px">Needs 20 graded PrizePicks-line picks before this chart means anything.</p>`;
+ const bins=[[.5,.54,"Said 50 to 54%"],[.54,.58,"54 to 58%"],[.58,.62,"58 to 62%"],[.62,1.01,"62% and up"]].map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length;
+  return{l,n,ep:n?s.reduce((a,x)=>a+x.p,0)/n:0,hr:n?s.filter(x=>x.hit).length/n:0}}).filter(x=>x.n>=5);
+ const W=340,rowH=42,H=bins.length*rowH+24,X=v=>14+(W-28)*((clamp(v,.3,.8)-.3)/.5);
+ const grid=[.3,.4,.5,.6,.7,.8].map(v=>`<line x1="${X(v)}" x2="${X(v)}" y1="2" y2="${H-20}" class="hg"/><text x="${X(v)}" y="${H-6}" class="ht">${Math.round(v*100)}%</text>`).join("");
+ const rows=bins.map((x,i)=>{const y=26+i*rowH,c=x.hr>=x.ep-.02?"var(--go)":"var(--stop)";
+  return `<text x="14" y="${y-11}" class="hl2">${x.l}</text><text x="${W-14}" y="${y-11}" class="hn" fill="${c}">hit ${pct(x.hr)} of ${x.n}</text>
+   <line x1="${X(x.ep).toFixed(1)}" x2="${X(x.hr).toFixed(1)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="3" opacity=".55"/>
+   <circle cx="${X(x.ep).toFixed(1)}" cy="${y}" r="5" class="hs"/><circle cx="${X(x.hr).toFixed(1)}" cy="${y}" r="6" fill="${c}"/>`}).join("");
+ const hot=bins.filter(x=>x.ep>=.58),hn=hot.reduce((a,x)=>a+x.n,0),hhr=hn?hot.reduce((a,x)=>a+x.hr*x.n,0)/hn:0,hep=hn?hot.reduce((a,x)=>a+x.ep*x.n,0)/hn:0;
+ const v=hn>=20?(hhr<hep-.04?`<b class="red">Its big numbers run too high.</b> At 58% or more it hit ${pct(hhr)} (expected ${pct(hep)}), so Crossover cuts those picks down.`
+  :`<b class="gold">Its big numbers are holding up.</b> At 58% or more it hit ${pct(hhr)} (expected ${pct(hep)}).`):"Too few high-chance picks graded yet to judge its big numbers.";
+ return `<h4 class="rp-h">${esc(b.name)} · ${esc(b.sport)}</h4><svg class="hon" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(b.name)}: chance against real hit rate">${grid}${rows}</svg><p class="bt-v">${v}</p>`}
+function honestySection(){if(!B.some(b=>b.h&&b.h.props&&b.h.props.length))return"";
+ return `<h2>Is each board honest?</h2><p class="lede">Every graded pick on a PrizePicks line, grouped by the chance its board gave it. A solid dot left of the hollow one means that board was too confident there, and Crossover's correction pulls those picks down.</p>
+ <section class="card honcard">${B.map(honestyBoard).join("")}<p class="keys"><span class="key2 said">Board said</span><span class="key2 dot">Really hit</span></p></section>`}
+
+/* ---------- your report card across Gridline, Baseline and Crossover ---------- */
+function reportCard(){const tag=(k,s)=>rawTix(k).map(t=>({...t,_s:s})),S=[...tag("pb_tickets","Football"),...tag("bl_tickets","Basketball"),...tag("cx_tickets","Crossover slips")].filter(t=>t.r);
+ if(!S.length)return"";
+ const add=(m,k,net,w)=>{const o=m[k]=m[k]||{w:0,l:0,net:0,c:0};o.c++;if(w===true)o.w++;else if(w===false)o.l++;if(net!=null)o.net+=net};
+ const play={},sport={},stat={},side={};
+ for(const t of S){const n=(t.legs||[]).length,net=tNet(t),w=net>0?true:net<0?false:null;
+  add(play,t.kind==="pp"?`${t.mode||"PrizePicks"} ${n}-pick`:`${n}-leg parlay`,net,w);add(sport,t._s,net,w);
+  const L=Array.isArray(t.lg)?t.lg:null;if(t.kind==="pp"&&L&&Array.isArray(t.res))t.res.forEach((r,j)=>{const l=L[j];if(!l||!r||r.h==null)return;
+   add(stat,MK[l.mk]||"Other",null,r.h);add(side,l.side==="o"?"More":"Less",null,r.h)})}
+ const rows=(m,isMoney)=>Object.entries(m).sort((a,b)=>b[1].c-a[1].c).map(([k,o])=>{const hr=o.w/(o.w+o.l||1);
+  return `<div class="recrow"><span>${esc(k)}</span><span class="k">${o.w}-${o.l}</span><b class="${isMoney?(o.net>=0?"gold":"red"):hr>=BE2?"gold":"red"}">${isMoney?(o.net>=0?"+":"−")+money(Math.abs(o.net)):pct(hr)}</b></div>`}).join("");
+ return `<h2>Your report card</h2><p class="lede">Every ticket you saved or logged on all three sites, graded. Money rows are what each kind of ticket really made or lost. Pick rows are how often each kind of pick hit, gold when it beat the ${pct(BE2)} a 2-pick Power needs.</p>
+  <section class="card rpcard"><h4 class="rp-h">By sport</h4>${rows(sport,true)}<h4 class="rp-h">By play</h4>${rows(play,true)}
+  ${Object.keys(stat).length?`<h4 class="rp-h">Each pick, by stat</h4>${rows(stat)}<h4 class="rp-h">More vs Less</h4>${rows(side)}`:`<p class="fine">Pick-by-pick rows show up once a saved ticket grades itself.</p>`}</section>`}
+
 let LAST={};
 function render(){
  const live=sp=>B.reduce((a,b)=>a+(b.d?b.d.games.filter(g=>Date.parse(g.kick)>Date.now()&&(sp==="all"||g.sp===sp)).length:0),0);
@@ -589,7 +623,7 @@ function render(){
  const GP=gaps().slice(0,6),GR=gapRecAll();
  h+=`<h2>Line gaps across both</h2><p class="lede">PrizePicks has these lines away from where the sportsbooks have them, so the side shown gets the better number.${GR.n?` So far gap picks have gone <b>${GR.w}-${GR.n-GR.w}</b> (${pct(GR.w/GR.n)}).`:" Their record shows up once some are graded."}</p>`+
   (GP.length?`<div class="list">${GP.map(x=>pickRow(x)).join("")}</div>`:`<div class="card empty">No PrizePicks line is far enough from the books right now.</div>`);
- xGrade();h+=ticketsSection();h+=bankCard();
+ xGrade();h+=ticketsSection();h+=bankCard();h+=reportCard();h+=honestySection();
  const L=getLimit();if(L){const ws=weekStart(Date.now()),wk=[...rawTix("pb_tickets"),...rawTix("bl_tickets"),...rawTix("cx_tickets")].filter(t=>{const a=tAt(t);return a&&a>=ws}).reduce((a,t)=>a+(+t.stake||0),0);
   if(wk>=L)h=`<div class="warn" style="margin-top:14px">You've put in ${money(wk)} this week across both sports, past your ${money(L)} weekly limit.</div>`+h}
  $("#view").innerHTML=h;renderXSlip()}
@@ -625,6 +659,6 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  const st=B.map(b=>`${esc(b.name)} <b>${b.d?new Date(b.d.updated).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}):"not loaded"}</b>`).join("<br>");
  $("#stamp").innerHTML=st;render()});
 </script>
-<script src="../fx.js?v=5"></script>
+<script src="../fx.js?v=6"></script>
 </body>
 </html>

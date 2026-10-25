@@ -348,7 +348,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="fx.css?v=5">
+<link rel="stylesheet" href="fx.css?v=6">
 </head>
 <body>
 <header class="wrap top">
@@ -767,6 +767,7 @@ function renderPP(){
   ${R?(R.top.length?`<div class="res">${R.top.map((r,i)=>comboPP(r,i,"scan")).join("")}</div>`:`<div class="empty">Not enough picks from different teams to build a lineup. PrizePicks needs at least 2 teams.</div>`)+`<p class="scanned">Scanned ${R.n.toLocaleString()} lineups from the ${R.pool} strongest picks.</p>`:""}
   <p class="fine">Power Play break-even per pick: ${be}. Same-game picks can lower PrizePicks payouts.</p>
  </section>
+ ${corrSection()}
  <h2>Player props</h2><p class="lede">Gold marks the likelier side after the books, his recent games and the matchup. Tap a side to add it to your lineup.</p>
  <div class="filters"><button class="pill ${ui.stat==="all"?"on":""}" data-stat="all">All stats</button>${stats.map(s=>`<button class="pill ${ui.stat===s?"on":""}" data-stat="${s}">${esc(MK[s]||s)}</button>`).join("")}</div>
  <div class="toolbar" style="margin-top:8px"><input class="search" id="pq" type="search" placeholder="Find a player or team" value="${esc(ui.pq)}">
@@ -803,12 +804,13 @@ function renderTix(){
  const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.reduce((a,t)=>a+tRet(t),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.pw??t.p??0),0);
  return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}${pu?"-"+pu:""}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
  <p class="fine">${tickets.length-S.length} open. Tickets grade themselves after each update when the board tracked every pick. Tap Won or Edit payout on any ticket to enter what it really paid, like a smaller payout after a tie. A win means it made money, so a Flex that pays back less than you put in counts as a loss. Expected wins is how many the odds said would make money.</p>`:""}
- ${bankCard()}${renderRecord()}<h2>Saved tickets</h2>
+ ${bankCard()}<h2>Saved tickets</h2>
  <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>{const n=t.r?tNet(t):0,cls=!t.r?"":n>0?"W":tRet(t)>0?"PT":"L",flex=t.kind==="pp"&&t.mode==="Flex",ti=tieInfo(t);
   return `<div class="card tk ${cls}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
   ${legRows(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":n===0&&tRet(t)>0?"Refund":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`
    :ti?`<div class="res PT"><b>Tie</b> · ${ti.ties>1?ti.ties+" picks":"a pick"} landed right on the line, so this pays less than ${money(t.pay)}${ti.est!=null?`, usually about ${money(ti.est)}`:""}. Tap ${flex?"Paid":"Won"} and enter what you got.</div>`:""}
-  <div class="m"><button data-tw="${i}">${t.r?"Edit payout":flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>`}
+  <div class="m"><button data-tw="${i}">${t.r?"Edit payout":flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>
+ ${reportCard(tickets)}${renderRecord()}${honestyCard()}${backtestCard()}`}
 
 /* ---------- auto-grade open tickets from the board's graded results (history.json) ---------- */
 let HIST=null;
@@ -1332,6 +1334,114 @@ function renderSportBar(){
 /* ---------- slip ---------- */
 function mlLegs(){return Object.entries(sel).map(([id,s])=>{const g=GI[id];if(!g)return null;const b=best(g,s);if(!b)return null;return{g,s,ml:b.ml,book:b.book,p:pSide(g,s)}}).filter(Boolean)}
 function ppLegs(){return Object.entries(pps).map(([k,s])=>{const r=PI[k];if(!r)return null;const q=pFinal(r);return{r,s,p:s==="o"?q:1-q}}).filter(Boolean)}
+/* ---------- insights: the honesty chart, the backtest, your report card, correlated pairs ---------- */
+const PFX=SITENAME==="Baseline"?"bl_":"pb_";
+const gradedPP=()=>HIST?HIST.props.filter(x=>x.pp&&(x.hit===true||x.hit===false)):[];
+
+/* is the board honest? what it said its picks would hit, against what they really hit */
+function honestyCard(){const ps=gradedPP();if(ps.length<20)return"";
+ const bins=[[.5,.54,"Board said 50 to 54%"],[.54,.58,"54 to 58%"],[.58,.62,"58 to 62%"],[.62,1.01,"62% and up"]].map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length;
+  return{l,n,ep:n?s.reduce((a,x)=>a+x.p,0)/n:0,hr:n?s.filter(x=>x.hit).length/n:0}}).filter(b=>b.n>=5);
+ const W=340,rowH=42,H=bins.length*rowH+24,X=v=>14+(W-28)*((clamp(v,.3,.8)-.3)/.5);
+ const grid=[.3,.4,.5,.6,.7,.8].map(v=>`<line x1="${X(v)}" x2="${X(v)}" y1="2" y2="${H-20}" class="hg"/><text x="${X(v)}" y="${H-6}" class="ht">${Math.round(v*100)}%</text>`).join("");
+ const rows=bins.map((b,i)=>{const y=26+i*rowH,ok=b.hr>=b.ep-.02,c=ok?"var(--go)":"var(--stop)";
+  return `<text x="14" y="${y-11}" class="hl2">${b.l}</text><text x="${W-14}" y="${y-11}" class="hn" fill="${c}">hit ${pct(b.hr)} of ${b.n}</text>
+   <line x1="${X(b.ep).toFixed(1)}" x2="${X(b.hr).toFixed(1)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="3" opacity=".55"/>
+   <circle cx="${X(b.ep).toFixed(1)}" cy="${y}" r="5" class="hs"/><circle cx="${X(b.hr).toFixed(1)}" cy="${y}" r="6" fill="${c}"/>`}).join("");
+ // the higher the board's number, did picks really hit more?
+ const hot=bins.filter(b=>b.ep>=.58),hotN=hot.reduce((a,b)=>a+b.n,0),hotHR=hotN?hot.reduce((a,b)=>a+b.hr*b.n,0)/hotN:null,hotEP=hotN?hot.reduce((a,b)=>a+b.ep*b.n,0)/hotN:null;
+ const verdict=hotN>=20?(hotHR<hotEP-.04?`<b class="red">Its big numbers run too high.</b> When it said 58% or more, those picks really hit ${pct(hotHR)} (it expected ${pct(hotEP)}). Read a high number on this board as closer to a coin flip.`
+   :`<b class="gold">Its big numbers are holding up.</b> When it said 58% or more, those picks really hit ${pct(hotHR)} (it expected ${pct(hotEP)}).`)
+  :"Too few high-chance picks graded yet to say whether its big numbers hold up.";
+ // week by week
+ const wk=d=>addDays(d,-((new Date(d+"T12:00:00Z").getUTCDay()+6)%7)),by={};
+ for(const x of ps){const k=wk(x.d);const o=by[k]=by[k]||{n:0,w:0,e:0};o.n++;if(x.hit)o.w++;o.e+=x.p}
+ const weeks=Object.keys(by).sort().filter(k=>by[k].n>=10);
+ const trend=weeks.length>=2?(()=>{const W2=340,H2=110,Xw=i=>22+(W2-44)*(i/(weeks.length-1)),Y=v=>H2-22-(H2-40)*((clamp(v,.35,.7)-.35)/.35);
+  const line=f=>weeks.map((k,i)=>`${i?"L":"M"}${Xw(i).toFixed(1)} ${Y(f(by[k])).toFixed(1)}`).join("");
+  const lab=weeks.map((k,i)=>`<text x="${Xw(i).toFixed(1)}" y="${H2-6}" class="ht">${new Date(k+"T12:00:00Z").toLocaleDateString([],{month:"short",day:"numeric",timeZone:"UTC"})}</text>`).join("");
+  return `<h4 class="rp-h">Week by week</h4><svg class="hon" viewBox="0 0 ${W2} ${H2}" role="img" aria-label="Hit rate by week"><line x1="0" x2="${W2}" y1="${Y(bePower(2)).toFixed(1)}" y2="${Y(bePower(2)).toFixed(1)}" class="be"/>
+   <path d="${line(o=>o.e/o.n)}" class="ex"/><path d="${line(o=>o.w/o.n)}" class="hi"/>${weeks.map((k,i)=>{const v=by[k].w/by[k].n;return `<circle cx="${Xw(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="3.5" class="hd"/><text x="${Xw(i).toFixed(1)}" y="${(Y(v)+(v>=bePower(2)-.01?-9:16)).toFixed(1)}" class="hv">${pct(v)}</text>`}).join("")}${lab}</svg>
+   <p class="keys"><span class="key2 hi">Really hit</span><span class="key2 ex">Board said</span><span class="key2 be">Break-even, 2-pick Power</span></p>`})():"";
+ return `<h2>Is the board honest?</h2><p class="lede">Every graded pick on a PrizePicks line, grouped by the chance the board gave it. A solid dot left of the hollow one means the board was too confident there.</p>
+  <section class="card honcard"><svg class="hon" viewBox="0 0 ${W} ${H}" role="img" aria-label="Board's chance against real hit rate">${grid}${rows}</svg>
+  <p class="keys"><span class="key2 said">Board said</span><span class="key2 dot">Really hit</span></p><p class="bt-v">${verdict}</p>${trend}</section>`}
+
+/* backtest: replay every graded pick with other settings */
+function backtest(){if(!HIST)return null;const rows=HIST.props.filter(x=>x.pp&&x.act!=null&&x.act!==x.ln&&x.po!=null);
+ // scored two ways: how often the side it leaned hit, and the Brier score (how close its chances were to what happened; lower is better)
+ const score=f=>{let s=0,h=0,n=0;for(const x of rows){const q=f(x);if(q==null)continue;const o=x.act>x.ln?1:0;s+=(q-o)**2;if((q>=.5)===(o===1))h++;n++}return n?{b:s/n,hit:h/n,n}:null};
+ const market=score(x=>x.po),board=score(x=>x.side==="o"?x.p:1-x.p);
+ const full=rows.filter(x=>x.fo!=null);let grid=null;
+ if(full.length>=100){grid=[];for(const fk of["off","light","normal","heavy"])for(const mw of["off","light","normal","heavy"]){const K=FORMK[fk],Wm=MATCHW[mw];
+  const s=score(x=>{if(x.fo==null)return null;let q=x.po;const n=x.fo+x.fu;if(K&&n)q=(K*q+n*(x.fo+.5)/(n+1))/(K+n);
+   if(Wm&&x.mf)q=Phi(PhiInv(q)+x.ln*(x.mf-1)*Wm/sigmaFor(x.mk,x.ln));return q});if(s)grid.push({fk,mw,...s})}
+  grid.sort((a,b)=>b.hit-a.hit||a.b-b.b)}
+ return{market,board,grid,n:rows.length,nfull:full.length}}
+function backtestCard(){const B=backtest();if(!B||!B.market||B.n<30)return"";
+ const name={off:"Off",light:"Light",normal:"Normal",heavy:"Heavy"},cur=B.grid&&B.grid.find(g=>g.fk===formW&&g.mw===matchW),best=B.grid&&B.grid[0];
+ const dh=B.board.hit-B.market.hit,db=B.board.b-B.market.b;
+ const sides=dh>=.01?`Its extra signals (recent games and matchups) picked the right side more often than the sportsbooks alone.`
+  :dh<=-.01?`Its extra signals picked the right side <b>less</b> often than the sportsbooks alone. Turning Recent games and Matchups down in Settings would help.`:`Its extra signals aren't picking the right side any more often than the sportsbooks alone.`;
+ const conf=db>.001?` But its chances run hotter than what happened: the sportsbooks' own numbers were closer, so treat the board's number as a bit lower than it shows.`
+  :db<-.001?` Its chances were also closer to what really happened than the sportsbooks' numbers.`:"";
+ let tail;
+ if(best&&cur&&(best.fk!==formW||best.mw!==matchW)&&best.hit-cur.hit>=.02&&best.b<=cur.b+.001)
+  tail=`<p class="bt-v">Best mix over ${best.n} picks: Recent games <b>${name[best.fk]}</b>, Matchups <b>${name[best.mw]}</b>. Its side hit ${pct(best.hit)}, against ${pct(cur.hit)} with your settings. Past results don't promise future ones, but this is the mix that's worked so far.</p>
+  <button class="btn go wide" data-usebest="${best.fk}|${best.mw}">Use these settings</button>`;
+ else if(best)tail=`<p class="bt-v">Your settings (Recent games ${name[formW]}, Matchups ${name[matchW]}) are already as good as any other mix over ${best.n} picks.</p>`;
+ else tail=`<p class="fine">Trying every mix of the Recent games and Matchups settings needs 100 graded picks saved with their details (${B.nfull} so far). It switches on by itself.</p>`;
+ return `<h2>Backtest</h2><p class="lede">Every graded PrizePicks-line pick, replayed: the side the sportsbooks alone leaned, against the side the board picked.</p>
+  <section class="card btcard"><div class="bt"><div><span>Sportsbooks alone</span><b>${pct(B.market.hit)}</b><small>right side, ${B.market.n} picks</small></div><div><span>The board</span><b class="${dh>=.01?"gold":dh<=-.01?"red":""}">${pct(B.board.hit)}</b><small>right side, ${B.board.n} picks</small></div></div>
+  <p class="bt-v">${sides}${conf}</p>${tail}</section>`}
+
+/* your report card: what you really win and lose on, from your own tickets */
+function reportCard(list,bySport){const S=list.filter(t=>t.r);if(!S.length)return"";
+ const bePick=bePower(2);
+ const add=(m,k,net,w)=>{const o=m[k]=m[k]||{w:0,l:0,net:0,c:0};o.c++;if(w===true)o.w++;else if(w===false)o.l++;if(net!=null)o.net+=net};
+ const play={},sport={},stat={},side={};
+ for(const t of S){const n=(t.legs||[]).length,net=tNet(t),w=net>0?true:net<0?false:null;
+  add(play,t.kind==="pp"?`${t.mode||"PrizePicks"} ${n}-pick`:`${n}-leg parlay`,net,w);if(bySport)add(sport,bySport(t),net,w);
+  const L=Array.isArray(t.lg)?t.lg:null;if(t.kind==="pp"&&L&&Array.isArray(t.res))t.res.forEach((r,j)=>{const l=L[j];if(!l||!r||r.h==null)return;
+   add(stat,MK[l.mk]||"Other",null,r.h);add(side,l.side==="o"?"More":"Less",null,r.h)})}
+ const rows=(m,isMoney)=>Object.entries(m).sort((a,b)=>b[1].c-a[1].c).map(([k,o])=>{const hr=o.w/(o.w+o.l||1);
+  return `<div class="recrow"><span>${esc(k)}</span><span class="k">${o.w}-${o.l}</span><b class="${isMoney?(o.net>=0?"gold":"red"):hr>=bePick?"gold":"red"}">${isMoney?(o.net>=0?"+":"−")+money(Math.abs(o.net)):pct(hr)}</b></div>`}).join("");
+ return `<h2>Your report card</h2><p class="lede">From the tickets you saved or logged and graded. Money rows are what each kind of ticket really made or lost. Pick rows are how often each kind of pick hit, gold when it beat the ${pct(bePick)} a 2-pick Power needs.</p>
+  <section class="card rpcard"><h4 class="rp-h">By play</h4>${rows(play,true)}${bySport&&Object.keys(sport).length>1?`<h4 class="rp-h">By sport</h4>${rows(sport,true)}`:""}
+  ${Object.keys(stat).length?`<h4 class="rp-h">Each pick, by stat</h4>${rows(stat)}<h4 class="rp-h">More vs Less</h4>${rows(side)}`:`<p class="fine">Pick-by-pick rows show up once a saved ticket grades itself.</p>`}</section>`}
+
+/* correlated pairs: picks in the same game that tend to move together */
+const CATS={player_pass_yds:"pass",player_pass_tds:"pass",player_pass_completions:"pass",player_pass_attempts:"pass",player_pass_rush_yds:"pass",
+ player_rush_yds:"rush",player_rush_attempts:"rush",player_rush_reception_yds:"rush",player_reception_yds:"rec",player_receptions:"rec",
+ player_points:"pts",player_threes:"pts",player_rebounds:"reb",player_assists:"ast"};
+// typical correlation between two players' stats in the same game, both on More, before their recent games are mixed in
+const CPRIOR={same:{"pass|rec":.33,"pass|rush":-.1,"rec|rec":-.06,"rec|rush":-.06,"rush|rush":-.15,"pts|pts":-.1,"ast|pts":.15,"reb|reb":-.12,"pts|reb":-.04,"ast|ast":-.1,"ast|reb":0},
+ opp:{"pass|pass":.15,"rec|rec":.07,"pass|rec":.1,"rush|rush":-.05,"pts|pts":.1,"reb|reb":.04,"ast|pts":.05}};
+function pearson(a,b){const n=a.length;if(n<4||b.length!==n)return null;const ma=a.reduce((x,y)=>x+y,0)/n,mb=b.reduce((x,y)=>x+y,0)/n;
+ let s=0,sa=0,sb=0;for(let i=0;i<n;i++){s+=(a[i]-ma)*(b[i]-mb);sa+=(a[i]-ma)**2;sb+=(b[i]-mb)**2}return sa&&sb?{r:s/Math.sqrt(sa*sb),n}:null}
+function corr(ra,rb){if(ra.g!==rb.g||ra.pl===rb.pl||!ra.sd||!rb.sd)return null;const ca=CATS[ra.mk],cb=CATS[rb.mk];if(!ca||!cb)return null;
+ const same=ra.sd===rb.sd;let rho=CPRIOR[same?"same":"opp"][[ca,cb].sort().join("|")]??0;
+ if(same&&ra.rf&&rb.rf&&ra.rf.v&&rb.rf.v){const e=pearson(ra.rf.v,rb.rf.v);if(e){const w=e.n/(e.n+10);rho=w*e.r+(1-w)*rho}}   // teammates' last games, lined up
+ return{rho,same}}
+function bothChance(pa,pb,rho){const a=PhiInv(pa),b=PhiInv(pb),phi=x=>Math.exp(-x*x/2)/Math.sqrt(2*Math.PI);return clamp(pa*pb+rho*phi(a)*phi(b),0,Math.min(pa,pb))}
+function pairInfo(x,y){const c=corr(x.r,y.r);if(!c)return null;const eff=c.rho*(x.side===y.side?1:-1);return{eff,same:c.same,both:bothChance(x.p,y.p,eff),ind:x.p*y.p}}
+function corrPairs(){const C=ppCandidates(P.some(r=>r.pp)).slice(0,40),out=[];
+ for(let i=0;i<C.length;i++)for(let j=i+1;j<C.length;j++){const x=C[i],y=C[j];if(x.r.g!==y.r.g)continue;const I=pairInfo(x,y);if(!I||I.eff<.08)continue;
+  // teammates can't be a PrizePicks lineup alone, so bring in the strongest pick from another game
+  const z=I.same?C.find(w=>w.r.g!==x.r.g):null;if(I.same&&!z)continue;out.push({x,y,z,...I})}
+ return out.sort((a,b)=>b.both-a.both).slice(0,4)}
+function corrSection(){const L=corrPairs();if(!L.length)return"";const line=x=>`<span>${esc(x.r.pl)}<small>${x.side==="o"?"More":"Less"} ${x.r.ln} ${esc(MK[x.r.mk]||x.r.mk)}</small></span>`;
+ return `<h2>Correlated pairs</h2><p class="lede">Picks in the same game that tend to move together, so both hitting is a little likelier than their two chances multiplied. Everything else on the board treats picks as separate. These are rough estimates from typical game patterns and the players' recent games.</p>
+ <div class="list">${L.map(c=>`<div class="card cpcard"><div class="cp1">${line(c.x)}<b>${pct(c.x.p)}</b></div><div class="cp1">${line(c.y)}<b>${pct(c.y.p)}</b></div>
+  <p class="case-s">Both hit about <b>${pct(c.both)}</b>, against ${pct(c.ind)} if they were unrelated.</p>
+  ${c.z?`<p class="fine" style="margin:0 0 4px">Same team, and PrizePicks needs a second team, so this adds the strongest pick from another game. All three hit about ${pct(c.both*c.z.p)}.</p><div class="cp1 cp3">${line(c.z)}<b>${pct(c.z.p)}</b></div>`
+   :`<p class="fine" style="margin:0 0 8px">Different teams, so they can be a 2-pick on their own.</p>`}
+  <p class="fine" style="margin:6px 0 8px">PrizePicks may lower payouts on picks from the same game.</p>
+  <button class="sm" data-corrslip="${[c.x,c.y,c.z].filter(Boolean).map(w=>w.r.i+"|"+w.side).join("|")}">Put ${c.z?"all 3":"both"} on the slip</button></div>`).join("")}</div>`}
+function corrNote(Q){const out=[];for(let i=0;i<Q.length;i++)for(let j=i+1;j<Q.length;j++){const a=Q[i],b=Q[j],I=pairInfo({r:a.r,side:a.s,p:a.p},{r:b.r,side:b.s,p:b.p});
+  if(!I||Math.abs(I.eff)<.08)continue;out.push(`${esc(a.r.pl)} and ${esc(b.r.pl)} ${I.eff>0?"tend to move together, so both hitting is a bit likelier than these chances show":"tend to pull against each other, so both hitting is a bit less likely than these chances show"}.`)}
+ return out.slice(0,2).map(n=>`<div class="note">${n}</div>`).join("")}
+
 function renderSlip(){
  const L=mlLegs(),Q=ppLegs();
  let kind=ui.tab==="games"?"ml":ui.tab==="pp"?"pp":ui.kind;
@@ -1368,7 +1478,7 @@ function renderSlip(){
   <div class="tot"><span>Entry $<input id="stakePP" type="number" inputmode="decimal" value="${st}" min="0"></span><b>Max payout ${money(st*top)}</b></div>
   ${n<2?'<div class="note">PrizePicks needs at least 2 picks from at least 2 different teams.</div>'
    :tt===false?`<div class="note bad" role="alert">Every pick is a ${esc(one?(one.ab||one.n):"same-team")} player. PrizePicks won't take a lineup from one team, so swap one for a player on another team.</div>`
-   :tt===null?'<div class="note">Check these aren\'t all on the same team. PrizePicks needs at least 2 different teams.</div>':""}${same&&tt!==false?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}
+   :tt===null?'<div class="note">Check these aren\'t all on the same team. PrizePicks needs at least 2 different teams.</div>':""}${same&&tt!==false?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}${corrNote(Q)}
   ${limitNote()}<div class="rbtns"><button data-copyall>Copy picks</button><button data-share>Share image</button></div>
   <div class="note">Tap a name to copy it, then paste it into PrizePicks search.</div>
   <div class="rbtns"><button data-clear="pp">Clear</button><button class="go" data-save="pp" data-mode="${mode}" ${tt===false?"disabled":""}>Save ticket</button></div>`;
@@ -1447,6 +1557,9 @@ document.addEventListener("click",e=>{
  if(d.moreprops!==undefined){ui.limit+=60;keep();return}
  if(d.slip!==undefined){ui.slipOpen=!ui.slipOpen;renderSlip();return}
  if(d.copyname!==undefined){copyText(d.copyname,t);return}
+ if(d.usebest){const[f,m]=d.usebest.split("|");if(!FORMK.hasOwnProperty(f)||!MATCHW.hasOwnProperty(m))return;formW=f;matchW=m;LS.set(PFX+"form",f);LS.set(PFX+"match",m);TOP=null;ui.pp.res=null;keep();return}
+ if(d.corrslip){const a=d.corrslip.split("|"),L=[];for(let k=0;k+1<a.length;k+=2){const r=P[+a[k]];if(r)L.push([r.k,a[k+1]])}if(L.length<2)return;
+  pps={};L.forEach(([k,sd])=>pps[k]=sd);ui.ppMode=null;ui.kind="pp";ui.slipOpen=true;save();keep();return}
  if(d.share!==undefined){shareSlip(t);return}
  if(d.limitsave!==undefined){const v=parseFloat($("#limitamt").value);try{if(v>0)localStorage.setItem(LIMKEY,String(v));else localStorage.removeItem(LIMKEY)}catch(e){}keep();return}
  if(d.copyall!==undefined){copyText(ppLegs().map(q=>`${q.r.pl} ${q.s==="o"?"More":"Less"} ${q.r.ln} ${MK[q.r.mk]||q.r.mk}`).join("\n"),t);return}
@@ -1546,6 +1659,6 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 </script>
-<script src="fx.js?v=5"></script>
+<script src="fx.js?v=6"></script>
 </body>
 </html>

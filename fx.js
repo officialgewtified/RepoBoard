@@ -56,7 +56,7 @@ function burst(el){const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.t
   h.appendChild(s);setTimeout(()=>s.remove(),950)}}
 const ATTRS=["data-pp","data-pick","data-sport","data-tab","data-plmode","data-stat","data-ppmode","data-ltside","data-ltkind","data-ltmode","data-ltres",
  "data-th","data-formw","data-matchw","data-day","data-ckmk","data-ckpick","data-useml","data-usepp","data-save","data-copy","data-copyall","data-scanpp","data-scanml",
- "data-gaponly","data-agreeonly","data-share","data-limitsave","data-xp","data-xslip","data-xcopyall","data-xmode","data-xsave"];
+ "data-gaponly","data-agreeonly","data-share","data-limitsave","data-xp","data-xslip","data-xcopyall","data-xmode","data-xsave","data-usebest","data-corrslip"];
 const OPENS=["data-tab","data-sport","data-plmode","data-stat"];
 const isOn=el=>el.classList.contains("on")||el.getAttribute("aria-pressed")==="true";
 let enterNext=false;
@@ -73,7 +73,7 @@ document.addEventListener("click",e=>{
    if(!r.width)return;const d=Math.abs(r.top-r0.top)+Math.abs(r.left-r0.left);if(d<best){best=d;now=n}})}
   if(!now)return;
   if(isOn(now)&&!was){pop(now);if(attr==="data-pp"||attr==="data-pick"||attr==="data-xp")burst(now)}
-  else if(["data-save","data-copy","data-copyall","data-useml","data-usepp","data-share","data-limitsave","data-xslip","data-xcopyall","data-xsave"].includes(attr)){pop(now);burst(now)}}))},true);
+  else if(["data-save","data-copy","data-copyall","data-useml","data-usepp","data-share","data-limitsave","data-xslip","data-xcopyall","data-xsave","data-usebest","data-corrslip"].includes(attr)){pop(now);burst(now)}}))},true);
 
 /* ---------- the ball in the name spins when tapped ---------- */
 document.addEventListener("click",e=>{const b=e.target.closest(".mark .bars");if(!b||!fx())return;

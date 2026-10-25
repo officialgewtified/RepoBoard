@@ -817,7 +817,10 @@ def update_history(games, props, teams, pj):
         h["pending"][f"p|{r['g']}|{r['mk']}|{r['pl']}"] = {
             "t": "p", "sp": g["sp"], "kick": g["kick"], "pl": r["pl"], "mk": r["mk"], "ln": r["ln"], "pp": r["pp"],
             "nb": r["nb"], "po": r["po"], "side": "o" if pf >= .5 else "u", "p": round(max(pf, 1 - pf), 4),
-            "mx": is_mixed(r, teams, gbi), "ag": all_agree(r, teams, gbi, pf), "aid": r["aid"], "bm": r.get("bm")}
+            "mx": is_mixed(r, teams, gbi), "ag": all_agree(r, teams, gbi, pf), "aid": r["aid"], "bm": r.get("bm"),
+            # what went into the chance, so the page can replay any settings later
+            "fo": (r.get("rf") or {}).get("o"), "fu": (r.get("rf") or {}).get("u"),
+            "mf": (round(match_factor(r, teams, gbi), 4) if match_factor(r, teams, gbi) else None)}
     for g in games:
         if g.get("eid") and parse_t(g["kick"]) > NOW and g.get("src") != "espn":
             h["pending"][f"m|{g['id']}"] = {"t": "m", "sp": g["sp"], "kick": g["kick"], "eid": g["eid"],
@@ -842,7 +845,7 @@ def update_history(games, props, teams, pj):
             res = None if act == x["ln"] else ((act > x["ln"]) == (x["side"] == "o"))
             h["props"].append({"d": kick.astimezone(ET).strftime("%Y-%m-%d"), "sp": x["sp"], "pl": x["pl"], "mk": x["mk"],
                                "ln": x["ln"], "pp": x["pp"], "nb": x["nb"], "po": x["po"], "side": x["side"], "p": x["p"],
-                               "mx": x["mx"], "ag": x.get("ag", False), "act": act, "hit": res, "bm": x.get("bm")})
+                               "mx": x["mx"], "ag": x.get("ag", False), "act": act, "hit": res, "bm": x.get("bm"), "fo": x.get("fo"), "fu": x.get("fu"), "mf": x.get("mf")})
         else:
             sc = final_scores(x["sp"], str(day)).get(x["eid"])
             if not sc or sc[0] is None or sc[1] is None:
@@ -916,7 +919,7 @@ def write_brief(games, props, teams, site, url):
         if r.get("bm") is not None:
             gz = (r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])
             if abs(gz) >= .15:
-                gaps.append(dict(item, side="More" if gz > 0 else "Less", books=r["bm"], gz=round(gz, 2)))
+                gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(pf if gz > 0 else 1 - pf, 3), books=r["bm"], gz=round(gz, 2)))
     h = load_json("history.json", {})
     P = [x for x in h.get("props", []) if x.get("pp") and x.get("hit") in (True, False)]
     last_day = max((x["d"] for x in P), default=None)
@@ -926,6 +929,10 @@ def write_brief(games, props, teams, site, url):
              "gaps": sorted(gaps, key=lambda x: -abs(x["gz"]))[:3],
              "last": {"day": last_day, "w": sum(1 for x in last if x["hit"]), "l": sum(1 for x in last if not x["hit"])},
              "record": {"w": sum(1 for x in P if x["hit"]), "n": len(P)}}
+    # how picks on the side a line gap favors have really done
+    G = [x for x in h.get("props", []) if x.get("pp") and x.get("bm") is not None and x.get("act") is not None and x["act"] != x["ln"]
+         and x["bm"] != x["ln"] and abs((x["bm"] - x["ln"]) / sigma_for(x["mk"], x["ln"])) >= .15]
+    brief["gaprec"] = {"w": sum(1 for x in G if (x["act"] > x["ln"]) == (x["bm"] > x["ln"])), "n": len(G)}
     with open(os.path.join(HERE, "brief.json"), "w") as fh:
         json.dump(brief, fh, separators=(",", ":"))
 
