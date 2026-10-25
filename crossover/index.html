@@ -679,7 +679,7 @@ function cxLiveRows(t,bk){const X=t.lg.map(l=>cxLiveLeg(l,bk));if(!X.some(Boolea
  return `<div class="lgl lvl">${t.legs.map((txt,i)=>{const x=X[i],l=t.lg[i];if(!x)return `<div class="na"><span class="mk">–</span><span>${esc(txt)}<small>Not started</small></span></div>`;
   const c={ok:"ok",no:"no",live:"lv",push:"na",dnp:"na"}[x.j.c],mk={ok:"✓",no:"✕",live:"●",push:"=",dnp:"–"}[x.j.c];
   const v=x.s.v,top=Math.max(l.ln*1.3,v,1),w=x.s.dnp?0:Math.max(3,Math.min(100,v/top*100)),m=Math.min(100,l.ln/top*100);
-  return `<div class="${c}" data-game="${esc(x.g.sp)}|${esc(x.g.eid)}"><span class="mk">${mk}</span><span>${esc(txt)}<small>${x.s.dnp?esc(x.s.dnp):`${v} so far · ${esc(x.j.t)}`} · ${esc(x.d.completed?"Final":x.d.detail)}</small>${x.s.dnp?"":`<i class="lvbar"><b style="width:${w.toFixed(0)}%"></b><em style="left:${m.toFixed(0)}%"></em></i>`}</span><b class="lvv">${x.s.dnp?"DNP":v}</b></div>`}).join("")}</div>`}
+  return `<div class="${c}" data-game="${esc(x.g.sp)}|${esc(x.g.eid)}"><span class="mk">${mk}</span><span>${esc(txt)}<small>${x.s.dnp?esc(x.s.dnp):x.s.wait?esc(x.j.t):`${v} so far · ${esc(x.j.t)}`} · ${esc(x.d.completed?"Final":x.d.detail)}</small>${x.s.dnp||x.s.wait?"":`<i class="lvbar"><b style="width:${w.toFixed(0)}%"></b><em style="left:${m.toFixed(0)}%"></em></i>`}</span><b class="lvv">${x.s.dnp?"DNP":x.s.wait?"–":v}</b></div>`}).join("")}</div>`}
 function sweatSection(){const L=openTix().filter(({t,bk})=>t.lg.some(l=>cxLiveLeg(l,bk)));if(!L.length)return"";
  return `<h2>Sweating now</h2><p class="lede">Every open ticket from all three sites with games going, from ESPN's live box scores. Updates about every 40 seconds.</p>
  <div class="list">${L.map(({t,bk,name})=>{const X=t.lg.map(l=>cxLiveLeg(l,bk)),hit=X.filter(x=>x&&x.j.c==="ok").length,miss=X.filter(x=>x&&x.j.c==="no").length,dead=t.mode!=="Flex"&&miss>0;
@@ -1004,7 +1004,7 @@ Promise.all(B.map(b=>Promise.all([fetch(b.data,{cache:"no-store"}).then(r=>r.ok?
  $("#stamp").innerHTML=st;render();liveRefresh();injRefresh(true);scRefresh(true);importTix()});
 </script>
 <script src="../share.js?v=3"></script>
-<script src="../live.js?v=3"></script>
+<script src="../live.js?v=4"></script>
 <script src="../kit.js?v=3"></script>
 <script src="../game.js?v=1"></script>
 <script src="../fx.js?v=13"></script>

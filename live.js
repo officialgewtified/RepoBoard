@@ -14,19 +14,21 @@ async function getJSON(url,maxAge){const c=cache[url];if(c&&Date.now()-c.t<maxAg
 /* one game's box score, boiled down to each player's numbers */
 function parse(j){
  const comp=((j.header||{}).competitions||[])[0]||{},st=(comp.status||{}).type||{};
- const players={};
+ const state=st.state||"pre",completed=!!st.completed||state==="post";
+ const players={};let ready=false;
  for(const team of ((j.boxscore||{}).players)||[])for(const cat of team.statistics||[]){
   const labels=cat.labels||[],name=(cat.name||"").toLowerCase();
   for(const a of cat.athletes||[]){const n=nm(a.athlete&&a.athlete.displayName);if(!n)continue;const P=players[n]=players[n]||{};
-   if(a.didNotPlay){P.dnp=a.reason||"Did not play";continue}
-   const s=a.stats||[],v=l=>{const i=labels.indexOf(l);return i<0?null:s[i]},num=x=>{const f=parseFloat(x);return isFinite(f)?f:0};
+   // ESPN marks everyone "didn't play" until its live box score fills in, and a bench player can still check in later,
+   // so a DNP only counts once the game is over
+   if(a.didNotPlay||!(a.stats&&a.stats.length)){if(completed&&a.didNotPlay)P.dnp=a.reason?a.reason[0]+a.reason.slice(1).toLowerCase():"Did not play";continue}
+   ready=true;const s=a.stats||[],v=l=>{const i=labels.indexOf(l);return i<0?null:s[i]},num=x=>{const f=parseFloat(x);return isFinite(f)?f:0};
    if(name==="passing"){const ca=String(v("C/ATT")||"0/0").split("/");P.pass_c=num(ca[0]);P.pass_a=num(ca[1]);P.pass_yds=num(v("YDS"));P.pass_td=num(v("TD"));P.pass_int=num(v("INT"))}
    else if(name==="rushing"){P.rush_att=num(v("CAR"));P.rush_yds=num(v("YDS"))}
    else if(name==="receiving"){P.rec=num(v("REC"));P.rec_yds=num(v("YDS"))}
    else if(labels.includes("PTS")){P.pts=num(v("PTS"));P.reb=num(v("REB"));P.ast=num(v("AST"));P.stl=num(v("STL"));P.blk=num(v("BLK"));P.to=num(v("TO"));
     P.tpm=num(String(v("3PT")||"0").split("-")[0]);P.min=v("MIN")}}}
- const state=st.state||"pre",completed=!!st.completed||state==="post";
- return{state,completed,detail:st.shortDetail||st.detail||"",players,sig:(st.shortDetail||"")+"|"+JSON.stringify(players)}}
+ return{state,completed,ready,detail:st.shortDetail||st.detail||"",players,sig:(st.shortDetail||"")+"|"+ready+"|"+JSON.stringify(players)}}
 
 const VAL={player_pass_yds:P=>P.pass_yds,player_pass_tds:P=>P.pass_td,player_pass_completions:P=>P.pass_c,player_pass_attempts:P=>P.pass_a,
  player_pass_interceptions:P=>P.pass_int,player_rush_yds:P=>P.rush_yds,player_rush_attempts:P=>P.rush_att,player_reception_yds:P=>P.rec_yds,
@@ -43,9 +45,11 @@ return{
  /* a game's live box score (cached for maxAge ms) */
  async game(sp,eid,maxAge=30000){if(!PATH[sp]||!eid)throw new Error("no game");return parse(await getJSON(`${API}${PATH[sp]}/summary?event=${eid}`,maxAge))},
  /* a player's number for a PrizePicks stat; players who haven't touched the ball yet aren't in a football box score, so they count as 0 */
- stat(d,pl,mk){const P=d.players[nm(pl)];if(P&&P.dnp)return{dnp:P.dnp};const f=VAL[mk];if(!f)return null;const v=P?f(P):0;return{v:v==null?0:v,seen:!!P}},
+ stat(d,pl,mk){const P=d.players[nm(pl)];if(P&&P.dnp)return{dnp:P.dnp};const f=VAL[mk];if(!f)return null;
+  if(!d.ready&&!d.completed&&d.state==="in")return{v:0,seen:false,wait:true};   // the game's on but ESPN's box score hasn't filled in yet
+  const v=P?f(P):0;return{v:v==null?0:v,seen:!!P}},
  /* where a pick stands: ok (hit), no (missed), push, live (still going), dnp */
- judge(s,ln,side,d){if(!s)return null;if(s.dnp)return{c:"dnp",t:"Didn't play"};const v=s.v,fin=d.completed;
+ judge(s,ln,side,d){if(!s)return null;if(s.dnp)return{c:"dnp",t:"Didn't play"};if(s.wait)return{c:"live",t:"ESPN's box score isn't in yet"};const v=s.v,fin=d.completed;
   if(side==="o"){if(v>ln)return{c:"ok",t:"Hit"};if(fin)return v===ln?{c:"push",t:"Push"}:{c:"no",t:"Missed"};return{c:"live",t:`${+(ln-v+(Number.isInteger(ln)?1:.5)).toFixed(1)} to go`}}
   if(v>ln)return{c:"no",t:"Missed"};if(fin)return v===ln?{c:"push",t:"Push"}:{c:"ok",t:"Hit"};return{c:"live",t:`${+(ln-v).toFixed(1)} under`}},
  /* every player listed out, doubtful or questionable in a league right now */
