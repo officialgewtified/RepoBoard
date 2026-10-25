@@ -912,7 +912,14 @@ def write_brief(games, props, teams, site, url):
     h = load_json("history.json", {})
     P = [x for x in h.get("props", []) if x.get("pp") and x.get("hit") in (True, False)]
     ca, cb = fit_cal(P)
-    honest = lambda q: min(.8, max(.3, .5 + ca + cb * (q - .5)))   # chance on the board's side, adjusted for its record
+    # each stat with 40+ graded picks gets its own fit, blended with the overall one (half each at 150 picks), like the pages
+    fits = {}
+    for mk in {x["mk"] for x in P}:
+        L = [x for x in P if x["mk"] == mk]
+        if len(L) >= 40:
+            sa, sb = fit_cal(L); w = len(L) / (len(L) + 150); fits[mk] = (w * sa + (1 - w) * ca, w * sb + (1 - w) * cb)
+    def honest_mk(q, mk):
+        a, b = fits.get(mk, (ca, cb)); return min(.8, max(.3, .5 + a + b * (q - .5)))   # chance on the board's side, adjusted for its record
     for r in props:
         g = gbi.get(r["g"])
         if not g or not r.get("pp") or r.get("nb", 0) < 2 or parse_t(g["kick"]) <= NOW:
@@ -924,7 +931,7 @@ def write_brief(games, props, teams, site, url):
         t = g[r["sd"]] if r.get("sd") else None
         o = g["h" if r.get("sd") == "a" else "a"] if r.get("sd") else None
         item = {"pl": r["pl"], "stat": MARKET_LABEL.get(r["mk"], r["mk"]), "side": "More" if side == "o" else "Less", "ln": r["ln"],
-                "p": round(honest(p), 3), "raw": round(p, 3), "sp": g["sp"],
+                "p": round(honest_mk(p, r["mk"]), 3), "raw": round(p, 3), "sp": g["sp"],
                 "game": (f"{t['ab']} {'at' if r['sd'] == 'a' else 'vs'} {o['ab']}" if t and o else f"{g['a']['ab']} @ {g['h']['ab']}"),
                 "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"]}
         why, mkt, fm = [], (r["po"] if side == "o" else 1 - r["po"]), r.get("rf")
@@ -940,7 +947,7 @@ def write_brief(games, props, teams, site, url):
         if r.get("bm") is not None:
             gz = (r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])
             if abs(gz) >= .15:
-                gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(honest(p) if (gz > 0) == (side == "o") else 1 - honest(p), 3), books=r["bm"], gz=round(gz, 2)))
+                gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(honest_mk(p, r["mk"]) if (gz > 0) == (side == "o") else 1 - honest_mk(p, r["mk"]), 3), books=r["bm"], gz=round(gz, 2)))
     last_day = max((x["d"] for x in P), default=None)
     last = [x for x in P if x["d"] == last_day] if last_day else []
     brief = {"updated": iso(NOW), "site": site, "url": url,

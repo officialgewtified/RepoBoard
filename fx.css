@@ -583,6 +583,17 @@ button.tg{font:inherit;color:inherit;text-align:left;cursor:pointer}
 .glead > b{font-family:var(--fh);font-size:18px;letter-spacing:.03em}
 .glead em{color:var(--stop);font-style:normal;font-weight:700}
 
+/* ---------- slip builder ---------- */
+.sbcard{padding:12px 14px}
+.sbrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;background:var(--b-fill,var(--raise));border-radius:12px}
+.sbrow span{display:flex;flex-direction:column;min-width:0}
+.sbrow small{color:var(--mute);font-size:12.5px;margin-top:1px}
+.sbrow > b{font:italic 900 24px/1 var(--fd);font-stretch:68%;color:var(--led)}
+
+.cxfind{margin-top:12px}
+.cxfind .search{width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px}
+a.btn{display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;color:var(--b-ink,var(--ink))}
+
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
  .fx-ripple,.fx-ring,.fx-spark{display:none}

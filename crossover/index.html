@@ -458,10 +458,13 @@ function fitCal(ps){const n=ps.length,A=30;if(!n)return{a:0,b:.5,n:0};
  if(det<=1e-12){b=.5;a=(sy-b*sx)/(n+A)}else{a=(sy*a22-sx*b2)/det;b=(a11*b2-sx*sy)/det;if(b<.05||b>1){b=clamp(b,.05,1);a=(sy-b*sx)/(n+A)}}
  return{a:clamp(a,-.08,.08),b,n}}
 function calib(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x.hit===false));b.fit=fitCal(ps);
+ // each stat with 40+ graded picks gets its own fit, blended with the board's (half each at 150 picks); the boards do the same
+ b.fitMk={};const by={};for(const x of ps)(by[x.mk]=by[x.mk]||[]).push(x);
+ for(const mk in by){const L=by[mk];if(L.length<40)continue;const S=fitCal(L),w=L.length/(L.length+150);b.fitMk[mk]={a:w*S.a+(1-w)*b.fit.a,b:w*S.b+(1-w)*b.fit.b}}
  b.all={n:ps.length,w:ps.filter(x=>x.hit).length,ep:ps.length?ps.reduce((a,x)=>a+x.p,0)/ps.length:null};
  b.cal=RANGES.map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length,w=s.filter(x=>x.hit).length,ep=n?s.reduce((a,x)=>a+x.p,0)/n:0;
   return{lo,hi,l,n,w,hr:n?w/n:null,ep}})}
-function corrected(b,p){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],F=b.fit||{a:0,b:.5};
+function corrected(b,p,mk){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],F=(mk&&b.fitMk&&b.fitMk[mk])||b.fit||{a:0,b:.5};
  return{q:CXS.honest?clamp(.5+F.a+F.b*(p-.5),.3,.8):p,c}}
 
 /* ---------- candidates from both boards ---------- */
@@ -472,7 +475,7 @@ function picks(){const out=[];
  for(const b of B){if(!b.d)continue;const anyPP=(b.d.props||[]).some(r=>r.pp),best={};
   for(const r of b.d.props||[]){const g=b.GI[r.g];if(!g||Date.parse(g.kick)<=Date.now())continue;if(sportSel!=="all"&&g.sp!==sportSel)continue;
    if(anyPP&&!r.pp)continue;if(r.nb<2)continue;if(r.ij&&/^(out|doubtful)/i.test(r.ij))continue;if(scratch(r.pl,r.ij))continue;
-   const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p),mx=mixed(b,r);
+   const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p,r.mk),mx=mixed(b,r);
    const team=r.sd?g[r.sd]:null,opp=r.sd?g[r.sd==="a"?"h":"a"]:null;
    const x={b,r,g,side,p,q,c,mx,team,opp,key:b.k+"|"+r.g+"|"+r.pl,tk:r.sd?r.g+"|"+r.sd:null};
    if(mx&&CXS.skipMixed)continue;   // the board's recent games or matchup point against the books: both boards skip these too
@@ -492,7 +495,7 @@ const GAPZ=.15;
 function gaps(){const out=[];for(const b of B){if(!b.d)continue;
  for(const r of b.d.props||[]){const g=b.GI[r.g];if(!g||Date.parse(g.kick)<=Date.now()||(sportSel!=="all"&&g.sp!==sportSel))continue;
   if(!r.pp||r.bm==null||r.nb<2||(r.ij&&/^(out|doubtful)/i.test(r.ij))||scratch(r.pl,r.ij))continue;const d=+(r.bm-r.ln).toFixed(2);if(!d)continue;
-  const z=d/b.sigma(r.mk,r.ln);if(Math.abs(z)<GAPZ)continue;const side=d>0?"o":"u",p=side==="o"?r.po:1-r.po,{q,c}=corrected(b,p);
+  const z=d/b.sigma(r.mk,r.ln);if(Math.abs(z)<GAPZ)continue;const side=d>0?"o":"u",p=side==="o"?r.po:1-r.po,{q,c}=corrected(b,p,r.mk);
   out.push({b,r,g,side,p,q,c,z,gap:true,team:r.sd?g[r.sd]:null,opp:r.sd?g[r.sd==="a"?"h":"a"]:null,key:b.k+"|"+r.g+"|"+r.pl})}}
  return out.sort((a,b)=>Math.abs(b.z)-Math.abs(a.z))}
 function gapRecAll(){let w=0,n=0;for(const b of B)for(const x of (b.h&&b.h.props)||[]){if(!x.pp||x.bm==null||x.act==null||x.act===x.ln)continue;
@@ -831,14 +834,53 @@ function importTix(){fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.jso
   if(XT.some(x=>x.id===t.id||(x.legs.join("|")===t.legs.join("|")&&+x.stake===+t.stake)))continue;XT.unshift(t);n++}
  try{localStorage.setItem("cx_imported",JSON.stringify([...S]))}catch(e){}if(n){xTSave();rerender();liveRefresh()}}).catch(()=>{})}
 
+/* ---------- slip builder: pick a size and a style, get a slip from both sports ---------- */
+let SB={n:2,style:"bal",mix:false};try{Object.assign(SB,JSON.parse(localStorage.getItem("cx_sb")||"{}"))}catch(e){}
+const sbSave=()=>{try{localStorage.setItem("cx_sb",JSON.stringify(SB))}catch(e){}};
+function sbEV(qs,mode){const n=qs.length,d=xDist(qs);if(mode==="power")return XPAY.power[n]?qs.reduce((a,q)=>a*q,1)*XPAY.power[n]-1:null;
+ const t=XPAY.flex[n];if(!t)return null;let e=0;t.forEach((m,i)=>e+=(d[n-i]||0)*m);return e-1}
+function sbWin(qs,mode){const n=qs.length,d=xDist(qs);if(mode==="power")return d[n];const t=XPAY.flex[n]||[];let x=0;t.forEach((m,i)=>{if(m>1)x+=d[n-i]||0});return x}
+function sbBuild(C){const n=SB.n,out=[],games=new Set();
+ // the strongest picks, one per game (so at least 2 teams); with "both sports" it alternates football and basketball while both have picks
+ const pools=SB.mix?[C.filter(x=>x.b.k==="fb"),C.filter(x=>x.b.k==="bb")]:[C];let i=0;
+ while(out.length<n&&pools.some(p=>p.length)){const p=pools[i%pools.length];i++;while(p.length){const x=p.shift();if(games.has(x.b.k+x.r.g))continue;games.add(x.b.k+x.r.g);out.push(x);break}}
+ if(out.length<n)return null;const qs=out.map(x=>x.q);
+ const ep=sbEV(qs,"power"),ef=sbEV(qs,"flex");let mode=SB.style==="big"?"power":SB.style==="safe"?(ef!=null?"flex":"power"):(ef!=null&&ef>ep?"flex":"power");
+ return{legs:out,mode,ev:mode==="power"?ep:ef,all:qs.reduce((a,q)=>a*q,1),win:sbWin(qs,mode)}}
+function sbSection(C){const r=sbBuild(C.slice()),n=SB.n,pill=(a,v,l,on)=>`<button class="pill ${on?"on":""}" data-${a}="${v}">${l}</button>`;LAST.sb=r;
+ let body=`<div class="card empty">Not enough picks from different games to build a ${n}-pick slip right now.</div>`;
+ if(r){const m=r.mode,top=m==="power"?XPAY.power[n]:XPAY.flex[n][0];
+  body=`<section class="card sbcard"><div class="rchd"><span>${n}-pick ${m==="power"?"Power":"Flex"} Play<small>${m==="power"?`Pays ${top}x if every pick hits`:`Top payout ${top}x, pays back on ${n-XPAY.flex[n].length+1}+ hits`}</small></span><b class="${r.ev>0?"gold":"red"}">${sgn(r.ev)}</b></div>
+  <div class="stats"><div class="stat"><small>Every pick hits</small><b>${pct(r.all)}</b></div><div class="stat"><small>Makes money</small><b>${pct(r.win)}</b></div><div class="stat"><small>Sports</small><b>${[...new Set(r.legs.map(x=>x.g.sp))].join(" + ")}</b></div></div>
+  <div class="list" style="margin-top:10px">${r.legs.map(x=>`<div class="sbrow"><span><b>${esc(x.r.pl)}</b><small>${esc(x.g.sp)} · ${x.side==="o"?"More":"Less"} ${x.r.ln} ${esc(MK[x.r.mk]||x.r.mk)} · ${esc(gameOf(x))}</small></span><b>${pct(x.q)}</b></div>`).join("")}</div>
+  <div class="btns"><button class="btn" data-sbshare>Share image</button><button class="btn go" data-sbuse>Put on my slip</button></div>
+  <p class="fine">${r.ev>0?"By Crossover's corrected chances this beats the payout, but they're estimates.":"Even the best one doesn't beat PrizePicks' payout by Crossover's corrected chances, so keep the entry small."} One pick per game.</p></section>`}
+ return `<h2>Build my slip</h2><p class="lede">Pick how many and how you want to play it, and Crossover builds it from the strongest corrected picks across both sports.</p>
+ <div class="filters">${[2,3,4,5,6].map(k=>pill("sbn",k,`${k} picks`,n===k)).join("")}</div>
+ <div class="filters">${[["safe","Safe"],["bal","Balanced"],["big","Big payout"]].map(([k,l])=>pill("sbstyle",k,l,SB.style===k)).join("")}${sportSel==="all"?pill("sbmix","1","Both sports",SB.mix):""}</div>${body}`}
+
+/* ---------- check any player: his lines on both boards, and a link to his full player page ---------- */
+let FINDQ="";
+function mkPick(b,r){const g=b.GI[r.g];if(!g)return null;const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p,r.mk);
+ return{b,r,g,side,p,q,c,mx:mixed(b,r),team:r.sd?g[r.sd]:null,opp:r.sd?g[r.sd==="a"?"h":"a"]:null,key:b.k+"|"+r.g+"|"+r.pl,tk:r.sd?r.g+"|"+r.sd:null}}
+function findSection(){const q=pnmx(FINDQ);const bar=`<div class="cxfind"><input id="cxq" class="search" type="search" placeholder="Check any player on either board" value="${esc(FINDQ)}" autocomplete="off"></div>`;
+ if(q.length<2)return bar;const hits=[],names=new Map();
+ for(const b of B){if(!b.d)continue;for(const r of b.d.props||[]){const nm=pnmx(r.pl);if(!(q.includes(" ")?nm.includes(q):nm.split(" ").some(w=>w.startsWith(q))))continue;const g=b.GI[r.g];if(!g||Date.parse(g.kick)<=Date.now())continue;const x=mkPick(b,r);if(x){hits.push(x);names.set(b.k+"|"+r.pl,{b,pl:r.pl})}}}
+ // players with no line today can still be looked up on their board's player page
+ const links=[...names.values()].slice(0,4);
+ const more=hits.length?"":`<div class="card empty">No lines today for "${esc(FINDQ)}" on either board. Their player pages have every recent game:<div class="btns">${B.map(b=>`<a class="btn" href="${b.url}?player=${encodeURIComponent(FINDQ)}">Look up on ${esc(b.name)}</a>`).join("")}</div></div>`;
+ return bar+(hits.length?`<div class="list" style="margin-top:10px">${hits.sort((a,b)=>b.q-a.q).slice(0,12).map(x=>pickRow(x)).join("")}</div>
+  <div class="btns">${links.map(l=>`<a class="btn" href="${l.b.url}?player=${encodeURIComponent(l.pl)}">${esc(l.pl)}'s page on ${esc(l.b.name)}</a>`).join("")}</div>`:more)}
+
 let LAST={};
 function render(){
  const live=sp=>B.reduce((a,b)=>a+(b.d?b.d.games.filter(g=>Date.parse(g.kick)>Date.now()&&(sp==="all"||g.sp===sp)).length:0),0);
  $("#sportbar").innerHTML=SPORTS.filter(([k])=>k==="all"||live(k)).map(([k,l])=>`<button class="pill ${sportSel===k?"on":""}" data-sport="${k}">${l}<span class="ct">${live(k)}</span></button>`).join("");
  const C=picks(),best=pairs(C,false),mix=sportSel==="all"?pairs(C,true):null;LAST={best,mix};
- let h=ticker()+coolBanner()+sweatSection()+recordCard();
+ let h=ticker()+findSection()+coolBanner()+sweatSection()+recordCard();
  if(!C.length)h+=`<div class="card empty" style="margin-top:14px">No player props on either board right now. Each board pulls them in its overnight update for that day's games.</div>`;
  else{
+  h+=sbSection(C);
   h+=pairCard(best,"The slip I'd build","If you asked me for one slip right now, it's this one: the two picks with the highest corrected chance, from 2 different teams.","best");
   if(mix&&(mix.legs[0].key!==(best&&best.legs[0].key)||mix.legs[1].key!==(best&&best.legs[1].key)))h+=pairCard(mix,"The one I'd build with both sports","My pick for a slip with one football and one basketball player.","mix");
   h+=`<h2>Top picks across both</h2><p class="lede">Every prop from both boards with at least 2 books, ranked by Crossover's corrected chance. Picks where a board's own signals disagree are left out, as are players listed out or doubtful.</p>
@@ -856,6 +898,7 @@ function copyText(txt,btn){const done=()=>{const o=btn.textContent;btn.textConte
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,()=>prompt("Copy this:",txt));else prompt("Copy this:",txt)}
 function xKeep(){const a=document.activeElement,id=a&&a.id,pos=a&&a.selectionStart;if(rrRAF){cancelAnimationFrame(rrRAF);rrRAF=0;render()}renderXSlip();if(id){const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}}}
 document.addEventListener("input",e=>{const t=e.target;
+ if(t.id==="cxq"){FINDQ=t.value;const pos=t.selectionStart;rerenderNow();const n=$("#cxq");if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}return}
  if(t.id==="logxtext"||t.id==="logxstake"||t.id==="logxpay"){LOGX[{logxtext:"text",logxstake:"stake",logxpay:"pay"}[t.id]]=t.value;const pos=t.selectionStart,id=t.id;renderLog();const n=$("#"+id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}return}
  if(t.id==="xstake"){xStake=t.value;try{localStorage.setItem("cx_stake",xStake)}catch(_){}xPayTxt=null;xKeep();return}
  if(t.id==="xpayin"){xPayTxt=t.value;const v=parseFloat(t.value),st=+xStake||0;
@@ -888,6 +931,11 @@ document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)r
  if(d.logxmode){LOGX.mode=d.logxmode;renderLog();return}
  if(d.logxclose!==undefined){$("#logx").close();return}
  if(d.logxsave!==undefined){saveLog();return}
+ if(d.sbn){SB.n=+d.sbn;sbSave();rerender();return}
+ if(d.sbstyle){SB.style=d.sbstyle;sbSave();rerender();return}
+ if(d.sbmix!==undefined){SB.mix=!SB.mix;sbSave();rerender();return}
+ if(d.sbuse!==undefined){const r=LAST.sb;if(!r)return;XS=r.legs.map(xItem);xMode=r.mode;xSave();xOpen=true;rerender();return}
+ if(d.sbshare!==undefined){const r=LAST.sb;if(r)xShare(r.legs.map(xItem),r.mode,t);return}
  if(d.xshare!==undefined){const P=xPlay();xShare(XS,P.m,t,P.top);return}
  if(d.xalt!==undefined){const i=+d.xalt,s=XS[i];if(!s)return;const base=s.ln0!=null?s.ln0:s.ln;
   const v=prompt(`${s.pl}, ${MK[s.mk]||s.mk}: type the line PrizePicks shows.\nGoblins (green) are lower than ${base} and demons (red) are higher; both are More only. Type ${base} for the regular line.`,s.ln);

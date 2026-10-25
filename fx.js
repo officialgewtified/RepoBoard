@@ -56,7 +56,7 @@ function burst(el){const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.t
   h.appendChild(s);setTimeout(()=>s.remove(),950)}}
 const ATTRS=["data-pp","data-pick","data-sport","data-tab","data-plmode","data-stat","data-ppmode","data-ltside","data-ltkind","data-ltmode","data-ltres",
  "data-th","data-formw","data-matchw","data-day","data-ckmk","data-ckpick","data-useml","data-usepp","data-save","data-copy","data-copyall","data-scanpp","data-scanml",
- "data-gaponly","data-agreeonly","data-share","data-limitsave","data-xp","data-xslip","data-xcopyall","data-xmode","data-xsave","data-usebest","data-corrslip","data-xshare","data-xsharepair","data-honest","data-paystd","data-xpaystd","data-cxth","data-cxhonest","data-cxform","data-cxmatch","data-recapshare","data-coolok","data-backup","data-xcorr","data-corrslip","data-logxsave"];
+ "data-gaponly","data-agreeonly","data-share","data-limitsave","data-xp","data-xslip","data-xcopyall","data-xmode","data-xsave","data-usebest","data-corrslip","data-xshare","data-xsharepair","data-honest","data-paystd","data-xpaystd","data-cxth","data-cxhonest","data-cxform","data-cxmatch","data-recapshare","data-coolok","data-backup","data-xcorr","data-corrslip","data-logxsave","data-sbuse","data-sbshare"];
 const OPENS=["data-tab","data-sport","data-plmode","data-stat"];
 const isOn=el=>el.classList.contains("on")||el.getAttribute("aria-pressed")==="true";
 let enterNext=false;
@@ -76,8 +76,8 @@ document.addEventListener("click",e=>{
   else if(["data-save","data-copy","data-copyall","data-useml","data-usepp","data-share","data-limitsave","data-xslip","data-xcopyall","data-xsave","data-usebest","data-corrslip","data-xshare","data-xsharepair"].includes(attr)){pop(now);burst(now)}}))},true);
 
 /* a tapped choice lights up at once; the page redraws a frame later and confirms it */
-const PICKS=["data-pp","data-xp","data-stat","data-sport","data-ppmode","data-xmode","data-th","data-cxth","data-formw","data-matchw","data-honest","data-cxhonest","data-cxform","data-cxmatch","data-day","data-plmode"];
-const TOGGLES=["data-pp","data-xp","data-pponly","data-agreeonly","data-gaponly"];
+const PICKS=["data-sbn","data-sbstyle","data-pp","data-xp","data-stat","data-sport","data-ppmode","data-xmode","data-th","data-cxth","data-formw","data-matchw","data-honest","data-cxhonest","data-cxform","data-cxmatch","data-day","data-plmode"];
+const TOGGLES=["data-sbmix","data-pp","data-xp","data-pponly","data-agreeonly","data-gaponly"];
 document.addEventListener("click",e=>{const el=e.target.closest("button");if(!el||el.disabled)return;
  const a=[...PICKS,...TOGGLES].find(x=>el.hasAttribute(x));if(!a)return;const was=isOn(el);
  if(TOGGLES.includes(a)&&was){el.classList.remove("on");return}
