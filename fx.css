@@ -416,6 +416,38 @@ dialog[open] .sheet{animation:fxSheet .45s var(--spring)}
 :root[data-theme="clean"] .receipt .leg .alt.dem{color:#c4283a}
 .receipt .tot input#payPP,.receipt .tot input#xpayin{width:96px}
 
+/* ---------- live sweat tracker ---------- */
+.lvl{gap:6px;margin-top:8px}
+.lvl > div{align-items:center;background:var(--raise);clip-path:var(--tile);padding:8px 10px}
+.lvl > div > span:nth-child(2){flex:1;min-width:0;color:var(--ink)}
+.lvl small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.lvl .lvv{font:italic 900 26px/1 var(--fd);font-stretch:66%;color:var(--ink);min-width:36px;text-align:right}
+.lvl .ok .lvv{color:var(--go)}.lvl .no .lvv{color:var(--stop)}
+.lvl .lv .mk{color:var(--led);animation:fxLive 1.4s ease-in-out infinite}
+@keyframes fxLive{50%{opacity:.25}}
+.lvbar{position:relative;display:block;height:6px;margin-top:7px;background:color-mix(in srgb,var(--mute) 22%,transparent)}
+.lvbar b{display:block;height:100%;background:var(--led);transition:width .6s var(--out)}
+.ok .lvbar b{background:var(--go)}.no .lvbar b{background:var(--stop)}
+.lvbar em{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);opacity:.85}
+.sres{font-size:13px;margin-top:8px;color:var(--mute)}
+.sres b{color:var(--ink)}
+/* ---------- cool-off, weekly recap, gap scoreboard, stacks ---------- */
+.cool{padding:12px 14px 12px 18px;margin-top:14px;font-size:14px;line-height:1.45;color:var(--ink);box-shadow:inset 4px 0 0 var(--led)}
+.cool .sm{display:block;margin-top:10px;width:100%}
+.recap,.gapscore{padding:12px 14px}
+.gapscore{margin-top:10px}
+.cpb{display:flex;flex-direction:column;gap:6px}
+
+/* ---------- Mix: turf up top, hardwood below, one glowing seam (court-mix.svg); panels sit on it in a deep neutral ---------- */
+:root[data-theme="mix"]{
+ --bg:#111814;--panel:#17201c;--raise:#212c27;--line:#344539;--ink:#f6f4ec;--mute:#b8c1b3;
+ --led:#ffa024;--ledink:#1c0e00;--go:#7ef0b6;--stop:#ff8f7d;--paper:#f6f1e4;--paperink:#1b1a17;--paperline:#d9d0bb;
+ --shadow:0 10px 30px rgba(0,0,0,.4);color-scheme:dark}
+:root[data-theme="mix"] body{background-image:none}
+:root[data-theme="mix"] body::after{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:#111814 url(court-mix.svg) center/cover no-repeat}
+:root[data-sport="fb"][data-theme="mix"]{--led:#ffb420;--ledink:#1b1200}
+:root[data-sport="bb"][data-theme="mix"]{--led:#ff8b2c;--ledink:#1d0c00}
+
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important}
  .fx-ripple,.fx-ring,.fx-spark{display:none}

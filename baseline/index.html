@@ -348,7 +348,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </style>
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=8">
+<link rel="stylesheet" href="../fx.css?v=9">
 </head>
 <body>
 <header class="wrap top">
@@ -577,6 +577,7 @@ function gameTxt(r){const g=GI[r.g],t=teamOf(r);if(!t)return `${g.a.ab||g.a.n} @
 function ppCandidates(onlyPP,onlyAgree){
  const byPl={};for(const r of P){const g=GI[r.g];if(!g||!live(g)||!inSport(r.sp))continue;if(onlyPP&&!r.pp)continue;
   if(r.nb<2)continue;   // need at least two books before a pick goes into lineups
+  if(scratchOf(r))continue;   // ruled out since the overnight update
   if(skipMixed&&mixed(r))continue;   // books and his recent games disagree: leave it out
   if(onlyAgree&&!agree(r))continue;
   const{side,p}=propSide(r);if(p<.5)continue;const k=r.g+"|"+r.pl;if(!byPl[k]||byPl[k].p<p)byPl[k]={r,side,p}}
@@ -635,6 +636,7 @@ function gameCard(g){
  </article>`}
 
 function extraChips(r){const g=GI[r.g],out=[];
+ const sc=window.Live&&scratchOf(r);if(sc)out.push(`<span class="mchip tough">Now ${esc(sc)}, after the update</span>`);
  if(r.ij&&!/^active$/i.test(r.ij))out.push(`<span class="mchip tough">${esc(r.ij)}</span>`);
  if(r.op!=null&&r.op!==r.ln)out.push(`<span class="mchip even">PP line moved ${r.op} \u2192 ${r.ln}</span>`);
  return out.join(" ")}
@@ -702,9 +704,9 @@ function renderTop(){
  const ag=spread(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&agree(r)&&(!T.onlyPP||r.pp)).sort((a,b)=>propSide(b).p-propSide(a).p),2,8,r=>r.g);   // at most 2 per game while other games have picks
  const pg=[...new Set(P.filter(r=>live(GI[r.g])&&inSport(r.sp)&&(!T.onlyPP||r.pp)).map(r=>r.g))];
  const oneGame=pg.length===1?`<div class="card empty" style="margin-top:8px">Only ${esc(GI[pg[0]].a.n)} @ ${esc(GI[pg[0]].h.n)} has player props right now, so every pick comes from that game. Props for later games are pulled in the update before they tip off.</div>`:"";
- h+=recCard();
+ h+=coolBanner();h+=sweatSection();h+=recCard();
  h+=caseSection(P.some(r=>r.pp));
- h+=gapSection();
+ h+=gapSection();h+=gapScore();
  const RA=rec()&&rec().agree,be2=bePower(2);
  h+=`<h2>All signals agree</h2><p class="lede">The books, the player's recent games and the matchup all point the same way, with 2+ books and no injury tag.${RA&&RA.n?` So far these have gone <b>${wl(RA)}</b> (${pct(RA.w/RA.n)}) on PrizePicks lines${RA.w/RA.n<be2?`, below the ${pct(be2)} a 2-pick Power Play needs`:""}.`:" Their real record shows up here once some are graded."}</p>`;
  h+=ag.length?`<div class="list">${ag.map(propRow).join("")}</div>`:`<div class="card empty">No pick has every signal lined up right now. That's normal; it means skip rather than force it.</div>`;
@@ -765,7 +767,7 @@ function renderPP(){
  if(ui.psort==="time")list.sort((a,b)=>(GI[a.g].t||0)-(GI[b.g].t||0)||propSide(b).p-propSide(a).p);else list.sort((a,b)=>propSide(b).p-propSide(a).p);
  const stats=[...new Set(P.map(r=>r.mk))];
  const be=[2,3,4,5,6].map(n=>`${n}: ${pct(bePower(n))}`).join(", ");
- return `<h2>Lineup scanner</h2><p class="lede">Scores every lineup of the strongest picks against PrizePicks payouts, including Flex partial wins.</p>
+ return `${coolBanner()}<h2>Lineup scanner</h2><p class="lede">Scores every lineup of the strongest picks against PrizePicks payouts, including Flex partial wins.</p>
  <section class="card scanner"><div class="ctrls">
   <label>Picks<select id="ppSize"><option value="auto" ${ui.pp.size==="auto"?"selected":""}>Any (2–6)</option>${[2,3,4,5,6].map(n=>`<option ${ui.pp.size==n?"selected":""}>${n}</option>`).join("")}</select></label>
   <label>Play<select id="ppMode"><option value="best" ${ui.pp.mode==="best"?"selected":""}>Best</option><option value="power" ${ui.pp.mode==="power"?"selected":""}>Power</option><option value="flex" ${ui.pp.mode==="flex"?"selected":""}>Flex</option></select></label>
@@ -813,10 +815,10 @@ function renderTix(){
  const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.reduce((a,t)=>a+tRet(t),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.pw??t.p??0),0);
  return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}${pu?"-"+pu:""}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
  <p class="fine">${tickets.length-S.length} open. Tickets grade themselves after each update when the board tracked every pick. Tap Won or Edit payout on any ticket to enter what it really paid, like a smaller payout after a tie. A win means it made money, so a Flex that pays back less than you put in counts as a loss. Expected wins is how many the odds said would make money.</p>`:""}
- ${bankCard()}<h2>Saved tickets</h2>
+ ${coolBanner()}${bankCard()}${recapCard()}<h2>Saved tickets</h2>
  <div class="list" style="margin-top:10px">${tickets.length?tickets.map((t,i)=>{const n=t.r?tNet(t):0,cls=!t.r?"":n>0?"W":tRet(t)>0?"PT":"L",flex=t.kind==="pp"&&t.mode==="Flex",ti=tieInfo(t);
   return `<div class="card tk ${cls}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs, ${esc(t.odds)}</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
-  ${legRows(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":n===0&&tRet(t)>0?"Refund":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`
+  ${(!t.r&&liveRows(t))||legRows(t)}${scratchNote(t)}${t.r?`<div class="res ${cls}"><b>${n>0?"Won":n===0&&tRet(t)>0?"Refund":tRet(t)>0?"Partial":"Lost"}</b> · paid ${money(tRet(t))}, ${n>=0?"+":"−"}${money(Math.abs(n))}${t.hits?` · ${esc(t.hits)} hit`:""}${t.auto?" · graded automatically":""}</div>`
    :ti?`<div class="res PT"><b>Tie</b> · ${ti.ties>1?ti.ties+" picks":"a pick"} landed right on the line, so this pays less than ${money(t.pay)}${ti.est!=null?`, usually about ${money(ti.est)}`:""}. Tap ${flex?"Paid":"Won"} and enter what you got.</div>`:""}
   <div class="m"><button data-tw="${i}">${t.r?"Edit payout":flex?"Paid":"Won"}</button><button data-tl="${i}">Lost</button><button data-td="${i}">Delete</button></div></div>`}).join(""):'<div class="card empty">Saved tickets show up here so you can track how your picks do. Placed one without saving it? Tap Log a ticket.</div>'}</div>
  ${reportCard(tickets)}${renderRecord()}${honestyCard()}${backtestCard()}`}
@@ -1420,19 +1422,102 @@ function pairInfo(x,y){const c=corr(x.r,y.r);if(!c)return null;const eff=c.rho*(
 function corrPairs(){const C=ppCandidates(P.some(r=>r.pp)).slice(0,40),out=[];
  for(let i=0;i<C.length;i++)for(let j=i+1;j<C.length;j++){const x=C[i],y=C[j];if(x.r.g!==y.r.g)continue;const I=pairInfo(x,y);if(!I||I.eff<.08)continue;
   // teammates can't be a PrizePicks lineup alone, so bring in the strongest pick from another game
-  const z=I.same?C.find(w=>w.r.g!==x.r.g):null;if(I.same&&!z)continue;out.push({x,y,z,...I})}
+  const z=C.find(w=>w.r.g!==x.r.g);if(I.same&&!z)continue;out.push({x,y,z,...I})}
  return out.sort((a,b)=>b.both-a.both).slice(0,4)}
 function corrSection(){const L=corrPairs();if(!L.length)return"";const line=x=>`<span>${esc(x.r.pl)}<small>${x.side==="o"?"More":"Less"} ${x.r.ln} ${esc(MK[x.r.mk]||x.r.mk)}</small></span>`;
- return `<h2>Correlated pairs</h2><p class="lede">Picks in the same game that tend to move together, so both hitting is a little likelier than their two chances multiplied. Everything else on the board treats picks as separate. These are rough estimates from typical game patterns and the players' recent games.</p>
- <div class="list">${L.map(c=>`<div class="card cpcard"><div class="cp1">${line(c.x)}<b>${pct(c.x.p)}</b></div><div class="cp1">${line(c.y)}<b>${pct(c.y.p)}</b></div>
-  <p class="case-s">Both hit about <b>${pct(c.both)}</b>, against ${pct(c.ind)} if they were unrelated.</p>
-  ${c.z?`<p class="fine" style="margin:0 0 4px">Same team, and PrizePicks needs a second team, so this adds the strongest pick from another game. All three hit about ${pct(c.both*c.z.p)}.</p><div class="cp1 cp3">${line(c.z)}<b>${pct(c.z.p)}</b></div>`
-   :`<p class="fine" style="margin:0 0 8px">Different teams, so they can be a 2-pick on their own.</p>`}
+ const p2=PAY.power[2],p3=PAY.power[3],ret=v=>`<b class="${v>0?"gold":"red"}">${sgn(v)}</b>`;
+ return `<h2>Correlated pairs and stacks</h2><p class="lede">Picks in the same game that tend to move together, so both hitting is a little likelier than their two chances multiplied, and a 3-pick stack built on each. Everything else on the board treats picks as separate. These are rough estimates from typical game patterns and the players' recent games.</p>
+ <div class="list">${L.map(c=>{const all3=c.z?c.both*c.z.p:null;
+  return `<div class="card cpcard"><div class="cp1">${line(c.x)}<b>${pct(c.x.p)}</b></div><div class="cp1">${line(c.y)}<b>${pct(c.y.p)}</b></div>
+  <p class="case-s">Both hit about <b>${pct(c.both)}</b>, against ${pct(c.ind)} if they were unrelated.${c.same?"":` As a 2-pick Power (${p2}x), return ${ret(c.both*p2-1)}.`}</p>
+  ${c.z?`<p class="fine" style="margin:0 0 4px">${c.same?"Same team, and PrizePicks needs a second team, so the stack":"The stack"} adds the strongest pick from another game. All three hit about ${pct(all3)}; as a 3-pick Power (${p3}x), return ${ret(all3*p3-1)}.</p><div class="cp1 cp3">${line(c.z)}<b>${pct(c.z.p)}</b></div>`:""}
   <p class="fine" style="margin:6px 0 8px">PrizePicks may lower payouts on picks from the same game.</p>
-  <button class="sm" data-corrslip="${[c.x,c.y,c.z].filter(Boolean).map(w=>w.r.i+"|"+w.side).join("|")}">Put ${c.z?"all 3":"both"} on the slip</button></div>`).join("")}</div>`}
+  <div class="cpb">${c.same?"":`<button class="sm" data-corrslip="${[c.x,c.y].map(w=>w.r.i+"|"+w.side).join("|")}">Put both on the slip</button>`}${c.z?`<button class="sm" data-corrslip="${[c.x,c.y,c.z].map(w=>w.r.i+"|"+w.side).join("|")}">Put the 3-pick stack on the slip</button>`:""}</div></div>`}).join("")}</div>`}
 function corrNote(Q){const out=[];for(let i=0;i<Q.length;i++)for(let j=i+1;j<Q.length;j++){const a=Q[i],b=Q[j],I=pairInfo({r:a.r,side:a.s,p:a.p},{r:b.r,side:b.s,p:b.p});
   if(!I||Math.abs(I.eff)<.08)continue;out.push(`${esc(a.r.pl)} and ${esc(b.r.pl)} ${I.eff>0?"tend to move together, so both hitting is a bit likelier than these chances show":"tend to pull against each other, so both hitting is a bit less likely than these chances show"}.`)}
  return out.slice(0,2).map(n=>`<div class="note">${n}</div>`).join("")}
+
+/* ---------- live sweat tracker: open tickets against ESPN's live box scores (live.js, no credits) ---------- */
+let LIVE={},liveBusy=false;
+function liveGameOf(l){if(!l||!l.mk||!l.pl)return null;const n=pnm(l.pl),r=P.find(r=>r.mk===l.mk&&pnm(r.pl)===n);const g=r&&GI[r.g];
+ if(!g||!g.eid||!g.t)return null;const now=Date.now();return g.t<=now&&now-g.t<10*36e5?g:null}     // started, and within the last 10 hours
+function liveGames(){const out={};for(const t of tickets){if(t.r||!Array.isArray(t.legs))continue;for(const l of legsOf(t)){const g=liveGameOf(l);if(g)out[g.eid]=g}}return Object.values(out)}
+async function liveRefresh(){if(liveBusy||!window.Live||!DATA)return;const G=liveGames().filter(g=>!(LIVE[g.eid]&&LIVE[g.eid].completed&&Date.now()-LIVE[g.eid].at<6e5));if(!G.length)return;
+ liveBusy=true;let ch=false;
+ try{await Promise.all(G.map(async g=>{try{const d=await Live.game(g.sp,g.eid,25000);d.at=Date.now();const o=LIVE[g.eid];LIVE[g.eid]=d;if(!o||o.sig!==d.sig)ch=true}catch(e){}}))}finally{liveBusy=false}
+ const a=document.activeElement;if(ch&&!(a&&a.matches("input,select,textarea"))&&!document.querySelector("dialog[open]"))keep()}
+setInterval(()=>{if(!document.hidden)liveRefresh()},40000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)liveRefresh()});
+function liveLeg(l){const g=liveGameOf(l),d=g&&LIVE[g.eid];if(!d||d.state==="pre")return null;const s=Live.stat(d,l.pl,l.mk);if(!s)return null;
+ return{g,d,s,j:Live.judge(s,l.ln,l.side,d)}}
+function liveRows(t){const L=legsOf(t),X=L.map(liveLeg);if(!X.some(Boolean))return null;
+ return `<div class="lgl lvl">${t.legs.map((txt,i)=>{const x=X[i],l=L[i];if(!x)return `<div class="na"><span class="mk">–</span><span>${esc(txt)}<small>Not started</small></span></div>`;
+  const c={ok:"ok",no:"no",live:"lv",push:"na",dnp:"na"}[x.j.c],mk={ok:"✓",no:"✕",live:"●",push:"=",dnp:"–"}[x.j.c];
+  const v=x.s.v,top=Math.max(l.ln*1.3,v,1),pctw=x.s.dnp?0:Math.max(3,Math.min(100,v/top*100)),mark=Math.min(100,l.ln/top*100);
+  return `<div class="${c}"><span class="mk">${mk}</span><span>${esc(txt)}<small>${x.s.dnp?esc(x.s.dnp):`${v} so far · ${esc(x.j.t)}`} · ${esc(x.d.completed?"Final":x.d.detail)}</small>${x.s.dnp?"":`<i class="lvbar ${l.side}"><b style="width:${pctw.toFixed(0)}%"></b><em style="left:${mark.toFixed(0)}%"></em></i>`}</span><b class="lvv">${x.s.dnp?"DNP":v}</b></div>`}).join("")}</div>`}
+function sweatSection(){const open=tickets.filter(t=>!t.r&&Array.isArray(t.legs)&&legsOf(t).some(l=>liveLeg(l)));if(!open.length)return"";
+ return `<h2>Sweating now</h2><p class="lede">Your open tickets with games going, from ESPN's live box scores. Updates about every 40 seconds.</p>
+ <div class="list">${open.map(t=>{const L=legsOf(t),X=L.map(liveLeg),hit=X.filter(x=>x&&x.j.c==="ok").length,miss=X.filter(x=>x&&x.j.c==="no").length;
+  const dead=t.kind==="pp"&&t.mode!=="Flex"&&miss>0;
+  return `<div class="card tk sweat ${dead?"L":hit===L.length?"W":""}"><div class="hd"><span>${t.kind==="pp"?"PrizePicks "+esc(t.mode||""):"Parlay"} ${t.legs.length} legs</span><span>${money(t.stake)} to win ${money(t.pay)}</span></div>
+  ${liveRows(t)}<div class="sres"><b>${hit} hit</b>${miss?`, ${miss} missed`:""}${dead?" · a Power Play needs every pick, so this one's done":""}</div></div>`}).join("")}</div>`}
+
+/* ---------- late scratch check: players ruled out after the overnight update (ESPN injury lists, no credits) ---------- */
+let INJ={},injAt=0;
+async function injRefresh(force){if(!window.Live||!DATA||(!force&&Date.now()-injAt<9e5))return;injAt=Date.now();
+ const sps=[...new Set(G.filter(g=>g.t&&g.t>Date.now()-36e5&&g.t<Date.now()+20*36e5).map(g=>g.sp))];if(!sps.length)return;let ch=false;
+ await Promise.all(sps.map(async sp=>{try{const m=await Live.injuries(sp);for(const k in m)if(INJ[k]!==m[k]){INJ[k]=m[k];ch=true}}catch(e){}}));
+ const a=document.activeElement;if(ch&&!(a&&a.matches("input,select,textarea"))&&!document.querySelector("dialog[open]"))keep()}
+setInterval(()=>{if(!document.hidden)injRefresh()},5*60*1000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)injRefresh()});
+// a status that's out now but wasn't when the board updated overnight
+function scratch(pl,ij){const s=INJ[pnm(pl)];return s&&Live.isOut(s)&&!Live.isOut(ij)?s:null}
+const scratchOf=r=>scratch(r.pl,r.ij);
+function scratchNote(t){if(t.r||!Array.isArray(t.legs)||!window.Live)return"";const now=Date.now();
+ const names=legsOf(t).filter(l=>{if(!l||!l.pl)return false;const r=P.find(r=>r.mk===l.mk&&pnm(r.pl)===pnm(l.pl));return r&&GI[r.g]&&GI[r.g].t>now&&scratchOf(r)}).map(l=>l.pl);
+ return names.length?`<div class="note bad">${names.map(esc).join(" and ")} ${names.length>1?"are":"is"} now listed out. PrizePicks usually voids a pick like that, which drops the lineup to fewer picks and a smaller payout.</div>`:""}
+
+/* ---------- cool-off: after 3 losing tickets in a row, suggest sitting out the day ---------- */
+const COOLKEY="arena_cool_ok";
+function coolBanner(){const S=allTix().filter(t=>t.r&&tAt(t)).sort((a,b)=>tAt(b)-tAt(a)).slice(0,3);
+ if(S.length<3||!S.every(t=>tNet(t)<0)||Date.now()-tAt(S[0])>36*36e5)return"";
+ let ok="";try{ok=localStorage.getItem(COOLKEY)||""}catch(e){}if(ok===etDay(Date.now()))return"";
+ const lost=S.reduce((a,t)=>a-tNet(t),0);
+ return `<div class="card cool"><b>Three losing tickets in a row</b> (−${money(lost)}). Losing streaks happen even with good picks, and chasing them is how a bad day gets worse. A good time to sit out the rest of today; the picks will be here tomorrow.
+  <button class="sm" data-coolok>Got it, hide for today</button></div>`}
+
+/* ---------- weekly recap: your week and the board's week, as a card you can share ---------- */
+function recapData(){const ws=weekStart(Date.now()),wsD=etDay(ws),mine=tickets.filter(t=>t.r&&tAt(t)&&tAt(t)>=ws);
+ let from=ws,label="This week so far";
+ if(!mine.length){from=weekStart(ws-864e5);label="Last week"}
+ const to=from===ws?Date.now():ws,T=tickets.filter(t=>t.r&&tAt(t)&&tAt(t)>=from&&tAt(t)<to);
+ const fromD=etDay(from),toD=etDay(to-1),ps=gradedPP().filter(x=>x.d>=fromD&&x.d<=toD);
+ const w=T.filter(t=>tNet(t)>0).length,l=T.filter(t=>tNet(t)<0).length,net=T.reduce((a,t)=>a+tNet(t),0),stake=T.reduce((a,t)=>a+(+t.stake||0),0);
+ const best=T.filter(t=>tNet(t)>0).sort((a,b)=>tNet(b)-tNet(a))[0];
+ return{label,from,to,T,w,l,net,stake,best,bw:ps.filter(x=>x.hit).length,bn:ps.length}}
+function recapCard(){const R=recapData();if(!R.T.length&&!R.bn)return"";
+ const range=`${new Date(R.from).toLocaleDateString([],{month:"short",day:"numeric"})} to ${new Date(R.to-1).toLocaleDateString([],{month:"short",day:"numeric"})}`;
+ return `<h2>${R.label}</h2><section class="card recap"><div class="rchd"><span>Your week<small>${range}</small></span><b class="${R.net>=0?"gold":"red"}">${R.net>=0?"+":"−"}${money(Math.abs(R.net))}</b></div>
+  <div class="stats"><div class="stat"><small>Your tickets</small><b>${R.w}-${R.l}</b></div><div class="stat"><small>Put in</small><b>${money(R.stake)}</b></div><div class="stat"><small>${SITENAME}'s picks</small><b>${R.bn?pct(R.bw/R.bn):"–"}</b></div></div>
+  ${R.best?`<p class="fine" style="margin:6px 0 0">Best hit: ${esc(R.best.kind==="pp"?`${R.best.mode||""} ${R.best.legs.length}-pick`:`${R.best.legs.length}-leg parlay`)}, +${money(tNet(R.best))}.</p>`:""}
+  ${R.bn?`<p class="fine" style="margin:4px 0 0">${SITENAME}'s PrizePicks-line picks went ${R.bw}-${R.bn-R.bw} over the same days.</p>`:""}
+  <button class="btn wide" style="margin-top:10px" data-recapshare>Share my week</button></section>`}
+function shareRecap(btn){const R=recapData(),range=`${new Date(R.from).toLocaleDateString([],{month:"short",day:"numeric"})} to ${new Date(R.to-1).toLocaleDateString([],{month:"short",day:"numeric"})}`;
+ const rows=[{a:"Your tickets",b:`${R.w}-${R.l} · ${R.net>=0?"+":"−"}${money(Math.abs(R.net))}`,c:range}];
+ if(R.best)rows.push({a:"Best hit",b:`+${money(tNet(R.best))} on a ${R.best.kind==="pp"?`${R.best.mode||""} ${R.best.legs.length}-pick`:`${R.best.legs.length}-leg parlay`}`,c:R.best.legs.slice(0,3).join(", ")});
+ if(R.bn)rows.push({a:`${SITENAME}'s picks`,b:`${R.bw}-${R.bn-R.bw} (${pct(R.bw/R.bn)})`,c:"PrizePicks lines, graded after the game"});
+ shareSlipImage({site:SITENAME,head:R.label,rows,boxes:[["Put in",money(R.stake)],["Net",(R.net>=0?"+":"−")+money(Math.abs(R.net))],["Record",`${R.w}-${R.l}`]],
+  led:getComputedStyle(document.documentElement).getPropertyValue("--led").trim()||"#ffb420",url:location.host+location.pathname.replace(/index\.html$/,""),
+  text:`${SITENAME} · ${R.label}: ${R.w}-${R.l}, ${R.net>=0?"+":"−"}${money(Math.abs(R.net))}`,file:`${SITENAME.toLowerCase()}-week.png`},btn)}
+
+/* ---------- line gap scoreboard: how picks on the side a gap favors have really done, by gap size ---------- */
+function gapScore(){if(!HIST)return"";const B=[[.15,.3,"Small gaps"],[.3,.5,"Medium gaps"],[.5,99,"Big gaps"]].map(([lo,hi,l])=>({lo,hi,l,w:0,n:0}));
+ for(const x of HIST.props){if(!x.pp||x.bm==null||x.act==null||x.act===x.ln||x.bm===x.ln)continue;const z=Math.abs((x.bm-x.ln)/sigmaFor(x.mk,x.ln)),b=B.find(b=>z>=b.lo&&z<b.hi);
+  if(!b)continue;b.n++;if((x.act>x.ln)===(x.bm>x.ln))b.w++}
+ const be=bePower(2),tot=B.reduce((a,b)=>a+b.n,0);
+ return `<section class="card gapscore"><div class="rchd"><span>Line gap scoreboard<small>Picks on the side a gap favors, graded after the game, by how big the gap was</small></span></div>
+  ${tot?B.map(b=>b.n?`<div class="recrow"><span>${b.l}</span><span class="k">${b.w}-${b.n-b.w}</span><b class="${b.w/b.n>=be?"gold":"red"}">${pct(b.w/b.n)}</b></div>`:`<div class="recrow"><span>${b.l}</span><span class="k">none yet</span><b>–</b></div>`).join("")
+   :`<p class="fine" style="margin:6px 0 0">The board started saving the sportsbooks' line with each pick, so results show up here after the next grading. Gold means a size of gap is beating the ${pct(be)} a 2-pick Power needs.</p>`}</section>`}
 
 function renderSlip(){
  const L=mlLegs(),Q=ppLegs();
@@ -1472,7 +1557,7 @@ function renderSlip(){
    :alts?`<div class="note">Goblins and demons change the payout. Type what PrizePicks says it pays in Pays, so the return is right.</div>`:""}
   ${n<2?'<div class="note">PrizePicks needs at least 2 picks from at least 2 different teams.</div>'
    :tt===false?`<div class="note bad" role="alert">Every pick is a ${esc(one?(one.ab||one.n):"same-team")} player. PrizePicks won't take a lineup from one team, so swap one for a player on another team.</div>`
-   :tt===null?'<div class="note">Check these aren\'t all on the same team. PrizePicks needs at least 2 different teams.</div>':""}${same&&tt!==false?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}${corrNote(Q)}
+   :tt===null?'<div class="note">Check these aren\'t all on the same team. PrizePicks needs at least 2 different teams.</div>':""}${same&&tt!==false?'<div class="note">You have more than one pick from the same game. PrizePicks may lower the payout for that.</div>':""}${corrNote(Q)}${(()=>{const x=Q.filter(q=>scratchOf(q.r));return x.length?`<div class="note bad" role="alert">${x.map(q=>esc(q.r.pl)).join(" and ")} ${x.length>1?"are":"is"} now listed out. Swap ${x.length>1?"them":"him"} before you play this.</div>`:""})()}
   ${limitNote()}<div class="rbtns"><button data-copyall>Copy picks</button><button data-share>Share image</button></div>
   <div class="note">Tap a name to copy it, then paste it into PrizePicks search. Picked a goblin or demon? Tap that line under the name.</div>
   <div class="rbtns"><button data-clear="pp">Clear</button><button class="go" data-save="pp" data-mode="${mode}" ${tt===false?"disabled":""}>Save ticket</button></div>`;
@@ -1487,7 +1572,7 @@ function renderSettings(){
  const th=document.documentElement.dataset.theme,c=DATA&&DATA.credits;
  const fx=n=>PAY.flex[n].map((v,i)=>`<input data-payf="${n}|${i}" type="number" step="0.05" value="${v}" aria-label="${n}-pick flex ${n-i} hits">`).join("")+(PAY.flex[n].length<3?"<span></span>":"");
  $("#sheet").innerHTML=`<h3>Settings</h3>
- <h4>Look</h4><div class="filters">${[["dark","Night"],["clean","Day"],["bold","Court"]].map(([k,l])=>`<button class="pill ${th===k?"on":""}" data-th="${k}">${l}</button>`).join("")}</div>
+ <h4>Look</h4><div class="filters">${[["dark","Night"],["clean","Day"],["bold","Court"],["mix","Mix"]].map(([k,l])=>`<button class="pill ${th===k?"on":""}" data-th="${k}">${l}</button>`).join("")}</div>
  <h4>Your sportsbooks</h4><p>Best prices only come from books you check. Fair chances always use every book.</p>
  <div class="checks">${books.map(k=>`<label><input type="checkbox" data-book="${k}" ${okBook(k)?"checked":""}>${esc(bname(k))}</label>`).join("")||"<p>Books appear after the first update.</p>"}</div>
  <h4>Chances</h4><p>The board's own math has run too hot, so its chances are adjusted to match how its picks have really hit${cal().n?` (${cal().n} graded so far)`:", cut halfway toward 50% until it has graded picks"}. Lineups, labels and the slip all use the adjusted chance.</p>
@@ -1553,6 +1638,8 @@ document.addEventListener("click",e=>{
  if(d.moreprops!==undefined){ui.limit+=60;keep();return}
  if(d.slip!==undefined){ui.slipOpen=!ui.slipOpen;renderSlip();return}
  if(d.copyname!==undefined){copyText(d.copyname,t);return}
+ if(d.coolok!==undefined){try{localStorage.setItem(COOLKEY,etDay(Date.now()))}catch(_){}keep();return}
+ if(d.recapshare!==undefined){shareRecap(t);return}
  if(d.usebest){const[f,m]=d.usebest.split("|");if(!FORMK.hasOwnProperty(f)||!MATCHW.hasOwnProperty(m))return;formW=f;matchW=m;LS.set(PFX+"form",f);LS.set(PFX+"match",m);TOP=null;ui.pp.res=null;keep();return}
  if(d.corrslip){const a=d.corrslip.split("|"),L=[];for(let k=0;k+1<a.length;k+=2){const r=P[+a[k]];if(r)L.push([r.k,a[k+1]])}if(L.length<2)return;
   pps={};L.forEach(([k,sd])=>pps[k]=sd);ui.ppMode=null;ui.kind="pp";ui.slipOpen=true;save();keep();return}
@@ -1648,10 +1735,10 @@ $("#payout").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="p
 
 function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("bl_theme",t)}catch(e){}
  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()}
-(function(){let t="dark";try{t=localStorage.getItem("bl_theme")||"dark"}catch(e){}if(!["dark","clean","bold"].includes(t))t="dark";setTheme(t)})();
+(function(){let t="dark";try{t=localStorage.getItem("bl_theme")||"dark"}catch(e){}if(!["dark","clean","bold","mix"].includes(t))t="dark";setTheme(t)})();
 
 render();
-fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render()})
+fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render();liveRefresh();injRefresh(true)})
  .catch(()=>{window.LOADFAIL=1;$("#stamp").textContent="Couldn't load the board";render()});
 /* tickets.json: tickets added by hand (ones that never got saved from the slip). Each id is added once, so deleting it here keeps it gone. */
 fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!Array.isArray(j.add))return;
@@ -1664,7 +1751,8 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&!document.activeElement.matches("input,select")){stampText();keep()}});   // back from another app: drop games that started
 </script>
-<script src="../share.js?v=2"></script>
-<script src="../fx.js?v=9"></script>
+<script src="../share.js?v=3"></script>
+<script src="../live.js?v=1"></script>
+<script src="../fx.js?v=10"></script>
 </body>
 </html>

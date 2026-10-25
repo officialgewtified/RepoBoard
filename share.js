@@ -28,16 +28,17 @@ async function build(o){
  // picks
  let y=300;for(const r of o.rows){cut(x,64,y,W-128,rowH,22);x.fillStyle="#17253d";x.fill();
   x.fillStyle=led;x.fillRect(64,y+22,6,rowH-44);
-  x.fillStyle="#f1f4fa";font("800 46px","semi-condensed");x.fillText(r.a,100,y+62,W-430);
-  x.fillStyle=led;font("700 34px");x.fillText(r.b,100,y+108,W-430);
-  x.fillStyle="#8999b6";font("500 28px");x.fillText(r.c||"",100,y+146,W-430);
+  x.fillStyle="#f1f4fa";font("800 46px","semi-condensed");x.fillText(r.a,100,y+62,r.p!=null?W-430:W-200);
+  x.fillStyle=led;font("700 34px");x.fillText(r.b,100,y+108,r.p!=null?W-430:W-200);
+  x.fillStyle="#8999b6";font("500 28px");x.fillText(r.c||"",100,y+146,r.p!=null?W-430:W-200);
   if(r.p!=null){x.textAlign="right";x.fillStyle="#f1f4fa";font("italic 900 74px","condensed");x.fillText(Math.round(r.p*100)+"%",W-104,y+104);
    x.fillStyle="#8999b6";font("600 24px");x.fillText(o.chanceLabel||"chance",W-104,y+140);x.textAlign="left"}
   y+=rowH+gap}
  // money
  const box=(bx,bw,label,val)=>{cut(x,bx,y+10,bw,150,18);x.fillStyle="#0e192b";x.fill();x.strokeStyle="#24375a";x.lineWidth=2;x.stroke();
   x.fillStyle="#8999b6";font("600 26px");x.fillText(label,bx+28,y+56);x.fillStyle="#f1f4fa";font("italic 900 64px","condensed");x.fillText(val,bx+28,y+128,bw-56)};
- if(hasMoney){box(64,300,"Entry",money(o.entry));box(390,300,"Pays",money(o.pays));box(716,300,"Odds",o.odds)}
+ if(o.boxes)o.boxes.slice(0,3).forEach(([l,v],i)=>box(64+i*326,300,l,v));
+ else if(hasMoney){box(64,300,"Entry",money(o.entry));box(390,300,"Pays",money(o.pays));box(716,300,"Odds",o.odds)}
  else box(64,W-128,"Pays",o.odds);
  y+=190;
  x.fillStyle="#b4c0d6";font("500 26px");for(const l of recLines){x.fillText(l,64,y+20);y+=36}
