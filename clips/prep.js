@@ -61,7 +61,8 @@ function seasonNote(sport, keys, name) {
   let best = null;
   for (const k of keys) { const L = S.top[k] || [], e = L.find(x => x[1] === name && x[3] === DAY); if (!e) continue;
     const higher = L.filter(x => x[0] > e[0]).length, ties = L.filter(x => x[0] === e[0]).length;
-    if (higher < 3 && (!best || higher < best.higher)) best = { k, higher, ties }; }
+    // a tie only counts if it is shared with one other game; "tied for most" with five others says nothing
+    if (higher < 3 && ties <= 2 && (!best || higher < best.higher)) best = { k, higher, ties }; }
   if (!best) return null;
   const lab = REC_LABEL[sport][best.k], ord = ["most", "second-most", "third-most"][best.higher], tie = best.ties > 1;
   return { k: best.k, top: best.higher === 0, chip: `${tie ? "Tied for " + ord : cap(ord)} ${lab} this season`,
