@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Crossover</title>
+<title>Crossover Videos</title>
+<meta name="apple-mobile-web-app-title" content="Crossover Videos"><meta name="application-name" content="Crossover Videos"><link rel="manifest" href="manifest.webmanifest">
 <meta name="description" content="Today's best NFL, college football and NBA stats as a ready-to-post vertical video, made every morning.">
-<link rel="icon" href="../favicon-32.png"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" href="favicon-32.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 @font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
 @font-face{font-family:"Big Shoulders";src:url(../fonts/big-shoulders.woff) format("woff");font-weight:700 900}
@@ -36,7 +37,7 @@ ol{margin:10px 0 0 20px;color:var(--mute)}ol li{margin:6px 0}ol b{color:var(--in
 </style></head><body><main>
 <div class="k">Daily stats videos</div>
 <h1>Crossover</h1>
-<p class="lede">The best NFL, college football and NBA stat lines from the day before, as a narrated vertical video. A new one is ready every morning around 3am Eastern. Download it, paste the caption, post.</p>
+<p class="lede">The best NFL, college football and NBA stat lines from the day before, as a narrated vertical video. Two a day: the morning recap (ready around 3am Eastern) and tonight's games preview (ready around 3:30pm). Download it, copy the caption, post.</p>
 <div id="latest" class="card"><p class="empty">Loading today's video…</p></div>
 <h3>Earlier videos</h3>
 <div id="older" class="card"><p class="empty">Loading…</p></div>
@@ -63,7 +64,7 @@ const mp4=r=>(r.assets||[]).find(a=>/\.mp4$/.test(a.name));
 const ago=d=>{const h=(Date.now()-Date.parse(d))/36e5;return h<1?"just now":h<24?Math.round(h)+"h ago":Math.round(h/24)+"d ago"};
 async function load(){
  try{const r=await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=30`);if(!r.ok)throw new Error(r.status);
-  REL=(await r.json()).filter(x=>/^clip-/.test(x.tag_name)&&mp4(x)).sort((a,b)=>b.tag_name.localeCompare(a.tag_name))}
+  REL=(await r.json()).filter(x=>/^(clip|preview)-/.test(x.tag_name)&&mp4(x)).sort((a,b)=>Date.parse(b.published_at)-Date.parse(a.published_at))}
  catch(e){document.getElementById("latest").innerHTML=`<p class="empty">Couldn't reach GitHub just now. Pull down to try again.</p>`;document.getElementById("older").innerHTML="";return}
  if(!REL.length){document.getElementById("latest").innerHTML=`<p class="empty">The first video shows up here after the next morning run.</p>`;document.getElementById("older").innerHTML=`<p class="empty">None yet.</p>`;return}
  const L=REL[0],v=mp4(L);

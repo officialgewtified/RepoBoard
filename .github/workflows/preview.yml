@@ -1,0 +1,84 @@
+name: Tonight's games preview video
+on:
+  schedule:
+    # 19:23 UTC is about 3:23pm Eastern (2:23pm in winter): the slate, injuries and recent form are set, and it's ready well before tip-off.
+    - cron: "23 19 * * *"
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Day to preview, YYYY-MM-DD (blank = today, Eastern time)"
+        required: false
+permissions:
+  contents: write
+concurrency:
+  group: preview
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: clips
+    steps:
+      - uses: actions/checkout@v4
+      - name: Which day
+        run: |
+          DAY="${{ inputs.day }}"
+          [ -z "$DAY" ] && DAY=$(TZ=America/New_York date +%F)
+          echo "DAY=$DAY" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Tonight's slate
+        id: prep
+        run: |
+          mkdir -p out
+          set +e
+          node preview.js "$DAY" out/data.json
+          code=$?
+          if [ $code -eq 3 ]; then echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          exit $code
+      - uses: actions/setup-python@v5
+        if: steps.prep.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        if: steps.prep.outputs.skip != '1'
+        with:
+          path: clips/.models
+          key: kokoro-v1.0-int8-voice
+      - name: Voiceover
+        if: steps.prep.outputs.skip != '1'
+        continue-on-error: true
+        run: |
+          mkdir -p .models
+          [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          pip install -q kokoro-onnx soundfile
+          python tts.py out/data.json out/voice
+        env:
+          # same voice and pace as the morning recap
+          VOICE: am_puck
+          SPEED: "1.05"
+      - name: Browser and ffmpeg
+        if: steps.prep.outputs.skip != '1'
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y -qq ffmpeg > /dev/null
+      - name: Render
+        if: steps.prep.outputs.skip != '1'
+        run: |
+          node render.js out/data.json "out/tonight-$DAY.mp4" 30
+          node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
+      - name: Publish
+        if: steps.prep.outputs.skip != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="preview-$DAY"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" "out/tonight-$DAY.mp4" out/data.json --title "Tonight · $(date -d "$DAY" '+%a %b %-d')" --notes-file out/caption.txt --latest=false
+          # keep the newest 30 previews
+          gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^preview-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag
