@@ -16,7 +16,7 @@ concurrency:
 jobs:
   make:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: clips
@@ -46,21 +46,29 @@ jobs:
       - uses: actions/cache@v4
         if: steps.prep.outputs.skip != '1'
         with:
-          path: clips/.models
-          key: kokoro-v1.0-int8-voice
+          path: |
+            clips/.models
+            ~/.u2net
+            ~/.cache/huggingface
+          key: voices-kokoro-chatterbox-v1
       - name: Voiceover
         if: steps.prep.outputs.skip != '1'
+        # Chatterbox reads it (natural, expressive); if that fails for any reason, Kokoro reads it so the day still gets a video
         continue-on-error: true
+        timeout-minutes: 35
         run: |
           mkdir -p .models
           [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
           [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
           pip install -q kokoro-onnx soundfile
-          python tts.py out/data.json out/voice
+          python ref.py
+          pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
+          python tts_cb.py out/data.json out/voice ref.wav || python tts.py out/data.json out/voice
         env:
-          # same voice and pace as the morning recap
           VOICE: am_puck
           SPEED: "1.05"
+          EXAGGERATION: "0.5"
+          CFG: "0.5"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
         # setup normally takes about a minute; if GitHub's package mirror hangs, fail fast instead of blocking the next run

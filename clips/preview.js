@@ -88,7 +88,7 @@ function star(s, sport) {
     const gw = p.l5 ? (WORDS[p.l5.g] || p.l5.g) : "";
     return { name: p.name, short: p.short, big: p.l5 ? p.l5.p : r1(p.value), lab: p.l5 ? `PPG last ${p.l5.g}` : "PPG", season: r1(p.value), l5: p.l5, hot,
       chip: p.l5 ? `${p.short}: ${p.l5.p} / ${p.l5.r} / ${p.l5.a} last ${p.l5.g}` : `${p.short}: ${p.show} PPG`,
-      say: p.l5 ? `${pick(["Keep an eye on", "Watch", "Don't sleep on"], p.name)} ${p.name}: ${Math.round(p.l5.p)} a game his last ${gw}${hot ? ", way up from " + Math.round(p.value) : ""}` : `${p.name} is putting up ${Math.round(p.value)} a game` }; }
+      say: p.l5 ? `${p.name} is averaging ${Math.round(p.l5.p)} points over his last ${gw} games${hot ? ", up from " + Math.round(p.value) + " on the season" : ""}` : `${p.name} is averaging ${Math.round(p.value)} points per game` }; }
   const p = s.lead.passingYards || s.lead.rushingYards || s.lead.receivingYards; if (!p) return null;
   return { name: p.name, short: p.short, big: null, chip: `${p.short}: ${p.show}`, say: "" };
 }
@@ -103,13 +103,13 @@ function build(day, nba, nfl, cfb, brand) {
   const hotList = nba.flatMap(g => [g.a, g.h]).filter(x => x && x.l5).sort((a, b) => (b.hot - a.hot) || (b.big - a.big));
   const hot = hotList[0], hotTeam = hot && nba.find(g => g.a === hot || g.h === hot), hotSide = hotTeam && (hotTeam.a === hot ? hotTeam.away : hotTeam.home);
   const count = [nba.length && `${nba.length} NBA`, nfl.length && `${nfl.length} NFL`, cfb.length && `${cfb.length} Top 25`].filter(Boolean).join(" · ");
-  const sayCount = [nba.length && `${WORDS[nba.length] || nba.length} N B A game${nba.length === 1 ? "" : "s"}`, nfl.length && `${WORDS[nfl.length] || nfl.length} in the N F L`, cfb.length && `${WORDS[cfb.length] || cfb.length} Top 25 college games`].filter(Boolean);
+  const sayCount = [nba.length && `${WORDS[nba.length] || nba.length} NBA game${nba.length === 1 ? "" : "s"}`, nfl.length && `${WORDS[nfl.length] || nfl.length} in the NFL`, cfb.length && `${WORDS[cfb.length] || cfb.length} Top 25 college games`].filter(Boolean);
   DAYKEY = day;
-  const voice = { hook: `${pick(["Big night ahead!", "Let's set up tonight.", "Here's your night."], "h0")} ${cap(sayCount.join(sayCount.length > 2 ? ", " : " and "))} ${wd === DAYS[new Date().getUTCDay()] ? "tonight" : "on " + wd}!${hot ? ` ${hot.name} is ${hot.hot ? "on fire" : "rolling"}, ${Math.round(hot.big)} a game over his last ${WORDS[hot.l5.g] || hot.l5.g}!` : ""} Here's what to watch.` };
+  const voice = { hook: `${cap(sayCount.join(sayCount.length > 2 ? ", " : " and "))} ${wd === DAYS[new Date().getUTCDay()] ? "tonight" : "on " + wd}.${hot ? ` ${hot.name} is averaging ${Math.round(hot.big)} points over his last ${WORDS[hot.l5.g] || hot.l5.g} games.` : ""} Here are the games to watch.` };
   const scenes = feat.map((g, i) => {
     const outs = [...g.away.out.map(x => [x, g.away]), ...g.home.out.map(x => [x, g.home])];
     const starOut = outs.find(([x]) => (g.a && x === g.a.name) || (g.h && x === g.h.name));
-    const say = `${g.away.rank ? "Number " + g.away.rank + " " : ""}${g.sport === "CFB" ? g.away.nick : "The " + g.away.nick} at ${g.home.rank ? "number " + g.home.rank + " " : ""}${g.sport === "CFB" ? g.home.nick : "the " + g.home.nick}, ${g.sport === "NBA" ? "tip-off" : "kickoff"} at ${g.say}${g.tv ? " on " + g.tv.replace(/NBA TV/, "N B A TV") : ""}.` +
+    const say = `${g.away.rank ? "Number " + g.away.rank + " " : ""}${g.sport === "CFB" ? g.away.nick : "The " + g.away.nick} at ${g.home.rank ? "number " + g.home.rank + " " : ""}${g.sport === "CFB" ? g.home.nick : "the " + g.home.nick}, ${g.sport === "NBA" ? "tip-off" : "kickoff"} at ${g.say}${g.tv ? " on " + g.tv : ""}.` +
       [g.a, g.h].filter(x => x && x.say).map(x => " " + x.say + ".").join("") + (starOut ? ` ${starOut[0]} is out tonight.` : "");
     voice["g" + i] = say;
     return { sport: g.sport, time: g.time, tv: g.tv, away: { ab: g.away.ab, nick: g.away.nick, rec: g.away.rec, color: g.away.color, rank: g.away.rank },
@@ -117,8 +117,8 @@ function build(day, nba, nfl, cfb, brand) {
       chips: [g.a && g.a.chip, g.h && g.h.chip].filter(Boolean), out: outs.slice(0, 3).map(([x, t]) => `${x} (${t.ab})`),
       big: g.a && g.h && g.a.big != null && g.h.big != null ? (g.a.big >= g.h.big ? [g.a, g.away] : [g.h, g.home]) : null };
   }).map(s => { if (s.big) { const [p, t] = s.big; s.big = { v: p.big, lab: p.lab, who: p.name, tm: t.ab }; } return s; });
-  voice.slate = pick(["Here's the full slate.", "And here's everything on tonight."], "sl");
-  voice.outro = pick([`Enjoy the games. Follow ${brand} for the morning recap!`, `That's your night. Follow ${brand}, recap drops in the morning!`], "out");
+  voice.slate = "Here is the full slate.";
+  voice.outro = `That's tonight's slate. Follow ${brand} for the morning recap.`;
   const cap1 = `${wd}'s games to watch (${md}) 👀`;
   const lines = [hot ? `${hot.name}: ${hot.big} PPG over his last ${hot.l5.g} 🔥` : `${count} games tonight`, "", cap1,
     ...feat.map(g => `${g.sport === "NBA" ? "🏀" : "🏈"} ${g.away.ab} @ ${g.home.ab}, ${g.time} ET${g.tv ? " on " + g.tv : ""}`), "",
