@@ -14,7 +14,7 @@ import urllib.request, urllib.parse
 HERE = os.path.dirname(os.path.abspath(__file__))
 DIR = os.path.join(HERE, "faces")
 INDEX = os.path.join(DIR, "index.json")
-VERSION = 2
+VERSION = 3
 UA = "CrossoverStatsVideo/1.0 (https://github.com/officialgewtified/RepoBoard; daily sports stats recap)"
 SPORT_Q = {"NBA": {"Q3665646"}, "NFL": {"Q19204627", "Q14128148"}, "CFB": {"Q19204627", "Q14128148"}}
 SPORT_WORD = {"NBA": "basketball", "NFL": "football", "CFB": "football"}
@@ -116,8 +116,9 @@ def meta_score(f, name, team):
     if not OK_LICENSE.match(f["license"]) or re.search(r"\bN[CD]\b", f["license"]):
         return None
     text = (f["title"] + " " + f["desc"] + " " + f["cats"]).lower()
-    last = name.split()[-1].lower()
-    if last not in text and slug(last) not in slug(text):
+    # the player's own name has to be in the file's title: a photo filed under him can still be of a teammate
+    last = re.sub(r"\b(jr|sr|ii|iii|iv)\.?$", "", name.lower()).split()[-1]
+    if slug(last) not in slug(f["title"]):
         return None
     yrs = [int(y) for y in re.findall(r"(?<!\d)(19[89]\d|20[0-3]\d)(?!\d)", f["date"] + " " + f["title"]) if int(y) <= THIS_YEAR]
     year = max(yrs) if yrs else 2012
