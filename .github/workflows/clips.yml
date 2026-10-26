@@ -1,0 +1,86 @@
+name: Daily stats video
+on:
+  schedule:
+    # 07:13 UTC is about 3am Eastern: every game from the night before, West Coast included, is final by then.
+    - cron: "13 7 * * *"
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Game day to cover, YYYY-MM-DD (blank = yesterday, Eastern time)"
+        required: false
+permissions:
+  contents: write
+concurrency:
+  group: clips
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: clips
+    steps:
+      - uses: actions/checkout@v4
+      - name: Which day
+        run: |
+          DAY="${{ inputs.day }}"
+          [ -z "$DAY" ] && DAY=$(TZ=America/New_York date -d yesterday +%F)
+          echo "DAY=$DAY" >> "$GITHUB_ENV"
+          echo "Covering $DAY"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Box scores
+        run: node fetch.js "$DAY" out
+      - name: What to show and say
+        id: prep
+        run: |
+          set +e
+          node prep.js "$DAY" out/nfl.json out/nba.json out/cfb.json > out/data.json
+          code=$?
+          if [ $code -eq 3 ]; then echo "No finished games on $DAY, nothing to make."; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          exit $code
+      - uses: actions/setup-python@v5
+        if: steps.prep.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        if: steps.prep.outputs.skip != '1'
+        with:
+          path: clips/.models
+          key: kokoro-v1.0-int8
+      - name: Voiceover
+        if: steps.prep.outputs.skip != '1'
+        # if the voice fails for any reason the video still gets made, just without narration
+        continue-on-error: true
+        run: |
+          mkdir -p .models
+          [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          pip install -q kokoro-onnx soundfile
+          python tts.py out/data.json out/voice
+        env:
+          VOICE: af_heart
+          SPEED: "1.1"
+      - name: Browser and ffmpeg
+        if: steps.prep.outputs.skip != '1'
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y -qq ffmpeg > /dev/null
+      - name: Render
+        if: steps.prep.outputs.skip != '1'
+        run: |
+          node render.js out/data.json "out/best-stats-$DAY.mp4" 30
+          node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
+      - name: Publish
+        if: steps.prep.outputs.skip != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="clip-$DAY"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" "out/best-stats-$DAY.mp4" out/data.json --title "Best stats · $(date -d "$DAY" '+%a %b %-d')" --notes-file out/caption.txt --latest
+          # keep the newest 30 videos
+          gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^clip-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag

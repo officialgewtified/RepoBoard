@@ -1,0 +1,125 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Daily stats recap</title>
+<style>
+@font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
+@font-face{font-family:"Big Shoulders";src:url(../fonts/big-shoulders.woff) format("woff");font-weight:700 900}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0e0e10}
+body{font-family:"Archivo",sans-serif;color:#f4f4f5;-webkit-font-smoothing:antialiased}
+#bg{position:absolute;inset:0;background:radial-gradient(90% 55% at 50% 30%,#2c2c31 0%,#18181b 55%,#0e0e10 100%)}
+#glow{position:absolute;width:1400px;height:1400px;left:-160px;top:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,154,61,.17),transparent 62%)}
+/* content stays inside the area TikTok and Shorts leave clear: off the right-hand buttons and the caption at the bottom */
+.sc{position:absolute;left:84px;right:140px;top:230px;bottom:380px;opacity:0;display:flex;flex-direction:column;justify-content:center}
+.brand{position:absolute;left:84px;right:84px;top:86px;display:flex;justify-content:space-between;font:700 26px/1 "Archivo";font-stretch:115%;letter-spacing:.14em;text-transform:uppercase;color:#a1a1aa}
+.brand b{color:#f4f4f5}
+.k{font:700 34px/1 "Archivo";font-stretch:118%;letter-spacing:.16em;text-transform:uppercase;color:#ff9a3d}
+.wide{font:600 54px/1.05 "Archivo";font-stretch:116%;text-transform:uppercase}
+.mute{color:#a1a1aa}
+.fit{display:block;white-space:nowrap}
+.chips{display:flex;gap:16px;flex-wrap:wrap}
+.chip{font:700 30px/1 "Archivo";font-stretch:110%;letter-spacing:.08em;text-transform:uppercase;padding:20px 28px;border-radius:999px;background:rgba(244,244,245,.09)}
+.chip.o{background:#ff9a3d;color:#1d0c00}
+/* hook */
+#hook .num{font:900 470px/.8 "Big Shoulders";color:#ff9a3d;margin:46px 0 6px;transform-origin:left 70%}
+#hook .lab{font:800 70px/1 "Archivo";font-stretch:120%;letter-spacing:.06em;text-transform:uppercase}
+#hook .who{font:900 132px/.9 "Big Shoulders";text-transform:uppercase;margin:34px 0 18px}
+#hook .chips{margin-top:54px}
+/* scores */
+.sport{font:900 230px/.8 "Big Shoulders";text-transform:uppercase;margin:22px 0 44px;display:flex;align-items:baseline;gap:26px}
+.sport small{font:700 34px/1 "Archivo";font-stretch:115%;letter-spacing:.12em;color:#a1a1aa}
+.grid{display:grid;gap:18px}
+.g{padding:20px 22px;border-radius:26px;background:rgba(244,244,245,.06);border:2px solid rgba(244,244,245,.07)}
+.r{display:flex;align-items:center;gap:14px;height:66px}
+.r i{width:10px;height:44px;border-radius:5px;flex:none}
+.r b{font:900 58px/1 "Big Shoulders";flex:1;color:#8b8b93}
+.r s{text-decoration:none;font:900 58px/1 "Big Shoulders";color:#8b8b93}
+.r.w b,.r.w s{color:#f4f4f5}
+.r b u{text-decoration:none;font-size:.6em;color:#ff9a3d;margin-right:8px;vertical-align:.12em}
+.g em{display:block;font:800 20px/1 "Archivo";font-style:normal;letter-spacing:.14em;color:#71717a;margin-top:8px}
+.c3 .r b,.c3 .r s{font-size:52px}
+/* performer cards */
+.tag{display:flex;align-items:center;gap:18px}
+.tag .rank{font:900 104px/.8 "Big Shoulders";color:#ff9a3d}
+.name{margin:30px 0 26px}
+.name .fit{font:900 214px/.86 "Big Shoulders";text-transform:uppercase}
+.ctx{display:flex;align-items:center;gap:16px;font:600 42px/1.2 "Archivo";color:#a1a1aa}
+.ctx i{width:12px;height:40px;border-radius:6px;flex:none}
+.ctx b{color:#f4f4f5}
+.line{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:70px}
+.st{padding:30px 26px 28px;border-radius:32px;background:rgba(244,244,245,.07);border:2px solid rgba(244,244,245,.08);overflow:hidden}
+.st b{font:900 176px/.9 "Big Shoulders"}
+.st span{display:block;margin-top:14px;font:700 29px/1.1 "Archivo";font-stretch:112%;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa}
+.st.top{background:#ff9a3d;border-color:#ff9a3d;color:#1d0c00}.st.top span{color:#3a1a00}
+.sub{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+.sub span{font:700 32px/1 "Archivo";font-stretch:106%;padding:20px 26px;border-radius:999px;background:rgba(244,244,245,.08);color:#d4d4d8}
+/* more */
+.mlist{margin-top:44px;display:flex;flex-direction:column;gap:24px}
+.mr{padding:24px 30px;border-radius:28px;background:rgba(244,244,245,.06);border:2px solid rgba(244,244,245,.07)}
+.mn .fit{font:900 88px/.9 "Big Shoulders";text-transform:uppercase}
+.mt{display:flex;align-items:center;gap:14px;margin-top:12px;font:600 34px/1.2 "Archivo";color:#d4d4d8;white-space:nowrap}
+.mt i{width:10px;height:36px;border-radius:5px;flex:none}
+.mt b{color:#f4f4f5}
+.ms{font:800 21px/1 "Archivo";letter-spacing:.12em;padding:9px 12px;border-radius:999px;background:rgba(244,244,245,.1);color:#a1a1aa}
+/* outro */
+#outro .big{margin:28px 0 44px}
+#outro .big .fit{font:900 230px/.86 "Big Shoulders";text-transform:uppercase}
+.src{position:absolute;left:84px;right:84px;bottom:112px;font:600 26px/1.3 "Archivo";color:#71717a}
+.bar{position:absolute;left:84px;right:84px;bottom:72px;height:8px;border-radius:4px;background:rgba(244,244,245,.1);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#ff9a3d}
+</style></head><body>
+<div id="bg"></div><div id="glow"></div>
+<div class="brand"><b id="bname"></b><span id="bdate"></span></div>
+<div id="stage"></div>
+<div class="src" id="src"></div>
+<div class="bar"><i id="prog"></i></div>
+<script>
+/* build(data) lays out every scene once; render(t) poses the frame at t seconds. Same t, same picture, every time. */
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3);
+let D=null,SC=[],TOTAL=30;
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num=v=>/^\d+$/.test(String(v))?` data-v="${v}"`:"";
+function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+1&&fs>min){fs-=3;el.style.fontSize=fs+"px"}}
+function build(data){D=data;SC=[];
+ document.getElementById("bname").textContent=D.brand;document.getElementById("bdate").textContent=D.date;
+ document.getElementById("src").textContent=D.source||"";
+ // with a voiceover each scene lasts as long as its line (data.dur, from tts.py) plus a beat; the line starts at va
+ let h="",t=0;const add=(id,dur,html,cls="")=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.4);
+  SC.push({id,t0:t,t1:t+dur,va:t+off});t+=dur;h+=`<div class="sc ${cls}" id="${id}">${html}</div>`};
+ const H=D.hook;
+ add("hook",3.4,`<div class="k">${esc(D.title)}</div><div class="num">${esc(H.big)}</div><div class="lab">${esc(H.label)}</div>
+  <div class="who"><span class="fit">${esc(H.who)}</span></div><div class="ctx"><i style="background:${H.color}"></i>${H.ctx}</div>
+  <div class="chips">${D.sections.map((s,i)=>`<span class="chip ${i===0?"o":""}">${esc(s.sport)} · ${s.total} final${s.total===1?"":"s"}</span>`).join("")}</div>`);
+ D.sections.forEach((S,si)=>{const n=S.games.length,cols=n>10?3:n>1?2:1;
+  add("s"+si,Math.min(5.2,2.4+n*.22),`<div class="k">Final scores</div><div class="sport">${esc(S.sport)}<small>${esc(S.when||"")}</small></div>
+   <div class="grid ${cols===3?"c3":""}" style="grid-template-columns:repeat(${cols},1fr)">${S.games.map(g=>`<div class="g">${[g.a,g.h].map(x=>`<div class="r ${x.w?"w":""}"><i style="background:${x.c}"></i><b>${x.rk?`<u>${x.rk}</u>`:""}${esc(x.ab)}</b><s>${esc(x.s)}</s></div>`).join("")}${g.note?`<em>${esc(g.note)}</em>`:""}</div>`).join("")}</div>`,"scores");
+  S.top.forEach((p,i)=>add(`p${si}_${i}`,3.9,`<div class="tag">${p.rank?`<span class="rank">${esc(p.rank)}</span>`:""}<span class="k">${esc(S.sport)} · ${esc(p.tag)}</span></div>
+   <div class="name"><span class="fit">${esc(p.first)}</span><span class="fit">${esc(p.last)}</span></div>
+   <div class="ctx"><i style="background:${p.color}"></i><span>${p.ctx}</span></div>
+   <div class="line">${p.stats.map((s,j)=>`<div class="st ${j===0?"top":""}"><b class="fit"${num(s[0])}>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join("")}</div>
+   <div class="sub">${p.sub.map(s=>`<span>${esc(s)}</span>`).join("")}</div>`,"perf"))});
+ if(D.more&&D.more.length)add("more",2.6+D.more.length*.6,`<div class="k">Also worth a look</div><div class="mlist">${D.more.map(r=>`<div class="mr"><div class="mn"><span class="fit">${esc(r.name)}</span></div>
+   <div class="mt"><i style="background:${r.color}"></i><b>${esc(r.tm)}</b><span class="ms">${esc(r.sport)}</span><span>${esc(r.txt)}</span></div></div>`).join("")}</div>`,"more");
+ add("outro",3.4,`<div class="k">Every morning</div><div class="big"><span class="fit">Follow for</span><span class="fit">tomorrow's</span><span class="fit">best stats</span></div><div class="wide mute">${esc(D.brand)}</div>`);
+ document.getElementById("stage").innerHTML=h;TOTAL=t;
+ document.querySelectorAll(".name .fit").forEach(e=>fit(e,96));document.querySelectorAll(".who .fit").forEach(e=>fit(e,80));
+ document.querySelectorAll(".st .fit").forEach(e=>fit(e,70));document.querySelectorAll(".mn .fit").forEach(e=>fit(e,50));document.querySelectorAll("#outro .fit").forEach(e=>fit(e,100));
+ return TOTAL}
+function countUp(el,k){const v=+el.dataset.v;if(el.dataset.v!=null&&!isNaN(v))el.textContent=Math.round(v*k)}
+function render(t){document.getElementById("prog").style.width=(clamp(t/TOTAL)*100).toFixed(2)+"%";
+ for(const s of SC){const el=document.getElementById(s.id),on=t>=s.t0-.01&&t<s.t1+.01;
+  if(!on){el.style.opacity=0;continue}
+  const lt=t-s.t0,a=s.id==="hook"?1:ease(lt/.42),b=s.id==="outro"?1:ease((s.t1-t)/.3);
+  el.style.opacity=Math.min(a,b).toFixed(3);el.style.transform=`translateY(${((1-a)*60).toFixed(1)}px)`;
+  if(s.id==="hook"){const n=el.querySelector(".num"),x=ease(lt/.5);n.style.transform=`scale(${(.9+.1*x).toFixed(3)})`;
+   el.querySelectorAll(".chip").forEach((c,i)=>{const y=ease((lt-1-i*.15)/.4);c.style.opacity=y;c.style.transform=`translateY(${((1-y)*30).toFixed(1)}px)`})}
+  if(el.classList.contains("scores"))el.querySelectorAll(".g").forEach((g,i)=>{const x=ease((lt-.3-i*.07)/.45);g.style.opacity=x.toFixed(3);g.style.transform=`translateY(${((1-x)*40).toFixed(1)}px)`});
+  if(el.classList.contains("perf")){el.querySelectorAll(".name .fit").forEach((n,i)=>{const x=ease((lt-i*.08)/.5);n.style.transform=`translateX(${((1-x)*-90).toFixed(1)}px)`});
+   el.querySelectorAll(".st").forEach((g,i)=>{const x=ease((lt-.35-i*.13)/.45);g.style.opacity=x.toFixed(3);g.style.transform=`translateY(${((1-x)*50).toFixed(1)}px) scale(${(.92+.08*x).toFixed(3)})`;
+    countUp(g.querySelector("b"),ease((lt-.35-i*.13)/.9))});
+   el.querySelectorAll(".sub span").forEach((c,i)=>{const x=ease((lt-1-i*.1)/.4);c.style.opacity=x.toFixed(3)})}
+  if(s.id==="more"){const cue=D.cues&&D.cues.more,R=el.querySelectorAll(".mr");R.forEach((r,i)=>{const at=cue&&cue[i+1]!=null?s.va-s.t0+cue[i+1]-.15:.3+i*.45,x=ease((lt-at)/.4);
+    r.style.opacity=x.toFixed(3);r.style.transform=`translateX(${((1-x)*-70).toFixed(1)}px)`})}
+  if(s.id==="outro"){const x=ease((lt-.15)/.6);el.querySelectorAll(".big .fit").forEach((f,i)=>{const y=ease((lt-.1-i*.1)/.5);f.style.transform=`translateX(${((1-y)*-80).toFixed(1)}px)`;f.style.opacity=y.toFixed(3)})}}
+ document.getElementById("glow").style.transform=`translate(${(Math.sin(t*.35)*120).toFixed(1)}px,${(Math.cos(t*.27)*90).toFixed(1)}px)`}
+window.build=build;window.render=render;
+</script></body></html>
