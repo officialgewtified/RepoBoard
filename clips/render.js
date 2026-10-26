@@ -44,8 +44,24 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
     SFX.forEach(e => { if (SYN[e.k] && e.t < total) ins.push([path.join(tmp, e.k + ".wav"), e.t, "s"]); });
     const args = ["-y", "-loglevel", "error", "-i", silent];
     ins.forEach(([f]) => args.push("-i", f));
-    const f = ins.map(([, at, kind], i) => `[${i + 1}:a]aresample=48000${kind === "v" ? VFX : ""},adelay=delays=${Math.round(at * 1000)}:all=1[a${i}]`).join(";") +
-      `;${ins.map((_, i) => `[a${i}]`).join("")}amix=inputs=${ins.length}:normalize=0,apad,atrim=0:${total.toFixed(3)},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]`;
+    // background music: one of the tracks in music/ (picked by date, so it rotates), looped to length, quiet,
+    // ducked further whenever the narrator talks, faded in and out
+    const MD = path.join(__dirname, "music"), tracks = fs.existsSync(MD) ? fs.readdirSync(MD).filter(x => /\.(mp3|m4a|wav|ogg)$/i.test(x)).sort() : [];
+    const track = tracks.length ? path.join(MD, tracks[[...String(data.day || "")].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7) % tracks.length]) : null;
+    if (track) args.push("-stream_loop", "-1", "-i", track);
+    const T = total.toFixed(3), mi = ins.length + 1;
+    let f = ins.map(([, at, kind], i) => `[${i + 1}:a]aresample=48000${kind === "v" ? VFX : ""},adelay=delays=${Math.round(at * 1000)}:all=1[a${i}]`).join(";");
+    const vs = ins.map((x, i) => x[2] === "v" ? `[a${i}]` : "").join(""), sx = ins.map((x, i) => x[2] !== "v" ? `[a${i}]` : "").join("");
+    const nv = ins.filter(x => x[2] === "v").length, ns = ins.length - nv;
+    if (track && nv) {
+      f += `;${vs}amix=inputs=${nv}:normalize=0,apad,atrim=0:${T},asplit=2[v1][v2]` +
+        `;[${mi}:a]aresample=48000,aformat=channel_layouts=stereo,atrim=0:${T},volume=${process.env.MUSIC_VOL || "0.16"},afade=t=in:d=1.2,afade=t=out:st=${Math.max(0, total - 2.5).toFixed(3)}:d=2.5[m0]` +
+        `;[v2]aformat=channel_layouts=stereo[sc];[m0][sc]sidechaincompress=threshold=0.02:ratio=6:attack=15:release=400[m1]` +
+        `;[v1]${sx}[m1]amix=inputs=${2 + ns}:normalize=0,atrim=0:${T},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]`;
+    } else {
+      f += `;${ins.map((_, i) => `[a${i}]`).join("")}amix=inputs=${ins.length}:normalize=0,apad,atrim=0:${T},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]`;
+    }
+    if (track) console.log("music:", path.basename(track));
     args.push("-filter_complex", f, "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", out);
     await run(args); fs.unlinkSync(silent); fs.rmSync(tmp, { recursive: true, force: true });
   }
