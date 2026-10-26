@@ -1,7 +1,7 @@
 """Composes the channel's own background beats in code (so there's nothing to license and nothing for Content ID to
 claim): a laid-back hip-hop groove with warm chords, a sub bass and light drums, built to sit quietly under the
 narrator. Each track is a seamless 8-bar loop; render.js loops it to the video's length and ducks it under the voice.
-usage: python make_music.py music/      (writes crossover-beat-1.mp3, crossover-beat-2.mp3)"""
+usage: python make_music.py music/      (writes crossover-beat-1.mp3; --both also writes beat 2)"""
 import os, subprocess, sys
 import numpy as np
 
@@ -104,6 +104,6 @@ if __name__ == "__main__":
     os.makedirs(out, exist_ok=True)
     # 1: smooth, minor (Am9 / Fmaj7 / Cmaj7 / G6)
     save(track(90, [("A", "m9"), ("F", "maj7"), ("C", "maj7"), ("G", "6")], [(0, 3), (3, 1), (4, 2), (7, 1)], seed=1), os.path.join(out, "crossover-beat-1.mp3"))
-    # 2: brighter, a little quicker (Dm7 / G7 / Cmaj7 / Am7)
-    save(track(96, [("D", "m7"), ("G", "7"), ("C", "maj7"), ("A", "m7")], [(0, 2), (2, 1), (3, 1), (4, 3), (7, 1)], swing=0.08, seed=2), os.path.join(out, "crossover-beat-2.mp3"))
+    # 2: brighter, a little quicker (Dm7 / G7 / Cmaj7 / Am7). Not used: the channel went with beat 1.
+    if "--both" in sys.argv: save(track(96, [("D", "m7"), ("G", "7"), ("C", "maj7"), ("A", "m7")], [(0, 2), (2, 1), (3, 1), (4, 3), (7, 1)], swing=0.08, seed=2), os.path.join(out, "crossover-beat-2.mp3"))
     print("wrote", os.listdir(out))
