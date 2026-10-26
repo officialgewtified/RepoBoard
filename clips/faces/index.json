@@ -9,7 +9,7 @@
 "q": 9.55,
 "team": "Pistons",
 "title": "File:1 cade cunningham 2024.jpg",
-"v": 3,
+"v": 4,
 "year": 2024
 },
 "franz-wagner": {
@@ -22,21 +22,14 @@
 "q": 7.95,
 "team": "Magic",
 "title": "File:Wagner2022.jpg",
-"v": 3,
+"v": 4,
 "year": 2022
 },
 "jaxon-smith-njigba": {
-"artist": "FanDuel",
-"at": "2026-10-26",
-"file": "jaxon-smith-njigba.webp",
-"inTeam": false,
-"license": "CC BY 3.0",
-"page": "https://commons.wikimedia.org/wiki/File:Jaxon_Smith-Njigba_FanDuel_Interview.png",
-"q": 4.81,
+"miss": "2026-10-26",
 "team": "Seahawks",
-"title": "File:Jaxon Smith-Njigba FanDuel Interview.png",
-"v": 3,
-"year": 2023
+"v": 4,
+"why": "6 photos, none usable (licence/size)"
 },
 "joe-burrow": {
 "artist": "All-Pro Reels",
@@ -48,7 +41,7 @@
 "q": 6.68,
 "team": "Bengals",
 "title": "File:Joe Burrow after injury (2020) (1).jpg",
-"v": 3,
+"v": 4,
 "year": 2020
 },
 "luka-doncic": {
@@ -61,7 +54,7 @@
 "q": 10.36,
 "team": "Lakers",
 "title": "File:Luka Doncic (55095317361) (cropped).jpg",
-"v": 3,
+"v": 4,
 "year": 2026
 },
 "shai-gilgeous-alexander": {
@@ -74,7 +67,7 @@
 "q": 3.47,
 "team": "Thunder",
 "title": "File:Shai Gilgeous-Alexander 2 (cropped).jpg",
-"v": 3,
+"v": 4,
 "year": 2018
 },
 "tony-pollard": {
@@ -87,21 +80,21 @@
 "q": 8.62,
 "team": "Titans",
 "title": "File:Tony Pollard Titans 24.jpg",
-"v": 3,
+"v": 4,
 "year": 2024
 },
 "trey-mcbride": {
-"artist": "FanDuel",
+"artist": "Paul L Dineen",
 "at": "2026-10-26",
 "file": "trey-mcbride.webp",
-"inTeam": true,
-"license": "CC BY 3.0",
-"page": "https://commons.wikimedia.org/wiki/File:2024_FanDuel_Interview_Trey_McBride.png",
-"q": 8.58,
+"inTeam": false,
+"license": "CC BY 2.0",
+"page": "https://commons.wikimedia.org/wiki/File:Trey_McBride.jpg",
+"q": 3.85,
 "team": "Cardinals",
-"title": "File:2024 FanDuel Interview Trey McBride.png",
-"v": 3,
-"year": 2024
+"title": "File:Trey McBride.jpg",
+"v": 4,
+"year": 2018
 },
 "zay-flowers": {
 "artist": "Maryland GovPics",
@@ -113,7 +106,7 @@
 "q": 9.25,
 "team": "Ravens",
 "title": "File:Zay Flowers JUL2024 (53880447586).jpg",
-"v": 3,
+"v": 4,
 "year": 2024
 }
 }
