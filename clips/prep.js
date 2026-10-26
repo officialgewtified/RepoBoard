@@ -172,17 +172,27 @@ function build(day, nflGames, nbaGames, opts, cfbGames) {
     source: "Stats: official box scores via ESPN",
     hook: { big: String(h[1]), label: h[2], who: h[3].n, ctx: h[4].txt, color: col(h[4].me), tm: h[4].me.ab, sport: h[5] },
     sections, more, voice,
-    caption: caption(wd, md, sections, h)
+    caption: caption(wd, md, sections, h, hs)
   };
 }
 
-// a ready-to-paste caption: what happened, no hype, no betting talk
-function caption(wd, md, sections, h) {
-  const lines = [`${wd}'s best stats (${md}) 📊`, `${h[3].n}: ${h[1]} ${h[2]} in a ${h[4].score} ${h[4].plain}.`];
+// a ready-to-paste caption built to get engagement: hook, the stat lines, a question for the comments, and hashtags
+// for the leagues, the day's stars and their teams. Still no hype beyond the numbers and no betting talk.
+const tag = s => "#" + String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]/g, "");
+function caption(wd, md, sections, h, hs) {
+  const icon = sp => sp === "NBA" ? "🏀" : "🏈", last = c => c.last || "";
+  const lines = [`${h[3].n} ${HOOK_SAY[h[2]](h[1])} on ${wd} 🔥${hs && hs.top ? " The most by anyone this season." : ""}`, "", `${wd}'s best stats (${md}) 📊`];
   const lab = l => /^TDs?$/.test(l) ? l : l.toLowerCase();
-  for (const s of sections) for (const p of (s.sport === "NBA" ? s.top.slice().reverse() : s.top)) lines.push(`${s.sport} ${p.rank ? p.rank + " " : ""}${p.tag.toLowerCase()}: ${p.first} ${p.last}, ${p.stats.map(x => `${x[0]} ${lab(x[1])}`).join(", ")}`);
-  const tags = ["#" + sections.map(s => s.sport === "CFB" ? "CollegeFootball" : s.sport).join(" #"), "#stats", "#sports", "#highlights"].join(" ");
-  return lines.join("\n") + "\n\n" + tags;
+  for (const s of sections) for (const p of (s.sport === "NBA" ? s.top.slice().reverse() : s.top))
+    lines.push(`${icon(s.sport)} ${p.rank ? p.rank + " " : ""}${p.first} ${last(p)}: ${p.stats.map(x => `${x[0]} ${lab(x[1])}`).join(", ")}`);
+  const sp = sections.map(s => s.sport);
+  lines.push("", sp.length > 1 ? "Who had the best night? Drop it in the comments 👇" : "Who was the best on " + wd + "? Comments 👇", "Follow for tomorrow's best stats ✅");
+  // hashtags: leagues first (YouTube shows the first three), then the stars and their teams, then reach tags
+  const stars = [h[3].n, ...sections.map(s => { const t = s.sport === "NBA" ? s.top[s.top.length - 1] : s.top[0]; return t && `${t.first} ${t.last}`; })];
+  const teams = [nick(h[4].me)];
+  const tags = [...sp.map(x => x === "CFB" ? "#CollegeFootball" : "#" + x), ...stars.filter(Boolean).map(tag), ...teams.map(tag),
+    ...(sp.some(x => x !== "NBA") ? ["#FantasyFootball"] : []), ...(sp.includes("NBA") ? ["#NBAStats"] : []), "#SportsStats", "#fyp"];
+  return lines.join("\n") + "\n\n" + [...new Set(tags)].slice(0, 11).join(" ");
 }
 
 module.exports = { build };
