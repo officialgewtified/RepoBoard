@@ -93,6 +93,9 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 #logo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;z-index:9}
 #logo span{display:block;font:900 640px/.8 "Big Shoulders";color:var(--paper)}
 #logo i{position:absolute;right:-70px;bottom:20px;width:110px;height:110px;border-radius:50%;background:var(--go)}
+#sig{position:absolute;left:0;right:0;top:calc(46% + 300px);text-align:center;opacity:0;z-index:9}
+#sig b{display:block;font:900 120px/1 "Big Shoulders";letter-spacing:.08em;color:var(--paper)}
+#sig small{display:block;margin-top:18px;font:700 30px/1 "Archivo";font-stretch:116%;letter-spacing:.2em;text-transform:uppercase;color:var(--haze)}
 </style></head><body>
 <div id="sky"></div>
 <div class="top"><span class="wm" id="wm"></span><span class="dt" id="dt"></span></div>
@@ -101,13 +104,14 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 <div class="strip" id="strip"></div>
 <div class="src" id="src"></div>
 <div id="logo"><span>X</span><i></i></div>
+<div id="sig"><b>CROSSOVER</b><small>Best stats · every day</small></div>
 <script>
 /* build(data) lays out every scene once; render(t) poses the frame at t seconds. Same t, same picture, every time.
    SFX lists the moments that get a sound (whoosh on each swipe, pop on each pop-up); render.js mixes them in. */
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3);
 // springy pop: overshoots a little and settles
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.8,TAIL=1.3;
+let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.8,TAIL=2.6,MIN=61.5;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num=v=>/^\d+$/.test(String(v))?` data-v="${v}"`:"";
 const ARROW=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
@@ -122,7 +126,7 @@ function build(data){D=data;SC=[];SFX=[];
  document.getElementById("src").textContent=(D.source||"")+(D.credits&&D.credits.length?" · Photos: Wikimedia Commons (see caption)":"");
  // with a voiceover each scene lasts as long as its line (data.dur, from tts.py) plus a beat; the line starts at va
  let h="",t=INTRO;const add=(id,dur,html,extra={})=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.35);
-  SC.push(Object.assign({id,t0:t,t1:t+dur,va:t+off},extra));if(id!=="hook")SFX.push({t:t,k:"whoosh"});t+=dur;h+=`<div class="sc ${extra.kind==="card"?"":"tall"}" id="${id}">${html}</div>`};
+  SC.push(Object.assign({id,t0:t,t1:t+dur,va:t+off},extra));t+=dur;h+=`<div class="sc ${extra.kind==="card"?"":"tall"}" id="${id}">${html}</div>`};
  const OUT=D.mode==="preview"?["Follow for","the morning","recap"]:["Follow for","tomorrow's","best stats"];
  if(D.mode==="preview"){const H=D.hook;
   add("hook",3.4,`<div class="hero"><div class="wmk">Tonight</div>
@@ -164,7 +168,11 @@ function build(data){D=data;SC=[];SFX=[];
  add("outro",3.4,`<div class="hero"><div class="wmk">${esc(D.brand)}</div><div class="k">Every morning</div>
   <div class="h2">${OUT.map(x=>`<span class="fit">${esc(x)}</span>`).join("")}</div>
   <div class="view" style="position:relative"><span id="fl">Follow ${esc(D.brand)}</span><div class="ring"></div></div></div>`,{kind:"outro"});
- document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;SFX.push({t:.42,k:"whoosh"},{t:t+.55,k:"stamp"});
+ // over a minute, every time (TikTok only pays on videos longer than 1:00): if it runs short, each screen holds a little longer
+ const short=MIN-(t+TAIL);if(short>0){const mids=SC.filter(s=>s.id!=="hook"),per=short/mids.length;let sh=0;
+  for(const s of SC){s.t0+=sh;s.va+=sh;if(s.id!=="hook")sh+=per;s.t1+=sh}t+=short}
+ for(const s of SC)if(s.id!=="hook")SFX.push({t:s.t0,k:"whoosh"});
+ document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;SFX.push({t:.42,k:"whoosh"},{t:t+.1,k:"sting"});
  document.querySelectorAll(".h2 .fit").forEach(e=>fit(e,48));document.querySelectorAll(".mr .fit").forEach(e=>fit(e,40));
  document.querySelectorAll(".spec .nm").forEach(e=>fit(e,24));
  document.querySelectorAll(".wmk").forEach(e=>{const w=e.parentElement.clientWidth*1.5;let fs=560;e.style.fontSize=fs+"px";while(e.scrollWidth>w&&fs>200){fs-=20;e.style.fontSize=fs+"px"}});
@@ -209,7 +217,12 @@ function render(t){const N=SC.length;let cur=0;
  document.getElementById("dot").style.left=(clamp(t/TOTAL)*100).toFixed(2)+"%";
  // intro: the X holds, then the camera flies through it into the first card. Outro: everything fades back to the X, the same frame the video starts on.
  let lo=0,ls=1;if(t<INTRO+.1){if(t<.42){lo=1;ls=1+.025*Math.sin(t*9)}else{const x=ease((t-.42)/.4);ls=1+x*7;lo=1-x}}
- const end=TOTAL-TAIL;if(t>end+.2){lo=ease((t-end-.2)/.6);ls=1+.025*Math.sin((t-TOTAL)*9)}
+ // the signature end card: the X slams in, the dot pops, CROSSOVER spreads out under it, then it settles on the X alone (the first frame)
+ const end=TOTAL-TAIL;let sg=0,dp=1;
+ if(t>end+.1){const k=t-end-.1;lo=clamp(k/.1);ls=1+.55*(1-pop(k/.42));dp=pop((k-.3)/.35);
+  sg=Math.min(ease((k-.45)/.35),ease((TOTAL-.08-t)/.5))}
+ const SG=document.getElementById("sig");SG.style.opacity=sg.toFixed(3);SG.querySelector("b").style.letterSpacing=`${(.08+.1*(1-ease((t-end-.55)/.6))).toFixed(3)}em`;
+ document.querySelector("#logo i").style.transform=`scale(${Math.max(0,dp).toFixed(3)})`;
  const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`translate(-50%,-50%) scale(${ls.toFixed(3)})`;
  for(const q of [".top",".nav","#src"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
 // fonts load only when first used, so load them before build() measures any text
