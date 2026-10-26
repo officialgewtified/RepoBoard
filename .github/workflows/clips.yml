@@ -63,7 +63,10 @@ jobs:
         if: steps.prep.outputs.skip != '1'
         # free-to-use photos from Wikimedia Commons, cut out; players without one get their team badge
         continue-on-error: true
-        run: python faces.py out/data.json
+        # off: no player photos, just type, stats and team badges. Set PHOTOS to "on" to bring the cut-out photos back.
+        env:
+          PHOTOS: "off"
+        run: if [ "$PHOTOS" = "on" ]; then python faces.py out/data.json; else echo "Player photos are off"; fi
       - name: Voiceover
         if: steps.prep.outputs.skip != '1'
         # if the voice fails for any reason the video still gets made, just without narration
