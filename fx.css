@@ -635,3 +635,16 @@ a.btn{display:flex;align-items:center;justify-content:center;text-align:center;t
 .pcf i{font-style:normal;font-size:11.5px;font-weight:700;padding:3px 7px;border-radius:5px;background:color-mix(in srgb,var(--stop) 16%,transparent);color:var(--stop)}
 .pch{margin:22px 0 4px;font-size:15px}
 @media (prefers-reduced-motion:reduce){.seg [data-tab="live"].is-live::after{animation:none}}
+
+/* ---------- what's been hitting ---------- */
+.whc{padding:8px 14px 12px}
+.whr{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(56px,1fr) 46px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.wht{display:flex;flex-direction:column;min-width:0}
+.wht b{font-weight:750;font-size:14px;line-height:1.25}
+.wht small{font-size:12px;color:var(--mute)}
+.wht i{font-style:normal;font-weight:700}.wht i.go{color:var(--go)}.wht i.red{color:var(--stop)}
+.whb{position:relative;height:8px;border-radius:5px;background:var(--raise)}
+.whb i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--mute)}
+.whb i.go{background:var(--go)}.whb i.red{background:var(--stop)}
+.whb s{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);opacity:.7}
+.whr > b{text-align:right;font-family:var(--fn,inherit);font-weight:900;font-size:20px;font-variant-numeric:tabular-nums}

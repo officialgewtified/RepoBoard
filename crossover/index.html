@@ -360,7 +360,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/bebas-neue.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=15">
+<link rel="stylesheet" href="../fx.css?v=16">
 <link rel="stylesheet" href="../studio.css?v=1">
 <link rel="preload" href="../fonts/archivo-x.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/big-shoulders.woff" as="font" type="font/woff" crossorigin>
@@ -464,11 +464,15 @@ function calib(b){const ps=(b.h&&b.h.props||[]).filter(x=>x.pp&&(x.hit===true||x
  // each stat with 40+ graded picks gets its own fit, blended with the board's (half each at 150 picks); the boards do the same
  b.fitMk={};const by={};for(const x of ps)(by[x.mk]=by[x.mk]||[]).push(x);
  for(const mk in by){const L=by[mk];if(L.length<40)continue;const S=fitCal(L),w=L.length/(L.length+150);b.fitMk[mk]={a:w*S.a+(1-w)*b.fit.a,b:w*S.b+(1-w)*b.fit.b}}
+ // each stat's More and Less sides nudged toward how that side has really done (30+ picks, half weight at 200, at most 4 points); the boards do the same
+ b.shift={};const bys={};for(const x of ps)(bys[x.mk+"|"+x.side]=bys[x.mk+"|"+x.side]||[]).push(x);
+ for(const k in bys){const L=bys[k];if(L.length<30)continue;const F=b.fitMk[k.split("|")[0]]||b.fit;let gap=0;for(const x of L)gap+=(x.hit?1:0)-clamp(.5+F.a+F.b*(x.p-.5),.3,.8);
+  b.shift[k]=clamp(L.length/(L.length+200)*gap/L.length,-.04,.04)}
  b.all={n:ps.length,w:ps.filter(x=>x.hit).length,ep:ps.length?ps.reduce((a,x)=>a+x.p,0)/ps.length:null};
  b.cal=RANGES.map(([lo,hi,l])=>{const s=ps.filter(x=>x.p>=lo&&x.p<hi),n=s.length,w=s.filter(x=>x.hit).length,ep=n?s.reduce((a,x)=>a+x.p,0)/n:0;
   return{lo,hi,l,n,w,hr:n?w/n:null,ep}})}
-function corrected(b,p,mk){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],F=(mk&&b.fitMk&&b.fitMk[mk])||b.fit||{a:0,b:.5};
- return{q:CXS.honest?clamp(.5+F.a+F.b*(p-.5),.3,.8):p,c}}
+function corrected(b,p,mk,side){const c=b.cal.find(x=>p>=x.lo&&p<x.hi)||b.cal[0],F=(mk&&b.fitMk&&b.fitMk[mk])||b.fit||{a:0,b:.5},sh=(b.shift&&b.shift[mk+"|"+side])||0;
+ return{q:CXS.honest?clamp(.5+F.a+F.b*(p-.5)+sh,.3,.8):p,c}}
 
 /* ---------- candidates from both boards ---------- */
 function etDay(ms){return new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/New_York"})}
@@ -478,7 +482,7 @@ function picks(){const out=[];
  for(const b of B){if(!b.d)continue;const anyPP=(b.d.props||[]).some(r=>r.pp),best={};
   for(const r of b.d.props||[]){const g=b.GI[r.g];if(!g||Date.parse(g.kick)<=Date.now())continue;if(sportSel!=="all"&&g.sp!==sportSel)continue;
    if(anyPP&&!r.pp)continue;if(r.nb<2)continue;if(r.ij&&/^(out|doubtful)/i.test(r.ij))continue;if(scratch(r.pl,r.ij))continue;
-   const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p,r.mk),mx=mixed(b,r);
+   const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p,r.mk,side),mx=mixed(b,r);
    const team=r.sd?g[r.sd]:null,opp=r.sd?g[r.sd==="a"?"h":"a"]:null;
    const x={b,r,g,side,p,q,c,mx,team,opp,key:b.k+"|"+r.g+"|"+r.pl,tk:r.sd?r.g+"|"+r.sd:null};
    if(mx&&CXS.skipMixed)continue;   // the board's recent games or matchup point against the books: both boards skip these too
@@ -498,7 +502,7 @@ const GAPZ=.15;
 function gaps(){const out=[];for(const b of B){if(!b.d)continue;
  for(const r of b.d.props||[]){const g=b.GI[r.g];if(!g||Date.parse(g.kick)<=Date.now()||(sportSel!=="all"&&g.sp!==sportSel))continue;
   if(!r.pp||r.bm==null||r.nb<2||(r.ij&&/^(out|doubtful)/i.test(r.ij))||scratch(r.pl,r.ij))continue;const d=+(r.bm-r.ln).toFixed(2);if(!d)continue;
-  const z=d/b.sigma(r.mk,r.ln);if(Math.abs(z)<GAPZ)continue;const side=d>0?"o":"u",p=side==="o"?r.po:1-r.po,{q,c}=corrected(b,p,r.mk);
+  const z=d/b.sigma(r.mk,r.ln);if(Math.abs(z)<GAPZ)continue;const side=d>0?"o":"u",p=side==="o"?r.po:1-r.po,{q,c}=corrected(b,p,r.mk,side);
   out.push({b,r,g,side,p,q,c,z,gap:true,team:r.sd?g[r.sd]:null,opp:r.sd?g[r.sd==="a"?"h":"a"]:null,key:b.k+"|"+r.g+"|"+r.pl})}}
  return out.sort((a,b)=>Math.abs(b.z)-Math.abs(a.z))}
 function gapRecAll(){let w=0,n=0;for(const b of B)for(const x of (b.h&&b.h.props)||[]){if(!x.pp||x.bm==null||x.act==null||x.act===x.ln)continue;
@@ -871,7 +875,7 @@ function sbSection(C){const r=sbBuild(C.slice()),n=SB.n,pill=(a,v,l,on)=>`<butto
 
 /* ---------- check any player: his lines on both boards, and a link to his full player page ---------- */
 let FINDQ="";
-function mkPick(b,r){const g=b.GI[r.g];if(!g)return null;const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p,r.mk);
+function mkPick(b,r){const g=b.GI[r.g];if(!g)return null;const pb=boardP(b,r),side=pb>=.5?"o":"u",p=Math.max(pb,1-pb),{q,c}=corrected(b,p,r.mk,side);
  return{b,r,g,side,p,q,c,mx:mixed(b,r),team:r.sd?g[r.sd]:null,opp:r.sd?g[r.sd==="a"?"h":"a"]:null,key:b.k+"|"+r.g+"|"+r.pl,tk:r.sd?r.g+"|"+r.sd:null}}
 function findSection(){const q=pnmx(FINDQ);const bar=`<div class="cxfind"><input id="cxq" class="search" type="search" placeholder="Check any player on either board" value="${esc(FINDQ)}" autocomplete="off"></div>`;
  if(q.length<2)return bar;const hits=[],names=new Map();
