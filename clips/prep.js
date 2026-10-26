@@ -9,9 +9,11 @@ const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 
-// team colour that shows up on a dark background (falls back to the alternate, then grey)
 function lum(h) { if (!/^[0-9a-f]{6}$/i.test(h || "")) return 0; const c = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
-const col = t => lum(t.color) > .045 ? "#" + t.color : lum(t.alt) > .045 ? "#" + t.alt : "#a1a1aa";
+// team colour that reads on a dark background: the primary, else the alternate, else the primary lightened (purple stays purple)
+const hex = (h, f) => "#" + [0, 2, 4].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * (1 - f) + 255 * f).toString(16).padStart(2, "0")).join("");
+const col = t => { if (lum(t.color) > .045) return "#" + t.color; if (lum(t.alt) > .045 && !/^(ffffff|fff)$/i.test(t.alt)) return "#" + t.alt;
+  if (!/^[0-9a-f]{6}$/i.test(t.color || "")) return "#a1a1aa"; for (let f = .1; f < .9; f += .1) { const c = hex(t.color, f); if (lum(c.slice(1)) > .06) return c; } return "#a1a1aa"; };
 function split(name) { const p = String(name).trim().split(/\s+/); return p.length < 2 ? { first: "", last: p[0] } : { first: p[0], last: p.slice(1).join(" ") }; }
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
