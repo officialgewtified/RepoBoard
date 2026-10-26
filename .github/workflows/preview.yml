@@ -63,6 +63,8 @@ jobs:
           SPEED: "1.05"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
+        # setup normally takes about a minute; if GitHub's package mirror hangs, fail fast instead of blocking the next run
+        timeout-minutes: 10
         run: |
           npm i --no-save --no-package-lock playwright@1.63.0
           npx playwright install --with-deps chromium
