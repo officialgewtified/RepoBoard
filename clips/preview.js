@@ -14,7 +14,7 @@ const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const r1 = x => Math.round(x * 10) / 10;
 async function get(url, tries = 3) {
   for (let i = 0; ; i++) {
-    try { const r = await fetch(url, { headers: { "user-agent": "Mozilla/5.0 (stats preview)" } }); if (!r.ok) throw new Error(r.status + " " + url); return await r.json(); }
+    try { const r = await fetch(url, { headers: { "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36", accept: "application/json" } }); if (!r.ok) throw new Error(r.status + " " + url); return await r.json(); }
     catch (e) { if (i >= tries - 1) throw e; await new Promise(r => setTimeout(r, 1500 * (i + 1))); }
   }
 }
@@ -72,7 +72,7 @@ async function slate(sport, label, ymd) {
         rec, pct: w + l ? w / (w + l) : .5, rank: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : null, lead: leaders(x), out: (outs[String(t.id)] || []).slice(0, 3) }; }
     if (sport.includes("college") && !T.home.rank && !T.away.rank) continue;   // college: Top 25 games only
     const tv = [...new Set([...(c.broadcasts || []).flatMap(b => b.names || []), ...(c.geoBroadcasts || []).map(g => (g.media || {}).shortName)].filter(Boolean))];
-    games.push({ sport: label, id: ev.id, date: ev.date, time: et(ev.date), say: etSay(ev.date), tv: tv.find(x => NATIONAL.test(x)) || tv[0] || "", nat: tv.some(x => NATIONAL.test(x)), away: T.away, home: T.home });
+    games.push({ sport: label, id: ev.id, date: ev.date, time: et(ev.date), say: etSay(ev.date), tv: tv.find(x => NATIONAL.test(x) && !/League Pass/i.test(x)) || "", nat: tv.some(x => NATIONAL.test(x) && !/League Pass/i.test(x)), away: T.away, home: T.home });
   }
   if (label === "NBA") for (const g of games) for (const s of [g.away, g.home]) { const p = s.lead.points || s.lead.pointsPerGame;
     if (p && p.id) { p.l5 = await last5("basketball/nba", p.id); } }
@@ -83,9 +83,10 @@ const pl = (v, w) => `${v} ${w}${v === 1 ? "" : "s"}`;
 function star(s, sport) {
   if (sport === "NBA") { const p = s.lead.points || s.lead.pointsPerGame; if (!p) return null;
     const hot = p.l5 && p.l5.p - p.value >= 2 && p.l5.p >= 18;
-    return { name: p.name, short: p.short, big: p.l5 ? p.l5.p : r1(p.value), lab: p.l5 ? "PPG last 5" : "PPG", season: r1(p.value), l5: p.l5, hot,
-      chip: p.l5 ? `${p.short}: ${p.l5.p} / ${p.l5.r} / ${p.l5.a} last 5` : `${p.short}: ${p.show}`,
-      say: p.l5 ? `${p.name} is averaging ${Math.round(p.l5.p)} over his last five${hot ? ", up from " + Math.round(p.value) + " on the season" : ""}` : `${p.name} is averaging ${Math.round(p.value)} a game` }; }
+    const gw = p.l5 ? (WORDS[p.l5.g] || p.l5.g) : "";
+    return { name: p.name, short: p.short, big: p.l5 ? p.l5.p : r1(p.value), lab: p.l5 ? `PPG last ${p.l5.g}` : "PPG", season: r1(p.value), l5: p.l5, hot,
+      chip: p.l5 ? `${p.short}: ${p.l5.p} / ${p.l5.r} / ${p.l5.a} last ${p.l5.g}` : `${p.short}: ${p.show} PPG`,
+      say: p.l5 ? `${p.name} is averaging ${Math.round(p.l5.p)} over his last ${gw}${hot ? ", up from " + Math.round(p.value) + " on the season" : ""}` : `${p.name} is averaging ${Math.round(p.value)} a game` }; }
   const p = s.lead.passingYards || s.lead.rushingYards || s.lead.receivingYards; if (!p) return null;
   return { name: p.name, short: p.short, big: null, chip: `${p.short}: ${p.show}`, say: "" };
 }
@@ -101,7 +102,7 @@ function build(day, nba, nfl, cfb, brand) {
   const hot = hotList[0], hotTeam = hot && nba.find(g => g.a === hot || g.h === hot), hotSide = hotTeam && (hotTeam.a === hot ? hotTeam.away : hotTeam.home);
   const count = [nba.length && `${nba.length} NBA`, nfl.length && `${nfl.length} NFL`, cfb.length && `${cfb.length} Top 25`].filter(Boolean).join(" · ");
   const sayCount = [nba.length && `${WORDS[nba.length] || nba.length} N B A game${nba.length === 1 ? "" : "s"}`, nfl.length && `${WORDS[nfl.length] || nfl.length} in the N F L`, cfb.length && `${WORDS[cfb.length] || cfb.length} Top 25 college games`].filter(Boolean);
-  const voice = { hook: `${cap(sayCount.join(sayCount.length > 2 ? ", " : " and "))} ${wd === DAYS[new Date().getUTCDay()] ? "tonight" : "on " + wd}!${hot ? ` ${hot.name} is ${hot.hot ? "on fire" : "rolling"}, ${Math.round(hot.big)} a game over his last five!` : ""} Here's what to watch.` };
+  const voice = { hook: `${cap(sayCount.join(sayCount.length > 2 ? ", " : " and "))} ${wd === DAYS[new Date().getUTCDay()] ? "tonight" : "on " + wd}!${hot ? ` ${hot.name} is ${hot.hot ? "on fire" : "rolling"}, ${Math.round(hot.big)} a game over his last ${WORDS[hot.l5.g] || hot.l5.g}!` : ""} Here's what to watch.` };
   const scenes = feat.map((g, i) => {
     const outs = [...g.away.out.map(x => [x, g.away]), ...g.home.out.map(x => [x, g.home])];
     const starOut = outs.find(([x]) => (g.a && x === g.a.name) || (g.h && x === g.h.name));
@@ -116,7 +117,7 @@ function build(day, nba, nfl, cfb, brand) {
   voice.slate = "Here's the full slate.";
   voice.outro = `Follow ${brand} for the morning recap!`;
   const cap1 = `${wd}'s games to watch (${md}) 👀`;
-  const lines = [hot ? `${hot.name}: ${hot.big} PPG over his last 5 🔥` : `${count} games tonight`, "", cap1,
+  const lines = [hot ? `${hot.name}: ${hot.big} PPG over his last ${hot.l5.g} 🔥` : `${count} games tonight`, "", cap1,
     ...feat.map(g => `${g.sport === "NBA" ? "🏀" : "🏈"} ${g.away.ab} @ ${g.home.ab}, ${g.time} ET${g.tv ? " on " + g.tv : ""}`), "",
     "Who are you watching tonight? Comments 👇", "Follow for the morning recap ✅", "",
     [...new Set([...[nfl.length && "#NFL", cfb.length && "#CollegeFootball", nba.length && "#NBA"].filter(Boolean), ...(hot ? ["#" + hot.name.replace(/[^A-Za-z0-9]/g, "")] : []),
