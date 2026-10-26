@@ -33,6 +33,10 @@ jobs:
           node-version: "20"
       - name: Box scores
         run: node fetch.js "$DAY" out
+      - name: Season bests
+        # fills in the season so far on its first run, then adds each day; without it the video just skips the "most this season" notes
+        continue-on-error: true
+        run: node records.js "$DAY" out
       - name: What to show and say
         id: prep
         run: |
@@ -62,7 +66,7 @@ jobs:
           python tts.py out/data.json out/voice
         env:
           VOICE: af_heart
-          SPEED: "1.1"
+          SPEED: "1.2"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
         run: |
@@ -84,3 +88,14 @@ jobs:
           gh release create "$TAG" "out/best-stats-$DAY.mp4" out/data.json --title "Best stats · $(date -d "$DAY" '+%a %b %-d')" --notes-file out/caption.txt --latest
           # keep the newest 30 videos
           gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^clip-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag
+      - name: Save season bests
+        if: always()
+        run: |
+          [ -f records.json ] || exit 0
+          git config user.name "board-bot"
+          git config user.email "board-bot@users.noreply.github.com"
+          git add records.json
+          git diff --staged --quiet && exit 0
+          git commit -m "Season bests through $DAY"
+          for i in 1 2 3; do git pull --rebase origin ${{ github.ref_name }} && git push && exit 0; sleep 10; done
+          exit 1

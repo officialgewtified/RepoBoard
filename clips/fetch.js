@@ -44,12 +44,13 @@ function players(sum, kind) {
 async function day(sport, ymd) {
   const S = SPORTS[sport], d = ymd.replace(/-/g, "");
   const sb = await get(`${BASE}${S.p}/scoreboard?dates=${d}&limit=300${S.q}`);
-  const evs = (sb.events || []).filter(e => ((e.competitions[0].status || {}).type || {}).state === "post");
+  // regular season and playoffs only (preseason games are skipped)
+  const evs = (sb.events || []).filter(e => ((e.competitions[0].status || {}).type || {}).state === "post" && [2, 3].includes((e.season || {}).type || 2));
   const games = await pool(evs, 6, async ev => {
     const c = ev.competitions[0], st = c.status.type, T = {};
     for (const x of c.competitors) T[x.homeAway] = team(x);
     const sum = await get(`${BASE}${S.p}/summary?event=${ev.id}`);
-    return { id: ev.id, state: st.state, detail: st.shortDetail, home: T.home, away: T.away, players: players(sum, S.kind) };
+    return { id: ev.id, type: (ev.season || {}).type || 2, state: st.state, detail: st.shortDetail, home: T.home, away: T.away, players: players(sum, S.kind) };
   });
   return games.filter(Boolean);
 }

@@ -27,7 +27,8 @@ const cnt = (v, w) => v === 1 ? `a ${w}` : v === 0 ? `no ${w}${/s$/.test(w) ? "e
 function where(g, tm, sport) {
   const home = g.home.ab === tm, me = home ? g.home : g.away, op = home ? g.away : g.home, ms = n(me.score), os = n(op.score);
   const res = ms > os ? "W" : ms < os ? "L" : "T", o = tname(op, sport), hi = Math.max(ms, os), lo = Math.min(ms, os);
-  const say = res === "W" ? `in a ${hi} to ${lo} win ${home ? "over" : "at"} ${o}` : res === "L" ? `in a ${hi} to ${lo} loss ${home ? "to" : "at"} ${o}` : `in a ${ms} all tie with ${o}`;
+  // the score is on screen, so the narrator just says who it was against
+  const say = res === "W" ? `in a win ${home ? "over" : "at"} ${o}` : res === "L" ? `in a loss ${home ? "to" : "at"} ${o}` : `in a tie with ${o}`;
   return { me, op, home, res, say, txt: `<b>${esc(me.ab)}</b> ${home ? "vs" : "at"} ${esc(op.ab)} · <b>${res} ${hi}-${lo}</b>`, plain: `${res === "W" ? "win" : res === "L" ? "loss" : "tie"}`, score: `${hi}-${lo}` };
 }
 const finals = G => (G || []).filter(g => g.state === "post");
@@ -39,7 +40,7 @@ const BIG = { NFL: { m: 17, hi: 40, lo: 7 }, CFB: { m: 28, hi: 56, lo: 3 }, NBA:
 function scoreNotes(G, sport) {
   const T = BIG[sport], out = [], used = new Set();
   const gs = G.map(g => { const hs = n(g.home.score), as = n(g.away.score), W = hs > as ? g.home : g.away, L = hs > as ? g.away : g.home; return { g, W, L, ws: Math.max(hs, as), ls: Math.min(hs, as), m: Math.abs(hs - as) }; });
-  const add = (g, s) => { if (out.length < 2 && !used.has(g.g.id)) { used.add(g.g.id); out.push(cap(s)); } };
+  const add = (g, s) => { if (out.length < 1 && !used.has(g.g.id)) { used.add(g.g.id); out.push(cap(s)); } };
   if (sport === "CFB") for (const x of gs.filter(x => x.L.rank && (!x.W.rank || x.W.rank > x.L.rank)).sort((a, b) => a.L.rank - b.L.rank))
     add(x, `${x.W.rank ? "number " + x.W.rank : "unranked"} ${loc(x.W)} knocked off number ${x.L.rank} ${loc(x.L)}, ${x.ws} to ${x.ls}.`);
   for (const x of gs.filter(x => /OT/.test(String(x.g.detail || "")))) add(x, `${tname(x.W, sport)} beat ${tname(x.L, sport)} in overtime, ${x.ws} to ${x.ls}.`);
@@ -48,6 +49,23 @@ function scoreNotes(G, sport) {
   const lo = gs.filter(x => x.ls <= T.lo).sort((a, b) => a.ls - b.ls)[0]; if (lo) add(lo, `${tname(lo.L, sport)} managed just ${lo.ls} against ${tname(lo.W, sport)}.`);
   return out;
 }
+
+// season context from records.json: "Most points this season". Needs a few game days logged before it says anything.
+const REC_LABEL = { NBA: { PTS: "points", REB: "rebounds", AST: "assists", BLK: "blocks", STL: "steals", "3PM": "threes" },
+  NFL: { passYds: "passing yards", passTD: "touchdown passes", rushYds: "rushing yards", rushTD: "rushing touchdowns", recYds: "receiving yards", rec: "catches" } };
+let REC = null, DAY = "";
+function seasonNote(sport, keys, name) {
+  const S = REC && REC[sport]; if (!S || !S.top || (S.dates || []).length < 5) return null;
+  let best = null;
+  for (const k of keys) { const L = S.top[k] || [], e = L.find(x => x[1] === name && x[3] === DAY); if (!e) continue;
+    const higher = L.filter(x => x[0] > e[0]).length, ties = L.filter(x => x[0] === e[0]).length;
+    if (higher < 3 && (!best || higher < best.higher)) best = { k, higher, ties }; }
+  if (!best) return null;
+  const lab = REC_LABEL[sport][best.k], ord = ["most", "second-most", "third-most"][best.higher], tie = best.ties > 1;
+  return { k: best.k, top: best.higher === 0, chip: `${tie ? "Tied for " + ord : cap(ord)} ${lab} this season`,
+    say: tie ? `That's tied for the ${ord} ${lab} in a game this season.` : best.higher === 0 ? `That's the most ${lab} by anyone in a game this season.` : `That's the ${ord} ${lab} in a game this season.` };
+}
+const withNote = (card, note) => { if (note) { card.note = note.chip; card.say += " " + note.say; } return card; };
 
 // half-PPR-style fantasy points, used to find the next-best football games after the three cards
 const ppr = p => { const a = p.passing || {}, r = p.rushing || {}, c = p.receiving || {};
@@ -71,18 +89,18 @@ function fb(G, sport) {
   if (pa) { const p = pa[1], s = p.passing, w = where(p.g, p.tm, sport), sub = [`${s["C/ATT"]} comp`, `${n(s.INT)} INT`]; shownP.add(p);
     if (n(s.RTG)) sub.push(`${s.RTG} rating`); if (p.rushing && n(p.rushing.YDS) >= 25) sub.push(`${n(p.rushing.YDS)} rush yds`);
     const say = `${p.n} threw for ${n(s.YDS)} yards and ${cnt(n(s.TD), "touchdown")}${n(s.INT) === 0 && n(s.TD) >= 2 ? " with no picks" : n(s.INT) >= 2 ? `, but threw ${n(s.INT)} picks,` : ""} ${w.say}.`;
-    top.push(Object.assign(split(p.n), { tag: "Top passer", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Pass yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [s.AVG, "Yds/att"]], sub, say }));
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top passer", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Pass yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [s.AVG, "Yds/att"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["passTD", "passYds"], p.n)));
     hooks.push([n(s.YDS) / N.py, n(s.YDS), "passing yards", p, w], [n(s.TD) / N.pt, n(s.TD), "touchdown passes", p, w]); }
   const ru = best("rushing", (s, p) => n(s.YDS) + 20 * n(s.TD) + .5 * n((p.receiving || {}).YDS));
   if (ru) { const p = ru[1], s = p.rushing, w = where(p.g, p.tm, sport), sub = [`${s.AVG} per carry`, `Long of ${s.LONG}`]; shownP.add(p);
     if (p.receiving && n(p.receiving.REC)) sub.push(`${p.receiving.REC} catches, ${n(p.receiving.YDS)} yds`);
     const say = `${p.n} ran for ${n(s.YDS)} yards${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""} ${w.say}.`;
-    top.push(Object.assign(split(p.n), { tag: "Top rusher", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rush yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [n(s.CAR), "Carries"]], sub, say }));
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top rusher", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rush yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [n(s.CAR), "Carries"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["rushYds", "rushTD"], p.n)));
     hooks.push([n(s.YDS) / N.ry, n(s.YDS), "rushing yards", p, w], [n(s.TD) / N.rt, n(s.TD), "rushing touchdowns", p, w]); }
   const re = best("receiving", s => n(s.YDS) + 20 * n(s.TD) + 2 * n(s.REC));
   if (re) { const p = re[1], s = p.receiving, w = where(p.g, p.tm, sport), sub = [`${s.TGTS} targets`, `Long of ${s.LONG}`, `${s.AVG} per catch`]; shownP.add(p);
     const say = `${p.n} caught ${cnt(n(s.REC), "pass")} for ${n(s.YDS)} yards${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""} ${w.say}.`;
-    top.push(Object.assign(split(p.n), { tag: "Top receiver", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rec yds"], [n(s.REC), "Catches"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"]], sub, say }));
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top receiver", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rec yds"], [n(s.REC), "Catches"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["recYds", "rec"], p.n)));
     hooks.push([n(s.YDS) / N.cy, n(s.YDS), "receiving yards", p, w], [n(s.REC) / N.cr, n(s.REC), "catches", p, w]); }
   const more = P.filter(p => !shownP.has(p)).sort((a, b) => ppr(b) - ppr(a)).slice(0, 2).map(p => { const l = fbLine(p);
     return { sport, name: p.n, tm: p.tm, color: col(where(p.g, p.tm, sport).me), txt: l.txt, say: `${p.n} ${l.say}.` }; }).filter(r => r.txt);
@@ -111,8 +129,8 @@ function nba(G) {
     const [fm, fa] = String(p.FG || "0-0").split("-").map(n), tm3 = n(String(p["3PT"] || "0").split("-")[0]);
     const flair = tm3 >= 5 ? `, with ${tm3} threes,` : fa >= 12 && fm / fa >= .6 ? `, on ${fm} of ${fa} shooting,` : "";
     const say = `${i === 0 ? "And number one" : ORD[i]}: ${p.n}${td >= 3 ? ", with a triple-double" : ""}. ${n(p.PTS)} points, ${n(p[two[0]])} ${NORM[two[0]][1].toLowerCase()} and ${n(p[two[1]])} ${NORM[two[1]][1].toLowerCase()}${flair} ${w.say}.`;
-    return Object.assign(split(p.n), { rank: "#" + (i + 1), tag: td >= 3 ? "Triple-double" : td === 2 ? "Double-double" : "Top performer", ctx: w.txt + ` · ${n(p.MIN)} min`, color: col(w.me),
-      stats: [[n(p.PTS), "Points"], ...two.map(k => [n(p[k]), NORM[k][1]])], sub, say }); });
+    return withNote(Object.assign(split(p.n), { rank: "#" + (i + 1), tag: td >= 3 ? "Triple-double" : td === 2 ? "Double-double" : "Top performer", ctx: w.txt + ` · ${n(p.MIN)} min`, color: col(w.me),
+      stats: [[n(p.PTS), "Points"], ...two.map(k => [n(p[k]), NORM[k][1]])], sub, say }), seasonNote("NBA", ["PTS", "REB", "AST", "BLK", "STL", "3PM"], p.n)); });
   for (const p of P) { const w = where(p.g, p.tm, "NBA");
     hooks.push([n(p.PTS) / 32, n(p.PTS), "points", p, w], [n(p.REB) / 17, n(p.REB), "rebounds", p, w], [n(p.AST) / 14, n(p.AST), "assists", p, w], [n(p.BLK) / 6.5, n(p.BLK), "blocks", p, w]); }
   const more = all.slice(3, 5).map(p => ({ sport: "NBA", name: p.n, tm: p.tm, color: col(where(p.g, p.tm, "NBA").me),
@@ -127,14 +145,18 @@ const HOOK_SAY = { points: v => `dropped ${v} points`, rebounds: v => `grabbed $
   "passing yards": v => `threw for ${v} yards`, "touchdown passes": v => `threw ${v} touchdown passes`, "rushing yards": v => `ran for ${v} yards`,
   "rushing touchdowns": v => `ran for ${v} touchdowns`, "receiving yards": v => `had ${v} receiving yards`, catches: v => `caught ${v} passes` };
 
+const HOOK_KEY = { points: "PTS", rebounds: "REB", assists: "AST", blocks: "BLK", "passing yards": "passYds", "touchdown passes": "passTD",
+  "rushing yards": "rushYds", "rushing touchdowns": "rushTD", "receiving yards": "recYds", catches: "rec" };
+
 function build(day, nflGames, nbaGames, opts, cfbGames) {
-  opts = opts || {};
+  opts = opts || {}; REC = opts.records || null; DAY = day;
   const d = new Date(day + "T12:00:00Z"), wd = DAYS[d.getUTCDay()], md = `${MON[d.getUTCMonth()]} ${d.getUTCDate()}`;
   const sections = [fb(nflGames, "NFL"), fb(cfbGames, "CFB"), nba(nbaGames)].filter(Boolean);
   if (!sections.length) return null;
-  const h = sections.flatMap(s => s.hooks).sort((a, b) => b[0] - a[0])[0];
-  const more = sections.flatMap(s => s.more).slice(0, 6);
-  const voice = { hook: `${h[3].n} ${HOOK_SAY[h[2]](h[1])} on ${wd}. Here are the rest of the day's best stats.` };
+  const h = sections.flatMap(s => s.hooks.map(x => x.concat(s.sport))).sort((a, b) => b[0] - a[0])[0];
+  const more = sections.flatMap(s => s.more.slice(0, sections.length > 1 ? 2 : 3)).slice(0, 3);
+  const hs = h[5] !== "CFB" && seasonNote(h[5], [HOOK_KEY[h[2]]], h[3].n);
+  const voice = { hook: `${h[3].n} ${HOOK_SAY[h[2]](h[1])} on ${wd}${hs && hs.top ? ", the most by anyone this season" : ""}. Here's the rest of the day's best stats.` };
   sections.forEach((s, si) => { voice["s" + si] = s.say; s.top.forEach((p, i) => voice[`p${si}_${i}`] = p.say); });
   if (more.length) voice.more = "Also worth a look. " + more.map(r => r.say).join(" ");
   voice.outro = "Follow for tomorrow's best stats.";
@@ -161,7 +183,7 @@ module.exports = { build };
 if (require.main === module) {
   const [day, a, b, c] = process.argv.slice(2);
   const rd = f => f && f !== "-" && fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, "utf8")) : null;
-  const out = build(day, rd(a), rd(b), { brand: process.env.BRAND }, rd(c));
+  const out = build(day, rd(a), rd(b), { brand: process.env.BRAND, records: rd(require("path").join(__dirname, "records.json")) }, rd(c));
   if (!out) { console.error("No finished games on " + day); process.exit(3); }
   process.stdout.write(JSON.stringify(out, null, 1));
 }

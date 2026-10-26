@@ -51,6 +51,7 @@ body{font-family:"Archivo",sans-serif;color:#f4f4f5;-webkit-font-smoothing:antia
 .st span{display:block;margin-top:14px;font:700 29px/1.1 "Archivo";font-stretch:112%;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa}
 .st.top{background:#ff9a3d;border-color:#ff9a3d;color:#1d0c00}.st.top span{color:#3a1a00}
 .sub{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+.sub span.hot{background:transparent;border:3px solid #ff9a3d;color:#ffb877;padding:15px 22px}
 .sub span{font:700 32px/1 "Archivo";font-stretch:106%;padding:20px 26px;border-radius:999px;background:rgba(244,244,245,.08);color:#d4d4d8}
 /* more */
 .mlist{margin-top:44px;display:flex;flex-direction:column;gap:24px}
@@ -83,7 +84,7 @@ function build(data){D=data;SC=[];
  document.getElementById("bname").textContent=D.brand;document.getElementById("bdate").textContent=D.date;
  document.getElementById("src").textContent=D.source||"";
  // with a voiceover each scene lasts as long as its line (data.dur, from tts.py) plus a beat; the line starts at va
- let h="",t=0;const add=(id,dur,html,cls="")=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.4);
+ let h="",t=0;const add=(id,dur,html,cls="")=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.25;if(v!=null)dur=Math.max(2.4,v+off+.35);
   SC.push({id,t0:t,t1:t+dur,va:t+off});t+=dur;h+=`<div class="sc ${cls}" id="${id}">${html}</div>`};
  const H=D.hook;
  add("hook",3.4,`<div class="k">${esc(D.title)}</div><div class="num">${esc(H.big)}</div><div class="lab">${esc(H.label)}</div>
@@ -96,7 +97,7 @@ function build(data){D=data;SC=[];
    <div class="name"><span class="fit">${esc(p.first)}</span><span class="fit">${esc(p.last)}</span></div>
    <div class="ctx"><i style="background:${p.color}"></i><span>${p.ctx}</span></div>
    <div class="line">${p.stats.map((s,j)=>`<div class="st ${j===0?"top":""}"><b class="fit"${num(s[0])}>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join("")}</div>
-   <div class="sub">${p.sub.map(s=>`<span>${esc(s)}</span>`).join("")}</div>`,"perf"))});
+   <div class="sub">${p.note?`<span class="hot">${esc(p.note)}</span>`:""}${p.sub.map(s=>`<span>${esc(s)}</span>`).join("")}</div>`,"perf"))});
  if(D.more&&D.more.length)add("more",2.6+D.more.length*.6,`<div class="k">Also worth a look</div><div class="mlist">${D.more.map(r=>`<div class="mr"><div class="mn"><span class="fit">${esc(r.name)}</span></div>
    <div class="mt"><i style="background:${r.color}"></i><b>${esc(r.tm)}</b><span class="ms">${esc(r.sport)}</span><span>${esc(r.txt)}</span></div></div>`).join("")}</div>`,"more");
  add("outro",3.4,`<div class="k">Every morning</div><div class="big"><span class="fit">Follow for</span><span class="fit">tomorrow's</span><span class="fit">best stats</span></div><div class="wide mute">${esc(D.brand)}</div>`);
