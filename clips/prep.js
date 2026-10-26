@@ -66,7 +66,7 @@ function seasonNote(sport, keys, name) {
   if (!best) return null;
   const lab = REC_LABEL[sport][best.k], ord = ["most", "second-most", "third-most"][best.higher], tie = best.ties > 1;
   return { k: best.k, top: best.higher === 0, chip: `${tie ? "Tied for " + ord : cap(ord)} ${lab} this season`,
-    say: tie ? `That's tied for the ${ord} ${lab} in a game this season.` : best.higher === 0 ? `That's the most ${lab} by anyone in a game this season.` : `That's the ${ord} ${lab} in a game this season.` };
+    say: tie ? `That's tied for the ${ord} ${lab} in a game this season!` : best.higher === 0 ? `That's the most ${lab} by anyone this season!` : `That's the ${ord} ${lab} in a game this season!` };
 }
 const withNote = (card, note) => { if (note) { card.note = note.chip; card.say += " " + note.say; } return card; };
 
@@ -91,19 +91,20 @@ function fb(G, sport) {
   const pa = best("passing", s => n(s.YDS) + 20 * n(s.TD) - 25 * n(s.INT));
   if (pa) { const p = pa[1], s = p.passing, w = where(p.g, p.tm, sport), sub = [`${s["C/ATT"]} comp`, `${n(s.INT)} INT`]; shownP.add(p);
     if (n(s.RTG)) sub.push(`${s.RTG} rating`); if (p.rushing && n(p.rushing.YDS) >= 25) sub.push(`${n(p.rushing.YDS)} rush yds`);
-    const say = `${p.n} threw for ${n(s.YDS)} yards and ${cnt(n(s.TD), "touchdown")}${n(s.INT) === 0 && n(s.TD) >= 2 ? " with no picks" : n(s.INT) >= 2 ? `, but threw ${n(s.INT)} picks,` : ""} ${w.say}.`;
-    top.push(withNote(Object.assign(split(p.n), { tag: "Top passer", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Pass yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [s.AVG, "Yds/att"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["passTD", "passYds"], p.n)));
+    const big = n(s.TD) >= 4 || n(s.YDS) >= 350, picks = n(s.INT) === 0 && n(s.TD) >= 2 ? ", no picks" : n(s.INT) >= 2 ? `, but ${n(s.INT)} picks` : "";
+    const say = big ? `${p.n} was dealing! ${n(s.YDS)} yards and ${cnt(n(s.TD), "touchdown")}${picks}, ${w.say}.` : `${p.n} threw for ${n(s.YDS)} yards and ${cnt(n(s.TD), "touchdown")}${picks}, ${w.say}.`;
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top passer", tm: p.tm, ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Pass yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [s.AVG, "Yds/att"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["passTD", "passYds"], p.n)));
     hooks.push([n(s.YDS) / N.py, n(s.YDS), "passing yards", p, w], [n(s.TD) / N.pt, n(s.TD), "touchdown passes", p, w]); }
   const ru = best("rushing", (s, p) => n(s.YDS) + 20 * n(s.TD) + .5 * n((p.receiving || {}).YDS));
   if (ru) { const p = ru[1], s = p.rushing, w = where(p.g, p.tm, sport), sub = [`${s.AVG} per carry`, `Long of ${s.LONG}`]; shownP.add(p);
     if (p.receiving && n(p.receiving.REC)) sub.push(`${p.receiving.REC} catches, ${n(p.receiving.YDS)} yds`);
-    const say = `${p.n} ran for ${n(s.YDS)} yards${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""} ${w.say}.`;
-    top.push(withNote(Object.assign(split(p.n), { tag: "Top rusher", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rush yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [n(s.CAR), "Carries"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["rushYds", "rushTD"], p.n)));
+    const say = (n(s.YDS) >= 150 || n(s.TD) >= 3 ? `${p.n} ran wild! ${n(s.YDS)} yards` : `${p.n} ran for ${n(s.YDS)} yards`) + `${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""}, ${w.say}.`;
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top rusher", tm: p.tm, ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rush yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [n(s.CAR), "Carries"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["rushYds", "rushTD"], p.n)));
     hooks.push([n(s.YDS) / N.ry, n(s.YDS), "rushing yards", p, w], [n(s.TD) / N.rt, n(s.TD), "rushing touchdowns", p, w]); }
   const re = best("receiving", s => n(s.YDS) + 20 * n(s.TD) + 2 * n(s.REC));
   if (re) { const p = re[1], s = p.receiving, w = where(p.g, p.tm, sport), sub = [`${s.TGTS} targets`, `Long of ${s.LONG}`, `${s.AVG} per catch`]; shownP.add(p);
-    const say = `${p.n} caught ${cnt(n(s.REC), "pass")} for ${n(s.YDS)} yards${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""} ${w.say}.`;
-    top.push(withNote(Object.assign(split(p.n), { tag: "Top receiver", ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rec yds"], [n(s.REC), "Catches"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["recYds", "rec"], p.n)));
+    const say = (n(s.YDS) >= 140 ? `${p.n} was everywhere! ${n(s.REC)} catches for ${n(s.YDS)} yards` : `${p.n} caught ${cnt(n(s.REC), "pass")} for ${n(s.YDS)} yards`) + `${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""}, ${w.say}.`;
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top receiver", tm: p.tm, ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rec yds"], [n(s.REC), "Catches"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["recYds", "rec"], p.n)));
     hooks.push([n(s.YDS) / N.cy, n(s.YDS), "receiving yards", p, w], [n(s.REC) / N.cr, n(s.REC), "catches", p, w]); }
   const more = P.filter(p => !shownP.has(p)).sort((a, b) => ppr(b) - ppr(a)).slice(0, 2).map(p => { const l = fbLine(p);
     return { sport, name: p.n, tm: p.tm, color: col(where(p.g, p.tm, sport).me), txt: l.txt, say: `${p.n} ${l.say}.` }; }).filter(r => r.txt);
@@ -112,8 +113,8 @@ function fb(G, sport) {
   if (sport === "CFB") { const rk = g => Math.min(g.home.rank || 99, g.away.rank || 99), R = G.filter(g => rk(g) < 99).sort((a, b) => rk(a) - rk(b));
     shown = (R.length ? R : G).slice(0, 12); when = R.length ? "Top 25" : ""; }
   const notes = scoreNotes(G, sport);
-  const lead = sport === "CFB" ? "Over in college football." : `${G.length === 1 ? "One game" : (WORDS[G.length] ? cap(WORDS[G.length]) : G.length) + " games"} in the ${sport}.`;
-  return { sport, games: scoreRows(shown), total: G.length, when, top, hooks, more, say: [lead, ...notes].join(" ") };
+  const lead = sport === "CFB" ? "College football!" : `${sport === "NFL" ? "N F L" : sport}! ${G.length === 1 ? "One game" : (WORDS[G.length] ? cap(WORDS[G.length]) : G.length) + " games"} in the books.`;
+  return { sport, games: scoreRows(shown), total: G.length, when, top, hooks, more, note: notes[0] ? notes[0].replace(/\.$/, "") : "", say: [lead, ...notes].join(" ") };
 }
 
 function nba(G) {
@@ -131,17 +132,17 @@ function nba(G) {
     const td = ["PTS", "REB", "AST", "STL", "BLK"].filter(k => n(p[k]) >= 10).length;
     const [fm, fa] = String(p.FG || "0-0").split("-").map(n), tm3 = n(String(p["3PT"] || "0").split("-")[0]);
     const flair = tm3 >= 5 ? `, with ${tm3} threes,` : fa >= 12 && fm / fa >= .6 ? `, on ${fm} of ${fa} shooting,` : "";
-    const say = `${i === 0 ? "And number one" : ORD[i]}: ${p.n}${td >= 3 ? ", with a triple-double" : ""}. ${n(p.PTS)} points, ${n(p[two[0]])} ${NORM[two[0]][1].toLowerCase()} and ${n(p[two[1]])} ${NORM[two[1]][1].toLowerCase()}${flair} ${w.say}.`;
-    return withNote(Object.assign(split(p.n), { rank: "#" + (i + 1), tag: td >= 3 ? "Triple-double" : td === 2 ? "Double-double" : "Top performer", ctx: w.txt + ` · ${n(p.MIN)} min`, color: col(w.me),
+    const say = `${i === 0 ? "And number one" : ORD[i]}: ${p.n}${td >= 3 ? ", with a triple-double" : ""}! ${n(p.PTS)} points, ${n(p[two[0]])} ${NORM[two[0]][1].toLowerCase()} and ${n(p[two[1]])} ${NORM[two[1]][1].toLowerCase()}${flair} ${w.say}.`;
+    return withNote(Object.assign(split(p.n), { rank: "#" + (i + 1), tm: p.tm, tag: td >= 3 ? "Triple-double" : td === 2 ? "Double-double" : "Top performer", ctx: w.txt + ` · ${n(p.MIN)} min`, color: col(w.me),
       stats: [[n(p.PTS), "Points"], ...two.map(k => [n(p[k]), NORM[k][1]])], sub, say }), seasonNote("NBA", ["PTS", "REB", "AST", "BLK", "STL", "3PM"], p.n)); });
   for (const p of P) { const w = where(p.g, p.tm, "NBA");
     hooks.push([n(p.PTS) / 32, n(p.PTS), "points", p, w], [n(p.REB) / 17, n(p.REB), "rebounds", p, w], [n(p.AST) / 14, n(p.AST), "assists", p, w], [n(p.BLK) / 6.5, n(p.BLK), "blocks", p, w]); }
   const more = all.slice(3, 5).map(p => ({ sport: "NBA", name: p.n, tm: p.tm, color: col(where(p.g, p.tm, "NBA").me),
     txt: `${n(p.PTS)} pts · ${n(p.REB)} reb · ${n(p.AST)} ast`, say: `${p.n} had ${[`${n(p.PTS)} points`, n(p.REB) >= 8 ? `${n(p.REB)} rebounds` : "", n(p.AST) >= 6 ? `${n(p.AST)} assists` : ""].filter(Boolean).join(", ").replace(/, ([^,]*)$/, " and $1")}.` }));
   const notes = scoreNotes(G, "NBA");
-  const lead = `${G.length === 1 ? "One game" : (WORDS[G.length] ? cap(WORDS[G.length]) : G.length) + " games"} in the NBA.`;
+  const lead = `Now the N B A! ${G.length === 1 ? "One game" : (WORDS[G.length] ? cap(WORDS[G.length]) : G.length) + " games"} last night.`;
   // the countdown runs #3, #2, #1
-  return { sport: "NBA", games: scoreRows(G), total: G.length, when: "", top: top.reverse(), hooks, more, say: [lead, ...notes].join(" ") };
+  return { sport: "NBA", games: scoreRows(G), total: G.length, when: "", top: top.reverse(), hooks, more, note: notes[0] ? notes[0].replace(/\.$/, "") : "", say: [lead, ...notes].join(" ") };
 }
 
 const HOOK_SAY = { points: v => `dropped ${v} points`, rebounds: v => `grabbed ${v} rebounds`, assists: v => `dished out ${v} assists`, blocks: v => `blocked ${v} shots`,
@@ -159,15 +160,15 @@ function build(day, nflGames, nbaGames, opts, cfbGames) {
   const h = sections.flatMap(s => s.hooks.map(x => x.concat(s.sport))).sort((a, b) => b[0] - a[0])[0];
   const more = sections.flatMap(s => s.more.slice(0, sections.length > 1 ? 2 : 3)).slice(0, 3);
   const hs = h[5] !== "CFB" && seasonNote(h[5], [HOOK_KEY[h[2]]], h[3].n);
-  const voice = { hook: `${h[3].n} ${HOOK_SAY[h[2]](h[1])} on ${wd}${hs && hs.top ? ", the most by anyone this season" : ""}. Here's the rest of the day's best stats.` };
+  const voice = { hook: `${h[3].n} ${HOOK_SAY[h[2]](h[1])} on ${wd}!${hs && hs.top ? " The most by anyone this season!" : ""} Here are the day's best stats.` };
   sections.forEach((s, si) => { voice["s" + si] = s.say; s.top.forEach((p, i) => voice[`p${si}_${i}`] = p.say); });
-  if (more.length) voice.more = "Also worth a look. " + more.map(r => r.say).join(" ");
-  voice.outro = "Follow for tomorrow's best stats.";
+  if (more.length) voice.more = "A few more big ones. " + more.map(r => r.say).join(" ");
+  voice.outro = `Follow ${opts.brand || "Crossover"} for tomorrow's best stats!`;
   for (const s of sections) { delete s.hooks; delete s.more; delete s.say; s.when = s.when ? s.when + " · " + md : md; }
   return {
-    brand: opts.brand || "Daily Stat Drop", day, date: md, title: `${wd}'s best stats`,
+    brand: opts.brand || "Crossover", day, date: md, title: `${wd}'s best stats`,
     source: "Stats: official box scores via ESPN",
-    hook: { big: String(h[1]), label: h[2], who: h[3].n, ctx: h[4].txt, color: col(h[4].me) },
+    hook: { big: String(h[1]), label: h[2], who: h[3].n, ctx: h[4].txt, color: col(h[4].me), tm: h[4].me.ab, sport: h[5] },
     sections, more, voice,
     caption: caption(wd, md, sections, h)
   };
