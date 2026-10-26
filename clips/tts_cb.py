@@ -16,8 +16,22 @@ model = ChatterboxTTS.from_pretrained(device="cpu")
 
 # names it could misread, spelled the way they sound (say.json: plain respellings; syllable specs become hyphenated)
 SAY = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "say.json")))
+ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split()
+TENS = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()
+def words(n):
+    """292 -> two hundred ninety-two (spelled out, so the voice can't misread digits)"""
+    if n < 20: return ONES[n]
+    if n < 100: return TENS[n // 10] + ("-" + ONES[n % 10] if n % 10 else "")
+    if n < 1000: return ONES[n // 100] + " hundred" + (" " + words(n % 100) if n % 100 else "")
+    return words(n // 1000) + " thousand" + (" " + words(n % 1000) if n % 1000 else "")
+def say_numbers(t):
+    t = re.sub(r"(\d+)\.(\d+)", lambda m: words(int(m.group(1))) + " point " + " ".join(ONES[int(c)] for c in m.group(2)), t)
+    t = re.sub(r"(?<=\d),(?=\d{3})", "", t)   # 1,250 -> 1250, other commas stay (they make the pauses)
+    return re.sub(r"\d+", lambda m: words(int(m.group(0))), t)
+
 def fix(t):
     t = re.sub(r"\bN F L\b", "NFL", t); t = re.sub(r"\bN B A\b", "NBA", t)
+    t = say_numbers(t)
     for k, v in SAY.items():
         if v.startswith("/") or k in ("NFL", "NBA", "rebounds", "rebound"):
             continue
