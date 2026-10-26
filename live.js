@@ -14,11 +14,15 @@ async function getJSON(url,maxAge){const c=cache[url];if(c&&Date.now()-c.t<maxAg
 /* one game's box score, boiled down to each player's numbers */
 function parse(j){
  const comp=((j.header||{}).competitions||[])[0]||{},st=(comp.status||{}).type||{};
- const state=st.state||"pre",completed=!!st.completed||state==="post";
+ const state=st.state||"pre",completed=!!st.completed||state==="post",cs=comp.status||{};
+ // the clock and score, for the live pace board
+ const dc=String(cs.displayClock||""),mm=dc.match(/^(\d+):(\d+)/),clock=mm?(+mm[1])*60+(+mm[2]):(isFinite(parseFloat(dc))?parseFloat(dc):null);
+ const side=k=>(comp.competitors||[]).find(x=>x.homeAway===k)||{},H=side("home"),A=side("away");
+ const score={h:+H.score||0,a:+A.score||0,hab:(H.team||{}).abbreviation||"",aab:(A.team||{}).abbreviation||""};
  const players={};let ready=false;
- for(const team of ((j.boxscore||{}).players)||[])for(const cat of team.statistics||[]){
+ for(const team of ((j.boxscore||{}).players)||[]){const tab=(team.team||{}).abbreviation||"";for(const cat of team.statistics||[]){
   const labels=cat.labels||[],name=(cat.name||"").toLowerCase();
-  for(const a of cat.athletes||[]){const n=nm(a.athlete&&a.athlete.displayName);if(!n)continue;const P=players[n]=players[n]||{};
+  for(const a of cat.athletes||[]){const n=nm(a.athlete&&a.athlete.displayName);if(!n)continue;const P=players[n]=players[n]||{};P.tm=tab;if(a.starter)P.st=true;
    // ESPN marks everyone "didn't play" until its live box score fills in, and a bench player can still check in later,
    // so a DNP only counts once the game is over
    if(a.didNotPlay||!(a.stats&&a.stats.length)){if(completed&&a.didNotPlay)P.dnp=a.reason?a.reason[0]+a.reason.slice(1).toLowerCase():"Did not play";continue}
@@ -27,8 +31,8 @@ function parse(j){
    else if(name==="rushing"){P.rush_att=num(v("CAR"));P.rush_yds=num(v("YDS"))}
    else if(name==="receiving"){P.rec=num(v("REC"));P.rec_yds=num(v("YDS"))}
    else if(labels.includes("PTS")){P.pts=num(v("PTS"));P.reb=num(v("REB"));P.ast=num(v("AST"));P.stl=num(v("STL"));P.blk=num(v("BLK"));P.to=num(v("TO"));
-    P.tpm=num(String(v("3PT")||"0").split("-")[0]);P.min=v("MIN")}}}
- return{state,completed,ready,detail:st.shortDetail||st.detail||"",players,sig:(st.shortDetail||"")+"|"+ready+"|"+JSON.stringify(players)}}
+    P.tpm=num(String(v("3PT")||"0").split("-")[0]);P.min=v("MIN");P.pf=num(v("PF"))}}}}
+ return{state,completed,ready,period:+cs.period||0,clock,score,detail:st.shortDetail||st.detail||"",players,sig:(st.shortDetail||"")+"|"+ready+"|"+JSON.stringify(players)}}
 
 const VAL={player_pass_yds:P=>P.pass_yds,player_pass_tds:P=>P.pass_td,player_pass_completions:P=>P.pass_c,player_pass_attempts:P=>P.pass_a,
  player_pass_interceptions:P=>P.pass_int,player_rush_yds:P=>P.rush_yds,player_rush_attempts:P=>P.rush_att,player_reception_yds:P=>P.rec_yds,

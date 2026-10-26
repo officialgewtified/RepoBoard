@@ -349,7 +349,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/bebas-neue.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=14">
+<link rel="stylesheet" href="../fx.css?v=15">
 </head>
 <body>
 <header class="wrap top">
@@ -369,7 +369,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 </header>
 <nav class="tabs"><div class="wrap">
  <div class="seg" role="tablist">
-  <button data-tab="top" role="tab">Top picks</button><button data-tab="games" role="tab">Games</button><button data-tab="pp" role="tab">PrizePicks</button><button data-tab="tix" role="tab">Tickets</button><button data-tab="players" role="tab">Players</button>
+  <button data-tab="top" role="tab">Top picks</button><button data-tab="live" role="tab">Live</button><button data-tab="games" role="tab">Games</button><button data-tab="pp" role="tab">PrizePicks</button><button data-tab="tix" role="tab">Tickets</button><button data-tab="players" role="tab">Players</button>
  </div>
  <div class="filters" id="sportbar"></div>
 </div></nav>
@@ -1680,13 +1680,22 @@ function renderSettings(){
 
 /* ---------- main render ---------- */
 function skel(){return window.LOADFAIL?`<div class="card empty" style="margin-top:20px">The board didn't load. Check your connection and pull down to refresh.</div>`:'<div class="fx-sk big"></div><div class="fx-sk"></div><div class="fx-sk"></div><div class="fx-sk"></div>'}
+/* ---------- live pace: players on pace to hit their line while games are on (pace.js, ESPN box scores, no credits) ---------- */
+const paceLines=()=>P.filter(r=>inSport(r.sp)).map(r=>({pl:r.pl,mk:r.mk,ln:r.ln,sp:r.sp,pp:r.pp,g:GI[r.g]})).filter(x=>x.g);
+function renderLive(){if(!window.Pace)return"";const next=G.filter(g=>g.t&&g.t>Date.now()&&inSport(g.sp)).sort((a,b)=>a.t-b.t)[0];
+ return Pace.html(paceLines(),{empty:`<h2>Live</h2><div class="card empty">No games on right now.${next?` Next up: ${esc(next.a.n)} at ${esc(next.h.n)}, ${new Date(next.t).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"})}.`:""} Once games start, this shows the players on pace to go over their line, live.</div>`})}
+function paceTick(force){if(!window.Pace||!DATA)return;const L=paceLines();
+ document.querySelectorAll('[data-tab="live"]').forEach(b=>b.classList.toggle("is-live",Pace.anyLive(L)));
+ if(ui.tab!=="live")return;Pace.refresh(L,force).then(ch=>{if(ch&&ui.tab==="live")keep()})}
+setInterval(()=>{if(!document.hidden)paceTick()},15000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)paceTick()});
 function render(){
  renderSportBar();
- const v=$("#view");v.innerHTML=!DATA?skel():ticker()+(ui.tab==="games"?renderGames():ui.tab==="pp"?renderPP():ui.tab==="tix"?renderTix():ui.tab==="players"?renderPlayers():renderTop());
+ const v=$("#view");v.innerHTML=!DATA?skel():ticker()+(ui.tab==="games"?renderGames():ui.tab==="pp"?renderPP():ui.tab==="tix"?renderTix():ui.tab==="players"?renderPlayers():ui.tab==="live"?renderLive():renderTop());
  renderSlip();
  limitBar();
  document.body.style.paddingBottom=$("#slipin").innerHTML?"":"40px";
- if(DATA)checkWins();
+ if(DATA){checkWins();paceTick()}
 }
 function stampText(){if(!DATA)return;const u=new Date(DATA.updated),age=(Date.now()-u)/36e5;
  $("#stamp").innerHTML=`Updated <b>${u.toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})}</b><br>${G.filter(live).length} games, ${P.filter(r=>live(GI[r.g])).length} props`;
@@ -1698,7 +1707,7 @@ function keepNow(){if(keepRAF){cancelAnimationFrame(keepRAF);keepRAF=0}const y=w
 /* ---------- events ---------- */
 document.addEventListener("click",e=>{
  const t=e.target.closest("button,input[type=checkbox]");if(!t)return;const d=t.dataset;
- if(d.tab){ui.tab=d.tab;LS.set("bl_tab",ui.tab);ui.limit=60;render();window.scrollTo(0,0);return}
+ if(d.tab){ui.tab=d.tab;LS.set("bl_tab",ui.tab);ui.limit=60;render();window.scrollTo(0,0);if(d.tab==="live")paceTick(true);return}
  if(d.sport){ui.sport=d.sport;LS.set("bl_sport",ui.sport);ui.ml.res=null;ui.pp.res=null;keep();return}
  if(d.day){ui.day=d.day;keep();return}
  if(d.pick){const[id,s]=d.pick.split("|");if(sel[id]===s)delete sel[id];else sel[id]=s;ui.kind="ml";save();keep();return}
@@ -1846,7 +1855,8 @@ setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&!document.activeElement.matches("input,select")){stampText();keep()}});   // back from another app: drop games that started
 </script>
 <script src="../share.js?v=3"></script>
-<script src="../live.js?v=4"></script>
+<script src="../live.js?v=5"></script>
+<script src="../pace.js?v=1"></script>
 <script src="../kit.js?v=3"></script>
 <script src="../game.js?v=1"></script>
 <script src="../fx.js?v=13"></script>
