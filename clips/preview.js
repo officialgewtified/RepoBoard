@@ -24,7 +24,12 @@ const hex = (h, f) => "#" + [0, 2, 4].map(i => Math.round(parseInt(h.slice(i, i 
 const col = t => { if (lum(t.color) > .045) return "#" + t.color; if (lum(t.alt) > .045 && !/^ffffff$/i.test(t.alt)) return "#" + t.alt;
   if (!/^[0-9a-f]{6}$/i.test(t.color || "")) return "#a1a1aa"; for (let f = .1; f < .9; f += .1) { const c = hex(t.color, f); if (lum(c.slice(1)) > .06) return c; } return "#a1a1aa"; };
 const et = iso => { const d = new Date(iso); return d.toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).replace(" ", "").replace(/:00(?=[AP]M)/, ""); };
-const etSay = iso => new Date(iso).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).replace(/:00 /, " ").replace(/ [AP]M$/, "");
+// start time in words ("eight fifteen", "seven o'clock"): voices misread "8:15" as a number
+const NUMW = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+const TENS = { 2: "twenty", 3: "thirty", 4: "forty", 5: "fifty" };
+const etSay = iso => { const [h, m] = new Date(iso).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).split(" ")[0].split(":").map(Number);
+  const mm = m === 0 ? "o'clock" : m < 10 ? "oh " + NUMW[m] : m < 20 ? NUMW[m] : TENS[Math.floor(m / 10)] + (m % 10 ? "-" + NUMW[m % 10] : "");
+  return `${NUMW[h]} ${mm} Eastern`; };
 
 // the last 5 regular-season games for one player: points, rebounds, assists per game
 async function last5(sport, id) {
