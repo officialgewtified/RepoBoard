@@ -1191,7 +1191,7 @@ def write_brief(games, props, teams, site, url):
         item = {"pl": r["pl"], "stat": MARKET_LABEL.get(r["mk"], r["mk"]), "side": "More" if side == "o" else "Less", "ln": r["ln"],
                 "p": round(honest_mk(p, r["mk"], side), 3), "raw": round(p, 3), "sp": g["sp"],
                 "game": (f"{t['ab']} {'at' if r['sd'] == 'a' else 'vs'} {o['ab']}" if t and o else f"{g['a']['ab']} @ {g['h']['ab']}"),
-                "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"]}
+                "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"], "mk": r["mk"], "gid": r["g"]}
         why, mkt, fm = [], (r["po"] if side == "o" else 1 - r["po"]), r.get("rf")
         if mkt >= .53: why.append(f"{r['nb']} books lean {item['side']} ({round(mkt * 100)}%)")
         if fm and fm.get("n", 0) >= 3:
@@ -1219,6 +1219,15 @@ def write_brief(games, props, teams, site, url):
     brief["gaprec"] = {"w": sum(1 for x in G if (x["act"] > x["ln"]) == (x["bm"] > x["ln"])), "n": len(G)}
     with open(os.path.join(HERE, "brief.json"), "w") as fh:
         json.dump(brief, fh, separators=(",", ":"))
+    # the autopilot: today's fake entries for each strategy, and grading the older ones (autopilot_sports.py)
+    try:
+        import sys
+        for d in (HERE, os.path.dirname(HERE)):
+            if d not in sys.path: sys.path.insert(0, d)
+        import autopilot_sports
+        autopilot_sports.run(HERE, site, list(picks.values()), gaps, NOW)
+    except Exception as e:
+        print("autopilot failed:", e)
 
 def main():
     s = settings()

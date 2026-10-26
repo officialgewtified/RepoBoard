@@ -918,8 +918,16 @@ def write_brief(games, props, teams, site, url):
         L = [x for x in P if x["mk"] == mk]
         if len(L) >= 40:
             sa, sb = fit_cal(L); w = len(L) / (len(L) + 150); fits[mk] = (w * sa + (1 - w) * ca, w * sb + (1 - w) * cb)
-    def honest_mk(q, mk):
-        a, b = fits.get(mk, (ca, cb)); return min(.8, max(.3, .5 + a + b * (q - .5)))   # chance on the board's side, adjusted for its record
+    # and each stat's More and Less sides get a nudge toward how that side has really done (30+ picks, half weight at 200, at most 4 points), like the pages
+    shifts = {}
+    for key in {(x["mk"], x["side"]) for x in P}:
+        L = [x for x in P if (x["mk"], x["side"]) == key]
+        if len(L) >= 30:
+            a, b = fits.get(key[0], (ca, cb))
+            gap = sum((1 if x["hit"] else 0) - min(.8, max(.3, .5 + a + b * (x["p"] - .5))) for x in L)
+            shifts[key] = max(-.04, min(.04, len(L) / (len(L) + 200) * gap / len(L)))
+    def honest_mk(q, mk, side):
+        a, b = fits.get(mk, (ca, cb)); return min(.8, max(.3, .5 + a + b * (q - .5) + shifts.get((mk, side), 0)))   # chance on the board's side, adjusted for its record
     for r in props:
         g = gbi.get(r["g"])
         if not g or not r.get("pp") or r.get("nb", 0) < 2 or parse_t(g["kick"]) <= NOW:
@@ -931,9 +939,9 @@ def write_brief(games, props, teams, site, url):
         t = g[r["sd"]] if r.get("sd") else None
         o = g["h" if r.get("sd") == "a" else "a"] if r.get("sd") else None
         item = {"pl": r["pl"], "stat": MARKET_LABEL.get(r["mk"], r["mk"]), "side": "More" if side == "o" else "Less", "ln": r["ln"],
-                "p": round(honest_mk(p, r["mk"]), 3), "raw": round(p, 3), "sp": g["sp"],
+                "p": round(honest_mk(p, r["mk"], side), 3), "raw": round(p, 3), "sp": g["sp"],
                 "game": (f"{t['ab']} {'at' if r['sd'] == 'a' else 'vs'} {o['ab']}" if t and o else f"{g['a']['ab']} @ {g['h']['ab']}"),
-                "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"]}
+                "time": parse_t(g["kick"]).astimezone(ET).strftime("%a %-I:%M %p"), "kick": g["kick"], "mk": r["mk"], "gid": r["g"]}
         why, mkt, fm = [], (r["po"] if side == "o" else 1 - r["po"]), r.get("rf")
         if mkt >= .53: why.append(f"{r['nb']} books lean {item['side']} ({round(mkt * 100)}%)")
         if fm and fm.get("n", 0) >= 3:
@@ -947,7 +955,7 @@ def write_brief(games, props, teams, site, url):
         if r.get("bm") is not None:
             gz = (r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])
             if abs(gz) >= .15:
-                gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(honest_mk(p, r["mk"]) if (gz > 0) == (side == "o") else 1 - honest_mk(p, r["mk"]), 3), books=r["bm"], gz=round(gz, 2)))
+                gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(honest_mk(p, r["mk"], side) if (gz > 0) == (side == "o") else 1 - honest_mk(p, r["mk"], side), 3), books=r["bm"], gz=round(gz, 2)))
     last_day = max((x["d"] for x in P), default=None)
     last = [x for x in P if x["d"] == last_day] if last_day else []
     brief = {"updated": iso(NOW), "site": site, "url": url,
@@ -961,6 +969,15 @@ def write_brief(games, props, teams, site, url):
     brief["gaprec"] = {"w": sum(1 for x in G if (x["act"] > x["ln"]) == (x["bm"] > x["ln"])), "n": len(G)}
     with open(os.path.join(HERE, "brief.json"), "w") as fh:
         json.dump(brief, fh, separators=(",", ":"))
+    # the autopilot: today's fake entries for each strategy, and grading the older ones (autopilot_sports.py)
+    try:
+        import sys
+        for d in (HERE, os.path.dirname(HERE)):
+            if d not in sys.path: sys.path.insert(0, d)
+        import autopilot_sports
+        autopilot_sports.run(HERE, site, list(picks.values()), gaps, NOW)
+    except Exception as e:
+        print("autopilot failed:", e)
 
 def main():
     s = settings()

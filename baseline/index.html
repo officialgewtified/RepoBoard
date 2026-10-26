@@ -349,7 +349,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <link rel="preload" href="../fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/bebas-neue.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="../fx.css?v=16">
+<link rel="stylesheet" href="../fx.css?v=17">
 <link rel="stylesheet" href="../studio.css?v=1">
 <link rel="preload" href="../fonts/archivo-x.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/big-shoulders.woff" as="font" type="font/woff" crossorigin>
@@ -838,7 +838,10 @@ const tNet=t=>tRet(t)-(+t.stake);
 function legRows(t){const L=t.res;if(!L)return `<div class="lg2">${t.legs.map(esc).join(", ")}</div>`;
  return `<div class="lgl">${t.legs.map((x,i)=>{const r=L[i]||{};const c=r.h===true?"ok":r.h===false?"no":"na";
   return `<div class="${c}"><span class="mk" aria-label="${r.h===true?"Hit":r.h===false?"Miss":r.h===null?"Push":"Not graded"}">${r.h===true?"✓":r.h===false?"✕":"–"}</span><span>${esc(x)}${r.a!=null?` <small>had ${r.a}</small>`:""}</span></div>`}).join("")}</div>`}
-function renderTix(){
+/* the autopilot's fake entries for this board (apview.js; autopilot.json is written by the overnight update) */
+let AP=null;
+function renderTix(){return renderTix0()+(window.APV?APV.html([{A:AP}]):"")}
+function renderTix0(){
  const S=tickets.filter(t=>t.r),w=S.filter(t=>tNet(t)>0).length,l=S.filter(t=>tNet(t)<0).length,pu=S.length-w-l;
  const stk=S.reduce((a,t)=>a+ +t.stake,0),ret=S.reduce((a,t)=>a+tRet(t),0),net=ret-stk,ex=S.reduce((a,t)=>a+(t.pw??t.p??0),0);
  return `<div class="hrow"><h2>My tickets</h2><button class="iconbtn" data-logtix>+ Log a ticket</button></div>${tickets.length?`<div class="record"><div class="stat"><small>Record</small><b>${w}-${l}${pu?"-"+pu:""}</b></div><div class="stat"><small>Net</small><b class="${net>=0?"gold":"red"}">${net>=0?"+":"−"}$${Math.abs(net).toFixed(2)}</b></div><div class="stat"><small>Expected wins</small><b>${ex.toFixed(1)}</b></div></div>
@@ -1872,12 +1875,14 @@ fetch("tickets.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if
   if(seen.has(t.id))continue;seen.add(t.id);tickets.unshift(t);n++}
  LS.set("bl_imported",[...seen]);if(n){LS.set("bl_tickets",tickets);keep()}}).catch(()=>{}).finally(()=>
  fetch("history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.props)){HIST={props:j.props,ml:j.ml||[]};autoGrade();keep()}}).catch(()=>{}));
+ fetch("autopilot.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v){AP=j;if(ui.tab==="tix")keep()}}).catch(()=>{});
 setInterval(()=>{if(DATA){stampText();if(ui.tab!=="tix"&&!document.activeElement.matches("input,select"))keep()}},5*60*1000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&!document.activeElement.matches("input,select")){stampText();keep()}});   // back from another app: drop games that started
 </script>
 <script src="../share.js?v=3"></script>
 <script src="../live.js?v=5"></script>
 <script src="../pace.js?v=1"></script>
+<script src="../apview.js?v=1"></script>
 <script src="../kit.js?v=3"></script>
 <script src="../game.js?v=1"></script>
 <script src="../fx.js?v=13"></script>
