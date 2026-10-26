@@ -55,10 +55,10 @@ jobs:
           path: |
             clips/.models
             ~/.u2net
-          key: kokoro-v1.0-int8-u2net-human
+          key: kokoro-v1.0-int8-birefnet-portrait
       - name: Python tools
         if: steps.prep.outputs.skip != '1'
-        run: pip install -q kokoro-onnx soundfile "rembg[cpu]" pillow
+        run: pip install -q kokoro-onnx soundfile "rembg[cpu]" pillow scipy "opencv-python-headless==4.10.0.84"
       - name: Player photos
         if: steps.prep.outputs.skip != '1'
         # free-to-use photos from Wikimedia Commons, cut out; players without one get their team badge
@@ -74,9 +74,9 @@ jobs:
           [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
           python tts.py out/data.json out/voice
         env:
-          # the liveliest of the male voices (most pitch movement), read a little quick
+          # the liveliest of the male voices (most pitch movement), at a relaxed pace
           VOICE: am_puck
-          SPEED: "1.22"
+          SPEED: "1.05"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
         run: |
