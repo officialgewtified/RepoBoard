@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-sport="fb">
+<html lang="en" data-theme="studio" data-sport="fb">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#070d18">
+<meta name="theme-color" content="#111113">
 <title>Gridline</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
@@ -350,6 +350,9 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <link rel="preload" href="fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="fonts/bebas-neue.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="fx.css?v=15">
+<link rel="stylesheet" href="studio.css?v=1">
+<link rel="preload" href="fonts/archivo-x.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="fonts/big-shoulders.woff" as="font" type="font/woff" crossorigin>
 </head>
 <body>
 <header class="wrap top">
@@ -1675,7 +1678,7 @@ function renderSettings(){
  const th=document.documentElement.dataset.theme,c=DATA&&DATA.credits;
  const fx=n=>PAY.flex[n].map((v,i)=>`<input data-payf="${n}|${i}" type="number" step="0.05" value="${v}" aria-label="${n}-pick flex ${n-i} hits">`).join("")+(PAY.flex[n].length<3?"<span></span>":"");
  $("#sheet").innerHTML=`<h3>Settings</h3>
- <h4>Look</h4><div class="filters">${[["dark","Night"],["clean","Day"],["bold","Field"],["mix","Mix"]].map(([k,l])=>`<button class="pill ${th===k?"on":""}" data-th="${k}">${l}</button>`).join("")}</div>
+ <h4>Look</h4><div class="filters">${[["studio","Studio"],["dark","Night"],["clean","Day"],["bold","Field"],["mix","Mix"]].map(([k,l])=>`<button class="pill ${th===k?"on":""}" data-th="${k}">${l}</button>`).join("")}</div>
  <h4>Your sportsbooks</h4><p>Best prices only come from books you check. Fair chances always use every book.</p>
  <div class="checks">${books.map(k=>`<label><input type="checkbox" data-book="${k}" ${okBook(k)?"checked":""}>${esc(bname(k))}</label>`).join("")||"<p>Books appear after the first update.</p>"}</div>
  <h4>Chances</h4><p>The board's own math has run too hot, so its chances are adjusted to match how its picks have really hit${cal().n?` (${cal().n} graded so far)`:", cut halfway toward 50% until it has graded picks"}. Lineups, labels and the slip all use the adjusted chance.</p>
@@ -1857,7 +1860,7 @@ $("#payout").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="p
 
 function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("pb_theme",t)}catch(e){}
  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()}
-(function(){let t="dark";try{t=localStorage.getItem("pb_theme")||"dark"}catch(e){}if(!["dark","clean","bold","mix"].includes(t))t="dark";setTheme(t)})();
+(function(){let t="studio";try{t=localStorage.getItem("pb_theme")||"studio";if(!localStorage.getItem("arena_studio_pb_theme")){t="studio";localStorage.setItem("arena_studio_pb_theme","1")}}catch(e){}if(!["studio","dark","clean","bold","mix"].includes(t))t="studio";setTheme(t)})();   // Studio is the new default look; Settings can switch back
 
 render();
 fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{ingest(j);stampText();render();liveRefresh();injRefresh(true);scRefresh(true);if(needOther())loadOther();

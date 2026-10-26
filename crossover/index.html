@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-sport="x">
+<html lang="en" data-theme="studio" data-sport="x">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#070d18">
+<meta name="theme-color" content="#111113">
 <title>Crossover</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
@@ -361,6 +361,9 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/
 <link rel="preload" href="../fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="../fonts/bebas-neue.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="../fx.css?v=15">
+<link rel="stylesheet" href="../studio.css?v=1">
+<link rel="preload" href="../fonts/archivo-x.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="../fonts/big-shoulders.woff" as="font" type="font/woff" crossorigin>
 </head>
 <body>
 <header class="wrap top">
@@ -951,10 +954,10 @@ document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)r
  if(d.xsharepair){const P=LAST[d.xsharepair];if(P)xShare(P.legs.map(xItem),"power",t);return}
  if(d.xcopyall!==undefined){copyText(XS.map(xLegTxt).join("\n"),t);return}
  if(d.copy){const P=LAST[d.copy];if(P)copyText(P.legs.map(x=>`${x.r.pl} ${x.side==="o"?"More":"Less"} ${x.r.ln} ${MK[x.r.mk]||x.r.mk}`).join("\n"),t)}});
-const THEMES=[["mix","Mix"],["dark","Night"],["clean","Day"],["bold","Field"],["court","Court"]];
+const THEMES=[["studio","Studio"],["mix","Mix"],["dark","Night"],["clean","Day"],["bold","Field"],["court","Court"]];
 function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("cx_theme",t)}catch(e){}
  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()}
-(function(){let t="mix";try{t=localStorage.getItem("cx_theme")||"mix"}catch(e){}if(!THEMES.some(x=>x[0]===t))t="mix";setTheme(t)})();
+(function(){let t="studio";try{t=localStorage.getItem("cx_theme")||"studio";if(!localStorage.getItem("arena_studio_cx_theme")){t="studio";localStorage.setItem("arena_studio_cx_theme","1")}}catch(e){}if(!THEMES.some(x=>x[0]===t))t="studio";setTheme(t)})();   // Studio is the new default look; Settings can switch back
 /* ---------- settings ---------- */
 function renderSettings(){const th=document.documentElement.dataset.theme,L=getLimit();
  const pill=(k,on,attr,l)=>`<button class="pill ${on?"on":""}" ${attr}="${k}">${l}</button>`;

@@ -1,0 +1,132 @@
+/* Studio: the graphite drop-page look (same family as Early Bird) for Gridline, Baseline and Crossover.
+   Loaded last; everything here only applies when the look is set to Studio (Settings, Look), which is the default.
+   Wide uppercase Archivo for headings, tall Big Shoulders for numbers, soft rounded panels, no glow, no cut corners.
+   The sport's color is kept for what you've picked and the main action. */
+@font-face{font-family:"ArchivoX";src:url(fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%;font-style:normal;font-display:swap}
+@font-face{font-family:"Big Shoulders";src:url(fonts/big-shoulders.woff) format("woff");font-weight:700 900;font-style:normal;font-display:swap}
+
+:root[data-theme="studio"]{--bg:#111113;--panel:#1A1A1D;--raise:#242428;--line:#2E2E33;--ink:#F4F4F5;--mute:#A1A1AA;--go:#4ADE80;--stop:#F87171;
+ --paper:#F4F4F5;--paperink:#111113;--paperline:#D4D4D8;--shadow:0 20px 40px -24px rgba(0,0,0,.8);color-scheme:dark;
+ --fd:"ArchivoX","Archivo",system-ui,-apple-system,sans-serif;--fh:"ArchivoX","Archivo",system-ui,sans-serif;--fn:"Big Shoulders","ArchivoX",system-ui,sans-serif;
+ --shape:none;--shape-in:none;--tile:none;--para:none;--glow:transparent;
+ --b-fill:#26262A;--b-fill-2:#2E2E33;--b-ink:#F4F4F5;--r:20px;--rs:14px;
+ --hero:radial-gradient(80% 60% at 55% 30%,#2E2E33 0%,#1C1C1F 55%,#141416 100%)}
+:root[data-theme="studio"][data-sport="fb"]{--led:#FFB420;--ledink:#1B1200}
+:root[data-theme="studio"][data-sport="bb"]{--led:#FF9A3D;--ledink:#1D0C00}
+:root[data-theme="studio"][data-sport="x"]{--led:#FFAA2E;--ledink:#1C0E00}
+
+/* ---------- page ---------- */
+:root[data-theme="studio"]{background:#111113}
+:root[data-theme="studio"] body{font-family:var(--fd);font-weight:450;font-stretch:100%;background:radial-gradient(130% 70% at 50% -15%,#2A2A2F 0%,#18181B 45%,#111113 100%) no-repeat;background-color:#111113;background-image:radial-gradient(130% 70% at 50% -15%,#2A2A2F 0%,#18181B 45%,#111113 100%)}
+:root[data-theme="studio"] body::before,:root[data-theme="studio"] body::after{display:none}
+:root[data-theme="studio"] :focus-visible{outline:2px solid var(--ink)}
+
+/* ---------- type: wide uppercase headings, tall numbers ---------- */
+:root[data-theme="studio"] h2,:root[data-theme="studio"] .hero h3,:root[data-theme="studio"] .sheet h3,:root[data-theme="studio"] .sheet h4,:root[data-theme="studio"] .rchd > span,:root[data-theme="studio"] .rp-h,:root[data-theme="studio"] .case-h,:root[data-theme="studio"] .receipt h4,:root[data-theme="studio"] .kit-ban b,:root[data-theme="studio"] .ckhead b,:root[data-theme="studio"] .gt b,:root[data-theme="studio"] .gstat.gh b,:root[data-theme="studio"] .glead > b,:root[data-theme="studio"] .pch{
+ font-family:var(--fh);font-style:normal;-webkit-text-stroke:0;text-transform:uppercase;letter-spacing:.01em}
+:root[data-theme="studio"] h2{font-size:27px;font-weight:500;font-stretch:115%;line-height:1;margin:34px 0 8px;display:block}
+:root[data-theme="studio"] h2::before{display:none}
+:root[data-theme="studio"] .lede{font-size:14px;line-height:1.5;color:var(--mute)}
+:root[data-theme="studio"] .hero h3{font-size:24px;font-weight:600;font-stretch:112%;line-height:1.02}
+:root[data-theme="studio"] .sheet h3{font-size:30px;font-weight:600;font-stretch:112%;line-height:1}
+:root[data-theme="studio"] .sheet h4,:root[data-theme="studio"] .pch{font-size:14px;font-weight:700;font-stretch:112%;letter-spacing:.06em;margin:22px 0 8px}
+:root[data-theme="studio"] .rchd > span{font-size:15px;font-weight:700;font-stretch:112%;letter-spacing:.05em}
+:root[data-theme="studio"] .rchd > span small{font-family:var(--fd);text-transform:none;letter-spacing:0;font-weight:500;font-stretch:100%}
+:root[data-theme="studio"] .rp-h{font-size:12px;font-weight:700;font-stretch:112%;letter-spacing:.08em;color:var(--mute)}
+:root[data-theme="studio"] .case-h{font-size:15px;font-weight:700;font-stretch:112%;letter-spacing:.05em}
+:root[data-theme="studio"] .receipt h4{font-size:22px;font-weight:600;font-stretch:112%}
+:root[data-theme="studio"] .ckhead b{font-size:20px;font-weight:600;font-stretch:110%}
+:root[data-theme="studio"] .gt b{font-size:18px;font-weight:700;font-stretch:110%}
+:root[data-theme="studio"] .gstat.gh b,:root[data-theme="studio"] .glead > b{font-size:13px;font-weight:700;font-stretch:110%;letter-spacing:.05em}
+/* every big number: Big Shoulders, upright */
+:root[data-theme="studio"] .num,:root[data-theme="studio"] .hero .ev,:root[data-theme="studio"] .stat b,:root[data-theme="studio"] .side-b b,:root[data-theme="studio"] .rchd b,:root[data-theme="studio"] .recrow b,:root[data-theme="studio"] .price b,:root[data-theme="studio"] .pct,:root[data-theme="studio"] .row .r b,:root[data-theme="studio"] .combo .hd b,:root[data-theme="studio"] .sbar .o,:root[data-theme="studio"] .receipt .big,:root[data-theme="studio"] .feel .hl,:root[data-theme="studio"] .prec,:root[data-theme="studio"] .rank,
+:root[data-theme="studio"] .receipt .leg b,:root[data-theme="studio"] .mode b,:root[data-theme="studio"] .lvl .lvv,:root[data-theme="studio"] .ckmore b,:root[data-theme="studio"] .bt b,:root[data-theme="studio"] .cp1 b,:root[data-theme="studio"] .tg .tr em,:root[data-theme="studio"] .gsc b,:root[data-theme="studio"] .sbrow > b,:root[data-theme="studio"] .hon .hn,:root[data-theme="studio"] .hon .hv,:root[data-theme="studio"] .kit-ban b{
+ font-family:var(--fn);font-style:normal;font-stretch:100%;font-weight:900;letter-spacing:0;text-shadow:none}
+:root[data-theme="studio"] .hero .ev,:root[data-theme="studio"] .rchd b{font-size:54px;line-height:.9}
+:root[data-theme="studio"] .bank .rchd b{font-size:44px}
+:root[data-theme="studio"] .stat b{font-size:30px}
+:root[data-theme="studio"] .side-b b{font-size:28px}
+:root[data-theme="studio"] .price b{font-size:30px}
+:root[data-theme="studio"] .row .r b{font-size:28px}
+:root[data-theme="studio"] .recrow b,:root[data-theme="studio"] .prec{font-size:26px}
+:root[data-theme="studio"] .receipt .big{font-size:40px}
+:root[data-theme="studio"] .lvl .lvv{font-size:30px}
+:root[data-theme="studio"] .bt b{font-size:38px}
+:root[data-theme="studio"] .sbar .o{font-size:30px}
+:root[data-theme="studio"] .kit-ban b{font-size:46px;text-transform:uppercase}
+
+/* ---------- header ---------- */
+:root[data-theme="studio"] .mark{font-family:var(--fn);font-style:normal;font-weight:900;font-stretch:100%;font-size:44px;letter-spacing:.01em;text-transform:uppercase;text-shadow:none;gap:12px}
+:root[data-theme="studio"] .mark .bars{width:42px;height:42px;filter:none}
+:root[data-theme="studio"] .stamp{color:var(--mute)}
+:root[data-theme="studio"] .askbar{border-radius:999px;background:var(--b-fill);padding:13px 18px;font-weight:550;color:var(--mute)}
+:root[data-theme="studio"] .warn{border-radius:var(--rs);clip-path:none;border:0;border-left:3px solid var(--stop);background:color-mix(in srgb,var(--stop) 10%,var(--panel))}
+
+/* ---------- switch between the three sites ---------- */
+:root[data-theme="studio"] .net{gap:6px}
+:root[data-theme="studio"] .net a{border-radius:999px;background:var(--b-fill);color:var(--mute);font-weight:700;font-stretch:96%;text-transform:uppercase;letter-spacing:.02em;font-size:11.5px;white-space:nowrap}
+:root[data-theme="studio"] .net a.on{background:var(--ink);color:#111113;box-shadow:none}
+:root[data-theme="studio"] .net a.on i{background:#111113}
+
+/* ---------- bottom bar: icons, a dot under the open tab ---------- */
+:root[data-theme="studio"] .seg{background:color-mix(in srgb,#111113 88%,transparent);box-shadow:0 -1px 0 var(--line)}
+:root[data-theme="studio"] .seg button{color:#6B6B73;font-weight:700;font-stretch:95%;font-size:11px}
+:root[data-theme="studio"] .seg button.on{color:var(--ink)}
+:root[data-theme="studio"] .seg button.on::before{background:var(--led)}
+:root[data-theme="studio"] .seg .fx-ind{top:auto!important;bottom:calc(4px + env(safe-area-inset-bottom,0px))!important;height:4px!important;border-radius:2px;box-shadow:none;transform:scaleX(.06);background:var(--ink)}
+
+/* ---------- filters ---------- */
+:root[data-theme="studio"] .pill{border-radius:999px;background:var(--b-fill);color:var(--mute);font-weight:700;font-stretch:100%;padding:8px 15px}
+:root[data-theme="studio"] .pill.on{background:var(--ink);color:#111113}
+:root[data-theme="studio"] .pill.on .ct{opacity:.6}
+
+/* ---------- panels: rounded, flat, a fine edge ---------- */
+:root[data-theme="studio"] .card{--edge:var(--line);--fill:var(--panel)}
+:root[data-theme="studio"] .card::before{border-radius:var(--r);background:var(--edge)}
+:root[data-theme="studio"] .card::after{border-radius:calc(var(--r) - 1px);background:var(--fill)}
+:root[data-theme="studio"] .hero,:root[data-theme="studio"] .rcard{--edge:#34343A;filter:none}
+:root[data-theme="studio"] .hero::after,:root[data-theme="studio"] .rcard::after{background:var(--hero)}
+:root[data-theme="studio"] .tk.W{--edge:color-mix(in srgb,var(--go) 60%,var(--line))}:root[data-theme="studio"] .tk.L{--edge:color-mix(in srgb,var(--stop) 55%,var(--line))}:root[data-theme="studio"] .tk.PT{--edge:color-mix(in srgb,var(--led) 55%,var(--line))}
+
+/* tiles inside panels */
+:root[data-theme="studio"] .stat,:root[data-theme="studio"] .team,:root[data-theme="studio"] .row,:root[data-theme="studio"] .combo,:root[data-theme="studio"] .ckrow,:root[data-theme="studio"] .ltleg,:root[data-theme="studio"] .feel,:root[data-theme="studio"] .mchip,:root[data-theme="studio"] .ms,:root[data-theme="studio"] .checks label,:root[data-theme="studio"] .ckmore div,:root[data-theme="studio"] .bt div,:root[data-theme="studio"] .case,:root[data-theme="studio"] .lvl > div,:root[data-theme="studio"] .sbrow,:root[data-theme="studio"] .tg,:root[data-theme="studio"] .receipt .leg{border-radius:var(--rs)}
+:root[data-theme="studio"] .stat,:root[data-theme="studio"] .team,:root[data-theme="studio"] .row,:root[data-theme="studio"] .combo,:root[data-theme="studio"] .ckrow,:root[data-theme="studio"] .checks label,:root[data-theme="studio"] .ckmore div,:root[data-theme="studio"] .bt div,:root[data-theme="studio"] .case,:root[data-theme="studio"] .lvl > div{background:#202024}
+:root[data-theme="studio"] .team.on,:root[data-theme="studio"] .row.on{background:color-mix(in srgb,var(--led) 12%,#202024);box-shadow:inset 3px 0 0 var(--led)}
+:root[data-theme="studio"] .chip{border-radius:10px}
+:root[data-theme="studio"] .tier,:root[data-theme="studio"] .lg,:root[data-theme="studio"] .ppmark,:root[data-theme="studio"] .cklog span{border-radius:999px;clip-path:none}
+:root[data-theme="studio"] .mchip{border-radius:999px;padding:4px 10px}
+:root[data-theme="studio"] .lbar{border-radius:5px;clip-path:none}:root[data-theme="studio"] .lbar i{border-radius:5px}
+:root[data-theme="studio"] .lvbar{border-radius:4px;overflow:hidden}
+
+/* ---------- buttons: flat pills; the main action and what you picked stay the sport's gold ---------- */
+:root[data-theme="studio"] .btn,:root[data-theme="studio"] .sm,:root[data-theme="studio"] .tk .m button,:root[data-theme="studio"] .receipt .rbtns button,:root[data-theme="studio"] .shr-b .btn{border-radius:999px;font-stretch:105%}
+:root[data-theme="studio"] .btn.go,:root[data-theme="studio"] .receipt .rbtns .go,:root[data-theme="studio"] .shr-b .btn.go{text-transform:uppercase;letter-spacing:.08em;font-weight:800;font-stretch:112%;font-size:14px}
+:root[data-theme="studio"] .side-b{border-radius:var(--rs);background:#26262A}
+:root[data-theme="studio"] .side-b.on{background:var(--led)}
+:root[data-theme="studio"] .mode{border-radius:var(--rs)}
+:root[data-theme="studio"] .sbar{border-radius:999px;padding:12px 20px}
+:root[data-theme="studio"] .slip .in{filter:drop-shadow(0 14px 28px rgba(0,0,0,.6))}
+
+/* ---------- the slip and sheets ---------- */
+:root[data-theme="studio"] .receipt{border-radius:24px;background:#1C1C1F;clip-path:none}
+:root[data-theme="studio"] .receipt input,:root[data-theme="studio"] .lset input,:root[data-theme="studio"] .search,:root[data-theme="studio"] select.sel,:root[data-theme="studio"] .ctrls select,:root[data-theme="studio"] .ctrls input,:root[data-theme="studio"] .ckline input,:root[data-theme="studio"] .paygrid input{border-radius:12px}
+:root[data-theme="studio"] dialog::backdrop{background:rgba(0,0,0,.62)}
+:root[data-theme="studio"] .sheet{border-radius:28px;clip-path:none;background:var(--hero)}
+:root[data-theme="studio"] #sharedlg .shr{border-radius:24px;clip-path:none}
+:root[data-theme="studio"] .fx-sk{border-radius:var(--r);clip-path:none;background:linear-gradient(100deg,#1A1A1D 30%,#26262A 50%,#1A1A1D 70%);background-size:250% 100%}
+:root[data-theme="studio"] .kit-ban{border-radius:24px}
+
+/* ---------- small things ---------- */
+:root[data-theme="studio"] .ticker .tg{background:#1C1C1F}
+:root[data-theme="studio"] .tg.mine{box-shadow:inset 0 0 0 2px var(--led)}
+:root[data-theme="studio"] .pros li::before,:root[data-theme="studio"] .cons li::before{border-radius:50%;clip-path:none;width:7px;height:7px;top:.55em}
+:root[data-theme="studio"] .cool{border-radius:var(--rs)}
+:root[data-theme="studio"] .gstat i{border-radius:2px}
+:root[data-theme="studio"] .fx-ripple i{background:radial-gradient(circle,rgba(255,255,255,.14) 0,transparent 68%)}
+:root[data-theme="studio"] .fx-spark{box-shadow:none}
+
+/* live pace board */
+:root[data-theme="studio"] .pc{border-radius:var(--r);clip-path:none;background:#1C1C1F;border:1px solid var(--line);border-left-width:3px}
+:root[data-theme="studio"] .pc1 b{font-size:16px}
+:root[data-theme="studio"] .pc1 em{font-style:normal;font-family:var(--fd);font-weight:800;font-stretch:110%;font-size:11px;letter-spacing:.08em}
+:root[data-theme="studio"] .pc2 b{font-family:var(--fn);font-weight:900;font-size:17px;letter-spacing:.01em}
