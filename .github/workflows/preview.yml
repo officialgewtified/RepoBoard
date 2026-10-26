@@ -59,7 +59,7 @@ jobs:
           python tts.py out/data.json out/voice
         env:
           # same voice and pace as the morning recap
-          VOICE: "am_onyx*0.55+am_puck*0.45"
+          VOICE: am_puck
           SPEED: "1.05"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
@@ -72,7 +72,7 @@ jobs:
       - name: Render
         if: steps.prep.outputs.skip != '1'
         run: |
-          node render.js out/data.json "out/tonight-$DAY.mp4" 30
+          PITCH=0.93 node render.js out/data.json "out/tonight-$DAY.mp4" 30
           node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
       - name: Publish
         if: steps.prep.outputs.skip != '1'

@@ -34,12 +34,15 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
       pop: ["aevalsrc=sin(2*PI*(620*t+2600*t*t))*exp(-26*t):d=0.18:s=48000", "volume=0.35"],
       stamp: ["aevalsrc=sin(2*PI*85*t)*exp(-12*t)+0.3*(random(0)*2-1)*exp(-70*t):d=0.4:s=48000", "volume=0.7"] };
     for (const [k, [src, fx]] of Object.entries(SYN)) await run(["-y", "-loglevel", "error", "-f", "lavfi", "-i", src, "-af", fx, "-ar", "48000", "-ac", "1", path.join(tmp, k + ".wav")]);
+    // the voice: shifted a little deeper (PITCH < 1) without changing its speed, plus some low end
+    const P = Math.min(1, Math.max(.8, +process.env.PITCH || 1));
+    const VFX = (P < 1 ? `,asetrate=${Math.round(48000 * P)},aresample=48000,atempo=${(1 / P).toFixed(4)}` : "") + ",bass=g=4:f=110";
     const ins = [];
     if (voice) SC.forEach(s => { const f = path.join(data.voiceDir, s.id + ".wav"); if (fs.existsSync(f)) ins.push([f, s.va, "v"]); });
     SFX.forEach(e => { if (SYN[e.k] && e.t < total) ins.push([path.join(tmp, e.k + ".wav"), e.t, "s"]); });
     const args = ["-y", "-loglevel", "error", "-i", silent];
     ins.forEach(([f]) => args.push("-i", f));
-    const f = ins.map(([, at, kind], i) => `[${i + 1}:a]aresample=48000${kind === "v" ? ",bass=g=4:f=110" : ""},adelay=delays=${Math.round(at * 1000)}:all=1[a${i}]`).join(";") +
+    const f = ins.map(([, at, kind], i) => `[${i + 1}:a]aresample=48000${kind === "v" ? VFX : ""},adelay=delays=${Math.round(at * 1000)}:all=1[a${i}]`).join(";") +
       `;${ins.map((_, i) => `[a${i}]`).join("")}amix=inputs=${ins.length}:normalize=0,apad,atrim=0:${total.toFixed(3)},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]`;
     args.push("-filter_complex", f, "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", out);
     await run(args); fs.unlinkSync(silent); fs.rmSync(tmp, { recursive: true, force: true });

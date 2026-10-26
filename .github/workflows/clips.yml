@@ -78,7 +78,7 @@ jobs:
           python tts.py out/data.json out/voice
         env:
           # the liveliest of the male voices (most pitch movement), at a relaxed pace
-          VOICE: "am_onyx*0.55+am_puck*0.45"
+          VOICE: am_puck
           SPEED: "1.05"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
@@ -91,7 +91,7 @@ jobs:
       - name: Render
         if: steps.prep.outputs.skip != '1'
         run: |
-          node render.js out/data.json "out/best-stats-$DAY.mp4" 30
+          PITCH=0.93 node render.js out/data.json "out/best-stats-$DAY.mp4" 30
           node -e "const d=require('./out/data.json');process.stdout.write(d.caption+(d.credits&&d.credits.length?'\n\nPhotos via Wikimedia Commons: '+d.credits.join('; '):''))" > out/caption.txt
       - name: Publish
         if: steps.prep.outputs.skip != '1'

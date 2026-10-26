@@ -36,13 +36,15 @@ def syllables(spec):
     return out
 
 def override(value):
+    if value.startswith("/") and value.endswith("/"):   # exact sounds, written as phonemes: nothing left to guess
+        return value.strip("/")
     return " ".join(syllables(t) if "|" in t else phon(t) for t in value.split())
 
 def to_phonemes(text):
     """the sentence as phonemes, with the syllable-spec words dropped in exactly"""
-    spec = {k: v for k, v in SAY.items() if "|" in v}
+    spec = {k: v for k, v in SAY.items() if "|" in v or v.startswith("/")}
     for k, v in SAY.items():
-        if "|" not in v:
+        if "|" not in v and not v.startswith("/"):
             text = re.sub(r"\b" + re.escape(k) + r"\b", v, text)
     if not spec:
         return phon(text)
@@ -91,7 +93,9 @@ if __name__ == "__main__":
         sents = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s]
         parts, cues, t = [], [], 0.0
         for i, s in enumerate(sents):
-            a, sr, ph = speak(s, VOICE, SPEED)
+            # a little quicker on the hype lines, a touch slower on a dramatic "..." lead-in
+            sp = SPEED * (1.06 if s.rstrip().endswith("!") else .96 if "..." in s else 1)
+            a, sr, ph = speak(s, VOICE, sp)
             cues.append(round(t, 3)); parts.append(a); t += len(a) / sr
             if i < len(sents) - 1:
                 parts.append(np.zeros(int(GAP * sr), dtype=np.float32)); t += GAP
