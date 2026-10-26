@@ -93,7 +93,7 @@ function star(s, sport) {
     const gw = p.l5 ? (WORDS[p.l5.g] || p.l5.g) : "";
     return { name: p.name, short: p.short, big: p.l5 ? p.l5.p : r1(p.value), lab: p.l5 ? `PPG last ${p.l5.g}` : "PPG", season: r1(p.value), l5: p.l5, hot,
       chip: p.l5 ? `${p.short}: ${p.l5.p} / ${p.l5.r} / ${p.l5.a} last ${p.l5.g}` : `${p.short}: ${p.show} PPG`,
-      say: p.l5 ? `${p.name} is averaging ${Math.round(p.l5.p)} points over his last ${gw} games${hot ? ", up from " + Math.round(p.value) + " on the season" : ""}` : `${p.name} is averaging ${Math.round(p.value)} points per game` }; }
+      say: p.l5 ? `Keep an eye on ${p.name}, averaging ${Math.round(p.l5.p)} points over his last ${gw} games${hot ? ", up from " + Math.round(p.value) + " on the season" : ""}` : `${p.name} is averaging ${Math.round(p.value)} points per game` }; }
   const p = s.lead.passingYards || s.lead.rushingYards || s.lead.receivingYards; if (!p) return null;
   return { name: p.name, short: p.short, big: null, chip: `${p.short}: ${p.show}`, say: "" };
 }
@@ -110,7 +110,7 @@ function build(day, nba, nfl, cfb, brand) {
   const count = [nba.length && `${nba.length} NBA`, nfl.length && `${nfl.length} NFL`, cfb.length && `${cfb.length} Top 25`].filter(Boolean).join(" · ");
   const sayCount = [nba.length && `${WORDS[nba.length] || nba.length} NBA game${nba.length === 1 ? "" : "s"}`, nfl.length && `${WORDS[nfl.length] || nfl.length} in the NFL`, cfb.length && `${WORDS[cfb.length] || cfb.length} Top 25 college games`].filter(Boolean);
   DAYKEY = day;
-  const voice = { hook: `${cap(sayCount.join(sayCount.length > 2 ? ", " : " and "))} ${wd === DAYS[new Date().getUTCDay()] ? "tonight" : "on " + wd}.${hot ? ` ${hot.name} is averaging ${Math.round(hot.big)} points over his last ${WORDS[hot.l5.g] || hot.l5.g} games.` : ""} Here are the games to watch.` };
+  const voice = { hook: hot ? `${Math.round(hot.big)} points a game! That's what ${hot.name} is averaging over his last ${WORDS[hot.l5.g] || hot.l5.g}, and he's back on the floor tonight. ${cap(sayCount.join(sayCount.length > 2 ? ", " : " and "))} on the board. Here's what to watch!` : `${cap(sayCount.join(sayCount.length > 2 ? ", " : " and "))} ${wd === DAYS[new Date().getUTCDay()] ? "tonight" : "on " + wd}! Here's what to watch!` };
   const scenes = feat.map((g, i) => {
     const outs = [...g.away.out.map(x => [x, g.away]), ...g.home.out.map(x => [x, g.home])];
     const starOut = outs.find(([x]) => (g.a && x === g.a.name) || (g.h && x === g.h.name));
@@ -122,8 +122,8 @@ function build(day, nba, nfl, cfb, brand) {
       chips: [g.a && g.a.chip, g.h && g.h.chip].filter(Boolean), out: outs.slice(0, 3).map(([x, t]) => `${x} (${t.ab})`),
       big: g.a && g.h && g.a.big != null && g.h.big != null ? (g.a.big >= g.h.big ? [g.a, g.away] : [g.h, g.home]) : null };
   }).map(s => { if (s.big) { const [p, t] = s.big; s.big = { v: p.big, lab: p.lab, who: p.name, tm: t.ab }; } return s; });
-  voice.slate = "Here is the full slate.";
-  voice.outro = `That's tonight's slate. Follow ${brand} for the morning recap.`;
+  voice.slate = "Here's the full slate!";
+  voice.outro = `Enjoy the games! Follow ${brand} for the morning recap!`;
   const cap1 = `${wd}'s games to watch (${md}) 👀`;
   const lines = [hot ? `${hot.name}: ${hot.big} PPG over his last ${hot.l5.g} 🔥` : `${count} games tonight`, "", cap1,
     ...feat.map(g => `${g.sport === "NBA" ? "🏀" : "🏈"} ${g.away.ab} @ ${g.home.ab}, ${g.time} ET${g.tv ? " on " + g.tv : ""}`), "",

@@ -111,7 +111,7 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3);
 // springy pop: overshoots a little and settles
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.8,TAIL=2.6,MIN=61.5;
+let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.4,TAIL=2.6,MIN=61.5;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num=v=>/^\d+$/.test(String(v))?` data-v="${v}"`:"";
 const ARROW=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
@@ -172,7 +172,7 @@ function build(data){D=data;SC=[];SFX=[];
  const short=MIN-(t+TAIL);if(short>0){const mids=SC.filter(s=>s.id!=="hook"),per=short/mids.length;let sh=0;
   for(const s of SC){s.t0+=sh;s.va+=sh;if(s.id!=="hook")sh+=per;s.t1+=sh}t+=short}
  for(const s of SC)if(s.id!=="hook")SFX.push({t:s.t0,k:"whoosh"});
- document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;SFX.push({t:.42,k:"whoosh"},{t:t+.1,k:"sting"});
+ document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;SFX.push({t:.05,k:"whoosh"},{t:t+.1,k:"sting"});
  document.querySelectorAll(".h2 .fit").forEach(e=>fit(e,48));document.querySelectorAll(".mr .fit").forEach(e=>fit(e,40));
  document.querySelectorAll(".spec .nm").forEach(e=>fit(e,24));
  document.querySelectorAll(".wmk").forEach(e=>{const w=e.parentElement.clientWidth*1.5;let fs=560;e.style.fontSize=fs+"px";while(e.scrollWidth>w&&fs>200){fs-=20;e.style.fontSize=fs+"px"}});
@@ -216,7 +216,7 @@ function render(t){const N=SC.length;let cur=0;
  else strip.style.opacity=0;
  document.getElementById("dot").style.left=(clamp(t/TOTAL)*100).toFixed(2)+"%";
  // intro: the X holds, then the camera flies through it into the first card. Outro: everything fades back to the X, the same frame the video starts on.
- let lo=0,ls=1;if(t<INTRO+.1){if(t<.42){lo=1;ls=1+.025*Math.sin(t*9)}else{const x=ease((t-.42)/.4);ls=1+x*7;lo=1-x}}
+ let lo=0,ls=1;if(t<INTRO+.1){if(t<.08){lo=1;ls=1}else{const x=ease((t-.08)/.36);ls=1+x*7;lo=1-x}}
  // the signature end card: the X slams in, the dot pops, CROSSOVER spreads out under it, then it settles on the X alone (the first frame)
  const end=TOTAL-TAIL;let sg=0,dp=1;
  if(t>end+.1){const k=t-end-.1;lo=clamp(k/.1);ls=1+.55*(1-pop(k/.42));dp=pop((k-.3)/.35);

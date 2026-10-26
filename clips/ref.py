@@ -1,9 +1,9 @@
 """Makes ref.wav, the ~12 second reference read that Chatterbox clones the narrator's voice from (a deep, clear male
 read from Kokoro's am_onyx voice, so the narrator stays the same every day)."""
 import numpy as np, soundfile as sf, tts
-LINES = ["Good morning, and welcome to the daily recap.",
-         "Here are yesterday's best performances from around the NFL and the NBA.",
-         "Joe Burrow threw for two hundred ninety-two yards and four touchdowns in Cincinnati's win at Baltimore."]
+LINES = ["What a night around the league!",
+         "Fifty-two points from Luka Doncic, and four touchdown passes from Joe Burrow!",
+         "Here are the best performances from the NFL and the NBA!"]
 parts = []
 for l in LINES:
     a, sr, _ = tts.speak(l, "am_onyx", 0.95)

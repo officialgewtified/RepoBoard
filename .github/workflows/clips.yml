@@ -84,8 +84,8 @@ jobs:
         env:
           VOICE: am_puck
           SPEED: "1.05"
-          EXAGGERATION: "0.5"
-          CFG: "0.5"
+          EXAGGERATION: "0.75"
+          CFG: "0.35"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
         # use the Chrome the runner already has (Playwright's own install was what kept hanging)
