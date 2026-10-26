@@ -1158,7 +1158,7 @@ def fit_cal(P):
 def write_brief(games, props, teams, site, url):
     """Today's strongest picks, the biggest line gaps and last night's results, small enough to read in a text."""
     gbi = {g["id"]: g for g in games}
-    picks, gaps = {}, []
+    picks, gaps, allc = {}, [], []   # allc: every playable prop, for the autopilot
     h = load_json("history.json", {})
     P = [x for x in h.get("props", []) if x.get("pp") and x.get("hit") in (True, False)]
     ca, cb = fit_cal(P)
@@ -1200,6 +1200,7 @@ def write_brief(games, props, teams, site, url):
         if r.get("bm") is not None and (r["bm"] - r["ln"]) * (1 if side == "o" else -1) > 0 and abs((r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])) >= .15:
             why.append(f"books have {r['bm']} vs PrizePicks {r['ln']}")
         item["why"] = why
+        allc.append(dict(item, po=r["po"]))
         if not is_mixed(r, teams, gbi) and (r["pl"] not in picks or picks[r["pl"]]["p"] < p):
             picks[r["pl"]] = item
         if r.get("bm") is not None:
@@ -1225,7 +1226,7 @@ def write_brief(games, props, teams, site, url):
         for d in (HERE, os.path.dirname(HERE)):
             if d not in sys.path: sys.path.insert(0, d)
         import autopilot_sports
-        autopilot_sports.run(HERE, site, list(picks.values()), gaps, NOW)
+        autopilot_sports.run(HERE, site, allc, gaps, NOW)
     except Exception as e:
         print("autopilot failed:", e)
 
