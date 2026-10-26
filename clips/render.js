@@ -7,7 +7,7 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
 (async () => {
   const [dataFile, out, fpsArg] = process.argv.slice(2), fps = +fpsArg || 30;
   const data = JSON.parse(fs.readFileSync(dataFile, "utf8"));
-  const browser = await chromium.launch(), page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+  const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}), page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
   page.on("pageerror", e => { console.error("page error:", e.message); process.exit(1); });
   await page.goto("file://" + path.join(__dirname, "recap.html"));
   await page.evaluate(() => window.ready ? window.ready() : document.fonts.ready);
@@ -34,7 +34,7 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
       pop: ["aevalsrc=sin(2*PI*(620*t+2600*t*t))*exp(-26*t):d=0.18:s=48000", "volume=0.35"],
       stamp: ["aevalsrc=sin(2*PI*85*t)*exp(-12*t)+0.3*(random(0)*2-1)*exp(-70*t):d=0.4:s=48000", "volume=0.7"],
       // the Crossover sting: a deep hit and a rising three-note chime, the same at the end of every video
-      sting: ["aevalsrc=0.9*sin(2*PI*55*t)*exp(-3.5*t)+0.25*(random(0)*2-1)*exp(-40*t)+0.32*sin(2*PI*329.6*(t-0.05))*exp(-5*(t-0.05))*gte(t,0.05)+0.32*sin(2*PI*493.9*(t-0.22))*exp(-5*(t-0.22))*gte(t,0.22)+0.36*sin(2*PI*659.3*(t-0.39))*exp(-3.2*(t-0.39))*gte(t,0.39):d=1.8:s=48000", "volume=0.6"] };
+      sting: ["aevalsrc=0.9*sin(2*PI*55*t)*exp(-3.5*t)+0.25*(random(0)*2-1)*exp(-40*t)+0.32*sin(2*PI*329.6*(t-0.05))*exp(-5*(t-0.05))*(1+sgn(t-0.05))/2+0.32*sin(2*PI*493.9*(t-0.22))*exp(-5*(t-0.22))*(1+sgn(t-0.22))/2+0.36*sin(2*PI*659.3*(t-0.39))*exp(-3.2*(t-0.39))*(1+sgn(t-0.39))/2:d=1.8:s=48000", "volume=0.6"] };
     for (const [k, [src, fx]] of Object.entries(SYN)) await run(["-y", "-loglevel", "error", "-f", "lavfi", "-i", src, "-af", fx, "-ar", "48000", "-ac", "1", path.join(tmp, k + ".wav")]);
     // the voice: shifted a little deeper (PITCH < 1) without changing its speed, plus some low end
     const P = data.voiceEngine === "chatterbox" ? 1 : Math.min(1, Math.max(.8, +process.env.PITCH || 1));   // the Chatterbox voice is already deep

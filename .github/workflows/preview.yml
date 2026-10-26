@@ -71,13 +71,14 @@ jobs:
           CFG: "0.5"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
-        # setup normally takes about a minute; if GitHub's package mirror hangs, fail fast instead of blocking the next run
-        timeout-minutes: 16
+        # use the Chrome the runner already has (Playwright's own install was what kept hanging)
+        timeout-minutes: 12
         run: |
           npm i --no-save --no-package-lock playwright@1.63.0
-          # GitHub's package mirror sometimes hangs: give each try 4 minutes, up to 3 tries
-          for i in 1 2 3; do timeout 240 npx playwright install --with-deps chromium && break; echo "retry $i"; sleep 5; done
-          for i in 1 2 3; do timeout 180 sudo apt-get install -y -qq ffmpeg > /dev/null && break; echo "retry $i"; sudo apt-get update -qq || true; done
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+          # ffmpeg from Ubuntu's own packages, with time limits and retries in case the mirror stalls
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
           which ffmpeg
       - name: Render
         if: steps.prep.outputs.skip != '1'
