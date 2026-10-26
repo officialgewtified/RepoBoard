@@ -23,7 +23,7 @@ function board(A,title){if(!A||!A.v)return "";const K=Object.keys(A.strats);
  return h+`</div>`}
 /* boards: [{A, title}] */
 function html(boards){const B=boards.filter(b=>b.A&&b.A.v);
- return `<h2>Autopilot</h2><p class="lede">Every day it places a fake $10 2-pick Power Play for each strategy and grades it after the games. Each strategy has its own fake $1,000, so you can see which one actually makes money without spending yours. A 2-pick Power Play pays 3x, so both picks have to hit about 58% of the time just to break even.</p>`+
+ return `<h2>Autopilot</h2><p class="lede">Every day it places up to 5 fake $10 2-pick Power Plays for each strategy and grades them after the games. Each strategy has its own fake $1,000, so you can see which one actually makes money without spending yours. A 2-pick Power Play pays 3x, so both picks have to hit about 58% of the time just to break even.</p>`+
   (B.length?B.map(b=>board(b.A,b.title)).join(""):`<div class="card empty">Its first entries go in with the next overnight update.</div>`)+
   `<p class="fine">"Random" picks lines and sides by chance: if a strategy can't beat it over a few weeks, it isn't real. A handful of entries is mostly luck.</p>`}
 return{html,stats}})();
