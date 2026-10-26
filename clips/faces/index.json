@@ -3,63 +3,117 @@
 "artist": "Chensiyuan",
 "at": "2026-10-26",
 "file": "cade-cunningham.webp",
+"inTeam": true,
 "license": "CC BY-SA 4.0",
-"page": "https://commons.wikimedia.org/wiki/File:1_cade_cunningham_2024.jpg"
+"page": "https://commons.wikimedia.org/wiki/File:1_cade_cunningham_2024.jpg",
+"q": 9.55,
+"team": "Pistons",
+"title": "File:1 cade cunningham 2024.jpg",
+"v": 2,
+"year": 2024
 },
 "franz-wagner": {
-"artist": "Sandro Halank, Wikimedia Commons",
+"artist": "All-Pro Reels",
 "at": "2026-10-26",
 "file": "franz-wagner.webp",
-"license": "CC BY-SA 4.0",
-"page": "https://commons.wikimedia.org/wiki/File:2023-08-09_Deutschland_gegen_Kanada_(Basketball-L%C3%A4nderspiel)_by_Sandro_Halank%E2%80%93138.jpg"
+"inTeam": true,
+"license": "CC BY-SA 2.0",
+"page": "https://commons.wikimedia.org/wiki/File:Wagner2022.jpg",
+"q": 7.95,
+"team": "Magic",
+"title": "File:Wagner2022.jpg",
+"v": 2,
+"year": 2022
 },
 "jaxon-smith-njigba": {
 "artist": "FanDuel",
 "at": "2026-10-26",
 "file": "jaxon-smith-njigba.webp",
+"inTeam": false,
 "license": "CC BY 3.0",
-"page": "https://commons.wikimedia.org/wiki/File:Jaxon_Smith-Njigba_FanDuel_Interview_(cropped).png"
+"page": "https://commons.wikimedia.org/wiki/File:Jaxon_Smith-Njigba_FanDuel_Interview.png",
+"q": 4.81,
+"team": "Seahawks",
+"title": "File:Jaxon Smith-Njigba FanDuel Interview.png",
+"v": 2,
+"year": 2023
 },
 "joe-burrow": {
-"artist": "The White House from Washington, DC",
+"artist": "All-Pro Reels",
 "at": "2026-10-26",
 "file": "joe-burrow.webp",
-"license": "Public domain",
-"page": "https://commons.wikimedia.org/wiki/File:LSU_Football_at_the_White_House_(49400533066)_(cropped).jpg"
+"inTeam": true,
+"license": "CC BY-SA 2.0",
+"page": "https://commons.wikimedia.org/wiki/File:Ja%27Marr_Chase.jpg",
+"q": 7.76,
+"team": "Bengals",
+"title": "File:Ja'Marr Chase.jpg",
+"v": 2,
+"year": 2021
 },
 "luka-doncic": {
 "artist": "Erik Drost",
 "at": "2026-10-26",
 "file": "luka-doncic.webp",
-"license": "CC BY 2.0",
-"page": "https://commons.wikimedia.org/wiki/File:Luka_Doncic_(51914951721)_(cropped1).jpg"
+"inTeam": true,
+"license": "CC BY 4.0",
+"page": "https://commons.wikimedia.org/wiki/File:Luka_Doncic_(55095317361)_(cropped).jpg",
+"q": 10.36,
+"team": "Lakers",
+"title": "File:Luka Doncic (55095317361) (cropped).jpg",
+"v": 2,
+"year": 2026
 },
 "shai-gilgeous-alexander": {
 "artist": "Sandro Halank, Wikimedia Commons",
 "at": "2026-10-26",
 "file": "shai-gilgeous-alexander.webp",
+"inTeam": false,
 "license": "CC BY-SA 4.0",
-"page": "https://commons.wikimedia.org/wiki/File:2023-08-09_Deutschland_gegen_Kanada_(Basketball-L%C3%A4nderspiel)_by_Sandro_Halank%E2%80%93108.jpg"
+"page": "https://commons.wikimedia.org/wiki/File:2023-08-09_Deutschland_gegen_Kanada_(Basketball-L%C3%A4nderspiel)_by_Sandro_Halank%E2%80%93108.jpg",
+"q": 6.1,
+"team": "Thunder",
+"title": "File:2023-08-09 Deutschland gegen Kanada (Basketball-L\u00e4nderspiel) by Sandro Halank\u2013108.jpg",
+"v": 2,
+"year": 2023
 },
 "tony-pollard": {
-"artist": "All-Pro Reels",
+"artist": "Tennessee Titans",
 "at": "2026-10-26",
 "file": "tony-pollard.webp",
-"license": "CC BY-SA 2.0",
-"page": "https://commons.wikimedia.org/wiki/File:Tony_Pollard_(cropped).jpg"
+"inTeam": true,
+"license": "CC BY 3.0",
+"page": "https://commons.wikimedia.org/wiki/File:Tony_Pollard_Titans_24.jpg",
+"q": 8.62,
+"team": "Titans",
+"title": "File:Tony Pollard Titans 24.jpg",
+"v": 2,
+"year": 2024
 },
 "trey-mcbride": {
-"artist": "Paul L Dineen",
+"artist": "FanDuel",
 "at": "2026-10-26",
 "file": "trey-mcbride.webp",
-"license": "CC BY 2.0",
-"page": "https://commons.wikimedia.org/wiki/File:Trey_McBride.jpg"
+"inTeam": true,
+"license": "CC BY 3.0",
+"page": "https://commons.wikimedia.org/wiki/File:2024_FanDuel_Interview_Trey_McBride.png",
+"q": 8.58,
+"team": "Cardinals",
+"title": "File:2024 FanDuel Interview Trey McBride.png",
+"v": 2,
+"year": 2024
 },
 "zay-flowers": {
 "artist": "Maryland GovPics",
 "at": "2026-10-26",
 "file": "zay-flowers.webp",
+"inTeam": true,
 "license": "CC BY 2.0",
-"page": "https://commons.wikimedia.org/wiki/File:Zay_Flowers_JUL2024_(53880447586).jpg"
+"page": "https://commons.wikimedia.org/wiki/File:Zay_Flowers_JUL2024_(53880447586).jpg",
+"q": 9.25,
+"team": "Ravens",
+"title": "File:Zay Flowers JUL2024 (53880447586).jpg",
+"v": 2,
+"year": 2024
 }
 }
