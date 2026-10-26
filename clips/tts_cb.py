@@ -16,6 +16,7 @@ model = ChatterboxTTS.from_pretrained(device="cpu")
 
 # names it could misread, spelled the way they sound (say.json: plain respellings; syllable specs become hyphenated)
 SAY = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "say.json")))
+CB = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "say_cb.json")))
 ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split()
 TENS = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()
 def words(n):
@@ -32,7 +33,12 @@ def say_numbers(t):
 def fix(t):
     t = re.sub(r"\bN F L\b", "NFL", t); t = re.sub(r"\bN B A\b", "NBA", t)
     t = say_numbers(t)
+    # this voice's own spellings first (say_cb.json), then the shared list for anything not covered
+    for k in sorted(CB, key=len, reverse=True):
+        t = re.sub(r"\b" + re.escape(k) + r"\b", CB[k], t)
     for k, v in SAY.items():
+        if k in CB or any(k in c for c in CB):
+            continue
         if v.startswith("/") or k in ("NFL", "NBA", "rebounds", "rebound"):
             continue
         t = re.sub(r"\b" + re.escape(k) + r"\b", v.replace("|", "-").lower() if "|" in v else v, t)
