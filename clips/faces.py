@@ -118,7 +118,8 @@ def main():
             print(f"{name}: {e.get('file') or e.get('why')}")
         if e.get("file") and os.path.exists(os.path.join(DIR, e["file"])):
             obj["photo"] = "faces/" + e["file"]
-            cr = f"{name}: {e['artist']}, {e['license']}, via Wikimedia Commons"
+            artist = re.sub(r",?\s*Wikimedia Commons$", "", e["artist"]).strip() or "Unknown"
+            cr = f"{name}: {artist} ({e['license']})"
             if cr not in credits:
                 credits.append(cr)
     h = D.get("hook") or {}
