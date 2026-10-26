@@ -59,7 +59,7 @@ jobs:
           python tts.py out/data.json out/voice
         env:
           # same voice and pace as the morning recap
-          VOICE: am_puck
+          VOICE: "am_onyx*0.55+am_puck*0.45"
           SPEED: "1.05"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'

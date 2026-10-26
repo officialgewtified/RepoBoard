@@ -78,7 +78,7 @@ jobs:
           python tts.py out/data.json out/voice
         env:
           # the liveliest of the male voices (most pitch movement), at a relaxed pace
-          VOICE: am_puck
+          VOICE: "am_onyx*0.55+am_puck*0.45"
           SPEED: "1.05"
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'

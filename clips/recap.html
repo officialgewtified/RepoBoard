@@ -89,6 +89,10 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 #outro .view{margin-bottom:auto;margin-top:40px;min-height:120px;font-size:42px}
 .ring{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:4px solid var(--paper);opacity:0;pointer-events:none}
 .src{position:absolute;left:72px;right:72px;bottom:150px;font:600 22px/1.3 "Archivo";color:var(--dim)}
+/* the Crossover X: the intro zooms through it, and the video ends on it so it loops */
+#logo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;z-index:9}
+#logo span{display:block;font:900 640px/.8 "Big Shoulders";color:var(--paper)}
+#logo i{position:absolute;right:-70px;bottom:20px;width:110px;height:110px;border-radius:50%;background:var(--go)}
 </style></head><body>
 <div id="sky"></div>
 <div class="top"><span class="wm" id="wm"></span><span class="dt" id="dt"></span></div>
@@ -96,13 +100,14 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 <div id="stage"></div>
 <div class="strip" id="strip"></div>
 <div class="src" id="src"></div>
+<div id="logo"><span>X</span><i></i></div>
 <script>
 /* build(data) lays out every scene once; render(t) poses the frame at t seconds. Same t, same picture, every time.
    SFX lists the moments that get a sound (whoosh on each swipe, pop on each pop-up); render.js mixes them in. */
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3);
 // springy pop: overshoots a little and settles
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[];
+let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.8,TAIL=1.3;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num=v=>/^\d+$/.test(String(v))?` data-v="${v}"`:"";
 const ARROW=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
@@ -116,7 +121,7 @@ function build(data){D=data;SC=[];SFX=[];
  document.getElementById("wm").textContent=D.brand;document.getElementById("dt").textContent=D.date;
  document.getElementById("src").textContent=(D.source||"")+(D.credits&&D.credits.length?" · Photos: Wikimedia Commons (see caption)":"");
  // with a voiceover each scene lasts as long as its line (data.dur, from tts.py) plus a beat; the line starts at va
- let h="",t=0;const add=(id,dur,html,extra={})=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.35);
+ let h="",t=INTRO;const add=(id,dur,html,extra={})=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.35);
   SC.push(Object.assign({id,t0:t,t1:t+dur,va:t+off},extra));if(id!=="hook")SFX.push({t:t,k:"whoosh"});t+=dur;h+=`<div class="sc ${extra.kind==="card"?"":"tall"}" id="${id}">${html}</div>`};
  const OUT=D.mode==="preview"?["Follow for","the morning","recap"]:["Follow for","tomorrow's","best stats"];
  if(D.mode==="preview"){const H=D.hook;
@@ -159,7 +164,7 @@ function build(data){D=data;SC=[];SFX=[];
  add("outro",3.4,`<div class="hero"><div class="wmk">${esc(D.brand)}</div><div class="k">Every morning</div>
   <div class="h2">${OUT.map(x=>`<span class="fit">${esc(x)}</span>`).join("")}</div>
   <div class="view" style="position:relative"><span id="fl">Follow ${esc(D.brand)}</span><div class="ring"></div></div></div>`,{kind:"outro"});
- document.getElementById("stage").innerHTML=h;TOTAL=t;
+ document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;SFX.push({t:.42,k:"whoosh"},{t:t+.55,k:"stamp"});
  document.querySelectorAll(".h2 .fit").forEach(e=>fit(e,48));document.querySelectorAll(".mr .fit").forEach(e=>fit(e,40));
  document.querySelectorAll(".spec .nm").forEach(e=>fit(e,24));
  document.querySelectorAll(".wmk").forEach(e=>{const w=e.parentElement.clientWidth*1.5;let fs=560;e.style.fontSize=fs+"px";while(e.scrollWidth>w&&fs>200){fs-=20;e.style.fontSize=fs+"px"}});
@@ -174,7 +179,7 @@ function countUp(el,k){if(!el||el.dataset.v==null)return;const v=+el.dataset.v;i
 function render(t){const N=SC.length;let cur=0;
  for(let j=0;j<N;j++){const s=SC[j],el=document.getElementById(s.id),on=t>=s.t0-.01&&t<s.t1+.4;
   if(!on){el.style.opacity=0;continue}
-  const lt=t-s.t0,a=s.id==="hook"?1:ease(lt/.5),b=s.id==="outro"?1:ease((s.t1-t+.4)/.4);
+  const lt=t-s.t0,a=s.id==="hook"?ease((lt+.08)/.3):ease(lt/.5),b=s.id==="outro"?ease((s.t1+.45-t)/.45):ease((s.t1-t+.4)/.4);
   if(t>=s.t0)cur=j;
   // swipe: in from the right, out to the left, like flicking through the card strip
   const x=(1-a)*260-(1-b)*260,sc=.94+.06*Math.min(a,b);
@@ -201,7 +206,12 @@ function render(t){const N=SC.length;let cur=0;
  const c=SC[cur],strip=document.getElementById("strip");
  if(c&&c.kind==="card"){stripFor(c.si,c.i);const y=ease((t-c.t0)/.4);strip.style.opacity=SC[cur-1]&&SC[cur-1].kind==="card"?1:y;strip.style.transform=`translateY(${SC[cur-1]&&SC[cur-1].kind==="card"?0:((1-y)*60).toFixed(1)}px)`}
  else strip.style.opacity=0;
- document.getElementById("dot").style.left=(clamp(t/TOTAL)*100).toFixed(2)+"%"}
+ document.getElementById("dot").style.left=(clamp(t/TOTAL)*100).toFixed(2)+"%";
+ // intro: the X holds, then the camera flies through it into the first card. Outro: everything fades back to the X, the same frame the video starts on.
+ let lo=0,ls=1;if(t<INTRO+.1){if(t<.42){lo=1;ls=1+.025*Math.sin(t*9)}else{const x=ease((t-.42)/.4);ls=1+x*7;lo=1-x}}
+ const end=TOTAL-TAIL;if(t>end+.2){lo=ease((t-end-.2)/.6);ls=1+.025*Math.sin((t-TOTAL)*9)}
+ const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`translate(-50%,-50%) scale(${ls.toFixed(3)})`;
+ for(const q of [".top",".nav","#src"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
 // fonts load only when first used, so load them before build() measures any text
 window.ready=()=>Promise.all(['500 100px "Archivo"','800 100px "Archivo"','900 100px "Big Shoulders"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;

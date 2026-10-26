@@ -59,9 +59,24 @@ def to_phonemes(text):
         parts.append(phon(text[last:]))
     return re.sub(r"\s+", " ", " ".join(parts)).strip()
 
+_styles = {}
+def voice_arg(v):
+    """'am_onyx*0.55+am_puck*0.45' blends voices (deeper with Onyx, livelier with Puck); a plain name is used as is"""
+    if "+" not in v and "*" not in v:
+        return v
+    if v not in _styles:
+        try:
+            parts = [(p.partition("*")[0].strip(), float(p.partition("*")[2] or 1)) for p in v.split("+")]
+            tot = sum(w for _, w in parts)
+            _styles[v] = sum(kokoro().get_voice_style(nm) * w for nm, w in parts) / tot
+        except Exception as e:
+            print("voice blend failed, using the first voice:", e)
+            _styles[v] = v.split("+")[0].partition("*")[0].strip()
+    return _styles[v]
+
 def speak(text, voice, speed):
     ph = to_phonemes(text)
-    a, sr = kokoro().create(ph, voice=voice, speed=speed, lang="en-us", is_phonemes=True)
+    a, sr = kokoro().create(ph, voice=voice_arg(voice), speed=speed, lang="en-us", is_phonemes=True)
     return np.trim_zeros(np.asarray(a, dtype=np.float32), "fb"), sr, ph
 
 if __name__ == "__main__":
