@@ -119,7 +119,8 @@ function assemble(wk, season, games, std, nba, brand) {
   games.forEach((g, i) => {
     const st = story(g), stars = g.players.slice().sort((a, b) => ppr(b) - ppr(a)).slice(0, 3);
     const lines = stars.map(p => ({ name: p.n, tm: p.tm, color: (g.home.ab === p.tm ? g.home : g.away).color, line: statLine(p).txt }));
-    const rec = st.W.rec && st.L.rec ? ` The ${st.W.nick} move to ${st.W.rec.replace("-", " and ")}, and the ${st.L.nick} fall to ${st.L.rec.replace("-", " and ")}.` : "";
+    const rs = r => { const [w, l, t] = r.split("-"); return t && +t ? `${w}, ${l} and ${t}` : `${w} and ${l}`; };
+    const rec = st.W.rec && st.L.rec ? ` The ${st.W.nick} move to ${rs(st.W.rec)}, and the ${st.L.nick} fall to ${rs(st.L.rec)}.` : "";
     voice["g" + i] = `${st.say} ${stars.slice(0, 2).map(p => statLine(p).say).join(" ")}${rec}`;
     scenes.push({ kind: "game", id: "g" + i, chapter: `${g.away.nick} ${g.away.score}, ${g.home.nick} ${g.home.score}`, tag: st.tag, head: st.head, day: dow(g.date), date: md(g.date),
       away: g.away, home: g.home, ot: /OT/.test(g.detail || ""), stars: lines, winner: st.W.ab });
@@ -143,12 +144,13 @@ function assemble(wk, season, games, std, nba, brand) {
   scenes.push({ kind: "board", id: "fan", chapter: "Fantasy top 5", title: "Fantasy points (PPR)", unit: "PTS", rows: fan });
   // best records
   if (std.length >= 4) {
-    voice.std = `After Week ${wk}, the ${std[0].nick} have the best record in the league at ${std[0].rec.replace(/-/g, " and ")}. ${std[1].nick}, ${std[2].nick} and ${std[3].nick} are right behind them.`;
+    voice.std = `After Week ${wk}, the ${std[0].nick} have the best record in the league at ${std[0].rec.split("-").filter((x, i) => i < 2 || +x).join(" and ")}. ${std[1].nick}, ${std[2].nick} and ${std[3].nick} are right behind them.`;
     scenes.push({ kind: "standings", id: "std", chapter: "Best records", rows: std });
   }
   // around the NBA
   if (nba.length >= 3) {
-    voice.nba = `Around the NBA this week, ${nba[0].name} had the biggest night, with ${nba[0].pts} points against the ${nba[0].opp}. ${nba[1].name} put up ${nba[1].pts}, and ${nba[2].name} had ${nba[2].pts}.`;
+    const line = p => `${p.pts} points, ${p.reb} rebounds and ${p.ast} assists against the ${p.opp}`;
+    voice.nba = `Around the NBA this week, ${nba[0].name} had the biggest night, with ${line(nba[0])}. ${nba[1].name} had ${line(nba[1])}, and ${nba[2].name} had ${line(nba[2])}.`;
     scenes.push({ kind: "board", id: "nba", chapter: "Around the NBA", title: "NBA: best games this week", unit: "PTS", rows: nba.map(p => ({ name: p.name, tm: p.tm, color: p.color, v: p.pts, sub: `${p.reb} reb · ${p.ast} ast · vs ${p.opp} · ${p.date}` })) });
   }
   voice.outro = `That's Week ${wk}! Subscribe to ${brand} for daily stats, and we'll see you next week!`;
