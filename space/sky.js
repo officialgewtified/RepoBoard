@@ -300,7 +300,7 @@ async function build(today, outDir, brand) {
 }
 
 function ytTitle(H, S, d) {
-  const t = { ast: S.ast && S.ast.closer ? "Asteroid Passes Closer Than the Moon ☄️" : S.ast ? `${S.ast.count} Asteroids Fly Past Earth This Week ☄️` : "",
+  const t = { ast: S.ast && S.ast.closer ? "Asteroid Passes Closer Than the Moon ☄️" : S.ast ? `${S.ast.count} Asteroids Fly Past Earth in the Next 10 Days ☄️` : "",
     aur: "Northern Lights Alert Tonight 🌌", sun: "The Sun Just Fired an X-Class Flare ☀️", lau: "Astronauts Launching This Week 🚀", moon: S.moon && (S.moon.fullTonight ? `Full ${S.moon.tonightName} Moon Tonight 🌕` : `Tonight's Moon: ${S.moon.illum}% Lit 🌙`) }[H[1]] || "Tonight's Sky Report 🔭";
   return `${t} | Sky Report ${d}`.slice(0, 100);
 }
