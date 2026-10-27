@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zenith Videos</title>
+<meta name="apple-mobile-web-app-title" content="Zenith Videos"><meta name="application-name" content="Zenith Videos">
+<meta name="description" content="The daily Zenith sky report as a ready-to-post vertical video: asteroids, northern lights, the Sun, launches and the Moon.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2303040A%22/%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2230%22 fill=%22none%22 stroke=%22%23EAF2FF%22 stroke-width=%227%22/%3E%3Ccircle cx=%2282%22 cy=%2236%22 r=%228%22 fill=%22%234FF3FF%22/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
+@font-face{font-family:"Big Shoulders";src:url(../fonts/big-shoulders.woff) format("woff");font-weight:700 900}
+:root{--bg:#04050b;--card:#0b1020;--line:#1c2742;--ink:#eaf2ff;--mute:#9aa7c2;--dim:#6b7894;--acc:#4ff3ff;--accInk:#03040a}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f3f6fb;--card:#fff;--line:#dbe3f0;--ink:#0b1020;--mute:#4a5670;--dim:#6b7894;--acc:#0a8fa3;--accInk:#fff}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 "Archivo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:560px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 16px 60px}
+.k{font:700 12px/1 "Archivo";font-stretch:118%;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+h1{font:900 64px/.85 "Big Shoulders";text-transform:uppercase;margin:10px 0 12px}
+.lede{color:var(--mute);max-width:46ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:18px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+h2{font:900 34px/1 "Big Shoulders";text-transform:uppercase}
+.when{color:var(--dim);font-size:13px;white-space:nowrap}
+video{display:block;width:100%;max-height:70vh;border-radius:14px;background:#000;margin-top:14px;aspect-ratio:9/16;object-fit:contain}
+.btns{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:48px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:700 15px/1 "Archivo";font-stretch:108%;text-decoration:none;cursor:pointer}
+.btn.p{background:var(--acc);border-color:var(--acc);color:var(--accInk)}
+.cap{white-space:pre-wrap;color:var(--mute);font-size:14px;margin-top:14px;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--line) 45%,transparent)}
+.row{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row b{flex:1;font:800 15px/1.2 "Archivo"}
+.row .btn{flex:none;min-height:38px;padding:0 14px;font-size:13px}
+h3{font:800 13px/1 "Archivo";font-stretch:115%;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:30px 0 4px}
+ol{margin:10px 0 0 20px;color:var(--mute)}ol li{margin:6px 0}ol b{color:var(--ink)}
+.fine{color:var(--dim);font-size:13px;margin-top:14px}
+.empty{color:var(--mute)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+</style></head><body><main>
+<div class="k">Daily sky report</div>
+<h1>Zenith</h1>
+<p class="lede">Asteroid flybys, the northern lights forecast, the Sun, rocket launches and the Moon, as a narrated vertical video over real NASA footage. A new one every morning around 7:40, with its cover image. Download it, copy the caption, post.</p>
+<div id="latest" class="card"><p class="empty">Loading today's video…</p></div>
+<h3>Earlier videos</h3>
+<div id="older" class="card"><p class="empty">Loading…</p></div>
+<h3>How to post (about a minute)</h3>
+<div class="card">
+<ol>
+<li><b>Download</b> the video, then open it from the download list (or the Files app) and tap Share, then <b>Save Video</b> so it lands in Photos.</li>
+<li><b>Copy caption</b> on this page.</li>
+<li><b>TikTok:</b> + → Upload → pick the video → Next → paste the caption → Post. You can add a trending sound at low volume in the editor; keep the voiceover louder.</li>
+<li><b>YouTube Shorts:</b> + → Create a Short → Upload → pick the video → use the caption's first line as the title → Upload.</li>
+<li><b>Cover image:</b> every video now has one (big number, yellow label). Use it as the TikTok cover (Edit cover, then upload it from Photos if your app offers that) and as the YouTube thumbnail on the long-form.</li>
+<li>Post the same video to both. Mornings work, and so does early evening, when people plan to look up tonight.</li>
+</ol>
+<p class="fine">Data: NASA JPL, NOAA SWPC, The Space Devs. Footage: NASA (credited in every caption; never use NASA logos as the channel's branding). If something ever looks off, skip that day rather than post it.</p>
+</div>
+</main><div class="toast" id="toast"></div>
+<script>
+"use strict";
+const REPO="officialgewtified/RepoBoard";
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let REL=[];
+function toast(t){const e=document.getElementById("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),1600)}
+async function copyTitle(i){const t=REL[i].name||"";try{await navigator.clipboard.writeText(t);toast("Title copied")}catch(e){toast("Couldn't copy")}}
+async function copy(i){const t=REL[i].body||"";try{await navigator.clipboard.writeText(t);toast("Caption copied")}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy");toast("Caption copied")}catch(_){toast("Couldn't copy")}a.remove()}}
+const mp4=r=>(r.assets||[]).find(a=>/\.mp4$/.test(a.name)),thumbOf=r=>(r.assets||[]).find(a=>/thumbnail\.jpg$/.test(a.name));
+const ago=d=>{const h=(Date.now()-Date.parse(d))/36e5;return h<1?"just now":h<24?Math.round(h)+"h ago":Math.round(h/24)+"d ago"};
+async function load(){
+ try{const r=await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=30`);if(!r.ok)throw new Error(r.status);
+  REL=(await r.json()).filter(x=>/^space-/.test(x.tag_name)&&mp4(x)).sort((a,b)=>Date.parse(b.published_at)-Date.parse(a.published_at))}
+ catch(e){document.getElementById("latest").innerHTML=`<p class="empty">Couldn't reach GitHub just now. Pull down to try again.</p>`;document.getElementById("older").innerHTML="";return}
+ if(!REL.length){document.getElementById("latest").innerHTML=`<p class="empty">The first video shows up here after the next morning run.</p>`;document.getElementById("older").innerHTML=`<p class="empty">None yet.</p>`;return}
+ const L=REL[0],v=mp4(L);
+ document.getElementById("latest").innerHTML=`<div class="top"><h2>${esc(L.name)}</h2><span class="when">${ago(L.published_at)}</span></div>
+  <video controls playsinline preload="metadata" src="${esc(v.browser_download_url)}" onerror="this.remove()"></video>
+  <div class="btns"><a class="btn p" href="${esc(v.browser_download_url)}" download>Download video</a><button class="btn" onclick="copyTitle(0)">Copy title</button><button class="btn" onclick="copy(0)">Copy caption</button></div>
+  ${thumbOf(L)?`<div class="btns"><a class="btn" href="${esc(thumbOf(L).browser_download_url)}" download>Download cover image</a></div>`:""}
+  <div class="cap">${esc(L.body||"")}</div>`;
+ document.getElementById("older").innerHTML=REL.length>1?REL.slice(1).map((r,i)=>`<div class="row"><b>${esc(r.name)}</b><a class="btn" href="${esc(mp4(r).browser_download_url)}" download>Video</a>${thumbOf(r)?`<a class="btn" href="${esc(thumbOf(r).browser_download_url)}" download>Thumb</a>`:""}<button class="btn" onclick="copyTitle(${i+1})">Title</button><button class="btn" onclick="copy(${i+1})">Caption</button></div>`).join(""):`<p class="empty">None yet.</p>`}
+load();
+</script></body></html>

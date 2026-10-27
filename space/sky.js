@@ -1,0 +1,226 @@
+/* ZENITH sky report: the day's space data turned into what space.html draws and what the narrator says.
+   Asteroid flybys (NASA JPL close-approach data), the northern lights forecast (NOAA SWPC Kp), the Sun (NOAA GOES
+   flares, NASA SDO image), upcoming launches (The Space Devs Launch Library), and the Moon (phase computed here).
+   Picks the most dramatic story for the hook. Every number on screen comes from those feeds.
+   usage: node sky.js out/data.json [YYYY-MM-DD]     (downloads the Sun and aurora images next to data.json) */
+"use strict";
+const fs = require("fs"), path = require("path");
+const UA = { headers: { "User-Agent": "Mozilla/5.0 (zenith sky report)" } };
+async function get(u, tries = 3) { for (let i = 0; ; i++) { try { const r = await fetch(u, UA); if (!r.ok) throw new Error(r.status + " " + u); return await r.json(); } catch (e) { if (i >= tries - 1) throw e; await new Promise(r => setTimeout(r, 2000 * (i + 1))); } } }
+async function save(u, f) { try { const r = await fetch(u, UA); if (!r.ok) throw new Error(r.status); fs.writeFileSync(f, Buffer.from(await r.arrayBuffer())); return f; } catch (e) { console.error("image", u, e.message); return null; } }
+const ET = (d, o) => new Date(d).toLocaleString("en-US", Object.assign({ timeZone: "America/New_York" }, o));
+const etDay = d => ET(d, { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/(\d+)\/(\d+)\/(\d+)/, "$3-$1-$2");
+const fmtTime = d => ET(d, { hour: "numeric", minute: "2-digit" }).replace(":00", "");
+const comma = x => Math.round(x).toLocaleString("en-US");
+const r1 = x => Math.round(x * 10) / 10;
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split(" ");
+const TENS = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split(" ");
+const w2 = n => n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? "-" + ONES[n % 10] : "");
+// "2025 UK9" read the way astronomers say it: "twenty twenty-five U K nine"
+const sayDes = des => String(des).replace(/^(\d{2})(\d{2}) ([A-Z]{2})(\d*)$/, (m, a, b, L, n) => `${w2(+a)} ${+b < 10 ? "oh " + ONES[+b] : w2(+b)} ${L.split("").join(" ")}${n ? " " + n : ""}`);
+// relative day words for the narrator, from the video's date (ET)
+function when(d, today) {
+  const a = new Date(etDay(d) + "T12:00:00Z"), b = new Date(today + "T12:00:00Z"), k = Math.round((a - b) / 864e5), h = +ET(d, { hour: "numeric", hour12: false }) % 24;
+  if (k <= 0) return h >= 17 || h < 4 ? "tonight" : "today";
+  if (k === 1) return h >= 18 ? "tomorrow night" : h < 4 ? "late tonight" : "tomorrow";
+  if (k < 7) return "on " + ET(d, { weekday: "long" }) + (h >= 18 ? " night" : "");
+  return "on " + ET(d, { month: "long", day: "numeric" });
+}
+
+// ---------- asteroids
+const AU_MI = 92955807, LD = 0.00256955529;
+const REFS = [["a car", 4.5, "car"], ["a school bus", 12, "bus"], ["a blue whale", 30, "whale"], ["a Boeing 747", 70, "plane"], ["a football field", 110, "field"],
+  ["the Eiffel Tower", 330, "tower"], ["the Empire State Building", 443, "tower2"]];
+function refFor(m) { let best = REFS[0]; for (const r of REFS) if (Math.abs(Math.log(m / r[1])) < Math.abs(Math.log(m / best[1]))) best = r; return { name: best[0], m: best[1], icon: best[2] }; }
+const ft = m => m * 3.281;
+async function asteroids() {
+  const d = await get("https://ssd-api.jpl.nasa.gov/cad.api?date-min=now&date-max=%2B10&dist-max=0.05&diameter=true&fullname=true&sort=dist");
+  const F = d.fields || [], at = (r, k) => r[F.indexOf(k)];
+  return (d.data || []).map(r => {
+    const [y, mo, dd, hm] = String(at(r, "cd")).split(/[- ]/), date = new Date(`${dd} ${mo} ${y} ${hm} UTC`);
+    const H = +at(r, "h"), dia = +at(r, "diameter"), mid = dia ? dia * 1000 : 1329e3 / Math.sqrt(.14) * Math.pow(10, -H / 5);
+    const lo = dia ? mid : 1329e3 / Math.sqrt(.25) * Math.pow(10, -H / 5), hi = dia ? mid : 1329e3 / Math.sqrt(.05) * Math.pow(10, -H / 5);
+    const dist = +at(r, "dist"), v = +at(r, "v_rel");
+    return { des: String(at(r, "des")), date: date.toISOString(), ld: dist / LD, miles: dist * AU_MI, minMiles: +at(r, "dist_min") * AU_MI, mph: v * 2236.94, m: mid, lo, hi, H };
+  }).filter(a => isFinite(a.ld));
+}
+
+// ---------- aurora (Kp forecast for tonight, 7pm-7am ET)
+const VIEW = [[0, "Alaska and far northern Canada"], [4, "Alaska, Canada, and the northern edge of Montana, North Dakota and Minnesota"],
+  [5, "the northern US: Washington, Montana, the Dakotas, Minnesota, Michigan and Maine"], [6, "as far south as Oregon, Wyoming, Wisconsin and New York"],
+  [7, "as far south as Iowa, Illinois, Pennsylvania and northern California"], [8, "as far south as Missouri, Kentucky and Virginia"], [9, "as far south as Texas and Alabama"]];
+const SHORT = { 0: "Alaska", 4: "the northern border", 5: "Minnesota and Michigan", 6: "New York and Wisconsin", 7: "Iowa and Pennsylvania", 8: "Missouri and Virginia", 9: "Texas and Alabama" };
+async function aurora(today) {
+  const d = await get("https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json");
+  const rows = Array.isArray(d[0]) ? d.slice(1).map(r => ({ time_tag: r[0], kp: +r[1], observed: r[2] })) : d;
+  const s = Date.parse(today + "T23:00:00Z"), e = s + 12 * 36e5;   // 7pm to 7am Eastern (daylight time; close enough in winter)
+  const night = rows.filter(r => { const t = Date.parse(r.time_tag + "Z"); return t >= s - 36e5 && t <= e; });
+  const kp = Math.max(0, ...night.map(r => +r.kp)), k = Math.floor(kp + .34);
+  const v = VIEW.filter(x => x[0] <= k).pop();
+  const curve = rows.filter(r => { const t = Date.parse(r.time_tag + "Z"); return t >= s - 24 * 36e5 && t <= e + 24 * 36e5; }).map(r => ({ t: r.time_tag, kp: +r.kp, p: r.observed }));
+  return { kp: r1(kp), k, g: k >= 5 ? "G" + Math.min(5, k - 4) : "", where: v[1], short: SHORT[v[0]], curve };
+}
+
+// ---------- the Sun
+const FL = { A: 1e-8, B: 1e-7, C: 1e-6, M: 1e-5, X: 1e-4 };
+const flux = c => { const m = String(c || "").match(/^([ABCMX])([\d.]+)/); return m ? FL[m[1]] * parseFloat(m[2]) : 0; };
+async function sun() {
+  const f = await get("https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json");
+  const sc = await get("https://services.swpc.noaa.gov/products/noaa-scales.json").catch(() => ({}));
+  const now = Date.now(), day = f.filter(x => now - Date.parse(x.max_time) < 24 * 36e5), best = L => L.slice().sort((a, b) => flux(b.max_class) - flux(a.max_class))[0];
+  const b24 = best(day), b7 = best(f), p = sc["1"] || {};
+  return { b24: b24 ? { cls: b24.max_class, t: b24.max_time } : null, b7: b7 ? { cls: b7.max_class, t: b7.max_time } : null, n24: day.length,
+    mProb: +((p.R || {}).MinorProb || 0), xProb: +((p.R || {}).MajorProb || 0), now: sc["0"] || {} };
+}
+
+// ---------- launches
+const STATES = { CA: "California", FL: "Florida", TX: "Texas", VA: "Virginia", AK: "Alaska", NM: "New Mexico" };
+const place = l => { const m = String(l || "").match(/^(.+?)(?: SFB| SFS| AFB| Space Force Station)?, ([A-Z]{2}), USA$/); if (m) return `${m[1].replace(/ Launch Complex.*$/, "")}, ${STATES[m[2]] || m[2]}`;
+  return String(l || "").replace(/, (People's Republic of )?China$/, ", China").replace(/^Rocket Lab Launch Complex 1, Mahia Peninsula, /, "Mahia, "); };
+const PROV = { "Indian Space Research Organization": "ISRO", "China Aerospace Science and Technology Corporation": "China", "Russian Federal Space Agency (ROSCOSMOS)": "Roscosmos",
+  "National Aeronautics and Space Administration": "NASA", "United Launch Alliance": "ULA", "Japan Aerospace Exploration Agency": "JAXA", "Mitsubishi Heavy Industries": "Mitsubishi" };
+async function launches() {
+  const d = await get("https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=12&mode=normal");
+  const now = Date.now();
+  return (d.results || []).filter(r => Date.parse(r.net) > now - 36e5 && Date.parse(r.net) < now + 8 * 864e5 && /Go|TBC|TBD/.test((r.status || {}).abbrev || ""))
+    .map(r => { const [rocket, mission] = String(r.name).split(" | "), prov = (r.launch_service_provider || {}).name || "";
+      const crew = /crew|astronaut|soyuz ms|shenzhou|axiom/i.test(r.name + " " + ((r.mission || {}).type || ""));
+      return { rocket: (rocket || "").replace(/ Block 5$/, ""), mission: mission || "", prov: PROV[prov] || prov, net: r.net, loc: place((r.pad || {}).location && r.pad.location.name),
+        orbit: ((r.mission || {}).orbit || {}).abbrev || "", crew, star: /starlink/i.test(mission || ""), tbd: /TBD|TBC/.test((r.status || {}).abbrev || "") }; }).slice(0, 3);
+}
+
+// ---------- the Moon (Meeus, Astronomical Algorithms ch. 49: new and full moon times to within minutes)
+function phaseJD(k, full) {
+  const T = k / 1236.85, rad = Math.PI / 180, E = 1 - .002516 * T - .0000074 * T * T;
+  const M = (2.5534 + 29.1053567 * k) * rad, Mp = (201.5643 + 385.81693528 * k + .0107582 * T * T) * rad, F = (160.7108 + 390.67050284 * k - .0016118 * T * T) * rad, O = (124.7746 - 1.56375588 * k) * rad;
+  let jd = 2451550.09766 + 29.530588861 * k + .00015437 * T * T;
+  const c = full ? [-.40614, .17302, .01614, .01043, .00734, -.00515, .00209] : [-.4072, .17241, .01608, .01039, .00739, -.00514, .00208];
+  jd += c[0] * Math.sin(Mp) + c[1] * E * Math.sin(M) + c[2] * Math.sin(2 * Mp) + c[3] * Math.sin(2 * F) + c[4] * E * Math.sin(Mp - M) + c[5] * E * Math.sin(Mp + M) + c[6] * E * E * Math.sin(2 * M)
+    - .00111 * Math.sin(Mp - 2 * F) - .00057 * Math.sin(Mp + 2 * F) + .00056 * E * Math.sin(2 * Mp + M) - .00042 * Math.sin(3 * Mp) + .00042 * E * Math.sin(M + 2 * F)
+    + .00038 * E * Math.sin(M - 2 * F) - .00024 * E * Math.sin(2 * Mp - M) - .00017 * Math.sin(O);
+  return new Date((jd - 2440587.5) * 864e5 - 69e3);
+}
+const NAMES = ["Wolf", "Snow", "Worm", "Pink", "Flower", "Strawberry", "Buck", "Sturgeon", "Corn", "Hunter's", "Beaver", "Cold"];
+function moon(at) {
+  const t = at.getTime(), k0 = Math.floor((at.getUTCFullYear() + at.getUTCMonth() / 12 - 2000) * 12.3685) - 2;
+  let lastNew = null, nextNew = null, nextFull = null;
+  for (let k = k0; k < k0 + 6; k++) { const n = phaseJD(k, false), f = phaseJD(k + .5, true);
+    if (n <= at) lastNew = n; else if (!nextNew) nextNew = n; if (f > at && !nextFull) nextFull = f; }
+  const age = (t - lastNew) / 864e5, frac = age / 29.530588853, illum = Math.round((1 - Math.cos(2 * Math.PI * frac)) / 2 * 100);
+  const PH = [[1.85, "New Moon"], [5.54, "Waxing Crescent"], [9.23, "First Quarter"], [12.92, "Waxing Gibbous"], [16.61, "Full Moon"], [20.3, "Waning Gibbous"], [23.99, "Last Quarter"], [27.68, "Waning Crescent"], [99, "New Moon"]];
+  // the full moon nearest the September equinox is the Harvest Moon; the one after it, the Hunter's Moon
+  const y = nextFull.getUTCFullYear(), eq = Date.UTC(y, 8, 22, 18), fulls = []; for (let k = Math.floor((y - 2000 + .55) * 12.3685) - 2; k < Math.floor((y - 2000 + .9) * 12.3685) + 2; k++) fulls.push(phaseJD(k + .5, true));
+  const harvest = fulls.sort((a, b) => Math.abs(a - eq) - Math.abs(b - eq))[0], hunters = fulls.filter(f => f > harvest).sort((a, b) => a - b)[0];
+  const mo = +ET(nextFull, { month: "numeric" }) - 1;
+  const name = Math.abs(nextFull - harvest) < 2 * 864e5 ? "Harvest" : hunters && Math.abs(nextFull - hunters) < 2 * 864e5 ? "Hunter's" : NAMES[mo === 8 ? 8 : mo === 9 ? 9 : mo];
+  return { age: r1(age), frac: +frac.toFixed(4), illum, phase: PH.find(p => age < p[0])[1], waxing: frac < .5, nextFull: nextFull.toISOString(), fullName: name, nextNew: nextNew.toISOString() };
+}
+
+async function build(today, outDir, brand) {
+  const imgDir = path.join(outDir, "img"); fs.mkdirSync(imgDir, { recursive: true });
+  const safe = async (f, name) => { try { return await f(); } catch (e) { console.error(name + ":", e.message); return null; } };
+  const [A, AU, SU, LA] = await Promise.all([safe(asteroids, "asteroids"), safe(() => aurora(today), "aurora"), safe(sun, "sun"), safe(launches, "launches")]);
+  const MO = moon(new Date(today + "T23:30:00Z"));
+  const sunImg = await save("https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg", path.join(imgDir, "sun.jpg"));
+  const aurImg = await save("https://services.swpc.noaa.gov/images/animations/ovation/north/latest.jpg", path.join(imgDir, "aurora.jpg"));
+  const S = {}, V = {}, score = {}, hooks = [];
+
+  // asteroid: the most notable flyby (big and close), plus how many are passing
+  if (A && A.length) {
+    const pickA = A.slice().sort((a, b) => (Math.log10(b.m) - 1.3 * Math.log10(b.ld) + (b.ld < 1 ? 1 : 0)) - (Math.log10(a.m) - 1.3 * Math.log10(a.ld) + (a.ld < 1 ? 1 : 0)))[0];
+    const a = pickA, ref = refFor(a.m), w = when(a.date, today), feet = ft(a.m), mi = Math.round(a.miles / 1000) * 1000, us = Math.max(1, Math.round(2800 / a.mph * 60));
+    const sizeSay = feet < 1000 ? `about ${comma(Math.round(feet / 10) * 10)} feet wide` : `about ${r1(a.m / 1609)} miles wide`;
+    const dist = a.ld < 1 ? `That's closer than the Moon, only about ${Math.round(a.ld * 100)} percent of the way there!` : a.ld < 2 ? `That's just ${r1(a.ld)} times the distance to the Moon.` : `That's about ${Math.round(a.ld)} times the distance to the Moon.`;
+    S.ast = { kind: "ast", id: "ast", des: a.des, when: ET(a.date, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), time: fmtTime(a.date) + " ET",
+      ld: +a.ld.toFixed(2), miles: mi, mph: Math.round(a.mph / 100) * 100, ft: Math.round(feet), loFt: Math.round(ft(a.lo)), hiFt: Math.round(ft(a.hi)), ref, us, count: A.length,
+      list: A.slice(0, 5).map(x => ({ des: x.des, ld: +x.ld.toFixed(2), ft: Math.round(ft(x.m)), when: ET(x.date, { month: "short", day: "numeric" }) })) };
+    V.ast = `Asteroid watch! ${cap(w)}, asteroid ${sayDes(a.des)} will fly past Earth at about ${comma(mi)} miles away. ${dist} It's ${sizeSay}, about the size of ${ref.name}, ` +
+      `and it's moving at ${comma(Math.round(a.mph / 100) * 100)} miles per hour, fast enough to cross the entire United States in ${us === 1 ? "one minute" : "about " + us + " minutes"}. ` +
+      `Don't worry, it will safely miss us. ${A.length > 1 ? `In all, ${A.length} asteroids will pass within twenty Moon distances of Earth over the next ten days.` : ""}`;
+    score.ast = a.ld < 1 ? 10 : a.m >= 150 && a.ld < 10 ? 6 : 3;
+    if (a.ld < 1) hooks.push([10, "ast", `An asteroid the size of ${ref.name} will pass closer to Earth than the Moon ${w}!`, { big: comma(mi), unit: "Miles from Earth", kicker: "Closer than the Moon", sub: `Asteroid ${a.des} · ${S.ast.when}` }]);
+    else if (a.m >= 150) hooks.push([6, "ast", `An asteroid bigger than ${ref.name} is about to fly past Earth!`, { big: comma(Math.round(feet)), unit: "Feet wide", kicker: "Asteroid flyby", sub: `${a.des} · ${S.ast.when}` }]);
+    hooks.push([2, "ast", `${cap(w2(A.length))} asteroids will fly past Earth in the next ten days!`, { big: String(A.length), unit: "Asteroids flying by", kicker: "Next 10 days", sub: `Closest: ${A[0].des}` }]);
+  }
+  // northern lights
+  if (AU) {
+    const k = AU.k;
+    S.aur = { kind: "aur", id: "aur", kp: AU.kp, k, g: AU.g, where: AU.where, short: AU.short, img: aurImg ? "file://" + path.resolve(aurImg) : "", curve: AU.curve };
+    V.aur = k >= 5 ? `Northern lights alert! NOAA is forecasting a Kp of ${AU.kp} tonight, a ${AU.g} geomagnetic storm. With dark, clear skies, the aurora could be visible ${AU.where.replace(/^as far south as/, "as far south as")}. Look north after dark!`
+      : k === 4 ? `The northern lights are active tonight, with a Kp of ${AU.kp}. Best chances are in ${AU.where}. Look north after dark.`
+      : `For the northern lights, it's a quiet night, with a Kp of ${AU.kp}. Your best chances are in ${AU.where}.`;
+    score.aur = k >= 7 ? 10 : k >= 5 ? 8 : k === 4 ? 4 : 1;
+    if (k >= 5) hooks.push([k >= 7 ? 11 : 8, "aur", `The northern lights could be visible as far south as ${AU.short} tonight!`, { big: "KP " + AU.kp, unit: AU.g + " geomagnetic storm", kicker: "Aurora alert", sub: "Tonight · look north" }]);
+  }
+  // the Sun
+  if (SU) {
+    const c24 = SU.b24 && SU.b24.cls, c7 = SU.b7 && SU.b7.cls, big = flux(c24);
+    S.sun = { kind: "sun", id: "sun", img: sunImg ? "file://" + path.resolve(sunImg) : "", c24: c24 || "", c7: c7 || "", t7: SU.b7 ? ET(SU.b7.t, { month: "short", day: "numeric" }) : "", n24: SU.n24, m: SU.mProb, x: SU.xProb };
+    const say = c => String(c).replace(/^([ABCMX])([\d.]+)$/, (m, L, n) => `${L}${n}`);
+    V.sun = big >= 1e-4 ? `The Sun just erupted with a powerful ${say(c24)} solar flare, the strongest class there is! Strong flares like this can cause radio blackouts on the sunny side of Earth.`
+      : big >= 1e-5 ? `The Sun fired off an ${say(c24)} flare in the last day. That's a moderate flare, strong enough to cause brief radio blackouts.`
+      : `The Sun has been fairly calm, with ${SU.n24 === 1 ? "one small flare" : SU.n24 + " small flares"} in the last day${c24 ? `, the biggest a ${say(c24)}` : ""}.`;
+    V.sun += ` NOAA gives a ${SU.mProb} percent chance of M-class flares${SU.xProb ? ` and a ${SU.xProb} percent chance of an X-class flare` : ""} over the next day.`;
+    score.sun = big >= 1e-4 ? 9 : big >= 5e-5 ? 6 : big >= 1e-5 ? 4 : 1;
+    if (big >= 1e-4) hooks.push([9, "sun", `The Sun just fired off a powerful X-class solar flare!`, { big: c24, unit: "Solar flare", kicker: "Solar flare alert", sub: "Strongest flare class" }]);
+  }
+  // launches
+  if (LA && LA.length) {
+    S.lau = { kind: "lau", id: "lau", items: LA.map(l => ({ ...l, day: ET(l.net, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), time: fmtTime(l.net) + " ET" })) };
+    const one = (l, i) => { const w = when(l.net, today), what = l.star ? "a batch of Starlink satellites" : l.crew ? `the ${l.mission} crew` : l.mission;
+      return `${i === 0 ? cap(w) : w === when(LA[i - 1].net, today) ? "Then" : cap(w)}${l.tbd ? ", if the date holds," : ""} ${l.prov} launches ${what} on ${/^a |^an /i.test(l.rocket) ? "" : "a "}${l.rocket} from ${l.loc}.`; };
+    V.lau = `Launch schedule! ${LA.map(one).join(" ")}`;
+    score.lau = LA.some(l => l.crew) ? 7 : LA.some(l => !l.star) ? 3 : 2;
+    const cr = LA.find(l => l.crew); if (cr) hooks.push([7, "lau", `Astronauts are launching ${when(cr.net, today)}!`, { big: "LIFTOFF", unit: cr.rocket, kicker: "Crew launch", sub: S.lau.items[LA.indexOf(cr)].day }]);
+  }
+  // the Moon
+  {
+    const nf = new Date(MO.nextFull), dTo = Math.round((nf - new Date(today + "T23:30:00Z")) / 864e5);
+    S.moon = { kind: "moon", id: "moon", ...MO, full: ET(nf, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), dTo };
+    V.moon = MO.illum >= 97 ? `And look up tonight: it's the full ${MO.fullName} Moon, ${MO.illum} percent lit!`
+      : `Tonight's Moon is a ${MO.phase.toLowerCase()}, ${MO.illum} percent lit. The next full moon, the ${MO.fullName} Moon, rises ${dTo <= 1 ? when(nf, today) : "on " + ET(nf, { weekday: "long", month: "long", day: "numeric" })}.`;
+    score.moon = MO.illum >= 97 ? 6 : dTo <= 1 ? 4 : 1;
+    if (MO.illum >= 97) hooks.push([6, "moon", `Tonight's full ${MO.fullName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.fullName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]);
+  }
+  if (!Object.keys(S).length) return null;
+  hooks.sort((a, b) => b[0] - a[0]);
+  const H = hooks[0] || [1, "moon", "Here's what's happening in the sky this week!", { big: S.moon.illum + "%", unit: "Moon lit tonight", kicker: "Sky report", sub: "" }];
+  const order = Object.keys(S).sort((a, b) => (b === H[1]) - (a === H[1]) || score[b] - score[a]);
+  const BG = { ast: "asteroid", aur: "aurora", sun: "sun", lau: "launch", moon: "moon" };
+  for (const k of order) S[k].bg = BG[k];
+  const scenes = [{ kind: "hook", id: "hook", topic: H[1], bg: BG[H[1]] || "earth", ...H[3] }, ...order.map(k => S[k]), { kind: "outro", id: "outro", bg: "earth" }];
+  const voice = { hook: `${H[2]} Here's your sky report for ${ET(today + "T16:00:00Z", { weekday: "long" })}.` };
+  for (const k of order) voice[k] = V[k];
+  voice.outro = `That's your sky report! Follow ${brand} so you never miss what's happening above you.`;
+  const dateLabel = ET(today + "T16:00:00Z", { month: "short", day: "numeric" });
+  const title = ytTitle(H, S, dateLabel);
+  return { mode: "space", template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), scenes, voice,
+    music: "../space/music", source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA", ytTitle: title, caption: caption(H, S, voice, brand, dateLabel) };
+}
+
+function ytTitle(H, S, d) {
+  const t = { ast: S.ast && S.ast.ld < 1 ? "Asteroid Passes Closer Than the Moon ☄️" : S.ast ? `${S.ast.count} Asteroids Fly Past Earth This Week ☄️` : "",
+    aur: "Northern Lights Alert Tonight 🌌", sun: "The Sun Just Fired an X-Class Flare ☀️", lau: "Astronauts Launching This Week 🚀", moon: S.moon && `Full ${S.moon.fullName} Moon Tonight 🌕` }[H[1]] || "Tonight's Sky Report 🔭";
+  return `${t} | Sky Report ${d}`.slice(0, 100);
+}
+function caption(H, S, voice, brand, d) {
+  const L = [H[2], "", `Your sky report for ${d} 🔭`];
+  if (S.ast) L.push(`☄️ Asteroid ${S.ast.des}: ${comma(S.ast.miles)} miles from Earth on ${S.ast.when.replace(/^\w+ /, "")} (${S.ast.ld < 1 ? "closer than the Moon" : S.ast.ld.toFixed(1) + "x the Moon's distance"}), about ${comma(S.ast.ft)} ft wide`);
+  if (S.aur) L.push(`🌌 Northern lights: Kp ${S.aur.kp} tonight${S.aur.g ? ` (${S.aur.g} storm)` : ""}, best in ${S.aur.where.replace(/^as far south as /, "areas as far south as ")}`);
+  if (S.sun) L.push(`☀️ Sun: biggest flare in the last day ${S.sun.c24 || "none"}; ${S.sun.m}% chance of M-class flares`);
+  if (S.lau) for (const l of S.lau.items.slice(0, 2)) L.push(`🚀 ${l.day} ${l.time}: ${l.prov} ${l.rocket}, ${l.mission} (${l.loc})`);
+  if (S.moon) L.push(`🌕 Moon: ${S.moon.phase}, ${S.moon.illum}% lit · next full moon ${S.moon.full}`);
+  L.push("", "What should we track next? Comments 👇", `Follow ${brand} for the sky report every day ✅`, "", "Data: NASA JPL, NOAA SWPC, The Space Devs. Footage: NASA.", "",
+    ["#space", "#astronomy", H[1] === "aur" || (S.aur && S.aur.k >= 5) ? "#northernlights" : "#asteroid", "#nightsky", "#spacenews", S.lau ? "#rocketlaunch" : "#science", "#moon", "#fyp"].join(" "));
+  return L.join("\n");
+}
+
+module.exports = { build, moon, sayDes };
+if (require.main === module) (async () => {
+  const out = process.argv[2], today = process.argv[3] || etDay(Date.now());
+  const D = await build(today, path.dirname(path.resolve(out)), process.env.BRAND || "Zenith");
+  if (!D) { console.error("No space data today."); process.exit(3); }
+  for (const [k, v] of Object.entries(D.voice)) console.log(k, "|", v);
+  fs.writeFileSync(out, JSON.stringify(D, null, 1)); console.log(D.ytTitle);
+})().catch(e => { console.error(e); process.exit(1); });

@@ -18,16 +18,31 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
   const SC = await page.evaluate(() => SC), SFX = await page.evaluate(() => typeof SFX === "undefined" ? [] : SFX);
   const frames = Math.round(total * fps), voice = data.voiceDir && fs.existsSync(data.voiceDir), sound = voice || SFX.length;
   const silent = sound ? out.replace(/\.mp4$/, "") + ".silent.mp4" : out;
-  const ff = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "-",
+  // background footage (the space videos): one clip per scene by topic (data.broll), cut at the scene changes; the page
+  // is then shot with a transparent background and laid over it
+  let bg = null;
+  if (data.broll && Object.keys(data.broll).length) {
+    bg = out.replace(/\.mp4$/, "") + ".bg.mp4";
+    const topic = id => (data.scenes.find(x => x.id === id) || {}).bg, used = {}, ins = [], parts = [];
+    const segs = [{ t0: 0, t1: SC[0].t0, f: null }, ...SC.map((s, j) => ({ t0: s.t0, t1: j + 1 < SC.length ? SC[j + 1].t0 : total, f: data.broll[topic(s.id)] || null, k: topic(s.id) }))];
+    segs.forEach((g, i) => { const d = Math.max(.04, g.t1 - g.t0).toFixed(3);
+      if (g.f) { const off = 7 * (used[g.k] = (used[g.k] || 0) + 1) - 7; ins.push("-stream_loop", "-1", "-i", g.f);
+        parts.push(`[${ins.filter(x => x === "-i").length - 1}:v]trim=start=${off}:duration=${d},setpts=PTS-STARTPTS,fps=${fps},scale=${W}:${H},setsar=1,fade=t=in:st=0:d=0.3[s${i}]`); }
+      else parts.push(`color=c=black:s=${W}x${H}:r=${fps}:d=${d},setsar=1[s${i}]`); });
+    await run(["-y", "-loglevel", "error", ...ins, "-filter_complex", parts.join(";") + ";" + segs.map((_, i) => `[s${i}]`).join("") + `concat=n=${segs.length}:v=1:a=0,format=yuv420p[v]`,
+      "-map", "[v]", "-t", total.toFixed(3), "-c:v", "libx264", "-preset", "veryfast", "-crf", "19", bg]);
+  }
+  const ff = spawn("ffmpeg", ["-y", "-loglevel", "error", ...(bg ? ["-i", bg] : []), "-f", "image2pipe", "-framerate", String(fps), "-c:v", bg ? "png" : "mjpeg", "-i", "-",
+    ...(bg ? ["-filter_complex", "[1:v]format=rgba[o];[0:v][o]overlay=0:0:shortest=1:format=auto,format=yuv420p[v]", "-map", "[v]"] : []),
     "-c:v", "libx264", "-preset", process.env.PRESET || "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", silent], { stdio: ["pipe", "inherit", "inherit"] });
   const done = new Promise((res, rej) => ff.on("close", c => c ? rej(new Error("ffmpeg " + c)) : res()));
   for (let i = 0; i < frames; i++) {
     await page.evaluate(t => window.render(t), i / fps);
-    const buf = await page.screenshot({ type: "jpeg", quality: 94 });
+    const buf = bg ? await page.screenshot({ type: "png", omitBackground: true }) : await page.screenshot({ type: "jpeg", quality: 94 });
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once("drain", r));
     if (i % 300 === 0) process.stderr.write(`frame ${i}/${frames}\n`);
   }
-  ff.stdin.end(); await done;
+  ff.stdin.end(); await done; if (bg) fs.unlinkSync(bg);
   // long-form extras: YouTube chapters (from each scene's start) and a thumbnail
   const base = out.replace(/\.mp4$/, "");
   const ch = SC.filter(s => s.chapter);
@@ -55,7 +70,7 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
     ins.forEach(([f]) => args.push("-i", f));
     // background music: one of the tracks in music/ (picked by date, so it rotates), looped to length, quiet,
     // ducked further whenever the narrator talks, faded in and out
-    const MD = path.join(__dirname, "music"), tracks = fs.existsSync(MD) ? fs.readdirSync(MD).filter(x => /\.(mp3|m4a|wav|ogg)$/i.test(x)).sort() : [];
+    const MD = data.music ? path.resolve(__dirname, data.music) : path.join(__dirname, "music"), tracks = fs.existsSync(MD) ? fs.readdirSync(MD).filter(x => /\.(mp3|m4a|wav|ogg)$/i.test(x)).sort() : [];
     const track = tracks.length ? path.join(MD, tracks[[...String(data.day || "")].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7) % tracks.length]) : null;
     if (track) args.push("-stream_loop", "-1", "-i", track);
     const T = total.toFixed(3), mi = ins.length + 1;

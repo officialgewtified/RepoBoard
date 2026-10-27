@@ -1,0 +1,102 @@
+name: Zenith sky report video
+on:
+  schedule:
+    # 11:37 UTC is 7:37am Eastern (6:37 in winter): fresh asteroid, aurora, Sun and launch data, ready for the morning
+    - cron: "37 11 * * *"
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Day of the report, YYYY-MM-DD (blank = today, Eastern time)"
+        required: false
+permissions:
+  contents: write
+concurrency:
+  group: space
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: space
+    steps:
+      - uses: actions/checkout@v4
+      - name: Which day
+        run: |
+          DAY="${{ inputs.day }}"
+          [ -z "$DAY" ] && DAY=$(TZ=America/New_York date +%F)
+          echo "DAY=$DAY" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Sky data
+        id: prep
+        run: |
+          mkdir -p out
+          set +e
+          node sky.js out/data.json "$DAY"
+          code=$?
+          if [ $code -eq 3 ]; then echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          exit $code
+      - uses: actions/setup-python@v5
+        if: steps.prep.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        if: steps.prep.outputs.skip != '1'
+        with:
+          path: |
+            clips/.models
+            ~/.cache/huggingface
+          key: voices-kokoro-chatterbox-v1
+      - name: Browser and ffmpeg
+        if: steps.prep.outputs.skip != '1'
+        timeout-minutes: 12
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
+          which ffmpeg
+      - name: NASA footage
+        if: steps.prep.outputs.skip != '1'
+        continue-on-error: true
+        timeout-minutes: 15
+        run: node broll.js out/data.json
+      - name: Voiceover
+        if: steps.prep.outputs.skip != '1'
+        # Chatterbox reads it, cloned from a Kokoro af_bella read (Zenith's own narrator); Kokoro reads it if that fails
+        continue-on-error: true
+        timeout-minutes: 45
+        working-directory: clips
+        run: |
+          mkdir -p .models
+          [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          pip install -q kokoro-onnx soundfile
+          python ref.py
+          pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
+          python tts_cb.py ../space/out/data.json ../space/out/voice ref.wav || python tts.py ../space/out/data.json ../space/out/voice
+        env:
+          REF_VOICE: af_bella
+          VOICE: af_bella
+          SPEED: "1.1"
+          EXAGGERATION: "0.65"
+          CFG: "0.5"
+          TEMPO: "1.06"
+      - name: Render
+        if: steps.prep.outputs.skip != '1'
+        run: |
+          node ../clips/render.js out/data.json "out/zenith-$DAY.mp4" 30
+          node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
+      - name: Publish
+        if: steps.prep.outputs.skip != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="space-$DAY"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          THUMB=$(ls out/zenith-$DAY-thumbnail.jpg 2>/dev/null || true)
+          gh release create "$TAG" "out/zenith-$DAY.mp4" $THUMB out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
+          gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^space-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag

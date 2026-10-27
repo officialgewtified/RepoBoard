@@ -1,0 +1,261 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Zenith sky report</title>
+<style>
+@font-face{font-family:"Unbounded";src:url(../fonts/unbounded-var.woff2) format("woff2");font-weight:200 900}
+@font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-400.woff2) format("woff2");font-weight:400}
+@font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-700.woff2) format("woff2");font-weight:700}
+@font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-800.woff2) format("woff2");font-weight:800}
+@font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
+/* Mission-control look: deep space black, ion cyan, solar amber, aurora green. Transparent page: NASA footage plays underneath. */
+:root{--void:#03040A;--ink:#EAF2FF;--dim:#8A97B2;--ion:#4FF3FF;--sol:#FFB547;--aur:#5CFFA8;--mag:#FF4FD8;--red:#FF5A5A;--glass:rgba(4,8,20,.66);--line:rgba(79,243,255,.32)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:transparent}
+body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.mono{font-family:"JBM",monospace}
+#stars{position:absolute;inset:0}
+#vt{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(3,4,10,.92) 0%,rgba(3,4,10,.55) 14%,rgba(3,4,10,0) 26%,rgba(3,4,10,0) 52%,rgba(3,4,10,.72) 70%,rgba(3,4,10,.94) 100%)}
+#scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px);mix-blend-mode:screen}
+.br{position:absolute;width:60px;height:60px;border:3px solid var(--ion);opacity:.75}
+.br.a{left:34px;top:34px;border-right:0;border-bottom:0}.br.b{right:34px;top:34px;border-left:0;border-bottom:0}
+.br.c{left:34px;bottom:34px;border-right:0;border-top:0}.br.d{right:34px;bottom:34px;border-left:0;border-top:0}
+#hud{position:absolute;left:70px;right:70px;top:84px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:18px;font:800 46px/1 "Unbounded";letter-spacing:.06em}
+.brand svg{width:64px;height:64px}
+.hr{font:700 26px/1 "JBM";letter-spacing:.14em;color:var(--ion);text-align:right}
+.hr small{display:block;margin-top:10px;color:var(--dim);font-weight:400;font-size:22px}
+.live{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--red);margin-right:10px;vertical-align:2px;box-shadow:0 0 12px var(--red)}
+#tick{position:absolute;left:70px;right:70px;top:186px;height:14px;background:repeating-linear-gradient(90deg,rgba(79,243,255,.5) 0 2px,transparent 2px 24px);opacity:.5;-webkit-mask-image:linear-gradient(90deg,#000,transparent)}
+#prog{position:absolute;left:70px;top:206px;height:4px;width:0;background:var(--ion);box-shadow:0 0 14px var(--ion)}
+.sc{position:absolute;left:64px;right:120px;top:240px;bottom:330px;opacity:0;will-change:transform}
+.kick{display:inline-flex;align-items:center;gap:14px;padding:14px 22px;border:2px solid var(--ion);color:var(--ion);font:800 28px/1 "JBM";letter-spacing:.14em;text-transform:uppercase;background:rgba(4,8,20,.6)}
+.kick i{width:12px;height:12px;background:var(--ion);box-shadow:0 0 14px var(--ion)}
+.t1{font:800 84px/1 "Unbounded";letter-spacing:.01em;text-transform:uppercase;margin-top:22px;white-space:nowrap;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+.meta{font:700 28px/1.3 "JBM";letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-top:16px}
+.panel{position:relative;background:var(--glass);border:2px solid var(--line);padding:26px 30px;margin-top:26px}
+.panel::before,.panel::after{content:"";position:absolute;width:22px;height:22px;border:3px solid var(--ion)}
+.panel::before{left:-3px;top:-3px;border-right:0;border-bottom:0}.panel::after{right:-3px;bottom:-3px;border-left:0;border-top:0}
+.plab{font:800 22px/1 "JBM";letter-spacing:.18em;color:var(--ion);text-transform:uppercase}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.tile{background:var(--glass);border:2px solid var(--line);padding:20px 20px 18px;min-width:0}
+.tile b{display:block;font:800 60px/1 "Unbounded";white-space:nowrap}
+.tile span{display:block;margin-top:12px;font:700 20px/1.2 "JBM";letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+.svg{display:block;width:100%}
+/* hook */
+#hook .ret{position:absolute;left:50%;top:330px;width:620px;height:620px;margin:-310px 0 0 -310px}
+#hook .low{position:absolute;left:0;right:0;bottom:0}
+#hook .big{font:900 230px/.9 "Unbounded";letter-spacing:-.03em;white-space:nowrap;margin-top:26px;text-shadow:0 0 50px rgba(79,243,255,.55),0 10px 0 rgba(0,0,0,.35)}
+#hook .unit{font:700 52px/1.05 "Unbounded";text-transform:uppercase;margin-top:12px;color:var(--ion)}
+#hook .sub{font:700 30px/1.2 "JBM";letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-top:20px}
+/* aurora */
+.scope{position:relative;width:520px;height:520px;margin:30px auto 0}
+.scope .img{position:absolute;inset:30px;border-radius:50%;overflow:hidden;background:#000}
+.scope img{width:100%;height:100%;object-fit:cover;transform:scale(1.32);filter:saturate(1.3) contrast(1.1)}
+.scope svg{position:absolute;inset:0;width:100%;height:100%}
+.aurrow{display:grid;grid-template-columns:330px 1fr;gap:26px;align-items:center}
+.where{font:700 34px/1.25 "Unbounded";text-transform:none}
+/* sun */
+.sunbox{position:relative;width:560px;height:560px;margin:24px auto 0}
+.sunbox img{position:absolute;inset:40px;width:480px;height:480px;border-radius:50%;object-fit:cover}
+.sunbox .glow{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(255,181,71,.55) 35%,rgba(255,120,30,.18) 55%,transparent 70%)}
+/* launches */
+.lc{display:grid;grid-template-columns:150px 1fr;gap:24px;align-items:center;background:var(--glass);border:2px solid var(--line);padding:22px 26px;margin-top:18px;position:relative}
+.lc .d{text-align:center;border-right:2px solid var(--line);padding-right:20px}
+.lc .d b{display:block;font:800 52px/1 "Unbounded";color:var(--sol)}
+.lc .d span{display:block;margin-top:8px;font:700 22px/1 "JBM";color:var(--dim)}
+.lc .r b{display:block;font:800 40px/1.05 "Unbounded";white-space:nowrap;overflow:hidden}
+.lc .r p{margin-top:8px;font:600 28px/1.2 "Archivo";white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc .r small{display:block;margin-top:10px;font:700 21px/1.2 "JBM";letter-spacing:.06em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc .tm{position:absolute;right:20px;top:18px;font:800 22px/1 "JBM";color:var(--ion);letter-spacing:.06em}
+/* moon */
+.moonrow{display:grid;grid-template-columns:520px 1fr;gap:20px;align-items:center;margin-top:20px}
+.moonrow .pct b{display:block;font:900 150px/.9 "Unbounded"}
+.moonrow .pct span{display:block;font:700 30px/1.2 "JBM";letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-top:12px}
+.phases{display:flex;justify-content:space-between;margin-top:24px}
+.phases div{text-align:center;font:700 16px/1 "JBM";color:var(--dim)}
+.phases div.on{color:var(--ion)}
+/* outro + logo */
+#outro .mid{position:absolute;left:0;right:0;top:300px;text-align:center}
+#outro .t1{font-size:96px;white-space:normal;line-height:1.05}
+.follow{display:inline-flex;align-items:center;justify-content:center;margin-top:46px;min-width:560px;height:118px;border:3px solid var(--ion);font:800 40px/1 "Unbounded";letter-spacing:.06em;color:var(--ion);position:relative}
+.ring{position:absolute;left:50%;top:50%;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;border:4px solid var(--ion);opacity:0}
+#logo{position:absolute;left:50%;top:45%;width:560px;height:560px;margin:-280px 0 0 -280px;opacity:0;z-index:9}
+#wordm{position:absolute;left:0;right:0;top:calc(45% + 300px);text-align:center;opacity:0;z-index:9;font:900 110px/1 "Unbounded";letter-spacing:.12em}
+#wordm small{display:block;margin-top:22px;font:700 30px/1 "JBM";letter-spacing:.3em;color:var(--ion)}
+#black{position:absolute;inset:0;background:var(--void);opacity:0;z-index:8}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:10;pointer-events:none}
+#src{position:absolute;left:70px;right:140px;bottom:120px;font:400 20px/1.3 "JBM";color:rgba(234,242,255,.45);letter-spacing:.04em}
+/* cover image */
+#thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden;background:radial-gradient(70% 45% at 50% 34%,#0f2a4a 0%,#060a18 55%,#020309 100%)}
+#thumb .neb{position:absolute;inset:0;background:radial-gradient(40% 30% at 25% 20%,rgba(255,79,216,.25),transparent 70%),radial-gradient(45% 35% at 80% 60%,rgba(79,243,255,.18),transparent 70%)}
+#thumb .art{position:absolute;left:90px;right:90px;top:210px;height:820px;display:flex;align-items:center;justify-content:center}
+#thumb .art img{width:760px;height:760px;border-radius:50%;object-fit:cover;box-shadow:0 0 140px rgba(255,181,71,.6)}
+#thumb .k{position:absolute;left:0;right:0;top:1000px;text-align:center}
+#thumb .k span{display:inline-block;background:#FFD60A;color:#05060c;font:900 70px/1 "Unbounded";padding:20px 34px;transform:rotate(-2deg);text-transform:uppercase;box-shadow:0 20px 40px rgba(0,0,0,.6)}
+#thumb .bigt{position:absolute;left:30px;right:30px;top:1140px;text-align:center;font:900 190px/.92 "Unbounded";letter-spacing:-.03em;text-shadow:0 0 60px rgba(79,243,255,.6),0 12px 0 rgba(0,0,0,.4);white-space:nowrap}
+#thumb .u{position:absolute;left:0;right:0;top:1340px;text-align:center;font:800 58px/1.1 "Unbounded";color:var(--ion);text-transform:uppercase}
+#thumb .bn{position:absolute;left:-20px;right:-20px;bottom:150px;background:#fff;color:#05060c;text-align:center;padding:26px 0;font:900 64px/1 "Unbounded";letter-spacing:.04em;transform:rotate(-2deg);text-transform:uppercase}
+#thumb .tl{position:absolute;left:70px;top:80px;font:900 60px/1 "Unbounded";letter-spacing:.08em;display:flex;align-items:center;gap:18px}
+#thumb .tl svg{width:70px;height:70px}
+</style></head><body>
+<svg id="stars"></svg>
+<div id="vt"></div><div id="scan"></div>
+<div class="br a"></div><div class="br b"></div><div class="br c"></div><div class="br d"></div>
+<div id="hud"><div class="brand"><svg viewBox="0 0 100 100" id="mk"></svg><span id="bn"></span></div><div class="hr"><span class="live"></span><span id="hd"></span><small id="hs"></small></div></div>
+<div id="tick"></div><div id="prog"></div>
+<div id="stage"></div>
+<div id="src"></div>
+<div id="black"></div>
+<svg id="logo" viewBox="0 0 200 200"></svg>
+<div id="wordm"><span id="wm"></span><small>Your sky report · every day</small></div>
+<div id="flash"></div>
+<div id="thumb"></div>
+<script>
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3),eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+let D=null,SC=[],TOTAL=30,SFX=[],STARS=[];const INTRO=.55,TAIL=2.8,MIN=61.5;
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const com=x=>Math.round(+x).toLocaleString("en-US");
+function rnd(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
+function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+1&&fs>min){fs-=3;el.style.fontSize=fs+"px"}}
+// the Zenith mark: a ring, a tilted orbit with a moon on it, and a Z
+const MARK=(id="")=>`<circle cx="100" cy="100" r="74" fill="none" stroke="#EAF2FF" stroke-width="9"/><ellipse id="${id}orb" cx="100" cy="100" rx="96" ry="34" fill="none" stroke="#4FF3FF" stroke-width="4" transform="rotate(-24 100 100)" stroke-dasharray="604" stroke-dashoffset="0"/>
+ <text x="100" y="128" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="82" fill="#EAF2FF">Z</text><circle id="${id}moon" r="11" fill="#4FF3FF" style="filter:drop-shadow(0 0 8px #4FF3FF)"/>`;
+const orbPos=(a)=>{const x=96*Math.cos(a),y=34*Math.sin(a),r=-24*Math.PI/180;return[100+x*Math.cos(r)-y*Math.sin(r),100+x*Math.sin(r)+y*Math.cos(r)]};
+// ---- graphics
+function rock(seed,r){const R=rnd(seed),n=18;let p="";for(let i=0;i<n;i++){const a=i/n*2*Math.PI,k=r*(.82+.3*R());p+=(i?"L":"M")+(k*Math.cos(a)).toFixed(1)+" "+(k*Math.sin(a)*.86).toFixed(1)}
+ let cr="";for(let i=0;i<5;i++){const a=R()*6.28,d=R()*r*.55,cr2=r*(.08+.12*R());cr+=`<circle cx="${(d*Math.cos(a)).toFixed(1)}" cy="${(d*Math.sin(a)).toFixed(1)}" r="${cr2.toFixed(1)}" fill="rgba(0,0,0,.28)"/>`}
+ return `<path d="${p}Z" fill="url(#rk)"/>${cr}`}
+// silhouettes, drawn in metres (width x height) so they sit at true scale next to the asteroid
+const SIL={car:[4.5,1.5,w=>`<path d="M0 -0.35 L0.3 -0.35 L1 -0.75 L2.9 -0.8 L3.6 -0.35 L4.5 -0.3 L4.5 -0.05 L0 -0.05Z M0.7 0 a0.35 0.35 0 1 0 0.01 0 M3.5 0 a0.35 0.35 0 1 0 0.01 0" transform="scale(1 1.8)"/>`],
+ bus:[12,3.2,()=>`<rect x="0" y="-3.2" width="12" height="2.8" rx="0.3"/><circle cx="2.3" cy="-0.4" r="0.55"/><circle cx="9.6" cy="-0.4" r="0.55"/>`],
+ whale:[30,5,()=>`<path d="M0 -2.2 C3 -5 14 -5.2 22 -3 L27 -4.8 L30 -5 L27.5 -2.5 L30 -0.2 L27 -0.6 L22 -1.6 C14 0.2 4 0.3 0 -2.2Z"/>`],
+ plane:[70,19,()=>`<path d="M0 -6 C2 -9 6 -10 12 -10 L58 -10 L66 -19 L70 -19 L68 -9 L70 -6 L64 -5 L12 -5 C5 -5 1 -5 0 -6Z M28 -7 L44 -2 L48 -2 L40 -8Z"/>`],
+ field:[110,6,()=>`<rect x="0" y="-3" width="110" height="3"/><rect x="0" y="-3" width="10" height="3" opacity=".6"/><rect x="100" y="-3" width="10" height="3" opacity=".6"/>`],
+ tower:[125,330,()=>`<path d="M0 0 C30 -30 50 -110 58 -280 L60 -330 L65 -330 L67 -280 C75 -110 95 -30 125 0 L95 0 C80 -40 45 -40 30 0Z"/>`],
+ tower2:[57,443,()=>`<path d="M0 0 L0 -60 L6 -60 L6 -200 L12 -200 L12 -330 L20 -330 L20 -380 L26 -380 L28 -443 L29 -443 L31 -380 L37 -380 L37 -330 L45 -330 L45 -200 L51 -200 L51 -60 L57 -60 L57 0Z"/>`]};
+function sizeSvg(s){const ref=s.ref,S0=SIL[ref.icon]||SIL.bus,[rw,rh]=S0,d=s.ft/3.281,W=920,H=330,base=290;
+ const sc=Math.min(260/Math.max(rh,d),(W-260)/(rw+d*1.1));const ax=60+d*sc/2,rx=ax+d*sc/2+60;
+ return `<svg class="svg" viewBox="0 0 ${W} ${H}"><defs><radialGradient id="rk" cx="35%" cy="30%"><stop offset="0" stop-color="#b9b2a8"/><stop offset=".6" stop-color="#6d655d"/><stop offset="1" stop-color="#2a2622"/></radialGradient></defs>
+  <line x1="20" y1="${base}" x2="${W-20}" y2="${base}" stroke="rgba(234,242,255,.4)" stroke-width="2" stroke-dasharray="6 8"/>
+  <g class="az" transform="translate(${ax} ${base-d*sc/2})">${rock(7,d*sc/2)}</g>
+  <g class="rf" transform="translate(${rx} ${base}) scale(${sc})" fill="rgba(234,242,255,.85)">${S0[2]()}</g>
+  <text x="${ax}" y="${base+32}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="24" fill="#4FF3FF">≈ ${com(s.ft)} FT</text>
+  <text x="${rx+rw*sc/2}" y="${base+32}" text-anchor="middle" font-family="JBM" font-weight="700" font-size="22" fill="#8A97B2">${esc(ref.name.replace(/^(a|the) /,"").toUpperCase())} · ${com(ref.m*3.281)} FT</text></svg>`}
+function distSvg(s){const W=920,H=250,y=120,x0=80,x1=W-60,max=s.ld<=1.15?1.3:s.ld*1.18,X=v=>x0+(x1-x0)*v/max,mx=X(1),ax=X(s.ld);
+ return `<svg class="svg" viewBox="0 0 ${W} ${H}"><defs><radialGradient id="eg" cx="35%" cy="30%"><stop offset="0" stop-color="#8fd3ff"/><stop offset=".55" stop-color="#1f6fd1"/><stop offset="1" stop-color="#0a2550"/></radialGradient></defs>
+  <line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="rgba(234,242,255,.35)" stroke-width="2" stroke-dasharray="4 10"/>
+  <circle cx="${x0}" cy="${y}" r="48" fill="url(#eg)"/><circle cx="${mx}" cy="${y}" r="17" fill="#c9c6bf"/>
+  <text x="${x0}" y="${y+86}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="22" fill="#8A97B2">EARTH</text>
+  <text x="${mx}" y="${y+86}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="22" fill="#8A97B2">MOON</text>
+  <text x="${mx}" y="${y+112}" text-anchor="middle" font-family="JBM" font-size="19" fill="#8A97B2">238,900 MI</text>
+  <path class="tr" d="M${x1} ${y-70} Q ${(ax+x1)/2} ${y-60} ${ax} ${y}" fill="none" stroke="#FFB547" stroke-width="3" stroke-dasharray="8 8"/>
+  <g class="am" data-x0="${x1}" data-x="${ax}" data-y="${y}"><circle r="12" fill="#FFB547" style="filter:drop-shadow(0 0 10px #FFB547)"/><circle r="26" fill="none" stroke="#FFB547" stroke-width="2"/></g>
+  <text class="al" x="${ax}" y="${y-44}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="26" fill="#FFB547">${com(s.miles)} MI</text></svg>`}
+function kpSvg(kp){const cx=160,cy=170,r=130,arc=(a,b,c)=>{const p=t=>[cx-r*Math.cos(Math.PI*t/9),cy-r*Math.sin(Math.PI*t/9)],[x0,y0]=p(a),[x1,y1]=p(b);return `<path d="M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}" stroke="${c}" stroke-width="22" fill="none"/>`};
+ return `<svg class="svg" viewBox="0 0 320 210">${arc(0,4,"#2f6f5a")}${arc(4,5,"#5CFFA8")}${arc(5,7,"#FFB547")}${arc(7,9,"#FF5A5A")}
+  ${[0,3,5,7,9].map(v=>{const a=Math.PI*v/9;return `<text x="${cx-(r+30)*Math.cos(a)}" y="${cy-(r+30)*Math.sin(a)+7}" text-anchor="middle" font-family="JBM" font-weight="700" font-size="16" fill="#8A97B2">${v}</text>`}).join("")}
+  <g class="ndl" data-kp="${kp}"><line x1="${cx}" y1="${cy}" x2="${cx-r+18}" y2="${cy}" stroke="#EAF2FF" stroke-width="6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="12" fill="#EAF2FF"/></g>
+  <text x="${cx}" y="${cy+36}" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="30" fill="#EAF2FF">KP <tspan class="kpn" data-v="${kp}">${kp}</tspan></text></svg>`}
+function flareSvg(s){const W=880,x=c=>{const m=String(c||"").match(/^([ABCMX])([\d.]+)/);if(!m)return null;const i="ABCMX".indexOf(m[1]);return 20+(W-40)*(i+Math.log10(Math.max(1,parseFloat(m[2]))))/5};
+ const seg=["#2a4a7a","#3d7bd9","#4FF3FF","#FFB547","#FF5A5A"],x24=x(s.c24),x7=x(s.c7);
+ return `<svg class="svg" viewBox="0 0 ${W} 150">${"ABCMX".split("").map((L,i)=>`<rect x="${20+(W-40)*i/5}" y="60" width="${(W-40)/5-4}" height="26" fill="${seg[i]}" opacity=".85"/><text x="${20+(W-40)*(i+.5)/5}" y="120" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="26" fill="#EAF2FF">${L}</text>`).join("")}
+  ${x7!=null?`<g class="fm"><line x1="${x7}" x2="${x7}" y1="44" y2="96" stroke="#FFB547" stroke-width="4"/><text x="${x7}" y="34" text-anchor="middle" font-family="JBM" font-weight="800" font-size="20" fill="#FFB547">7D MAX ${esc(s.c7)}</text></g>`:""}
+  ${x24!=null?`<g class="fm"><path d="M${x24-12} 104 L${x24+12} 104 L${x24} 90Z" fill="#4FF3FF"/><text x="${x24}" y="146" text-anchor="middle" font-family="JBM" font-weight="800" font-size="20" fill="#4FF3FF">24H ${esc(s.c24)}</text></g>`:""}</svg>`}
+function moonSvg(frac,size){const r=size/2-10,c=size/2,ph=frac*2*Math.PI,k=Math.cos(ph),wax=frac<.5;
+ // lit part: half disc on the lit side + an ellipse of half-width r*|k| (gibbous adds it, crescent cuts it)
+ const sw=wax?1:0,ex=Math.abs(k)*r,lit=`M${c} ${c-r} A${r} ${r} 0 0 ${sw} ${c} ${c+r} A${ex} ${r} 0 0 ${k<0?sw:1-sw} ${c} ${c-r}Z`;
+ return `<svg class="svg" viewBox="0 0 ${size} ${size}"><defs><radialGradient id="mg" cx="40%" cy="35%"><stop offset="0" stop-color="#f2efe8"/><stop offset=".7" stop-color="#bdb8ae"/><stop offset="1" stop-color="#8d887f"/></radialGradient>
+  <clipPath id="lit"><path d="${lit}"/></clipPath></defs><circle cx="${c}" cy="${c}" r="${r}" fill="#141821"/>
+  <g clip-path="url(#lit)"><circle cx="${c}" cy="${c}" r="${r}" fill="url(#mg)"/>${[[.38,.36,.16],[.6,.3,.11],[.55,.55,.14],[.35,.62,.09],[.68,.66,.07],[.46,.78,.06]].map(([x,y,s])=>`<ellipse cx="${size*x}" cy="${size*y}" rx="${size*s}" ry="${size*s*.8}" fill="rgba(80,80,90,.32)"/>`).join("")}</g>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="rgba(234,242,255,.15)" stroke-width="2"/></svg>`}
+function reticle(){let s=`<svg viewBox="0 0 620 620" class="svg">`;s+=`<g class="r1"><circle cx="310" cy="310" r="290" fill="none" stroke="rgba(79,243,255,.5)" stroke-width="2" stroke-dasharray="4 14"/></g>
+ <g class="r2"><circle cx="310" cy="310" r="230" fill="none" stroke="rgba(79,243,255,.8)" stroke-width="4" stroke-dasharray="120 60 20 60"/></g>
+ ${[0,90,180,270].map(a=>`<line x1="310" y1="0" x2="310" y2="60" stroke="#4FF3FF" stroke-width="4" transform="rotate(${a} 310 310)"/>`).join("")}
+ <circle cx="310" cy="310" r="8" fill="#4FF3FF"/></svg>`;return s}
+// ---- build
+function build(data){D=data;SC=[];SFX=[];
+ document.getElementById("bn").textContent=String(D.brand).toUpperCase();document.getElementById("wm").textContent=String(D.brand).toUpperCase();
+ document.getElementById("hd").textContent="SKY REPORT // "+D.date;document.getElementById("hs").textContent="LIVE DATA · NASA · NOAA";document.getElementById("src").textContent=D.source||"";
+ document.getElementById("mk").innerHTML=MARK("h");document.getElementById("logo").innerHTML=MARK("l");
+ const R=rnd(42);let st="";STARS=[];for(let i=0;i<170;i++){const x=R()*1080,y=R()*1920,r=R()<.08?2.2:R()*1.3+.4;STARS.push(R()*6.28);st+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(1)}" fill="#fff"/>`}
+ document.getElementById("stars").innerHTML=st;document.getElementById("stars").setAttribute("viewBox","0 0 1080 1920");
+ let h="",t=INTRO;const add=(s,dur,html)=>{const v=D.dur&&D.dur[s.id],off=s.kind==="hook"?.15:.35;if(v!=null)dur=Math.max(2.6,v+off+.4);
+  SC.push({id:s.id,kind:s.kind,t0:t,t1:t+dur,va:t+off});t+=dur;h+=`<div class="sc" id="${s.id}">${html}</div>`};
+ for(const s of D.scenes){
+  if(s.kind==="hook")add(s,4,`<div class="ret">${reticle()}</div><div class="low"><div class="kick"><i></i>${esc(s.kicker)}</div><div class="big" data-n="${esc(s.big)}">${esc(s.big)}</div><div class="unit">${esc(s.unit)}</div><div class="sub">${esc(s.sub)}</div></div>`);
+  else if(s.kind==="ast")add(s,14,`<div class="kick"><i></i>Asteroid watch</div><div class="t1">${esc(s.des)}</div><div class="meta">${esc(s.when)} · ${esc(s.time)} · Safe flyby</div>
+   <div class="panel p1"><div class="plab">Distance from Earth</div>${distSvg(s)}</div><div class="panel p2"><div class="plab">Size check</div>${sizeSvg(s)}</div>
+   <div class="tiles"><div class="tile"><b data-v="${s.mph}">${com(s.mph)}</b><span>MPH</span></div><div class="tile"><b>${s.ld<10?s.ld.toFixed(2):Math.round(s.ld)}</b><span>Moon distances</span></div><div class="tile"><b data-v="${s.count}">${s.count}</b><span>Flybys · 10 days</span></div></div>`);
+  else if(s.kind==="aur")add(s,10,`<div class="kick" style="${s.k>=5?"border-color:var(--aur);color:var(--aur)":""}"><i style="${s.k>=5?"background:var(--aur)":""}"></i>${s.k>=5?"Aurora alert":"Aurora forecast"}</div><div class="t1">Northern lights</div><div class="meta">Tonight · NOAA forecast${s.g?" · "+s.g+" storm":""}</div>
+   ${s.img?`<div class="scope"><div class="img"><img src="${esc(s.img)}"></div><svg viewBox="0 0 520 520"><g class="sr"><circle cx="260" cy="260" r="250" fill="none" stroke="rgba(92,255,168,.7)" stroke-width="3" stroke-dasharray="30 12"/></g><circle cx="260" cy="260" r="232" fill="none" stroke="rgba(234,242,255,.3)" stroke-width="2"/></svg></div>`:""}
+   <div class="panel aurrow"><div>${kpSvg(s.kp)}</div><div><div class="plab">Best viewing</div><div class="where" style="margin-top:14px">${esc(s.where.replace(/^as far south as /,"As far south as "))}</div></div></div>`);
+  else if(s.kind==="sun")add(s,10,`<div class="kick" style="border-color:var(--sol);color:var(--sol)"><i style="background:var(--sol)"></i>Space weather</div><div class="t1">The Sun today</div><div class="meta">NASA SDO · latest image</div>
+   ${s.img?`<div class="sunbox"><div class="glow"></div><img src="${esc(s.img)}"></div>`:""}<div class="panel"><div class="plab">Solar flare scale</div>${flareSvg(s)}</div>
+   <div class="tiles"><div class="tile"><b data-v="${s.n24}">${s.n24}</b><span>Flares · 24h</span></div><div class="tile"><b>${s.m}%</b><span>M-class odds</span></div><div class="tile"><b>${s.x}%</b><span>X-class odds</span></div></div>`);
+  else if(s.kind==="lau")add(s,12,`<div class="kick"><i></i>Launch schedule</div><div class="t1">Liftoff</div><div class="meta">Next ${s.items.length} launches · Eastern time</div>
+   ${s.items.map((l,i)=>`<div class="lc"><div class="d"><b>${esc(l.day.split(" ")[0])}</b><span>${esc(l.day.split(" ").slice(1).join(" "))}</span><span>${esc(l.time.replace(" ET",""))}</span></div>
+    <div class="r"><b>${esc(l.rocket)}</b><p>${esc(l.mission)}</p><small>${esc(l.prov)} · ${esc(l.loc)}${l.orbit?" · "+esc(l.orbit):""}</small></div><div class="tm" data-net="${esc(l.net)}"></div></div>`).join("")}`);
+  else if(s.kind==="moon")add(s,9,`<div class="kick"><i></i>Moon tonight</div><div class="t1">${esc(s.phase)}</div><div class="meta">Next full: ${esc(s.fullName)} Moon · ${esc(s.full)}</div>
+   <div class="moonrow"><div class="mn">${moonSvg(s.frac,520)}</div><div class="pct"><b data-v="${s.illum}">${s.illum}%</b><span>Illuminated</span><span style="margin-top:30px">Moon age<br>${s.age} days</span></div></div>
+   <div class="panel"><div class="plab">Lunar cycle</div><div class="phases">${["New","Wax Cr","1st Q","Wax Gib","Full","Wan Gib","Last Q","Wan Cr"].map((n,i)=>`<div class="${Math.round(s.frac*8)%8===i?"on":""}"><div style="width:80px;margin:0 auto 10px">${moonSvg(i/8,80).replace(/id="(mg|lit)"/g,'id="$1'+i+'"').replace(/url\(#(mg|lit)\)/g,"url(#$1"+i+")")}</div>${n}</div>`).join("")}</div></div>`);
+  else if(s.kind==="outro")add(s,3.6,`<div class="mid"><div class="kick" style="margin:0 auto"><i></i>New report every day</div><div class="t1" style="margin-top:30px">Follow<br>${esc(D.brand)}</div><div class="follow"><span id="fl">Follow</span><div class="ring"></div></div></div>`);
+ }
+ const short=MIN-(t+TAIL);if(short>0){const mids=SC.filter(s=>s.kind!=="hook"),per=short/mids.length;let sh=0;for(const s of SC){s.t0+=sh;s.va+=sh;if(s.kind!=="hook")sh+=per;s.t1+=sh}t+=short}
+ document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
+ document.querySelectorAll(".t1,.lc .r b").forEach(e=>fit(e,40));document.querySelectorAll("#hook .big").forEach(e=>fit(e,90));
+ for(const s of SC){if(s.kind!=="hook")SFX.push({t:s.t0,k:"whoosh"});if(s.kind==="hook"||s.kind==="outro")SFX.push({t:s.t0+.5,k:"pop"})}
+ SFX.push({t:.05,k:"whoosh"},{t:INTRO-.05,k:"stamp"},{t:t+.1,k:"sting"});
+ return TOTAL}
+// when the cue-th sentence of this scene starts (or a fallback time)
+function at(s,i,fb){const c=D.cues&&D.cues[s.id];return c&&c[i]!=null?s.va-s.t0+c[i]-.2:fb}
+function render(t){
+ document.querySelectorAll("#stars circle").forEach((c,i)=>{c.setAttribute("opacity",(.35+.45*Math.abs(Math.sin(t*1.3+STARS[i]))).toFixed(2))});
+ for(let j=0;j<SC.length;j++){const s=SC[j],el=document.getElementById(s.id),on=t>=s.t0-.01&&t<s.t1+.35;if(!on){el.style.opacity=0;continue}
+  const lt=t-s.t0,a=s.kind==="hook"?ease((lt+.05)/.3):ease(lt/.45),b=ease((s.t1+.35-t)/.35),g=lt<.25&&s.kind!=="hook"?(Math.sin(lt*90)>0?1:0)*(1-lt/.25):0;
+  el.style.opacity=Math.min(a,b).toFixed(3);el.style.transform=`translate(${((1-a)*-60+g*14).toFixed(1)}px,${((1-a)*30).toFixed(1)}px) scale(${(.97+.03*Math.min(a,b)).toFixed(4)})`;
+  el.style.filter=g?`drop-shadow(${(g*8).toFixed(1)}px 0 0 rgba(255,79,216,.7)) drop-shadow(${(-g*8).toFixed(1)}px 0 0 rgba(79,243,255,.7))`:"none";
+  const rev=(sel,t0,dt=.12)=>el.querySelectorAll(sel).forEach((x,i)=>{const y=pop((lt-t0-i*dt)/.45);x.style.opacity=clamp((lt-t0-i*dt)/.12).toFixed(3);x.style.transform=`translateY(${((1-y)*40).toFixed(1)}px)`});
+  el.querySelectorAll("[data-v]").forEach(n=>{const v=+n.dataset.v,k=ease((lt-.4)/1.2),txt=n.textContent;if(!isNaN(v))n.textContent=(txt.endsWith("%")?Math.round(v*k)+"%":com(v*k))});
+  if(s.kind==="hook"){el.querySelector(".r1").setAttribute("transform",`rotate(${(lt*12).toFixed(1)} 310 310)`);el.querySelector(".r2").setAttribute("transform",`rotate(${(-lt*30).toFixed(1)} 310 310)`);
+   const rt=el.querySelector(".ret");rt.style.transform=`scale(${(1.6-.6*ease(lt/.8)).toFixed(3)})`;rt.style.opacity=ease(lt/.5);
+   const bg=el.querySelector(".big"),y=pop((lt-.1)/.5);bg.style.transform=`scale(${(.6+.4*y).toFixed(3)})`;bg.style.transformOrigin="0 50%";rev(".kick,.unit,.sub",.25,.18)}
+  if(s.kind==="ast"){rev(".kick,.t1,.meta",0,.08);const c1=at(s,1,1.2),c2=at(s,2,4),c3=at(s,3,7);
+   const p1=el.querySelector(".p1"),p2=el.querySelector(".p2"),ti=el.querySelectorAll(".tile");[[p1,c1],[p2,c2]].forEach(([p,c])=>{const y=pop((lt-c)/.5);p.style.opacity=clamp((lt-c)/.15).toFixed(3);p.style.transform=`translateX(${((1-y)*-80).toFixed(1)}px)`});
+   ti.forEach((x,i)=>{const y=pop((lt-c3-i*.12)/.45);x.style.opacity=clamp((lt-c3-i*.12)/.12).toFixed(3);x.style.transform=`scale(${(.6+.4*y).toFixed(3)})`});
+   const am=el.querySelector(".am"),k=eio((lt-c1-.2)/1.6),x=+am.dataset.x0+(+am.dataset.x-am.dataset.x0)*k,yy=+am.dataset.y-70*(1-k)*(1-k);am.setAttribute("transform",`translate(${x.toFixed(1)} ${yy.toFixed(1)})`);
+   el.querySelector(".al").setAttribute("opacity",clamp((lt-c1-1.7)/.3));el.querySelector(".tr").setAttribute("stroke-dashoffset",(-lt*30).toFixed(0));
+   const az=el.querySelector(".az");az.style.transformBox="fill-box";az.style.transformOrigin="center";az.style.rotate=(lt*8).toFixed(1)+"deg"}
+  if(s.kind==="aur"){rev(".kick,.t1,.meta,.scope,.panel",0,.12);const sr=el.querySelector(".sr");if(sr)sr.setAttribute("transform",`rotate(${(lt*10).toFixed(1)} 260 260)`);
+   const im=el.querySelector(".scope img");if(im)im.style.transform=`scale(${(1.32+lt*.006).toFixed(3)}) rotate(${(lt*1.2).toFixed(2)}deg)`;
+   const nd=el.querySelector(".ndl"),kp=+nd.dataset.kp,k=pop((lt-.9)/.9);nd.setAttribute("transform",`rotate(${(180*kp/9*k).toFixed(1)} 160 170)`)}
+  if(s.kind==="sun"){rev(".kick,.t1,.meta,.sunbox,.panel,.tile",0,.12);const im=el.querySelector(".sunbox img");if(im)im.style.transform=`rotate(${(lt*2).toFixed(2)}deg) scale(${(1+.01*Math.sin(lt*2)).toFixed(4)})`;
+   const gl=el.querySelector(".glow");if(gl)gl.style.transform=`scale(${(1+.05*Math.sin(lt*2.4)).toFixed(3)})`}
+  if(s.kind==="lau"){rev(".kick,.t1,.meta",0,.08);const L=el.querySelectorAll(".lc");L.forEach((x,i)=>{const c=at(s,i+1,1+i*2.5)-.1,y=pop((lt-c)/.5);x.style.opacity=clamp((lt-c)/.12).toFixed(3);x.style.transform=`translateX(${((1-y)*120).toFixed(1)}px)`;
+    const tm=x.querySelector(".tm"),dt=Math.max(0,(Date.parse(tm.dataset.net)-(D.genAt||Date.parse(D.day+"T13:00:00Z")))/1e3-lt),d=Math.floor(dt/86400),hh=Math.floor(dt%86400/3600),mm=Math.floor(dt%3600/60),ss=Math.floor(dt%60);
+    tm.textContent=`T-${String(d).padStart(2,"0")}D ${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`})}
+  if(s.kind==="moon"){rev(".kick,.t1,.meta,.panel",0,.1);const mn=el.querySelector(".mn");mn.style.transform=`scale(${(.85+.15*pop((lt-.2)/.6)).toFixed(3)}) rotate(${(-6+lt*.8).toFixed(2)}deg)`;mn.style.opacity=ease((lt-.1)/.4);
+   el.querySelectorAll(".phases>div").forEach((x,i)=>{x.style.opacity=clamp((lt-1-i*.08)/.15).toFixed(3)})}
+  if(s.kind==="outro"){rev(".kick,.t1",.1,.12);const v=el.querySelector(".follow"),r=el.querySelector(".ring"),tp=lt-1.3;v.style.transform=`scale(${tp<0?pop((lt-.5)/.5):tp<.12?1-.06*(tp/.12):.94+.06*pop((tp-.12)/.4)})`;
+   if(tp>0){const y=ease(tp/.7);r.style.opacity=(1-y).toFixed(3);r.style.transform=`scale(${(1+y*5).toFixed(3)})`}
+   document.getElementById("fl").textContent=tp>.12?"Following ✓":"Follow";v.style.background=tp>.12?"var(--ion)":"transparent";v.style.color=tp>.12?"#03040A":"var(--ion)"}}
+ document.getElementById("prog").style.width=(clamp(t/TOTAL)*940).toFixed(1)+"px";
+ // the mark spins in hud; the intro draws the logo, flashes, and flies into the first scene; the end returns to the logo (loops back to frame one)
+ const hm=document.getElementById("hmoon"),[hx,hy]=orbPos(t*2.2);hm.setAttribute("cx",hx.toFixed(1));hm.setAttribute("cy",hy.toFixed(1));
+ const end=TOTAL-TAIL;let lo=0,ls=1,bk=0,wd=0,fl=0,ang=t*2.2;
+ if(t<INTRO+.15){bk=1;lo=1;if(t>INTRO-.2){const x=ease((t-INTRO+.2)/.35);ls=1+x*6;lo=1-x;bk=1-x}fl=t>INTRO-.08&&t<INTRO+.12?1-Math.abs(t-INTRO+.02)/.12:0}
+ if(t>end+.1){const k=t-end-.1;bk=clamp(k/.3);lo=clamp(k/.2);ls=1+.4*(1-pop(k/.5));wd=Math.min(ease((k-.5)/.4),ease((TOTAL-.1-t)/.5));ang=-1.4+eio(k/1.5)*Math.PI*2}
+ document.getElementById("black").style.opacity=bk.toFixed(3);const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`scale(${ls.toFixed(3)})`;
+ const [lx,ly]=orbPos(t<1?-1.4+eio(t/INTRO)*Math.PI*2:ang);const lm=document.getElementById("lmoon");lm.setAttribute("cx",lx.toFixed(1));lm.setAttribute("cy",ly.toFixed(1));
+ document.getElementById("lorb").setAttribute("stroke-dashoffset",(t<1?604*(1-ease(t/(INTRO-.1))):0).toFixed(0));
+ document.getElementById("wordm").style.opacity=wd.toFixed(3);document.getElementById("flash").style.opacity=(fl*.8).toFixed(3);
+ for(const q of ["#hud","#tick","#prog","#src"])document.querySelector(q).style.opacity=(1-Math.max(lo,bk)).toFixed(3)}
+// cover image: the hook's number and label over the day's picture (Sun, aurora, asteroid or Moon)
+window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),sc=D.scenes.find(s=>s.kind===H.topic)||{};
+ const art=H.topic==="sun"&&sc.img?`<img src="${esc(sc.img)}">`:H.topic==="aur"&&sc.img?`<img src="${esc(sc.img)}" style="box-shadow:0 0 140px rgba(92,255,168,.6)">`:H.topic==="moon"?`<div style="width:760px">${moonSvg(sc.frac||.5,760)}</div>`
+  :`<svg viewBox="-400 -400 800 800" style="width:760px;filter:drop-shadow(0 0 80px rgba(255,181,71,.55))"><defs><radialGradient id="rk" cx="35%" cy="30%"><stop offset="0" stop-color="#d4ccc0"/><stop offset=".6" stop-color="#7a7066"/><stop offset="1" stop-color="#2a2622"/></radialGradient></defs>${rock(11,330)}</svg>`;
+ T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1080 1920">${document.getElementById("stars").innerHTML}</svg><div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
+  <div class="art">${art}</div><div class="k"><span>${esc(H.kicker)}</span></div><div class="bigt">${esc(H.big)}</div><div class="u">${esc(H.unit)}</div><div class="bn">Sky report · ${esc(D.date)}</div>`;
+ T.style.display="block";fit(T.querySelector(".bigt"),90);const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
+window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"'].map(f=>document.fonts.load(f)));
+window.build=build;window.render=render;
+</script></body></html>
