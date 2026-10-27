@@ -31,6 +31,11 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 .kick i{width:12px;height:12px;background:var(--ion);box-shadow:0 0 14px var(--ion)}
 .t1{font:800 84px/1 "Unbounded";letter-spacing:.01em;text-transform:uppercase;margin-top:22px;white-space:nowrap;text-shadow:0 6px 30px rgba(0,0,0,.6)}
 .meta{font:700 28px/1.3 "JBM";letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-top:16px}
+/* typed lines: a data readout under the title and a "did you know" at the bottom */
+.rd{font:700 22px/1.3 "JBM";letter-spacing:.06em;color:var(--aur);margin-top:12px;white-space:nowrap;overflow:hidden;min-height:29px}
+.ty{position:absolute;left:0;right:0;bottom:0;font:700 27px/1.38 "JBM";color:var(--ink);background:rgba(4,8,20,.72);border-left:5px solid var(--ion);padding:16px 20px;min-height:96px}
+.ty b{color:var(--ion);font-weight:800}
+.cr{display:inline-block;width:14px;height:26px;background:var(--ion);vertical-align:-4px;margin-left:4px}
 .panel{position:relative;background:var(--glass);border:2px solid var(--line);padding:26px 30px;margin-top:26px}
 .panel::before,.panel::after{content:"";position:absolute;width:22px;height:22px;border:3px solid var(--ion)}
 .panel::before{left:-3px;top:-3px;border-right:0;border-bottom:0}.panel::after{right:-3px;bottom:-3px;border-left:0;border-top:0}
@@ -174,6 +179,8 @@ function moonSvg(frac,size){const r=size/2-10,c=size/2,ph=frac*2*Math.PI,k=Math.
   <clipPath id="lit"><path d="${lit}"/></clipPath></defs><circle cx="${c}" cy="${c}" r="${r}" fill="#141821"/>
   <g clip-path="url(#lit)"><circle cx="${c}" cy="${c}" r="${r}" fill="url(#mg)"/>${[[.38,.36,.16],[.6,.3,.11],[.55,.55,.14],[.35,.62,.09],[.68,.66,.07],[.46,.78,.06]].map(([x,y,s])=>`<ellipse cx="${size*x}" cy="${size*y}" rx="${size*s}" ry="${size*s*.8}" fill="rgba(80,80,90,.32)"/>`).join("")}</g>
   <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="rgba(234,242,255,.15)" stroke-width="2"/></svg>`}
+// the readout line under the title; the fact box goes at the bottom of the scene (added in add())
+const TY=s=>s.read?`<div class="rd" data-txt="${esc(s.read)}"></div>`:"";
 function reticle(){let s=`<svg viewBox="0 0 620 620" class="svg">`;s+=`<g class="r1"><circle cx="310" cy="310" r="290" fill="none" stroke="rgba(79,243,255,.5)" stroke-width="2" stroke-dasharray="4 14"/></g>
  <g class="r2"><circle cx="310" cy="310" r="230" fill="none" stroke="rgba(79,243,255,.8)" stroke-width="4" stroke-dasharray="120 60 20 60"/></g>
  ${[0,90,180,270].map(a=>`<line x1="310" y1="0" x2="310" y2="60" stroke="#4FF3FF" stroke-width="4" transform="rotate(${a} 310 310)"/>`).join("")}
@@ -188,22 +195,22 @@ function build(data){D=data;SC=[];SFX=[];
  const R=rnd(42);let st="";STARS=[];for(let i=0;i<170;i++){const x=R()*1080,y=R()*1920,r=R()<.08?2.2:R()*1.3+.4;STARS.push(R()*6.28);st+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(1)}" fill="#fff"/>`}
  document.getElementById("stars").innerHTML=st;document.getElementById("stars").setAttribute("viewBox","0 0 1080 1920");
  let h="",t=INTRO;const add=(s,dur,html)=>{const v=D.dur&&D.dur[s.id],off=s.kind==="hook"?.15:.35;if(v!=null)dur=Math.max(2.6,v+off+.4);
-  SC.push({id:s.id,kind:s.kind,t0:t,t1:t+dur,va:t+off});t+=dur;h+=`<div class="sc" id="${s.id}">${html}</div>`};
+  SC.push({id:s.id,kind:s.kind,t0:t,t1:t+dur,va:t+off});t+=dur;h+=`<div class="sc" id="${s.id}">${html}${s.fact?`<div class="ty" data-txt="${esc(s.fact)}"></div>`:""}</div>`};
  for(const s of D.scenes){
   if(s.kind==="hook")add(s,4,`<div class="ret">${reticle()}</div><div class="low"><div class="kick"><i></i>${esc(s.kicker)}</div><div class="big" data-n="${esc(s.big)}">${esc(s.big)}</div><div class="unit">${esc(s.unit)}</div><div class="sub">${esc(s.sub)}</div></div>`);
-  else if(s.kind==="ast")add(s,14,`<div class="kick"><i></i>Asteroid watch</div><div class="t1">${esc(s.des)}</div><div class="meta">${esc(s.when)} · ${esc(s.time)} · Safe flyby</div>
+  else if(s.kind==="ast")add(s,14,`<div class="kick"><i></i>Asteroid watch</div><div class="t1">${esc(s.des)}</div><div class="meta">${esc(s.when)} · ${esc(s.time)} · Safe flyby</div>${TY(s)}
    <div class="panel p1"><div class="plab">Distance from Earth</div>${distSvg(s)}</div><div class="panel p2"><div class="plab">Size check</div>${sizeSvg(s)}</div>
    <div class="tiles"><div class="tile"><b data-v="${s.mph}">${com(s.mph)}</b><span>MPH</span></div><div class="tile"><b>${s.ld<10?s.ld.toFixed(2):Math.round(s.ld)}</b><span>Moon distances</span></div><div class="tile"><b data-v="${s.count}">${s.count}</b><span>Flybys · 10 days</span></div></div>`);
-  else if(s.kind==="aur")add(s,10,`<div class="kick" style="${s.k>=5?"border-color:var(--aur);color:var(--aur)":""}"><i style="${s.k>=5?"background:var(--aur)":""}"></i>${s.k>=5?"Aurora alert":"Aurora forecast"}</div><div class="t1">Northern lights</div><div class="meta">Tonight · NOAA forecast${s.g?" · "+s.g+" storm":""}</div>
+  else if(s.kind==="aur")add(s,10,`<div class="kick" style="${s.k>=5?"border-color:var(--aur);color:var(--aur)":""}"><i style="${s.k>=5?"background:var(--aur)":""}"></i>${s.k>=5?"Aurora alert":"Aurora forecast"}</div><div class="t1">Northern lights</div><div class="meta">Tonight · NOAA forecast${s.g?" · "+s.g+" storm":""}</div>${TY(s)}
    ${s.img?`<div class="scope"><div class="img"><img src="${esc(s.img)}"></div><svg viewBox="0 0 520 520"><g class="sr"><circle cx="260" cy="260" r="250" fill="none" stroke="rgba(92,255,168,.7)" stroke-width="3" stroke-dasharray="30 12"/></g><circle cx="260" cy="260" r="232" fill="none" stroke="rgba(234,242,255,.3)" stroke-width="2"/></svg></div>`:""}
    <div class="panel aurrow"><div>${kpSvg(s.kp)}</div><div><div class="plab">Best viewing</div><div class="where" style="margin-top:14px">${esc(s.where.replace(/^as far south as /,"As far south as "))}</div></div></div>`);
-  else if(s.kind==="sun")add(s,10,`<div class="kick" style="border-color:var(--sol);color:var(--sol)"><i style="background:var(--sol)"></i>Space weather</div><div class="t1">The Sun today</div><div class="meta">NASA SDO · latest image</div>
+  else if(s.kind==="sun")add(s,10,`<div class="kick" style="border-color:var(--sol);color:var(--sol)"><i style="background:var(--sol)"></i>Space weather</div><div class="t1">The Sun today</div><div class="meta">NASA SDO · latest image</div>${TY(s)}
    ${s.img?`<div class="sunbox"><div class="glow"></div><img src="${esc(s.img)}"></div>`:""}<div class="panel"><div class="plab">Solar flare scale</div>${flareSvg(s)}</div>
    <div class="tiles"><div class="tile"><b data-v="${s.n24}">${s.n24}</b><span>Flares · 24h</span></div><div class="tile"><b>${s.m}%</b><span>M-class odds</span></div><div class="tile"><b>${s.x}%</b><span>X-class odds</span></div></div>`);
-  else if(s.kind==="lau")add(s,12,`<div class="kick"><i></i>Launch schedule</div><div class="t1">Liftoff</div><div class="meta">Next ${s.items.length} launches · Eastern time</div>
+  else if(s.kind==="lau")add(s,12,`<div class="kick"><i></i>Launch schedule</div><div class="t1">Liftoff</div><div class="meta">Next ${s.items.length} launches · Eastern time</div>${TY(s)}
    ${s.items.map((l,i)=>`<div class="lc"><div class="d"><b>${esc(l.day.split(" ")[0].replace(",",""))}</b><span>${esc(l.day.split(" ").slice(1).join(" "))}</span><span>${esc(l.time.replace(" ET",""))}</span></div>
     <div class="r"><b>${esc(l.rocket)}</b><p>${esc(l.mission)}</p><small>${esc(l.prov)} · ${esc(l.loc)}${l.orbit?" · "+esc(l.orbit):""}</small></div><div class="tm" data-net="${esc(l.net)}"></div></div>`).join("")}`);
-  else if(s.kind==="moon")add(s,9,`<div class="kick"><i></i>Moon tonight</div><div class="t1">${esc(s.phase)}</div><div class="meta">Next full: ${esc(s.fullName)} Moon · ${esc(s.full)}</div>
+  else if(s.kind==="moon")add(s,9,`<div class="kick"><i></i>Moon tonight</div><div class="t1">${esc(s.phase)}</div><div class="meta">Next full: ${esc(s.fullName)} Moon · ${esc(s.full)}</div>${TY(s)}
    <div class="moonrow"><div class="mn">${moonSvg(s.frac,520)}</div><div class="pct"><b data-v="${s.illum}">${s.illum}%</b><span>Illuminated</span><span style="margin-top:30px">Moon age<br>${s.age} days</span></div></div>
    <div class="panel"><div class="plab">Lunar cycle</div><div class="phases">${["New","Wax Cr","1st Q","Wax Gib","Full","Wan Gib","Last Q","Wan Cr"].map((n,i)=>`<div class="${Math.round(s.frac*8)%8===i?"on":""}"><div style="width:80px;margin:0 auto 10px">${moonSvg(i/8,80).replace(/id="(mg|lit)"/g,'id="$1'+i+'"').replace(/url\(#(mg|lit)\)/g,"url(#$1"+i+")")}</div>${n}</div>`).join("")}</div></div>`);
   else if(s.kind==="outro")add(s,3.6,`<div class="mid"><div class="kick" style="margin:0 auto"><i></i>New report every day</div><div class="t1" style="margin-top:30px">Follow<br>${esc(D.brand)}</div><div class="follow"><span id="fl">Follow</span><div class="ring"></div></div></div>`);
@@ -213,6 +220,8 @@ function build(data){D=data;SC=[];SFX=[];
  document.querySelectorAll(".t1,.lc .r b").forEach(e=>fit(e,40));document.querySelectorAll("#hook .big").forEach(e=>fit(e,90));
  for(const s of SC){if(s.kind!=="hook")SFX.push({t:s.t0,k:"whoosh"});if(s.kind==="hook"||s.kind==="outro")SFX.push({t:s.t0+.5,k:"pop"})}
  SFX.push({t:.02,k:"rumble"},{t:.05,k:"whoosh"},{t:1.15,k:"stamp"},{t:INTRO-.75,k:"riser"},{t:INTRO-.35,k:"whoosh"},{t:t+.1,k:"sting"},{t:t+1.2,k:"rumble"},{t:t+1.3,k:"whoosh"});
+ for(const s of SC){if(D.scenes.find(x=>x.id===s.id&&x.read))SFX.push({t:s.t0+.6,k:"compute"});const sc=D.scenes.find(x=>x.id===s.id);
+  if(sc&&sc.fact){const at0=s.t0+Math.max(2.4,(s.t1-s.t0)*.45);for(let k=0;k<Math.ceil(sc.fact.length/34/1.4);k++)SFX.push({t:at0+k*1.4,k:"typing"})}}
  // data sounds: an impact on the headline number, a beep as each panel locks in, ticks as the tiles land
  for(const s of SC){if(s.kind==="hook")SFX.push({t:s.t0+.3,k:"impact"});
   if(s.kind==="ast"){const at2=(i,fb)=>s.t0+at(s,i,fb);SFX.push({t:at2(1,1.2),k:"beep"},{t:at2(2,4),k:"beep"});for(let i=0;i<3;i++)SFX.push({t:at2(3,7)+i*.12,k:"tick"})}
@@ -229,6 +238,10 @@ function render(t){
   el.style.filter=g?`drop-shadow(${(g*8).toFixed(1)}px 0 0 rgba(255,79,216,.7)) drop-shadow(${(-g*8).toFixed(1)}px 0 0 rgba(79,243,255,.7))`:"none";
   const rev=(sel,t0,dt=.12)=>el.querySelectorAll(sel).forEach((x,i)=>{const y=pop((lt-t0-i*dt)/.45);x.style.opacity=clamp((lt-t0-i*dt)/.12).toFixed(3);x.style.transform=`translateY(${((1-y)*40).toFixed(1)}px)`});
   el.querySelectorAll("[data-v]").forEach(n=>{const v=+n.dataset.v,k=ease((lt-.4)/1.2),txt=n.textContent;if(!isNaN(v))n.textContent=(txt.endsWith("%")?Math.round(v*k)+"%":Number.isInteger(v)?com(v*k):(v*k).toFixed(1))});
+  const CPS=34,tyAt=Math.max(2.4,(s.t1-s.t0)*.45);
+  el.querySelectorAll(".rd").forEach(r=>{const n=Math.floor(Math.max(0,lt-.6)*CPS*1.4),tx=r.dataset.txt;r.textContent=tx.slice(0,n)+(n<tx.length&&lt>.6?"▌":"")});
+  el.querySelectorAll(".ty").forEach(r=>{const n=Math.floor(Math.max(0,lt-tyAt)*CPS),tx=r.dataset.txt,on=lt>tyAt-.3;r.style.opacity=on?clamp((lt-tyAt+.3)/.25).toFixed(3):0;
+   r.innerHTML=on?`<b>&gt; DID YOU KNOW: </b>${esc(tx.slice(0,n))}${n<tx.length||Math.floor(lt*2.5)%2?'<span class="cr"></span>':""}`:""});
   if(s.kind==="hook"){el.querySelector(".r1").setAttribute("transform",`rotate(${(lt*12).toFixed(1)} 310 310)`);el.querySelector(".r2").setAttribute("transform",`rotate(${(-lt*30).toFixed(1)} 310 310)`);
    const rt=el.querySelector(".ret");rt.style.transform=`scale(${(1.6-.6*ease(lt/.8)).toFixed(3)})`;rt.style.opacity=ease(lt/.5);
    const bg=el.querySelector(".big"),y=pop((lt-.1)/.5);bg.style.transform=`scale(${(.6+.4*y).toFixed(3)})`;bg.style.transformOrigin="0 50%";rev(".kick,.unit,.sub",.25,.18)}

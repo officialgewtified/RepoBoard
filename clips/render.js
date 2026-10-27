@@ -65,6 +65,9 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
       beep: ["aevalsrc=0.6*sin(2*PI*1320*t):d=0.09:s=48000", "afade=t=out:st=0.05:d=0.04,volume=0.22"],
       rumble: ["anoisesrc=d=1.8:c=brown:a=0.9", "lowpass=f=420,afade=t=in:st=0:d=0.35,afade=t=out:st=1.1:d=0.7,volume=1.1"],
       swish: ["anoisesrc=d=0.25:c=pink:a=0.6", "bandpass=f=4000:w=3000,afade=t=in:d=0.03,afade=t=out:st=0.08:d=0.17,volume=0.5"],
+      // typewriter clicks (1.4s burst) and sci-fi computer chatter (random-pitch blips)
+      typing: ["aevalsrc=0.55*(random(0)*2-1)*exp(-(t-floor(t/0.058)*0.058)*170)+0.15*sin(2*PI*3100*t)*exp(-(t-floor(t/0.058)*0.058)*240):d=1.4:s=48000", "highpass=f=1200,volume=0.35"],
+      compute: ["aevalsrc=0.3*sin(2*PI*(900+500*sin(floor(t*22)*78.233))*t)*(1+sgn(sin(2*PI*22*t)))/2:d=0.9:s=48000", "afade=t=out:st=0.7:d=0.2,volume=0.28"],
       sting: ["aevalsrc=0.9*sin(2*PI*55*t)*exp(-3.5*t)+0.25*(random(0)*2-1)*exp(-40*t)+0.32*sin(2*PI*329.6*(t-0.05))*exp(-5*(t-0.05))*(1+sgn(t-0.05))/2+0.32*sin(2*PI*493.9*(t-0.22))*exp(-5*(t-0.22))*(1+sgn(t-0.22))/2+0.36*sin(2*PI*659.3*(t-0.39))*exp(-3.2*(t-0.39))*(1+sgn(t-0.39))/2:d=1.8:s=48000", "volume=0.6"] };
     for (const [k, [src, fx]] of Object.entries(SYN)) await run(["-y", "-loglevel", "error", "-f", "lavfi", "-i", src, "-af", fx, "-ar", "48000", "-ac", "1", path.join(tmp, k + ".wav")]);
     // the voice: optionally shifted deeper (PITCH < 1, Kokoro only) without changing its speed

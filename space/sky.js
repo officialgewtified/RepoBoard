@@ -28,6 +28,20 @@ function when(d, today) {
   return "on " + ET(d, { month: "long", day: "numeric" });
 }
 
+// on-screen "did you know" lines, typed out in the video (timeless, checked facts; one picked per day)
+const FACTS = {
+  ast: ["NASA's Planetary Defense Coordination Office tracks near-Earth objects around the clock.", "One lunar distance is about 238,900 miles, the average gap between Earth and the Moon.",
+    "Most shooting stars are made by bits of space dust smaller than a grain of sand.", "In 2022, NASA's DART spacecraft changed an asteroid's orbit by crashing into it on purpose."],
+  aur: ["Auroras happen when charged particles from the Sun hit gases high in our atmosphere.", "Green aurora light comes from oxygen. Purple and blue come from nitrogen.",
+    "Phone cameras often pick up auroras better than your eyes do.", "The Kp index runs from 0 to 9. The higher it goes, the farther south auroras can reach."],
+  sun: ["Sunlight takes about 8 minutes to reach Earth.", "Each flare class is 10 times stronger than the one before it: A, B, C, M, then X.",
+    "About 109 Earths would fit across the face of the Sun.", "The Sun's activity rises and falls on a cycle of about 11 years."],
+  lau: ["To stay in low Earth orbit, a spacecraft has to move about 17,500 miles per hour.", "Launching toward the east gives rockets a free boost from Earth's spin.",
+    "The International Space Station circles Earth about every 90 minutes.", "SpaceX lands and reuses the first stage of its Falcon 9 rockets."],
+  moon: ["The Moon is slowly drifting away from Earth, about 1.5 inches every year.", "We always see the same side of the Moon from Earth.",
+    "The Moon's gravity is about one-sixth of Earth's.", "A full lunar cycle, new moon to new moon, takes about 29.5 days."] };
+const factFor = (k, day) => { const L = FACTS[k]; let h = 7; for (const c of day + k) h = (h * 31 + c.charCodeAt(0)) >>> 0; return L[h % L.length]; };
+
 // ---------- asteroids
 const AU_MI = 92955807, LD = 0.00256955529;
 const REFS = [["a car", 4.5, "car"], ["a school bus", 12, "bus"], ["a blue whale", 30, "whale"], ["a Boeing 747", 70, "plane"], ["a football field", 110, "field"],
@@ -232,6 +246,14 @@ async function build(today, outDir, brand) {
     QV.moon = V.moon;
     if (MO.illum >= 97) hooks.push([6, "moon", `Tonight's full ${MO.fullName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.fullName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]);
   }
+  // the typed readouts (raw numbers, mission-control style) and the day's fact for each panel
+  if (S.ast) { const a = AS.find(x => x.des === S.ast.des); S.ast.read = `OBJ ${a.des} · ${(a.mph / 2236.94).toFixed(2)} KM/S · ${(a.ld * LD).toFixed(4)} AU · H ${a.H}`; }
+  if (S.aur) S.aur.read = `KP ${S.aur.kp} · ${S.aur.g || "G0"} · WINDOW 7PM-7AM ET`;
+  if (S.sun) S.sun.read = `GOES X-RAY · 24H MAX ${S.sun.c24 || "-"} · 7D MAX ${S.sun.c7 || "-"}`;
+  if (S.lau) S.lau.read = `${S.lau.items.length} LAUNCHES · NEXT ${S.lau.items[0].rocket.toUpperCase()} · ${S.lau.items[0].orbit || "ORBIT TBD"}`;
+  if (S.moon) S.moon.read = `AGE ${S.moon.age} D · ILLUM ${S.moon.illum}% · NEW MOON ${ET(S.moon.nextNew, { month: "short", day: "numeric" }).toUpperCase()}`;
+  if (S.lau && !S.lau.items.some(l => /Falcon 9/.test(l.rocket))) FACTS.lau = FACTS.lau.filter(f => !/Falcon/.test(f));
+  for (const k of Object.keys(S)) S[k].fact = factFor(k, today);
   sane(S);
   if (!Object.keys(S).length) return null;
   for (let i = hooks.length - 1; i >= 0; i--) if (!S[hooks[i][1]]) hooks.splice(i, 1);
