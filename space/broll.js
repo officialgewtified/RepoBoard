@@ -19,7 +19,8 @@ const LIB = {
 const SECS = 30;
 const hash = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 const enc = u => u.replace(/^http:/, "https:").replace(/ /g, "%20");
-async function files(id) { const r = await fetch(`https://images-assets.nasa.gov/video/${encodeURIComponent(id)}/collection.json`); if (!r.ok) throw new Error(r.status + " " + id); return r.json(); }
+async function files(id) { const r = await fetch(`https://images-assets.nasa.gov/video/${encodeURIComponent(id)}/collection.json`, { signal: AbortSignal.timeout(30000) }); if (!r.ok) throw new Error(r.status + " " + id); return r.json(); }
+const T0 = Date.now(), BUDGET = 11 * 60e3;   // stop looking after 11 minutes; scenes without footage get the starfield
 
 async function clip(topic, day, out) {
   const L = LIB[topic], order = L.map((x, i) => L[(i + hash(day + topic)) % L.length]);
@@ -48,8 +49,10 @@ async function clip(topic, day, out) {
   const topics = [...new Set(D.scenes.map(s => s.bg).filter(Boolean))];
   D.broll = {};
   for (const t of topics) { const f = path.join(dir, t + ".mp4");
+    if (Date.now() - T0 > BUDGET) { console.error("out of time for footage; skipping", t); continue; }
     if (fs.existsSync(f)) { D.broll[t] = path.resolve(f); continue; }   // already cut for today's other video
-    const c = await clip(t, D.day, f); if (c) D.broll[t] = c.file; }
+    const c = await clip(t, D.day, f); if (c) D.broll[t] = c.file;
+    fs.writeFileSync(df, JSON.stringify(D, null, 1)); }   // saved after every clip, so a timeout keeps what's done
   fs.writeFileSync(df, JSON.stringify(D, null, 1));
   console.log("b-roll:", Object.keys(D.broll).join(", ") || "none");
 })().catch(e => { console.error(e); process.exit(0); });   // no footage just means the graphics play over the starfield
