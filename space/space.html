@@ -52,7 +52,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 .scope img{width:100%;height:100%;object-fit:cover;transform:scale(1.32);filter:saturate(1.3) contrast(1.1)}
 .scope svg{position:absolute;inset:0;width:100%;height:100%}
 .aurrow{display:grid;grid-template-columns:330px 1fr;gap:26px;align-items:center}
-.where{font:700 34px/1.25 "Unbounded";text-transform:none}
+.where{font:700 30px/1.25 "Unbounded";text-transform:none}
 /* sun */
 .sunbox{position:relative;width:560px;height:560px;margin:24px auto 0}
 .sunbox img{position:absolute;inset:40px;width:480px;height:480px;border-radius:50%;object-fit:cover}
@@ -78,7 +78,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #outro .t1{font-size:96px;white-space:normal;line-height:1.05}
 .follow{display:inline-flex;align-items:center;justify-content:center;margin-top:46px;min-width:560px;height:118px;border:3px solid var(--ion);font:800 40px/1 "Unbounded";letter-spacing:.06em;color:var(--ion);position:relative}
 .ring{position:absolute;left:50%;top:50%;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;border:4px solid var(--ion);opacity:0}
-#logo{position:absolute;left:50%;top:45%;width:560px;height:560px;margin:-280px 0 0 -280px;opacity:0;z-index:9}
+#logo{position:absolute;left:50%;top:45%;width:560px;height:560px;margin:-280px 0 0 -280px;opacity:0;z-index:9;overflow:visible}
 #wordm{position:absolute;left:0;right:0;top:calc(45% + 300px);text-align:center;opacity:0;z-index:9;font:900 110px/1 "Unbounded";letter-spacing:.12em}
 #wordm small{display:block;margin-top:22px;font:700 30px/1 "JBM";letter-spacing:.3em;color:var(--ion)}
 #black{position:absolute;inset:0;background:var(--void);opacity:0;z-index:8}
@@ -90,7 +90,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #thumb .art{position:absolute;left:90px;right:90px;top:210px;height:820px;display:flex;align-items:center;justify-content:center}
 #thumb .art img{width:760px;height:760px;border-radius:50%;object-fit:cover;box-shadow:0 0 140px rgba(255,181,71,.6)}
 #thumb .k{position:absolute;left:0;right:0;top:1000px;text-align:center}
-#thumb .k span{display:inline-block;background:#FFD60A;color:#05060c;font:900 70px/1 "Unbounded";padding:20px 34px;transform:rotate(-2deg);text-transform:uppercase;box-shadow:0 20px 40px rgba(0,0,0,.6)}
+#thumb .k span{display:inline-block;background:#FFD60A;color:#05060c;font:900 64px/1 "Unbounded";padding:20px 34px;transform:rotate(-2deg);text-transform:uppercase;box-shadow:0 20px 40px rgba(0,0,0,.6);white-space:nowrap}
 #thumb .bigt{position:absolute;left:30px;right:30px;top:1140px;text-align:center;font:900 190px/.92 "Unbounded";letter-spacing:-.03em;text-shadow:0 0 60px rgba(79,243,255,.6),0 12px 0 rgba(0,0,0,.4);white-space:nowrap}
 #thumb .u{position:absolute;left:0;right:0;top:1340px;text-align:center;font:800 58px/1.1 "Unbounded";color:var(--ion);text-transform:uppercase}
 #thumb .bn{position:absolute;left:-20px;right:-20px;bottom:150px;background:#fff;color:#05060c;text-align:center;padding:26px 0;font:900 64px/1 "Unbounded";letter-spacing:.04em;transform:rotate(-2deg);text-transform:uppercase}
@@ -112,16 +112,17 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 <script>
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3),eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[],STARS=[];const INTRO=.55,TAIL=2.8,MIN=61.5;
+let D=null,SC=[],TOTAL=30,SFX=[],STARS=[];const INTRO=1.15,TAIL=3,MIN=61.5;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const com=x=>Math.round(+x).toLocaleString("en-US");
 function rnd(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
 function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+1&&fs>min){fs-=3;el.style.fontSize=fs+"px"}}
 // the Liftoff mark: a rocket rising through a ring, a tilted orbit with a moon on it
 const MARK=(id="")=>`<defs><linearGradient id="${id}fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB547"/><stop offset="1" stop-color="#FF4F2E" stop-opacity="0"/></linearGradient>
- <linearGradient id="${id}bd" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9c6e0"/></linearGradient></defs>
+ <linearGradient id="${id}bd" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9c6e0"/></linearGradient>
+ <linearGradient id="${id}tr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3" stop-opacity=".95"/><stop offset=".25" stop-color="#FFB547" stop-opacity=".6"/><stop offset="1" stop-color="#FF4F2E" stop-opacity="0"/></linearGradient></defs>
  <circle cx="100" cy="100" r="74" fill="none" stroke="#EAF2FF" stroke-width="9"/><ellipse id="${id}orb" cx="100" cy="100" rx="96" ry="34" fill="none" stroke="#4FF3FF" stroke-width="4" transform="rotate(-24 100 100)" stroke-dasharray="604" stroke-dashoffset="0"/>
- <g id="${id}rkt"><path class="fl" d="M88 138 C89 158 95 176 100 194 C105 176 111 158 112 138Z" fill="url(#${id}fl)"/><path d="M93 138 C94 150 97 160 100 170 C103 160 106 150 107 138Z" fill="#FFF6D6"/>
+ <g id="${id}rkt"><rect id="${id}trail" x="91" y="150" width="18" height="420" rx="9" fill="url(#${id}tr)" opacity="0"/><path class="fl" d="M88 138 C89 158 95 176 100 194 C105 176 111 158 112 138Z" fill="url(#${id}fl)"/><path d="M93 138 C94 150 97 160 100 170 C103 160 106 150 107 138Z" fill="#FFF6D6"/>
  <path d="M79 106 L60 132 L60 148 L80 138Z M121 106 L140 132 L140 148 L120 138Z" fill="#4FF3FF"/><path d="M100 30 C117 46 122 68 122 94 L122 136 L78 136 L78 94 C78 68 83 46 100 30Z" fill="url(#${id}bd)"/>
  <rect x="86" y="134" width="28" height="8" rx="2" fill="#5b6785"/><circle cx="100" cy="82" r="10" fill="#03040A" stroke="#4FF3FF" stroke-width="4"/></g>
  <circle id="${id}moon" r="10" fill="#4FF3FF" style="filter:drop-shadow(0 0 8px #4FF3FF)"/>`;
@@ -142,7 +143,7 @@ function sizeSvg(s){const ref=s.ref,S0=SIL[ref.icon]||SIL.bus,[rw,rh]=S0,d=s.ft/
  const sc=Math.min(260/Math.max(rh,d),(W-260)/(rw+d*1.1));const ax=60+d*sc/2,rx=ax+d*sc/2+60;
  return `<svg class="svg" viewBox="0 0 ${W} ${H}"><defs><radialGradient id="rk" cx="35%" cy="30%"><stop offset="0" stop-color="#b9b2a8"/><stop offset=".6" stop-color="#6d655d"/><stop offset="1" stop-color="#2a2622"/></radialGradient></defs>
   <line x1="20" y1="${base}" x2="${W-20}" y2="${base}" stroke="rgba(234,242,255,.4)" stroke-width="2" stroke-dasharray="6 8"/>
-  <g class="az" transform="translate(${ax} ${base-d*sc/2})">${rock(7,d*sc/2)}</g>
+  <g class="az" data-t="translate(${ax} ${base-d*sc/2})" transform="translate(${ax} ${base-d*sc/2})">${rock(7,d*sc/2)}</g>
   <g class="rf" transform="translate(${rx} ${base}) scale(${sc})" fill="rgba(234,242,255,.85)">${S0[2]()}</g>
   <text x="${ax}" y="${base+32}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="24" fill="#4FF3FF">≈ ${com(s.ft)} FT</text>
   <text x="${rx+rw*sc/2}" y="${base+32}" text-anchor="middle" font-family="JBM" font-weight="700" font-size="22" fill="#8A97B2">${esc(ref.name.replace(/^(a|the) /,"").toUpperCase())} · ${com(ref.m*3.281)} FT</text></svg>`}
@@ -198,7 +199,7 @@ function build(data){D=data;SC=[];SFX=[];
    ${s.img?`<div class="sunbox"><div class="glow"></div><img src="${esc(s.img)}"></div>`:""}<div class="panel"><div class="plab">Solar flare scale</div>${flareSvg(s)}</div>
    <div class="tiles"><div class="tile"><b data-v="${s.n24}">${s.n24}</b><span>Flares · 24h</span></div><div class="tile"><b>${s.m}%</b><span>M-class odds</span></div><div class="tile"><b>${s.x}%</b><span>X-class odds</span></div></div>`);
   else if(s.kind==="lau")add(s,12,`<div class="kick"><i></i>Launch schedule</div><div class="t1">Liftoff</div><div class="meta">Next ${s.items.length} launches · Eastern time</div>
-   ${s.items.map((l,i)=>`<div class="lc"><div class="d"><b>${esc(l.day.split(" ")[0])}</b><span>${esc(l.day.split(" ").slice(1).join(" "))}</span><span>${esc(l.time.replace(" ET",""))}</span></div>
+   ${s.items.map((l,i)=>`<div class="lc"><div class="d"><b>${esc(l.day.split(" ")[0].replace(",",""))}</b><span>${esc(l.day.split(" ").slice(1).join(" "))}</span><span>${esc(l.time.replace(" ET",""))}</span></div>
     <div class="r"><b>${esc(l.rocket)}</b><p>${esc(l.mission)}</p><small>${esc(l.prov)} · ${esc(l.loc)}${l.orbit?" · "+esc(l.orbit):""}</small></div><div class="tm" data-net="${esc(l.net)}"></div></div>`).join("")}`);
   else if(s.kind==="moon")add(s,9,`<div class="kick"><i></i>Moon tonight</div><div class="t1">${esc(s.phase)}</div><div class="meta">Next full: ${esc(s.fullName)} Moon · ${esc(s.full)}</div>
    <div class="moonrow"><div class="mn">${moonSvg(s.frac,520)}</div><div class="pct"><b data-v="${s.illum}">${s.illum}%</b><span>Illuminated</span><span style="margin-top:30px">Moon age<br>${s.age} days</span></div></div>
@@ -209,7 +210,7 @@ function build(data){D=data;SC=[];SFX=[];
  document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
  document.querySelectorAll(".t1,.lc .r b").forEach(e=>fit(e,40));document.querySelectorAll("#hook .big").forEach(e=>fit(e,90));
  for(const s of SC){if(s.kind!=="hook")SFX.push({t:s.t0,k:"whoosh"});if(s.kind==="hook"||s.kind==="outro")SFX.push({t:s.t0+.5,k:"pop"})}
- SFX.push({t:.05,k:"whoosh"},{t:INTRO-.05,k:"stamp"},{t:t+.1,k:"sting"});
+ SFX.push({t:.05,k:"whoosh"},{t:.74,k:"stamp"},{t:INTRO-.3,k:"whoosh"},{t:t+.1,k:"sting"},{t:t+1.75,k:"whoosh"});
  return TOTAL}
 // when the cue-th sentence of this scene starts (or a fallback time)
 function at(s,i,fb){const c=D.cues&&D.cues[s.id];return c&&c[i]!=null?s.va-s.t0+c[i]-.2:fb}
@@ -220,7 +221,7 @@ function render(t){
   el.style.opacity=Math.min(a,b).toFixed(3);el.style.transform=`translate(${((1-a)*-60+g*14).toFixed(1)}px,${((1-a)*30).toFixed(1)}px) scale(${(.97+.03*Math.min(a,b)).toFixed(4)})`;
   el.style.filter=g?`drop-shadow(${(g*8).toFixed(1)}px 0 0 rgba(255,79,216,.7)) drop-shadow(${(-g*8).toFixed(1)}px 0 0 rgba(79,243,255,.7))`:"none";
   const rev=(sel,t0,dt=.12)=>el.querySelectorAll(sel).forEach((x,i)=>{const y=pop((lt-t0-i*dt)/.45);x.style.opacity=clamp((lt-t0-i*dt)/.12).toFixed(3);x.style.transform=`translateY(${((1-y)*40).toFixed(1)}px)`});
-  el.querySelectorAll("[data-v]").forEach(n=>{const v=+n.dataset.v,k=ease((lt-.4)/1.2),txt=n.textContent;if(!isNaN(v))n.textContent=(txt.endsWith("%")?Math.round(v*k)+"%":com(v*k))});
+  el.querySelectorAll("[data-v]").forEach(n=>{const v=+n.dataset.v,k=ease((lt-.4)/1.2),txt=n.textContent;if(!isNaN(v))n.textContent=(txt.endsWith("%")?Math.round(v*k)+"%":Number.isInteger(v)?com(v*k):(v*k).toFixed(1))});
   if(s.kind==="hook"){el.querySelector(".r1").setAttribute("transform",`rotate(${(lt*12).toFixed(1)} 310 310)`);el.querySelector(".r2").setAttribute("transform",`rotate(${(-lt*30).toFixed(1)} 310 310)`);
    const rt=el.querySelector(".ret");rt.style.transform=`scale(${(1.6-.6*ease(lt/.8)).toFixed(3)})`;rt.style.opacity=ease(lt/.5);
    const bg=el.querySelector(".big"),y=pop((lt-.1)/.5);bg.style.transform=`scale(${(.6+.4*y).toFixed(3)})`;bg.style.transformOrigin="0 50%";rev(".kick,.unit,.sub",.25,.18)}
@@ -229,7 +230,7 @@ function render(t){
    ti.forEach((x,i)=>{const y=pop((lt-c3-i*.12)/.45);x.style.opacity=clamp((lt-c3-i*.12)/.12).toFixed(3);x.style.transform=`scale(${(.6+.4*y).toFixed(3)})`});
    const am=el.querySelector(".am"),k=eio((lt-c1-.2)/1.6),x=+am.dataset.x0+(+am.dataset.x-am.dataset.x0)*k,yy=+am.dataset.y-70*(1-k)*(1-k);am.setAttribute("transform",`translate(${x.toFixed(1)} ${yy.toFixed(1)})`);
    el.querySelector(".al").setAttribute("opacity",clamp((lt-c1-1.7)/.3));el.querySelector(".tr").setAttribute("stroke-dashoffset",(-lt*30).toFixed(0));
-   const az=el.querySelector(".az");az.style.transformBox="fill-box";az.style.transformOrigin="center";az.style.rotate=(lt*8).toFixed(1)+"deg"}
+   const az=el.querySelector(".az");az.setAttribute("transform",`${az.dataset.t} rotate(${(lt*8).toFixed(1)})`)}
   if(s.kind==="aur"){rev(".kick,.t1,.meta,.scope,.panel",0,.12);const sr=el.querySelector(".sr");if(sr)sr.setAttribute("transform",`rotate(${(lt*10).toFixed(1)} 260 260)`);
    const im=el.querySelector(".scope img");if(im)im.style.transform=`scale(${(1.32+lt*.006).toFixed(3)}) rotate(${(lt*1.2).toFixed(2)}deg)`;
    const nd=el.querySelector(".ndl"),kp=+nd.dataset.kp,k=pop((lt-.9)/.9);nd.setAttribute("transform",`rotate(${(180*kp/9*k).toFixed(1)} 160 170)`)}
@@ -246,14 +247,17 @@ function render(t){
  document.getElementById("prog").style.width=(clamp(t/TOTAL)*940).toFixed(1)+"px";
  // the mark spins in hud; the intro draws the logo, flashes, and flies into the first scene; the end returns to the logo (loops back to frame one)
  const hm=document.getElementById("hmoon"),[hx,hy]=orbPos(t*2.2);hm.setAttribute("cx",hx.toFixed(1));hm.setAttribute("cy",hy.toFixed(1));
- const end=TOTAL-TAIL;let lo=0,ls=1,bk=0,wd=0,fl=0,ang=t*2.2;
- if(t<INTRO+.15){bk=1;lo=1;if(t>INTRO-.2){const x=ease((t-INTRO+.2)/.35);ls=1+x*6;lo=1-x;bk=1-x}fl=t>INTRO-.08&&t<INTRO+.12?1-Math.abs(t-INTRO+.02)/.12:0}
- if(t>end+.1){const k=t-end-.1;bk=clamp(k/.3);lo=clamp(k/.2);ls=1+.4*(1-pop(k/.5));wd=Math.min(ease((k-.5)/.4),ease((TOTAL-.1-t)/.5));ang=-1.4+eio(k/1.5)*Math.PI*2}
+ // the rocket: it flies up from below the screen and docks in the ring (intro), then at the end lifts off out of the top of the
+ // frame and leaves the empty ring, which is exactly how the video starts, so it loops
+ const end=TOTAL-TAIL;let lo=0,ls=1,bk=0,wd=0,fl=0,ry=0,trl=0,fs=1;
+ if(t<INTRO+.15){bk=1;lo=1;ry=560*(1-pop(t/.8));trl=.9*clamp(1-t/.75);fs=1+.8*clamp(1-t/.75);
+  if(t>.85){const x=ease((t-.85)/.35);ls=1+x*6;lo=1-x;bk=1-x}fl=t>.9&&t<1.1?1-Math.abs(t-1)/.1:0}
+ if(t>end+.1){const k=t-end-.1;bk=clamp(k/.3);lo=clamp(k/.2);ls=1+.4*(1-pop(k/.5));wd=Math.min(ease((k-.45)/.4),ease((2.55-k)/.3));
+  const ig=clamp((k-1.5)/.2),go=clamp((k-1.7)/.8);fs=1+.9*ig;ry=-620*Math.pow(go,2.2);trl=k<2.75?.9*ig:0}
  document.getElementById("black").style.opacity=bk.toFixed(3);const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`scale(${ls.toFixed(3)})`;
- const [lx,ly]=orbPos(t<1?-1.4+eio(t/INTRO)*Math.PI*2:ang);const lm=document.getElementById("lmoon");lm.setAttribute("cx",lx.toFixed(1));lm.setAttribute("cy",ly.toFixed(1));
- document.getElementById("lorb").setAttribute("stroke-dashoffset",(t<1?604*(1-ease(t/(INTRO-.1))):0).toFixed(0));
- const rk=document.getElementById("lrkt"),rise=t<1?(1-ease(t/(INTRO-.15)))*60:0;rk.setAttribute("transform",`translate(0 ${rise.toFixed(1)})`);
- rk.querySelector(".fl").setAttribute("transform",`translate(100 138) scale(1 ${(1+.18*Math.sin(t*40)).toFixed(3)}) translate(-100 -138)`);
+ const ang=2.2*(t<TOTAL/2?t:t-TOTAL),[lx,ly]=orbPos(ang);const lm=document.getElementById("lmoon");lm.setAttribute("cx",lx.toFixed(1));lm.setAttribute("cy",ly.toFixed(1));
+ const rk=document.getElementById("lrkt");rk.setAttribute("transform",`translate(0 ${ry.toFixed(1)})`);document.getElementById("ltrail").setAttribute("opacity",trl.toFixed(3));
+ rk.querySelector(".fl").setAttribute("transform",`translate(100 138) scale(1 ${(fs*(1+.18*Math.sin(t*40))).toFixed(3)}) translate(-100 -138)`);
  document.getElementById("wordm").style.opacity=wd.toFixed(3);document.getElementById("flash").style.opacity=(fl*.8).toFixed(3);
  for(const q of ["#hud","#tick","#prog","#src"])document.querySelector(q).style.opacity=(1-Math.max(lo,bk)).toFixed(3)}
 // cover image: the hook's number and label over the day's picture (Sun, aurora, asteroid or Moon)
@@ -262,7 +266,7 @@ window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElemen
   :`<svg viewBox="-400 -400 800 800" style="width:760px;filter:drop-shadow(0 0 80px rgba(255,181,71,.55))"><defs><radialGradient id="rk" cx="35%" cy="30%"><stop offset="0" stop-color="#d4ccc0"/><stop offset=".6" stop-color="#7a7066"/><stop offset="1" stop-color="#2a2622"/></radialGradient></defs>${rock(11,330)}</svg>`;
  T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1080 1920">${document.getElementById("stars").innerHTML}</svg><div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
   <div class="art">${art}</div><div class="k"><span>${esc(H.kicker)}</span></div><div class="bigt">${esc(H.big)}</div><div class="u">${esc(H.unit)}</div><div class="bn">Sky report · ${esc(D.date)}</div>`;
- T.style.display="block";fit(T.querySelector(".bigt"),90);const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
+ T.style.display="block";fit(T.querySelector(".bigt"),90);const ks=T.querySelector(".k span");let f=64;while(ks.offsetWidth>1000&&f>30){f-=3;ks.style.fontSize=f+"px"}const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
 window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;
 </script></body></html>

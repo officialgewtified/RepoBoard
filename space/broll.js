@@ -16,7 +16,7 @@ const LIB = {
   earth: [["jsc2021m000138_4K_Earth_Views_Extended_Cut_for_Earth_Day_ 2021_210422-4KMP4", .05, .9], ["jsc2022m000251_Expedition_67_Space_Station_Flyover_of_Hurricane_Ian_220928", .2, .7],
     ["Earth Views from the International Space Station", .1, .7], ["jsc2024m000130_Expedition_71_International_Space_Station_Flyover_of_Hurricane_Beryl_240701", .2, .7]]
 };
-const SECS = 40;
+const SECS = 30;
 const hash = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 const enc = u => u.replace(/^http:/, "https:").replace(/ /g, "%20");
 async function files(id) { const r = await fetch(`https://images-assets.nasa.gov/video/${encodeURIComponent(id)}/collection.json`); if (!r.ok) throw new Error(r.status + " " + id); return r.json(); }
@@ -25,14 +25,16 @@ async function clip(topic, day, out) {
   const L = LIB[topic], order = L.map((x, i) => L[(i + hash(day + topic)) % L.length]);
   for (const [id, a, b] of order) {
     try {
-      const fl = await files(id), src = ["~large.mp4", "~medium.mp4", "~orig.mp4"].map(s => fl.find(f => f.endsWith(s))).find(Boolean);
-      if (!src) continue;
-      const url = enc(src), dur = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", url], { timeout: 60000 }).toString()) || 0;
-      if (!dur) continue;
+      // the sharpest version that is still 1080p or less (4K decodes far too slowly on the free runner)
+      const fl = await files(id); let url = null, dur = 0;
+      for (const v of ["~large.mp4", "~medium.mp4", "~orig.mp4", "~small.mp4"]) { const f = fl.find(x => x.endsWith(v)); if (!f) continue;
+        const [w, d] = execFileSync("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width:format=duration", "-of", "csv=p=0:s=,", enc(f)], { timeout: 60000 }).toString().split(/[\n,]/).filter(Boolean).map(Number);
+        if (w && w <= 1920) { url = enc(f); dur = d; break; } }
+      if (!url || !dur) continue;
       const lo = dur * a, hi = Math.max(lo, Math.min(dur * b, dur - SECS - 1)), start = lo + (hash(day + id) % 1000) / 1000 * Math.max(0, hi - lo);
       execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-ss", start.toFixed(2), "-i", url, "-t", String(Math.min(SECS, Math.max(4, dur - start - .5))), "-an",
         "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30,eq=brightness=-0.04:saturation=1.15:contrast=1.05",
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-pix_fmt", "yuv420p", out], { timeout: 240000 });
+        "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-pix_fmt", "yuv420p", out], { timeout: 180000 });
       console.log(topic, "<-", id, "@", start.toFixed(1), "s");
       return { file: path.resolve(out), id };
     } catch (e) { console.error(topic, id, String(e.message).slice(0, 200)); }

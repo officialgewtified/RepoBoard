@@ -24,7 +24,7 @@ function when(d, today) {
   const a = new Date(etDay(d) + "T12:00:00Z"), b = new Date(today + "T12:00:00Z"), k = Math.round((a - b) / 864e5), h = +ET(d, { hour: "numeric", hour12: false }) % 24;
   if (k <= 0) return h >= 17 || h < 4 ? "tonight" : "today";
   if (k === 1) return h >= 18 ? "tomorrow night" : h < 4 ? "late tonight" : "tomorrow";
-  if (k < 7) return "on " + ET(d, { weekday: "long" }) + (h >= 18 ? " night" : "");
+  if (k < 7) return h < 5 ? "early " + ET(d, { weekday: "long" }) + " morning" : "on " + ET(d, { weekday: "long" }) + (h >= 18 ? " night" : "");
   return "on " + ET(d, { month: "long", day: "numeric" });
 }
 
@@ -87,7 +87,7 @@ async function launches() {
     .map(r => { const [rocket, mission] = String(r.name).split(" | "), prov = (r.launch_service_provider || {}).name || "";
       const crew = /crew|astronaut|soyuz ms|shenzhou|axiom/i.test(r.name + " " + ((r.mission || {}).type || ""));
       return { rocket: (rocket || "").replace(/ Block 5$/, ""), mission: mission || "", prov: PROV[prov] || prov, net: r.net, loc: place((r.pad || {}).location && r.pad.location.name),
-        orbit: ((r.mission || {}).orbit || {}).abbrev || "", crew, star: /starlink/i.test(mission || ""), tbd: /TBD|TBC/.test((r.status || {}).abbrev || "") }; }).slice(0, 3);
+        orbit: ((r.mission || {}).orbit || {}).abbrev || "", type: (r.mission || {}).type || "", crew, star: /starlink/i.test(mission || ""), tbd: /TBD|TBC/.test((r.status || {}).abbrev || "") }; }).slice(0, 3);
 }
 
 // ---------- the Moon (Meeus, Astronomical Algorithms ch. 49: new and full moon times to within minutes)
@@ -130,7 +130,7 @@ async function build(today, outDir, brand) {
   if (A && A.length) {
     const pickA = A.slice().sort((a, b) => (Math.log10(b.m) - 1.3 * Math.log10(b.ld) + (b.ld < 1 ? 1 : 0)) - (Math.log10(a.m) - 1.3 * Math.log10(a.ld) + (a.ld < 1 ? 1 : 0)))[0];
     const a = pickA, ref = refFor(a.m), w = when(a.date, today), feet = ft(a.m), mi = Math.round(a.miles / 1000) * 1000, us = Math.max(1, Math.round(2800 / a.mph * 60));
-    const sizeSay = feet < 1000 ? `about ${comma(Math.round(feet / 10) * 10)} feet wide` : `about ${r1(a.m / 1609)} miles wide`;
+    const sizeSay = feet < 100 ? `about ${Math.round(feet)} feet wide` : feet < 1000 ? `about ${comma(Math.round(feet / 10) * 10)} feet wide` : `about ${r1(a.m / 1609)} miles wide`;
     const dist = a.ld < 1 ? `That's closer than the Moon, only about ${Math.round(a.ld * 100)} percent of the way there!` : a.ld < 2 ? `That's just ${r1(a.ld)} times the distance to the Moon.` : `That's about ${Math.round(a.ld)} times the distance to the Moon.`;
     S.ast = { kind: "ast", id: "ast", des: a.des, when: ET(a.date, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), time: fmtTime(a.date) + " ET",
       ld: +a.ld.toFixed(2), miles: mi, mph: Math.round(a.mph / 100) * 100, ft: Math.round(feet), loFt: Math.round(ft(a.lo)), hiFt: Math.round(ft(a.hi)), ref, us, count: A.length,
@@ -147,7 +147,7 @@ async function build(today, outDir, brand) {
   if (AU) {
     const k = AU.k;
     S.aur = { kind: "aur", id: "aur", kp: AU.kp, k, g: AU.g, where: AU.where, short: AU.short, img: aurImg ? "file://" + path.resolve(aurImg) : "", curve: AU.curve };
-    V.aur = k >= 5 ? `Northern lights alert! NOAA is forecasting a Kp of ${AU.kp} tonight, a ${AU.g} geomagnetic storm. With dark, clear skies, the aurora could be visible ${AU.where.replace(/^as far south as/, "as far south as")}. Look north after dark!`
+    V.aur = k >= 5 ? `Northern lights alert! NOAA is forecasting a Kp of ${AU.kp} tonight, a ${AU.g} geomagnetic storm. With dark, clear skies, the aurora could be visible ${/^as far/.test(AU.where) ? AU.where : "across " + AU.where}. Look north after dark!`
       : k === 4 ? `The northern lights are active tonight, with a Kp of ${AU.kp}. Best chances are in ${AU.where}. Look north after dark.`
       : `For the northern lights, it's a quiet night, with a Kp of ${AU.kp}. Your best chances are in ${AU.where}.`;
     score.aur = k >= 7 ? 10 : k >= 5 ? 8 : k === 4 ? 4 : 1;
@@ -157,7 +157,7 @@ async function build(today, outDir, brand) {
   if (SU) {
     const c24 = SU.b24 && SU.b24.cls, c7 = SU.b7 && SU.b7.cls, big = flux(c24);
     S.sun = { kind: "sun", id: "sun", img: sunImg ? "file://" + path.resolve(sunImg) : "", c24: c24 || "", c7: c7 || "", t7: SU.b7 ? ET(SU.b7.t, { month: "short", day: "numeric" }) : "", n24: SU.n24, m: SU.mProb, x: SU.xProb };
-    const say = c => String(c).replace(/^([ABCMX])([\d.]+)$/, (m, L, n) => `${L}${n}`);
+    const say = c => String(c).replace(/^([ABCMX])([\d.]+)$/, (m, L, n) => `${L} ${n}`);
     V.sun = big >= 1e-4 ? `The Sun just erupted with a powerful ${say(c24)} solar flare, the strongest class there is! Strong flares like this can cause radio blackouts on the sunny side of Earth.`
       : big >= 1e-5 ? `The Sun fired off an ${say(c24)} flare in the last day. That's a moderate flare, strong enough to cause brief radio blackouts.`
       : `The Sun has been fairly calm, with ${SU.n24 === 1 ? "one small flare" : SU.n24 + " small flares"} in the last day${c24 ? `, the biggest a ${say(c24)}` : ""}.`;
@@ -168,8 +168,11 @@ async function build(today, outDir, brand) {
   // launches
   if (LA && LA.length) {
     S.lau = { kind: "lau", id: "lau", items: LA.map(l => ({ ...l, day: ET(l.net, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), time: fmtTime(l.net) + " ET" })) };
-    const one = (l, i) => { const w = when(l.net, today), what = l.star ? "a batch of Starlink satellites" : l.crew ? `the ${l.mission} crew` : l.mission;
-      return `${i === 0 ? cap(w) : w === when(LA[i - 1].net, today) ? "Then" : cap(w)}${l.tbd ? ", if the date holds," : ""} ${l.prov} launches ${what} on ${/^a |^an /i.test(l.rocket) ? "" : "a "}${l.rocket} from ${l.loc}.`; };
+    const one = (l, i) => { const w = when(l.net, today), m = l.mission.replace(/\s*\(.*?\)\s*/g, " ").trim();
+      // code-like names (IRNSS-1L, USSF-432) are read as what the mission is instead
+      const what = l.star ? "a batch of Starlink satellites" : l.crew ? `the ${m} crew` : /[A-Z]{3,}|\d/.test(m) ? (l.type ? `a ${l.type.toLowerCase()} mission` : "a satellite") : m;
+      const art = /^[aeiou]/i.test(l.rocket) ? "an " : "a ";
+      return `${i === 0 ? cap(w) : w === when(LA[i - 1].net, today) ? "Then" : cap(w)},${l.tbd ? " if the date holds," : ""} ${l.prov} launches ${what} on ${art}${l.rocket} from ${l.loc}.`; };
     V.lau = `Launch schedule! ${LA.map(one).join(" ")}`;
     score.lau = LA.some(l => l.crew) ? 7 : LA.some(l => !l.star) ? 3 : 2;
     const cr = LA.find(l => l.crew); if (cr) hooks.push([7, "lau", `Astronauts are launching ${when(cr.net, today)}!`, { big: "LIFTOFF", unit: cr.rocket, kicker: "Crew launch", sub: S.lau.items[LA.indexOf(cr)].day }]);
