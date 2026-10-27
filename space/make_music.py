@@ -1,6 +1,6 @@
-"""The Zenith music bed: an original cinematic synth track made from scratch with numpy (no samples, nothing to
+"""The Liftoff music bed: an original cinematic synth track made from scratch with numpy (no samples, nothing to
 license). 96 BPM, A minor, Am-F-C-G: a wide detuned pad, a 16th-note arpeggio with echo, a sub-bass pulse, a soft
-half-time kick and ticking hats, with a riser every 8 bars. Writes music/zenith-1.mp3 (needs ffmpeg).
+half-time kick and ticking hats, with a riser every 8 bars. Writes music/liftoff-1.mp3 (needs ffmpeg).
 usage: python make_music.py"""
 import numpy as np, subprocess, os
 SR, BPM = 44100, 96
@@ -73,7 +73,7 @@ for b in range(7, BARS, 8):
 
 m = max(np.abs(L).max(), np.abs(R).max()); st = (np.stack([L, R], 1) / m * 0.89).astype(np.float32)
 here = os.path.dirname(os.path.abspath(__file__)); os.makedirs(os.path.join(here, "music"), exist_ok=True)
-raw = os.path.join(here, "music", "zenith-1.f32")
+raw = os.path.join(here, "music", "liftoff-1.f32")
 st.tofile(raw)
-subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", raw, "-c:a", "libmp3lame", "-q:a", "3", os.path.join(here, "music", "zenith-1.mp3")], check=True)
-os.remove(raw); print("music/zenith-1.mp3", round(N / SR, 1), "s")
+subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", raw, "-c:a", "libmp3lame", "-q:a", "3", os.path.join(here, "music", "liftoff-1.mp3")], check=True)
+os.remove(raw); print("music/liftoff-1.mp3", round(N / SR, 1), "s")

@@ -1,12 +1,12 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>Zenith sky report</title>
+<html><head><meta charset="utf-8"><title>Liftoff space report</title>
 <style>
 @font-face{font-family:"Unbounded";src:url(../fonts/unbounded-var.woff2) format("woff2");font-weight:200 900}
 @font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-400.woff2) format("woff2");font-weight:400}
 @font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-700.woff2) format("woff2");font-weight:700}
 @font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-800.woff2) format("woff2");font-weight:800}
 @font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
-/* Mission-control look: deep space black, ion cyan, solar amber, aurora green. Transparent page: NASA footage plays underneath. */
+/* Liftoff. Mission-control look: deep space black, ion cyan, solar amber, aurora green. Transparent page: NASA footage plays underneath. */
 :root{--void:#03040A;--ink:#EAF2FF;--dim:#8A97B2;--ion:#4FF3FF;--sol:#FFB547;--aur:#5CFFA8;--mag:#FF4FD8;--red:#FF5A5A;--glass:rgba(4,8,20,.66);--line:rgba(79,243,255,.32)}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:1080px;height:1920px;overflow:hidden;background:transparent}
@@ -106,7 +106,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 <div id="src"></div>
 <div id="black"></div>
 <svg id="logo" viewBox="0 0 200 200"></svg>
-<div id="wordm"><span id="wm"></span><small>Your sky report · every day</small></div>
+<div id="wordm"><span id="wm"></span><small>Space news · every day</small></div>
 <div id="flash"></div>
 <div id="thumb"></div>
 <script>
@@ -117,9 +117,14 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const com=x=>Math.round(+x).toLocaleString("en-US");
 function rnd(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
 function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+1&&fs>min){fs-=3;el.style.fontSize=fs+"px"}}
-// the Zenith mark: a ring, a tilted orbit with a moon on it, and a Z
-const MARK=(id="")=>`<circle cx="100" cy="100" r="74" fill="none" stroke="#EAF2FF" stroke-width="9"/><ellipse id="${id}orb" cx="100" cy="100" rx="96" ry="34" fill="none" stroke="#4FF3FF" stroke-width="4" transform="rotate(-24 100 100)" stroke-dasharray="604" stroke-dashoffset="0"/>
- <text x="100" y="128" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="82" fill="#EAF2FF">Z</text><circle id="${id}moon" r="11" fill="#4FF3FF" style="filter:drop-shadow(0 0 8px #4FF3FF)"/>`;
+// the Liftoff mark: a rocket rising through a ring, a tilted orbit with a moon on it
+const MARK=(id="")=>`<defs><linearGradient id="${id}fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB547"/><stop offset="1" stop-color="#FF4F2E" stop-opacity="0"/></linearGradient>
+ <linearGradient id="${id}bd" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9c6e0"/></linearGradient></defs>
+ <circle cx="100" cy="100" r="74" fill="none" stroke="#EAF2FF" stroke-width="9"/><ellipse id="${id}orb" cx="100" cy="100" rx="96" ry="34" fill="none" stroke="#4FF3FF" stroke-width="4" transform="rotate(-24 100 100)" stroke-dasharray="604" stroke-dashoffset="0"/>
+ <g id="${id}rkt"><path class="fl" d="M88 138 C89 158 95 176 100 194 C105 176 111 158 112 138Z" fill="url(#${id}fl)"/><path d="M93 138 C94 150 97 160 100 170 C103 160 106 150 107 138Z" fill="#FFF6D6"/>
+ <path d="M79 106 L60 132 L60 148 L80 138Z M121 106 L140 132 L140 148 L120 138Z" fill="#4FF3FF"/><path d="M100 30 C117 46 122 68 122 94 L122 136 L78 136 L78 94 C78 68 83 46 100 30Z" fill="url(#${id}bd)"/>
+ <rect x="86" y="134" width="28" height="8" rx="2" fill="#5b6785"/><circle cx="100" cy="82" r="10" fill="#03040A" stroke="#4FF3FF" stroke-width="4"/></g>
+ <circle id="${id}moon" r="10" fill="#4FF3FF" style="filter:drop-shadow(0 0 8px #4FF3FF)"/>`;
 const orbPos=(a)=>{const x=96*Math.cos(a),y=34*Math.sin(a),r=-24*Math.PI/180;return[100+x*Math.cos(r)-y*Math.sin(r),100+x*Math.sin(r)+y*Math.cos(r)]};
 // ---- graphics
 function rock(seed,r){const R=rnd(seed),n=18;let p="";for(let i=0;i<n;i++){const a=i/n*2*Math.PI,k=r*(.82+.3*R());p+=(i?"L":"M")+(k*Math.cos(a)).toFixed(1)+" "+(k*Math.sin(a)*.86).toFixed(1)}
@@ -247,6 +252,8 @@ function render(t){
  document.getElementById("black").style.opacity=bk.toFixed(3);const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`scale(${ls.toFixed(3)})`;
  const [lx,ly]=orbPos(t<1?-1.4+eio(t/INTRO)*Math.PI*2:ang);const lm=document.getElementById("lmoon");lm.setAttribute("cx",lx.toFixed(1));lm.setAttribute("cy",ly.toFixed(1));
  document.getElementById("lorb").setAttribute("stroke-dashoffset",(t<1?604*(1-ease(t/(INTRO-.1))):0).toFixed(0));
+ const rk=document.getElementById("lrkt"),rise=t<1?(1-ease(t/(INTRO-.15)))*60:0;rk.setAttribute("transform",`translate(0 ${rise.toFixed(1)})`);
+ rk.querySelector(".fl").setAttribute("transform",`translate(100 138) scale(1 ${(1+.18*Math.sin(t*40)).toFixed(3)}) translate(-100 -138)`);
  document.getElementById("wordm").style.opacity=wd.toFixed(3);document.getElementById("flash").style.opacity=(fl*.8).toFixed(3);
  for(const q of ["#hud","#tick","#prog","#src"])document.querySelector(q).style.opacity=(1-Math.max(lo,bk)).toFixed(3)}
 // cover image: the hook's number and label over the day's picture (Sun, aurora, asteroid or Moon)

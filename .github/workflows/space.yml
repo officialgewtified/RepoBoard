@@ -1,4 +1,4 @@
-name: Zenith sky report video
+name: Liftoff space report video
 on:
   schedule:
     # 11:37 UTC is 7:37am Eastern (6:37 in winter): fresh asteroid, aurora, Sun and launch data, ready for the morning
@@ -66,7 +66,7 @@ jobs:
         run: node broll.js out/data.json
       - name: Voiceover
         if: steps.prep.outputs.skip != '1'
-        # Chatterbox reads it, cloned from a Kokoro af_bella read (Zenith's own narrator); Kokoro reads it if that fails
+        # Chatterbox reads it, cloned from a Kokoro af_bella read (Liftoff's own narrator); Kokoro reads it if that fails
         continue-on-error: true
         timeout-minutes: 45
         working-directory: clips
@@ -88,7 +88,7 @@ jobs:
       - name: Render
         if: steps.prep.outputs.skip != '1'
         run: |
-          node ../clips/render.js out/data.json "out/zenith-$DAY.mp4" 30
+          node ../clips/render.js out/data.json "out/liftoff-$DAY.mp4" 30
           node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
       - name: Publish
         if: steps.prep.outputs.skip != '1'
@@ -97,6 +97,6 @@ jobs:
         run: |
           TAG="space-$DAY"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          THUMB=$(ls out/zenith-$DAY-thumbnail.jpg 2>/dev/null || true)
-          gh release create "$TAG" "out/zenith-$DAY.mp4" $THUMB out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
+          THUMB=$(ls out/liftoff-$DAY-thumbnail.jpg 2>/dev/null || true)
+          gh release create "$TAG" "out/liftoff-$DAY.mp4" $THUMB out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
           gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^space-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag

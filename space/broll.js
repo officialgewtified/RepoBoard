@@ -1,4 +1,4 @@
-/* Background footage for the sky report: real NASA video from the NASA Image and Video Library (images.nasa.gov),
+/* Background footage for the Liftoff space report: real NASA video from the NASA Image and Video Library (images.nasa.gov),
    which NASA makes free to use (credited "Footage: NASA"; no NASA logos used as branding, no endorsement implied).
    A hand-checked list per topic (pure visuals: no talking heads, no title cards), a different clip and start point
    each day. Only the needed 40 seconds are streamed and cut to vertical 1080x1920, darkened a touch for the graphics.

@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:"Unbounded";src:url(../../fonts/unbounded-var.woff2) format("woff2");font-weight:200 900}
+@font-face{font-family:"JBM";src:url(../../fonts/jetbrains-mono-700.woff2) format("woff2");font-weight:700}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%}body{background:#03040A;color:#EAF2FF;overflow:hidden;position:relative}
+.bg{position:absolute;inset:0;background:radial-gradient(60% 55% at 50% 45%,#10284a 0%,#071024 50%,#03040A 100%)}
+.neb{position:absolute;inset:0;background:radial-gradient(35% 30% at 22% 25%,rgba(255,79,216,.22),transparent 70%),radial-gradient(40% 35% at 80% 70%,rgba(79,243,255,.18),transparent 70%)}
+svg.st{position:absolute;inset:0;width:100%;height:100%}
+.c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.wm{font:900 1px/1 "Unbounded";letter-spacing:.06em}
+.tag{font:700 1px/1 "JBM";letter-spacing:.22em;color:#4FF3FF;text-transform:uppercase}
+.pill{display:inline-block;border:3px solid #4FF3FF;color:#4FF3FF;font:700 1px/1 "JBM";letter-spacing:.12em}
+</style></head><body>
+<div class="bg"></div><div class="neb"></div><svg class="st" id="st"></svg><div class="c" id="c"></div>
+<script>
+const MARK=`<defs><linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7A3"/><stop offset=".45" stop-color="#FFB547"/><stop offset="1" stop-color="#FF4F2E" stop-opacity="0"/></linearGradient>
+ <linearGradient id="bd" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9c6e0"/></linearGradient></defs>
+ <circle cx="100" cy="100" r="74" fill="none" stroke="#EAF2FF" stroke-width="9"/>
+ <ellipse cx="100" cy="100" rx="96" ry="34" fill="none" stroke="#4FF3FF" stroke-width="4" transform="rotate(-24 100 100)"/>
+ <path d="M88 138 C89 158 95 176 100 194 C105 176 111 158 112 138Z" fill="url(#fl)"/><path d="M93 138 C94 150 97 160 100 170 C103 160 106 150 107 138Z" fill="#FFF6D6"/>
+ <path d="M79 106 L60 132 L60 148 L80 138Z M121 106 L140 132 L140 148 L120 138Z" fill="#4FF3FF"/>
+ <path d="M100 30 C117 46 122 68 122 94 L122 136 L78 136 L78 94 C78 68 83 46 100 30Z" fill="url(#bd)"/>
+ <rect x="86" y="134" width="28" height="8" rx="2" fill="#5b6785"/>
+ <circle cx="100" cy="82" r="10" fill="#03040A" stroke="#4FF3FF" stroke-width="4"/>
+ <circle cx="186" cy="62" r="10" fill="#4FF3FF" style="filter:drop-shadow(0 0 6px #4FF3FF)"/>`;
+const k=new URLSearchParams(location.search).get("k")||"icon",W=innerWidth,H=innerHeight;
+let s="";let x=7;const r=()=>(x=(x*16807)%2147483647)/2147483647;for(let i=0;i<(k==="banner"?420:140);i++)s+=`<circle cx="${r()*W}" cy="${r()*H}" r="${r()<.08?2.4:r()*1.4+.4}" fill="#fff" opacity="${.3+r()*.6}"/>`;
+document.getElementById("st").innerHTML=s;const c=document.getElementById("c");
+if(k==="icon")c.innerHTML=`<svg viewBox="0 0 200 200" style="width:${W*.74}px;filter:drop-shadow(0 0 40px rgba(79,243,255,.35))">${MARK}</svg>`;
+if(k==="icon2")c.innerHTML=`<div style="text-align:center"><svg viewBox="0 0 200 200" style="width:${W*.5}px;filter:drop-shadow(0 0 30px rgba(79,243,255,.35))">${MARK}</svg><div class="wm" style="font-size:${W*.115}px;margin-top:${W*.02}px">LIFTOFF</div></div>`;
+if(k==="banner"){document.querySelector(".bg").style.background="radial-gradient(70% 60% at 50% 45%,#0f2648 0%,#061022 55%,#03040A 100%)";
+ c.innerHTML=`<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 ${W} ${H}"><defs><radialGradient id="ea" cx="50%" cy="0%" r="70%"><stop offset="0" stop-color="#14559e"/><stop offset=".18" stop-color="#0a2a5c"/><stop offset=".45" stop-color="#050c1e"/><stop offset="1" stop-color="#03040A"/></radialGradient>
+  <linearGradient id="tr" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FFB547" stop-opacity="0"/><stop offset=".6" stop-color="#FFB547" stop-opacity=".7"/><stop offset="1" stop-color="#FFF6D6"/></linearGradient></defs>
+  <ellipse cx="${W/2}" cy="${H+1500}" rx="${W*1.1}" ry="1900" fill="url(#ea)"/><ellipse cx="${W/2}" cy="${H+1500}" rx="${W*1.1}" ry="1900" fill="none" stroke="#4FF3FF" stroke-opacity=".7" stroke-width="5" style="filter:drop-shadow(0 0 30px #4FF3FF)"/>
+  <path d="M2080 ${H-250} C 2250 ${H-600} 2380 ${H-1000} 2470 80" fill="none" stroke="url(#tr)" stroke-width="10" stroke-linecap="round"/>
+  <ellipse cx="${W/2}" cy="${H/2}" rx="1180" ry="300" fill="none" stroke="#4FF3FF" stroke-opacity=".25" stroke-width="3" stroke-dasharray="10 18" transform="rotate(-8 ${W/2} ${H/2})"/></svg>
+  <div id="g" style="position:relative;display:flex;align-items:center;gap:56px"><svg viewBox="0 0 200 200" style="width:330px;filter:drop-shadow(0 0 30px rgba(79,243,255,.4))">${MARK}</svg>
+  <div><div class="wm" style="font-size:210px">LIFTOFF</div><div class="tag" style="font-size:34px;margin-top:26px">Space news · asteroids · launches · auroras</div>
+  <div style="margin-top:26px;display:flex;gap:18px;align-items:center"><span class="pill" style="font-size:30px;padding:14px 22px">@liftoffnews</span><span class="tag" style="font-size:30px;color:#8A97B2">New report every day</span></div></div></div>`;
+ const g=document.getElementById("g"),w=g.getBoundingClientRect().width,h=g.getBoundingClientRect().height;const sc=Math.min(1,1500/w,400/h);g.style.transform=`scale(${sc})`}
+</script></body></html>
