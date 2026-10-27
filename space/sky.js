@@ -124,17 +124,21 @@ function phaseJD(k, full) {
 const NAMES = ["Wolf", "Snow", "Worm", "Pink", "Flower", "Strawberry", "Buck", "Sturgeon", "Corn", "Hunter's", "Beaver", "Cold"];
 function moon(at) {
   const t = at.getTime(), k0 = Math.floor((at.getUTCFullYear() + at.getUTCMonth() / 12 - 2000) * 12.3685) - 2;
-  let lastNew = null, nextNew = null, nextFull = null;
+  let lastNew = null, nextNew = null, nextFull = null, prevFull = null;
   for (let k = k0; k < k0 + 6; k++) { const n = phaseJD(k, false), f = phaseJD(k + .5, true);
-    if (n <= at) lastNew = n; else if (!nextNew) nextNew = n; if (f > at && !nextFull) nextFull = f; }
+    if (n <= at) lastNew = n; else if (!nextNew) nextNew = n; if (f > at && !nextFull) nextFull = f; if (f <= at) prevFull = f; }
   const age = (t - lastNew) / 864e5, frac = age / 29.530588853, illum = Math.round((1 - Math.cos(2 * Math.PI * frac)) / 2 * 100);
   const PH = [[1.85, "New Moon"], [5.54, "Waxing Crescent"], [9.23, "First Quarter"], [12.92, "Waxing Gibbous"], [16.61, "Full Moon"], [20.3, "Waning Gibbous"], [23.99, "Last Quarter"], [27.68, "Waning Crescent"], [99, "New Moon"]];
   // the full moon nearest the September equinox is the Harvest Moon; the one after it, the Hunter's Moon
   const y = nextFull.getUTCFullYear(), eq = Date.UTC(y, 8, 22, 18), fulls = []; for (let k = Math.floor((y - 2000 + .55) * 12.3685) - 2; k < Math.floor((y - 2000 + .9) * 12.3685) + 2; k++) fulls.push(phaseJD(k + .5, true));
   const harvest = fulls.sort((a, b) => Math.abs(a - eq) - Math.abs(b - eq))[0], hunters = fulls.filter(f => f > harvest).sort((a, b) => a - b)[0];
-  const mo = +ET(nextFull, { month: "numeric" }) - 1;
-  const name = Math.abs(nextFull - harvest) < 2 * 864e5 ? "Harvest" : hunters && Math.abs(nextFull - hunters) < 2 * 864e5 ? "Hunter's" : NAMES[mo === 8 ? 8 : mo === 9 ? 9 : mo];
-  return { age: r1(age), frac: +frac.toFixed(4), illum, phase: PH.find(p => age < p[0])[1], waxing: frac < .5, nextFull: nextFull.toISOString(), fullName: name, nextNew: nextNew.toISOString() };
+  const nameOf = F => { const mo = +ET(F, { month: "numeric" }) - 1;
+    return Math.abs(F - harvest) < 2 * 864e5 ? "Harvest" : hunters && Math.abs(F - hunters) < 2 * 864e5 ? "Hunter's" : NAMES[mo]; };
+  const name = nameOf(nextFull);
+  // "full moon tonight" only when a full moon actually falls within 18 hours of this evening, named for that full moon
+  const near = [prevFull, nextFull].filter(Boolean).sort((a, b) => Math.abs(a - at) - Math.abs(b - at))[0], fullTonight = !!near && Math.abs(near - at) < 18 * 36e5;
+  let phase = PH.find(p => age < p[0])[1]; if (phase === "Full Moon" && !fullTonight) phase = frac < .5 ? "Waxing Gibbous" : "Waning Gibbous";
+  return { age: r1(age), frac: +frac.toFixed(4), illum, phase, waxing: frac < .5, nextFull: nextFull.toISOString(), fullName: name, fullTonight, tonightName: fullTonight ? nameOf(near) : "", nextNew: nextNew.toISOString() };
 }
 
 // the US Naval Observatory's own phase times and illumination: if they disagree with the math above, theirs win
@@ -238,13 +242,13 @@ async function build(today, outDir, brand) {
   {
     const nf = new Date(MO.nextFull), dTo = Math.round((nf - new Date(today + "T23:30:00Z")) / 864e5);
     S.moon = { kind: "moon", id: "moon", ...MO, full: ET(nf, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), dTo };
-    V.moon = MO.illum >= 97 ? `And look up tonight: it's the full ${MO.fullName} Moon, ${MO.illum} percent lit!`
+    V.moon = MO.fullTonight ? `And look up tonight: it's the full ${MO.tonightName} Moon, ${MO.illum} percent lit!`
       : `Tonight's Moon is a ${MO.phase.toLowerCase()}, ${MO.illum} percent lit. The next full moon, the ${MO.fullName} Moon, rises ${dTo <= 1 ? when(nf, today) : "on " + ET(nf, { weekday: "long", month: "long", day: "numeric" })}.`;
-    score.moon = MO.illum >= 97 ? 6 : dTo <= 1 ? 4 : 1;
-    QH.moon = MO.illum >= 97 ? [`Tonight's full ${MO.fullName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.fullName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]
+    score.moon = MO.fullTonight ? 6 : dTo <= 1 ? 4 : 1;
+    QH.moon = MO.fullTonight ? [`Tonight's full ${MO.tonightName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.tonightName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]
       : [`Tonight's Moon is ${MO.illum} percent lit. Here's what's next.`, { big: MO.illum + "%", unit: MO.phase, kicker: "Moon tonight", sub: `Next full: ${S.moon.full}` }];
     QV.moon = V.moon;
-    if (MO.illum >= 97) hooks.push([6, "moon", `Tonight's full ${MO.fullName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.fullName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]);
+    if (MO.fullTonight) hooks.push([6, "moon", `Tonight's full ${MO.tonightName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.tonightName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]);
   }
   // the typed readouts (raw numbers, mission-control style) and the day's fact for each panel
   if (S.ast) { const a = AS.find(x => x.des === S.ast.des); S.ast.read = `OBJ ${a.des} · ${(a.mph / 2236.94).toFixed(2)} KM/S · ${(a.ld * LD).toFixed(4)} AU · H ${a.H}`; }
@@ -297,7 +301,7 @@ async function build(today, outDir, brand) {
 
 function ytTitle(H, S, d) {
   const t = { ast: S.ast && S.ast.closer ? "Asteroid Passes Closer Than the Moon ☄️" : S.ast ? `${S.ast.count} Asteroids Fly Past Earth This Week ☄️` : "",
-    aur: "Northern Lights Alert Tonight 🌌", sun: "The Sun Just Fired an X-Class Flare ☀️", lau: "Astronauts Launching This Week 🚀", moon: S.moon && `Full ${S.moon.fullName} Moon Tonight 🌕` }[H[1]] || "Tonight's Sky Report 🔭";
+    aur: "Northern Lights Alert Tonight 🌌", sun: "The Sun Just Fired an X-Class Flare ☀️", lau: "Astronauts Launching This Week 🚀", moon: S.moon && (S.moon.fullTonight ? `Full ${S.moon.tonightName} Moon Tonight 🌕` : `Tonight's Moon: ${S.moon.illum}% Lit 🌙`) }[H[1]] || "Tonight's Sky Report 🔭";
   return `${t} | Sky Report ${d}`.slice(0, 100);
 }
 function caption(H, S, voice, brand, d) {
