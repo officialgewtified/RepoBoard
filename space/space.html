@@ -180,6 +180,8 @@ function reticle(){let s=`<svg viewBox="0 0 620 620" class="svg">`;s+=`<g class=
  <circle cx="310" cy="310" r="8" fill="#4FF3FF"/></svg>`;return s}
 // ---- build
 function build(data){D=data;SC=[];SFX=[];
+ // with NASA footage the page is see-through (render.js lays it over the video); without it, a deep-space backdrop
+ document.documentElement.style.background=D.broll&&Object.keys(D.broll).length?"transparent":"radial-gradient(70% 45% at 50% 38%,#16305a 0%,#081227 55%,#03040A 100%)";
  document.getElementById("bn").textContent=String(D.brand).toUpperCase();document.getElementById("wm").textContent=String(D.brand).toUpperCase();
  document.getElementById("hd").textContent="SKY REPORT // "+D.date;document.getElementById("hs").textContent="LIVE DATA · NASA · NOAA";document.getElementById("src").textContent=D.source||"";
  document.getElementById("mk").innerHTML=MARK("h");document.getElementById("logo").innerHTML=MARK("l");
