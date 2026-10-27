@@ -1,9 +1,10 @@
 """Voiceover with Chatterbox (Resemble AI's open-source TTS, MIT licence: free, fine for monetized videos), which reads
 with far more natural expression than Kokoro. The voice is cloned from a short reference clip (ref.wav, a deep male
-read made with Kokoro at the start of the run), so it stays the same man every day.
+read made with Kokoro at the start of the run, ref.py), so the narrator is the same every day.
 Same output as tts.py: one wav per scene in <outdir>, and data.json gets dur, cues and voiceDir.
-usage: python tts_cb.py data.json <outdir> ref.wav     (env: EXAGGERATION=0.5, CFG=0.5)"""
-import json, os, re, sys
+usage: python tts_cb.py data.json <outdir> ref.wav     (env: EXAGGERATION=0.5, CFG=0.5, TEMPO=1.07)
+TEMPO speeds the read up without changing the pitch (ffmpeg's atempo), for a brisker, more natural broadcast pace."""
+import json, os, re, sys, shutil, subprocess
 import numpy as np, soundfile as sf
 import torch
 from chatterbox.tts import ChatterboxTTS
@@ -30,6 +31,17 @@ def say_numbers(t):
     t = re.sub(r"(?<=\d),(?=\d{3})", "", t)   # 1,250 -> 1250, other commas stay (they make the pauses)
     return re.sub(r"\d+", lambda m: words(int(m.group(0))), t)
 
+def prep(t):
+    """before splitting into sentences: periods that don't end a sentence (A.J., St. Brown, Jr.) and names with digits"""
+    t = re.sub(r"\b(Jr|Sr)\.(?=[,.!?])", r"\1", t)                         # "Penix Jr.." -> "Penix Jr."
+    t = re.sub(r"\b([A-Z])\.([A-Z])\.", r"\1\2", t)                       # A.J. Brown -> AJ Brown
+    t = re.sub(r"\bSt\. (?=[A-Z])", "Saint ", t)                              # Amon-Ra St. Brown
+    t = re.sub(r"\b(Jr|Sr)\.(?=\s+[a-z,])", lambda m: {"Jr": "Junior", "Sr": "Senior"}[m.group(1)], t)
+    t = re.sub(r"\b(Jr|Sr)\.", lambda m: {"Jr": "Junior.", "Sr": "Senior."}[m.group(1)], t)   # ends the sentence
+    t = re.sub(r"\b(Jr|Sr)\b", lambda m: {"Jr": "Junior", "Sr": "Senior"}[m.group(1)], t)
+    t = re.sub(r"\bIII\b", "the Third", t); t = re.sub(r"\bII\b", "the Second", t)
+    return re.sub(r"\b49ers\b", "Niners", t)
+
 def fix(t):
     t = re.sub(r"\bN F L\b", "NFL", t); t = re.sub(r"\bN B A\b", "NBA", t)
     t = say_numbers(t)
@@ -53,9 +65,10 @@ def trim(a, sr):
 
 D = json.load(open(data_path))
 D["dur"], D["cues"] = {}, {}
-GAP = 0.22
+GAP = 0.16
+TEMPO = float(os.environ.get("TEMPO", "1.07")) if shutil.which("ffmpeg") else 1.0
 for sid, text in D["voice"].items():
-    sents = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s]
+    sents = [s for s in re.split(r"(?<=[.!?])\s+", prep(text).strip()) if s]
     parts, cues, t, sr = [], [], 0.0, model.sr
     for i, s in enumerate(sents):
         wav = model.generate(fix(s), audio_prompt_path=ref, exaggeration=EXAG, cfg_weight=CFG)
@@ -64,10 +77,15 @@ for sid, text in D["voice"].items():
         if i < len(sents) - 1:
             parts.append(np.zeros(int(GAP * sr), dtype=np.float32)); t += GAP
     w = np.concatenate(parts)
-    sf.write(os.path.join(out, sid + ".wav"), w, sr)
+    f = os.path.join(out, sid + ".wav")
+    sf.write(f, w, sr)
+    if TEMPO != 1.0:
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", f, "-filter:a", f"atempo={TEMPO}", f + ".tmp.wav"], check=True)
+        os.replace(f + ".tmp.wav", f); w, sr2 = sf.read(f); cues = [round(c / TEMPO, 3) for c in cues]; sr = sr2
     D["dur"][sid], D["cues"][sid] = round(len(w) / sr, 3), cues
     print(f"{sid}: {D['dur'][sid]:.1f}s  {text[:70]}", flush=True)
 D["voiceDir"] = os.path.abspath(out)
 D["voiceEngine"] = "chatterbox"
+D["voiceTempo"] = TEMPO
 json.dump(D, open(data_path, "w"), indent=1)
 print("total voice", round(sum(D["dur"].values()), 1), "s")

@@ -50,6 +50,15 @@ jobs:
             clips/.models
             ~/.cache/huggingface
           key: voices-kokoro-chatterbox-v1
+      - name: Browser and ffmpeg
+        if: steps.prep.outputs.skip != '1'
+        timeout-minutes: 12
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
+          which ffmpeg
       - name: Voiceover
         if: steps.prep.outputs.skip != '1'
         # about 8-10 minutes of narration: Chatterbox on a plain CPU takes a couple of hours for this, which is fine overnight
@@ -64,23 +73,15 @@ jobs:
           pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
           python tts_cb.py out/data.json out/voice ref.wav || python tts.py out/data.json out/voice
         env:
-          VOICE: am_puck
-          SPEED: "1.05"
+          VOICE: af_heart
+          SPEED: "1.12"
           EXAGGERATION: "0.7"
-          CFG: "0.4"
-      - name: Browser and ffmpeg
-        if: steps.prep.outputs.skip != '1'
-        timeout-minutes: 12
-        run: |
-          npm i --no-save --no-package-lock playwright@1.63.0
-          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
-          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
-            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
-          which ffmpeg
+          CFG: "0.5"
+          TEMPO: "1.07"
       - name: Render
         if: steps.prep.outputs.skip != '1'
         run: |
-          PITCH=0.93 node render.js out/data.json out/nfl-week-recap.mp4 24
+          node render.js out/data.json out/nfl-week-recap.mp4 24
           node -e "const d=require('./out/data.json'),fs=require('fs');const ch=fs.existsSync('out/nfl-week-recap.chapters.txt')?fs.readFileSync('out/nfl-week-recap.chapters.txt','utf8').trim():'';process.stdout.write(d.ytTitle+'\n\n'+d.description.replace('{{chapters}}',ch))" > out/description.txt
           cat out/description.txt
       - name: Publish

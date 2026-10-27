@@ -101,20 +101,20 @@ function fb(G, sport) {
     const big = n(s.TD) >= 4 || n(s.YDS) >= 350, picks = n(s.INT) === 0 && n(s.TD) >= 2 ? ", no picks" : n(s.INT) >= 2 ? `, but ${n(s.INT)} picks` : "";
     const hype = n(s.TD) >= 3 || n(s.YDS) >= 300;
     const say = `${hype ? `What a day for ${p.n}! ` : `${p.n} threw for `}${hype ? `${n(s.YDS)} passing yards` : `${n(s.YDS)} yards`} and ${cnt(n(s.TD), "touchdown")}${n(s.INT) === 0 && n(s.TD) >= 2 ? ", no interceptions," : n(s.INT) >= 2 ? `, with ${n(s.INT)} interceptions,` : ""} ${w.say}${hype && w.res === "W" ? "!" : "."}`;
-    top.push(withNote(Object.assign(split(p.n), { tag: "Top passer", tm: p.tm, team: tinfo(w.me), ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Pass yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [s.AVG, "Yds/att"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["passTD", "passYds"], p.n)));
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top passer", tm: p.tm, team: tinfo(w.me), ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Pass yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [s.AVG, "Yds/att"]], sub, say, viz: { t: "field", k: "pass", yds: n(s.YDS), td: n(s.TD) } }), sport === "NFL" && seasonNote("NFL", ["passTD", "passYds"], p.n)));
     hooks.push([n(s.YDS) / N.py, n(s.YDS), "passing yards", p, w], [n(s.TD) / N.pt, n(s.TD), "touchdown passes", p, w]); }
   const ru = best("rushing", (s, p) => n(s.YDS) + 20 * n(s.TD) + .5 * n((p.receiving || {}).YDS));
   if (ru) { const p = ru[1], s = p.rushing, w = where(p.g, p.tm, sport), sub = [`${s.AVG} per carry`, `Long of ${s.LONG}`]; shownP.add(p);
     if (p.receiving && n(p.receiving.REC)) sub.push(`${p.receiving.REC} catches, ${n(p.receiving.YDS)} yds`);
     const hype = n(s.YDS) >= 120 || n(s.TD) >= 2;
     const say = `${hype ? `${p.n} was unstoppable on the ground! ${n(s.YDS)} rushing yards` : `${p.n} ran for ${n(s.YDS)} yards`}${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""} ${w.say}${hype && w.res === "W" ? "!" : "."}`;
-    top.push(withNote(Object.assign(split(p.n), { tag: "Top rusher", tm: p.tm, team: tinfo(w.me), ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rush yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [n(s.CAR), "Carries"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["rushYds", "rushTD"], p.n)));
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top rusher", tm: p.tm, team: tinfo(w.me), ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rush yds"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"], [n(s.CAR), "Carries"]], sub, say, viz: { t: "field", k: "rush", yds: n(s.YDS), td: n(s.TD) } }), sport === "NFL" && seasonNote("NFL", ["rushYds", "rushTD"], p.n)));
     hooks.push([n(s.YDS) / N.ry, n(s.YDS), "rushing yards", p, w], [n(s.TD) / N.rt, n(s.TD), "rushing touchdowns", p, w]); }
   const re = best("receiving", s => n(s.YDS) + 20 * n(s.TD) + 2 * n(s.REC));
   if (re) { const p = re[1], s = p.receiving, w = where(p.g, p.tm, sport), sub = [`${s.TGTS} targets`, `Long of ${s.LONG}`, `${s.AVG} per catch`]; shownP.add(p);
     const hype = n(s.YDS) >= 120;
     const say = `${hype ? `A monster game from ${p.n}! ${n(s.REC)} catches for ${n(s.YDS)} yards` : `${p.n} caught ${cnt(n(s.REC), "pass")} for ${n(s.YDS)} yards`}${n(s.TD) ? " and " + cnt(n(s.TD), "touchdown") : ""} ${w.say}${hype && w.res === "W" ? "!" : "."}`;
-    top.push(withNote(Object.assign(split(p.n), { tag: "Top receiver", tm: p.tm, team: tinfo(w.me), ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rec yds"], [n(s.REC), "Catches"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"]], sub, say }), sport === "NFL" && seasonNote("NFL", ["recYds", "rec"], p.n)));
+    top.push(withNote(Object.assign(split(p.n), { tag: "Top receiver", tm: p.tm, team: tinfo(w.me), ctx: w.txt, color: col(w.me), stats: [[n(s.YDS), "Rec yds"], [n(s.REC), "Catches"], [n(s.TD), n(s.TD) === 1 ? "TD" : "TDs"]], sub, say, viz: { t: "field", k: "rec", yds: n(s.YDS), td: n(s.TD) } }), sport === "NFL" && seasonNote("NFL", ["recYds", "rec"], p.n)));
     hooks.push([n(s.YDS) / N.cy, n(s.YDS), "receiving yards", p, w], [n(s.REC) / N.cr, n(s.REC), "catches", p, w]); }
   const more = P.filter(p => !shownP.has(p)).sort((a, b) => ppr(b) - ppr(a)).slice(0, 2).map(p => { const l = fbLine(p);
     return { sport, name: p.n, tm: p.tm, team: tinfo(where(p.g, p.tm, sport).me), color: col(where(p.g, p.tm, sport).me), txt: l.txt, say: `${p.n} ${l.say}.` }; }).filter(r => r.txt);
@@ -127,6 +127,13 @@ function fb(G, sport) {
   return { sport, games: scoreRows(shown), total: G.length, when, top, hooks, more, note: notes[0] ? notes[0].replace(/\.$/, "") : "", say: [lead, ...notes].join(" ") };
 }
 
+const courtViz = p => ({ t: "court", shots: p.shots || [], fg: p.FG, tp: p["3PT"], ft: p.FT });
+// the graphic for the hook's stat: the court for basketball, the field (in that kind of yards) for football
+function hookViz(label, p) {
+  if (p.PTS != null) return courtViz(p);
+  const k = /rush/.test(label) ? "rush" : /receiv|catch/.test(label) ? "rec" : "pass", s = p[{ pass: "passing", rush: "rushing", rec: "receiving" }[k]] || {};
+  return { t: "field", k, yds: n(s.YDS), td: n(s.TD) };
+}
 function nba(G) {
   G = finals(G); if (!G.length) return null;
   const P = []; for (const g of G) for (const p of g.players) if (p.PTS != null && n(p.MIN) > 0) P.push(Object.assign({ g }, p));
@@ -144,7 +151,7 @@ function nba(G) {
     const flair = tm3 >= 5 ? `, with ${tm3} threes,` : fa >= 12 && fm / fa >= .6 ? `, on ${fm} of ${fa} shooting,` : "";
     const say = `${ORD[i]} ${p.n}${td >= 3 ? ", with a triple-double" : ""}! ${n(p.PTS)} points, ${n(p[two[0]])} ${NORM[two[0]][1].toLowerCase()} and ${n(p[two[1]])} ${NORM[two[1]][1].toLowerCase()}${flair} ${w.say}.`;
     return withNote(Object.assign(split(p.n), { rank: "#" + (i + 1), tm: p.tm, team: tinfo(w.me), tag: td >= 3 ? "Triple-double" : td === 2 ? "Double-double" : "Top performer", ctx: w.txt + ` · ${n(p.MIN)} min`, color: col(w.me),
-      stats: [[n(p.PTS), "Points"], ...two.map(k => [n(p[k]), NORM[k][1]])], sub, say }), seasonNote("NBA", ["PTS", "REB", "AST", "BLK", "STL", "3PM"], p.n)); });
+      stats: [[n(p.PTS), "Points"], ...two.map(k => [n(p[k]), NORM[k][1]])], sub, say, viz: courtViz(p) }), seasonNote("NBA", ["PTS", "REB", "AST", "BLK", "STL", "3PM"], p.n)); });
   for (const p of P) { const w = where(p.g, p.tm, "NBA");
     hooks.push([n(p.PTS) / 32, n(p.PTS), "points", p, w], [n(p.REB) / 17, n(p.REB), "rebounds", p, w], [n(p.AST) / 14, n(p.AST), "assists", p, w], [n(p.BLK) / 6.5, n(p.BLK), "blocks", p, w]); }
   const more = all.slice(3, 5).map(p => ({ sport: "NBA", name: p.n, tm: p.tm, team: tinfo(where(p.g, p.tm, "NBA").me), color: col(where(p.g, p.tm, "NBA").me),
@@ -178,7 +185,7 @@ function build(day, nflGames, nbaGames, opts, cfbGames) {
   return {
     brand: opts.brand || "Crossover", day, date: md, title: `${wd}'s best stats`,
     source: "Stats: official box scores via ESPN",
-    hook: { big: String(h[1]), label: h[2], who: h[3].n, ctx: h[4].txt, color: col(h[4].me), tm: h[4].me.ab, sport: h[5] },
+    hook: { big: String(h[1]), label: h[2], who: h[3].n, ctx: h[4].txt, color: col(h[4].me), tm: h[4].me.ab, sport: h[5], viz: hookViz(h[2], h[3]) },
     sections, more, voice,
     caption: caption(wd, md, sections, h, hs),
     ytTitle: ytTitle(wd, sections, h, hs)

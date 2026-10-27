@@ -51,6 +51,17 @@ jobs:
             ~/.u2net
             ~/.cache/huggingface
           key: voices-kokoro-chatterbox-v1
+      - name: Browser and ffmpeg
+        if: steps.prep.outputs.skip != '1'
+        # use the Chrome the runner already has (Playwright's own install was what kept hanging)
+        timeout-minutes: 12
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+          # ffmpeg from Ubuntu's own packages, with time limits and retries in case the mirror stalls
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
+          which ffmpeg
       - name: Voiceover
         if: steps.prep.outputs.skip != '1'
         # Chatterbox reads it (natural, expressive); if that fails for any reason, Kokoro reads it so the day still gets a video
@@ -65,25 +76,15 @@ jobs:
           pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
           python tts_cb.py out/data.json out/voice ref.wav || python tts.py out/data.json out/voice
         env:
-          VOICE: am_puck
-          SPEED: "1.05"
-          EXAGGERATION: "0.75"
-          CFG: "0.35"
-      - name: Browser and ffmpeg
-        if: steps.prep.outputs.skip != '1'
-        # use the Chrome the runner already has (Playwright's own install was what kept hanging)
-        timeout-minutes: 12
-        run: |
-          npm i --no-save --no-package-lock playwright@1.63.0
-          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
-          # ffmpeg from Ubuntu's own packages, with time limits and retries in case the mirror stalls
-          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
-            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
-          which ffmpeg
+          VOICE: af_heart
+          SPEED: "1.12"
+          EXAGGERATION: "0.7"
+          CFG: "0.5"
+          TEMPO: "1.07"
       - name: Render
         if: steps.prep.outputs.skip != '1'
         run: |
-          PITCH=0.93 node render.js out/data.json "out/tonight-$DAY.mp4" 30
+          node render.js out/data.json "out/tonight-$DAY.mp4" 30
           node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
       - name: Publish
         if: steps.prep.outputs.skip != '1'
@@ -92,6 +93,7 @@ jobs:
         run: |
           TAG="preview-$DAY"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" "out/tonight-$DAY.mp4" out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
+          THUMB=$(ls out/tonight-$DAY-thumbnail.jpg 2>/dev/null || true)
+          gh release create "$TAG" "out/tonight-$DAY.mp4" $THUMB out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
           # keep the newest 30 previews
           gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^preview-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag

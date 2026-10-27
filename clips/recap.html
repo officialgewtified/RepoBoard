@@ -96,6 +96,30 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 #sig{position:absolute;left:0;right:0;top:calc(46% + 300px);text-align:center;opacity:0;z-index:9}
 #sig b{display:block;font:900 120px/1 "Big Shoulders";letter-spacing:.08em;color:var(--paper)}
 #sig small{display:block;margin-top:18px;font:700 30px/1 "Archivo";font-stretch:116%;letter-spacing:.2em;text-transform:uppercase;color:var(--haze)}
+/* stat graphics (viz.js): the field or the court in place of the team disc */
+.ph.v{align-items:center;justify-content:center}
+.ph.v svg{width:100%;height:100%;filter:drop-shadow(0 30px 40px rgba(0,0,0,.55))}
+/* cover image for TikTok / Shorts (thumb()) */
+#thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden;background:#09090a}
+#thumb .gl{position:absolute;inset:0;background:radial-gradient(60% 34% at 50% 30%,var(--tc) 0%,transparent 72%);opacity:.7}
+#thumb .gr{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px)}
+#thumb .tb{position:absolute;left:64px;right:64px;top:70px;display:flex;justify-content:space-between;align-items:center}
+#thumb .tb b{font:900 64px/1 "Big Shoulders";letter-spacing:.08em}
+#thumb .tb span{font:800 30px/1 "Archivo";letter-spacing:.12em;text-transform:uppercase;padding:16px 24px;border-radius:999px;background:rgba(255,255,255,.12)}
+#thumb .bg{position:absolute;left:0;right:0;top:170px;text-align:center;font:900 760px/.8 "Big Shoulders";color:#fff;letter-spacing:-.02em;
+ text-shadow:0 14px 0 rgba(0,0,0,.45),0 0 90px var(--tc)}
+#thumb .lb{position:absolute;left:50%;top:770px;transform:translateX(-50%) rotate(-3deg);background:#FFD60A;color:#0b0b0c;padding:18px 40px;border-radius:14px;
+ font:900 92px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;box-shadow:0 22px 40px -12px rgba(0,0,0,.7)}
+#thumb .nm{position:absolute;left:50px;right:50px;top:930px;text-align:center}
+#thumb .nm small{display:block;font:800 60px/1 "Archivo";font-stretch:115%;letter-spacing:.1em;text-transform:uppercase;color:#e4e4e7}
+#thumb .nm b{display:block;font:900 230px/.86 "Big Shoulders";text-transform:uppercase;white-space:nowrap;margin-top:12px}
+#thumb .vz2{position:absolute;left:110px;right:110px;top:1205px;height:445px;display:flex;justify-content:center;align-items:center}
+#thumb .vz2 svg{width:100%;height:100%}
+#thumb .mu{display:flex;flex-direction:column;gap:18px;width:100%}
+#thumb .mu div{display:flex;justify-content:center;align-items:center;gap:22px;font:900 92px/1 "Big Shoulders";padding:14px;border-radius:24px;background:rgba(255,255,255,.08)}
+#thumb .mu i{font-style:normal;color:#a1a1aa;font-size:60px}
+#thumb .bn{position:absolute;left:-20px;right:-20px;bottom:96px;transform:rotate(-2deg);background:#fff;color:#0b0b0c;text-align:center;padding:26px 0;
+ font:900 84px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;box-shadow:0 -10px 50px rgba(0,0,0,.6)}
 </style></head><body>
 <div id="sky"></div>
 <div class="top"><span class="wm" id="wm"></span><span class="dt" id="dt"></span></div>
@@ -105,6 +129,8 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 <div class="src" id="src"></div>
 <div id="logo"><span>X</span><i></i></div>
 <div id="sig"><b>CROSSOVER</b><small>Best stats · every day</small></div>
+<div id="thumb"></div>
+<script src="viz.js"></script>
 <script>
 /* build(data) lays out every scene once; render(t) poses the frame at t seconds. Same t, same picture, every time.
    SFX lists the moments that get a sound (whoosh on each swipe, pop on each pop-up); render.js mixes them in. */
@@ -120,6 +146,7 @@ function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.s
 function shade(hex,f){const h=String(hex||"#71717a").replace("#","");if(h.length<6)return "#3f3f46";return "#"+[0,2,4].map(i=>Math.round(parseInt(h.slice(i,i+2),16)*(1-f)).toString(16).padStart(2,"0")).join("")}
 const disc=(tm,c,cls="disc")=>`<div class="${cls}" style="background:radial-gradient(circle at 35% 28%,${c},${shade(c,.55)})">${esc(tm||"")}</div>`;
 const shot=(p,tm,c)=>p?`<div class="ph"><img src="${esc(p)}" alt=""></div>`:`<div class="ph d">${disc(tm,c)}</div><div class="gs"></div>`;
+const viz=(v,tm,c)=>`<div class="ph v">${VIZ.html(v,c,tm)}</div>`;
 const plain=h=>String(h||"").replace(/<[^>]+>/g,"");
 function build(data){D=data;SC=[];SFX=[];
  document.getElementById("wm").textContent=D.brand;document.getElementById("dt").textContent=D.date;
@@ -139,7 +166,7 @@ function build(data){D=data;SC=[];SFX=[];
    <div class="shot"><div class="ph d vs">${disc(g.away.ab,g.away.color)}<span class="at">@</span>${disc(g.home.ab,g.home.color)}</div></div>
    <div class="spec"><div class="nm">${esc(g.away.ab)} ${esc(g.away.rec)} · ${esc(g.home.ab)} ${esc(g.home.rec)}</div>${g.big?`<div class="pr"><b>${esc(g.big.v)}</b><span>${esc(g.big.lab)}</span></div>`:""}<div class="s2">${g.big?esc(g.big.who):""}${g.tv?(g.big?" · ":"")+esc(g.tv):""}</div></div>
    <div class="tags">${g.chips.map(c=>`<span class="tag" style="--c:var(--go)"><i></i>${esc(c)}</span>`).join("")}</div>
-   <div class="view">${g.out.length?"Out: "+esc(g.out.join(", ")):esc(g.time+" ET"+(g.tv?" · "+g.tv:""))}</div></div>`,{kind:"game"}));
+   <div class="view">${g.out.length?"Out: "+esc(g.out.slice(0,2).join(", ")):esc(g.time+" ET"+(g.tv?" · "+g.tv:""))}</div></div>`,{kind:"game"}));
   const n=D.slate.length,c3=n>10;
   add("slate",Math.min(5,2.6+n*.15),`<div class="hero"><div class="wmk">Slate</div><div class="htop"><div><div class="k">Full slate</div><div class="h2" style="margin-top:10px">Tonight</div></div><div class="rank">${esc(D.date)}<b>${n}</b></div></div>
    <div class="grid ${c3?"c3":""}" style="grid-template-columns:repeat(${c3?3:2},1fr)">${D.slate.map(g=>`<div class="g"><div class="r w" style="--c:${g.ac}"><i></i><b>${esc(g.a)}</b></div><div class="r w" style="--c:${g.hc}"><i></i><b>${esc(g.h)}</b></div><em>${esc(g.t)} ET · ${esc(g.sport)}</em></div>`).join("")}</div></div>`,{kind:"scores"});
@@ -147,7 +174,7 @@ function build(data){D=data;SC=[];SFX=[];
  const H=D.hook,lab=String(H.label||"");
  add("hook",3.4,`<div class="hero"><div class="wmk">${esc(lab.split(" ").pop())}</div>
   <div class="htop"><div class="h2">${esc(D.title)}</div><div class="rank">${esc(H.sport||"")}<b>${esc(H.tm||"")}</b></div></div>
-  <div class="shot">${shot(H.photo,H.tm,H.color)}</div>
+  <div class="shot">${H.viz?viz(H.viz,H.tm,H.color):shot(H.photo,H.tm,H.color)}</div>
   <div class="spec"><div class="nm">${esc(H.who)}</div><div class="pr"><b>${esc(H.big)}</b><span>${esc(lab)}</span></div><div class="s2">${H.ctx}</div></div>
   <div class="view">${D.sections.map(s=>`${esc(s.sport)} ${s.total}`).join(" · ")} finals ${ARROW}</div></div>`);
  D.sections.forEach((S,si)=>{const n=S.games.length,cols=n>10?3:n>1?2:1;
@@ -157,7 +184,7 @@ function build(data){D=data;SC=[];SFX=[];
   S.top.forEach((p,i)=>{const id=`p${si}_${i}`,main=p.stats[0],rest=p.stats.slice(1);
    add(id,3.9,`<div class="hero"><div class="wmk">${esc(p.last)}</div>
     <div class="htop"><div class="h2"><span class="fit">${esc(p.first)}</span><span class="fit">${esc(p.last)}</span></div><div class="rank">${esc(S.sport)}<b>${esc(p.rank||({"Top passer":"PASS","Top rusher":"RUSH","Top receiver":"REC"})[p.tag]||"")}</b></div></div>
-    <div class="shot">${shot(p.photo,p.tm,p.color)}${p.note?`<div class="stamp"><div>Season<br>best<small>${esc(p.note.replace(/ this season$/i,""))}</small></div></div>`:""}</div>
+    <div class="shot">${p.viz?viz(p.viz,p.tm,p.color):shot(p.photo,p.tm,p.color)}${p.note?`<div class="stamp"><div>Season<br>best<small>${esc(p.note.replace(/ this season$/i,""))}</small></div></div>`:""}</div>
     <div class="spec"><div class="nm">${esc(p.tag)}</div><div class="pr"><b${num(main[0])}>${esc(main[0])}</b><span>${esc(main[1])}</span></div><div class="s2">${p.ctx}</div></div>
     <div class="tags">${rest.map(s=>`<span class="tag" style="--c:var(--go)"><i></i>${esc(s[0])} ${esc(s[1])}</span>`).join("")}${p.sub.slice(0,2).map(s=>`<span class="tag"><i></i>${esc(s)}</span>`).join("")}</div>
     <div class="view">${p.note?STAR+esc(p.note):esc(S.sport+" · "+p.tag)}</div></div>`,{kind:"card",si,i,note:!!p.note})})});
@@ -195,6 +222,7 @@ function render(t){const N=SC.length;let cur=0;
   el.querySelectorAll(".ph img, .ph .disc").forEach((img,q)=>{const f=Math.sin((t+j+q*1.7)*1.4);img.style.transform=`translateY(${(f*12-(1-ease((lt-.1)/.6))*-80).toFixed(1)}px) rotate(${(s.kind==="card"||s.id==="hook"?-3+f*1.5:-6+f*2).toFixed(2)}deg) scale(${(.85+.15*ease((lt-.05)/.6)).toFixed(3)})`;
    const gs=el.querySelector(".gs");if(gs)gs.style.transform=`scale(${(1-.12*(f+1)/2).toFixed(3)})`})
   const w=el.querySelector(".wmk");if(w)w.style.transform=`translate(calc(-50% + ${((1-ease(lt/1.2))*120-lt*6).toFixed(1)}px),-50%)`;
+  VIZ.anim(el,lt,s.id==="hook"?.3:.45);
   if(s.id==="hook"){const v=el.querySelector(".view"),y=pop((lt-.9)/.45);v.style.transform=`scale(${y.toFixed(3)})`;v.style.opacity=clamp((lt-.9)/.15)}
   if(s.kind==="scores"){const v=el.querySelector(".view");if(v){const y=pop((lt-1.1)/.45);v.style.opacity=clamp((lt-1.1)/.12).toFixed(3);v.style.transform=`scale(${(.7+.3*y).toFixed(3)})`}}
   if(s.kind==="scores")el.querySelectorAll(".g").forEach((g,i)=>{const y=pop((lt-.3-i*.06)/.42);g.style.opacity=clamp((lt-.3-i*.06)/.12).toFixed(3);g.style.transform=`scale(${(.6+.4*y).toFixed(3)})`});
@@ -227,5 +255,17 @@ function render(t){const N=SC.length;let cur=0;
  for(const q of [".top",".nav","#src"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
 // fonts load only when first used, so load them before build() measures any text
 window.ready=()=>Promise.all(['500 100px "Archivo"','800 100px "Archivo"','900 100px "Big Shoulders"'].map(f=>document.fonts.load(f)));
+// the cover image (TikTok cover / Shorts thumbnail): the big number, the label in a yellow block, the name, the graphic
+window.thumb=()=>{const H=D.hook,T=document.getElementById("thumb"),pv=D.mode==="preview",nm=String(H.who||"").split(" ");
+ const last=nm.length>1?nm.slice(1).join(" "):nm[0],first=nm.length>1?nm[0]:"";
+ const art=!pv&&H.viz?`<div class="vz2">${VIZ.html(H.viz,H.color,H.tm)}</div>`:pv?`<div class="vz2"><div class="mu">${(D.games||[]).slice(0,3).map(g=>`<div>${esc(g.away.ab)}<i>@</i>${esc(g.home.ab)}</div>`).join("")}</div></div>`:"";
+ T.style.setProperty("--tc",H.color||"#4ade80");
+ T.innerHTML=`<div class="gl"></div><div class="gr"></div><div class="tb"><b>CROSSOVER</b><span>${esc(pv?"Tonight":D.date)}</span></div>
+  <div class="bg">${esc(H.big)}</div><div class="lb">${esc(H.label)}</div><div class="nm"><small>${esc(first)}</small><b>${esc(last)}</b></div>${art}
+  <div class="bn">${pv?"Tonight's games to watch":esc(D.title)}</div>`;
+ T.style.display="block";
+ const b=T.querySelector(".nm b");fit(b,90);const bg=T.querySelector(".bg");let fs=760;while(bg.scrollWidth>bg.clientWidth+1&&fs>300){fs-=20;bg.style.fontSize=fs+"px"}
+ const lb=T.querySelector(".lb");let f2=92;while(lb.offsetWidth>960&&f2>40){f2-=4;lb.style.fontSize=f2+"px"}
+ VIZ.anim(T,30,0);return true};
 window.build=build;window.render=render;
 </script></body></html>

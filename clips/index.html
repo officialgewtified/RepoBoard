@@ -48,6 +48,7 @@ ol{margin:10px 0 0 20px;color:var(--mute)}ol li{margin:6px 0}ol b{color:var(--in
 <li><b>Copy caption</b> on this page.</li>
 <li><b>TikTok:</b> + → Upload → pick the video → Next → paste the caption → Post. You can add a trending sound at low volume in the editor; keep the voiceover louder.</li>
 <li><b>YouTube Shorts:</b> + → Create a Short → Upload → pick the video → use the caption's first line as the title → Upload.</li>
+<li><b>Cover image:</b> every video now has one (big number, yellow label). Use it as the TikTok cover (Edit cover, then upload it from Photos if your app offers that) and as the YouTube thumbnail on the long-form.</li>
 <li>Post the same video to both. Mornings (7 to 9am Eastern) catch people checking last night's scores.</li>
 </ol>
 <p class="fine">Everything comes straight from the official box scores. If something ever looks off, skip that day rather than post it.</p>
@@ -72,7 +73,7 @@ async function load(){
  document.getElementById("latest").innerHTML=`<div class="top"><h2>${esc(L.name)}</h2><span class="when">${ago(L.published_at)}</span></div>
   <video controls playsinline preload="metadata" src="${esc(v.browser_download_url)}" onerror="this.remove()"></video>
   <div class="btns"><a class="btn p" href="${esc(v.browser_download_url)}" download>Download video</a><button class="btn" onclick="copyTitle(0)">Copy title</button><button class="btn" onclick="copy(0)">Copy caption</button></div>
-  ${thumbOf(L)?`<div class="btns"><a class="btn" href="${esc(thumbOf(L).browser_download_url)}" download>Download thumbnail</a></div>`:""}
+  ${thumbOf(L)?`<div class="btns"><a class="btn" href="${esc(thumbOf(L).browser_download_url)}" download>Download cover image</a></div>`:""}
   <div class="cap">${esc(L.body||"")}</div>`;
  document.getElementById("older").innerHTML=REL.length>1?REL.slice(1).map((r,i)=>`<div class="row"><b>${esc(r.name)}</b><a class="btn" href="${esc(mp4(r).browser_download_url)}" download>Video</a>${thumbOf(r)?`<a class="btn" href="${esc(thumbOf(r).browser_download_url)}" download>Thumb</a>`:""}<button class="btn" onclick="copyTitle(${i+1})">Title</button><button class="btn" onclick="copy(${i+1})">Caption</button></div>`).join(""):`<p class="empty">None yet.</p>`}
 load();

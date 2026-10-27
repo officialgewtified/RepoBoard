@@ -44,9 +44,10 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
       // the Crossover sting: a deep hit and a rising three-note chime, the same at the end of every video
       sting: ["aevalsrc=0.9*sin(2*PI*55*t)*exp(-3.5*t)+0.25*(random(0)*2-1)*exp(-40*t)+0.32*sin(2*PI*329.6*(t-0.05))*exp(-5*(t-0.05))*(1+sgn(t-0.05))/2+0.32*sin(2*PI*493.9*(t-0.22))*exp(-5*(t-0.22))*(1+sgn(t-0.22))/2+0.36*sin(2*PI*659.3*(t-0.39))*exp(-3.2*(t-0.39))*(1+sgn(t-0.39))/2:d=1.8:s=48000", "volume=0.6"] };
     for (const [k, [src, fx]] of Object.entries(SYN)) await run(["-y", "-loglevel", "error", "-f", "lavfi", "-i", src, "-af", fx, "-ar", "48000", "-ac", "1", path.join(tmp, k + ".wav")]);
-    // the voice: shifted a little deeper (PITCH < 1) without changing its speed, plus some low end
+    // the voice: optionally shifted deeper (PITCH < 1, Kokoro only) without changing its speed
     const P = data.voiceEngine === "chatterbox" ? 1 : Math.min(1, Math.max(.8, +process.env.PITCH || 1));   // the Chatterbox voice is already deep
-    const VFX = (P < 1 ? `,asetrate=${Math.round(48000 * P)},aresample=48000,atempo=${(1 / P).toFixed(4)}` : "") + ",bass=g=4:f=110";
+    // a touch of presence for the female narrator (no bass boost: that was for the old deep male voice)
+    const VFX = (P < 1 ? `,asetrate=${Math.round(48000 * P)},aresample=48000,atempo=${(1 / P).toFixed(4)}` : "") + (process.env.VOICE_EQ || ",highpass=f=70,equalizer=f=3000:t=q:w=1:g=2");
     const ins = [];
     if (voice) SC.forEach(s => { const f = path.join(data.voiceDir, s.id + ".wav"); if (fs.existsSync(f)) ins.push([f, s.va, "v"]); });
     SFX.forEach(e => { if (SYN[e.k] && e.t < total) ins.push([path.join(tmp, e.k + ".wav"), e.t, "s"]); });

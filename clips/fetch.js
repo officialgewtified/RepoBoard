@@ -23,8 +23,22 @@ function team(x) {
     rank: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : null, rec: ((x.records || [])[0] || {}).summary || null,
     ls: (x.linescores || []).map(l => +l.value || 0) };
 }
-function players(sum, kind) {
-  const out = kind === "bb" ? [] : {};
+// every field-goal attempt in the play-by-play, by shooter name: [x, y, made, three] (x 0-50 ft across, y ft out from the basket)
+function shots(sum) {
+  const S = {};
+  for (const p of sum.plays || []) {
+    if (!p.shootingPlay || /free throw/i.test(((p.type || {}).text || "") + " " + (p.text || ""))) continue;
+    const c = p.coordinate || {}, t = String(p.text || ""); if (!(c.x >= -2 && c.x <= 52 && c.y >= -3 && c.y <= 90)) continue;
+    let m = t.match(/^(.+?) (makes|misses)\b/), who, made;
+    if (m) { who = m[1].trim(); made = m[2] === "makes"; } else if ((m = t.match(/blocks (.+?) ?'s\b/))) { who = m[1].trim(); made = false; } else continue;
+    (S[who] = S[who] || []).push([c.x, Math.min(c.y, 42), made ? 1 : 0, /three point/i.test(t) || p.scoreValue === 3 ? 1 : 0]);
+  }
+  return S;
+}
+// extra: also keep defensive and interception lines (the weekly video's defense board)
+function players(sum, kind, extra) {
+  const out = kind === "bb" ? [] : {}, SH = kind === "bb" ? shots(sum) : null;
+  const CATS = extra ? ["passing", "rushing", "receiving", "defensive", "interceptions"] : ["passing", "rushing", "receiving"];
   for (const t of ((sum.boxscore || {}).players || [])) {
     const tab = t.team.abbreviation;
     for (const cat of t.statistics || []) {
@@ -33,14 +47,21 @@ function players(sum, kind) {
         if (!a.stats || !a.stats.length) continue;
         const d = {}; L.forEach((l, i) => d[l] = a.stats[i]);
         const name = a.athlete.displayName;
-        if (kind === "bb") { d.n = name; d.tm = tab; out.push(d); continue; }
-        if (!["passing", "rushing", "receiving"].includes(cat.name)) continue;
+        if (kind === "bb") { d.n = name; d.tm = tab; if (SH[name]) d.shots = SH[name]; out.push(d); continue; }
+        if (!CATS.includes(cat.name)) continue;
         const key = tab + "|" + name, p = out[key] || (out[key] = { n: name, tm: tab });
         p[cat.name] = d;
       }
     }
   }
   return kind === "bb" ? out : Object.values(out);
+}
+// team totals from the box score: { ABBR: { yds, to } }
+function teamStats(sum) {
+  const o = {};
+  for (const t of ((sum.boxscore || {}).teams || [])) { const S = {}; for (const x of t.statistics || []) S[x.name] = x.displayValue;
+    o[(t.team || {}).abbreviation] = { yds: parseFloat(S.totalYards) || 0, to: parseFloat(S.turnovers) || 0 }; }
+  return o;
 }
 async function day(sport, ymd) {
   const S = SPORTS[sport], d = ymd.replace(/-/g, "");
@@ -66,7 +87,7 @@ async function check(ymd) {
   console.log(`${ymd}: ${fin} final, ${left} not finished`);
   process.exit(fin + left === 0 ? 3 : left ? 4 : 0);
 }
-module.exports = { day, get, pool, team, players, BASE, SPORTS };
+module.exports = { day, get, pool, team, players, teamStats, BASE, SPORTS };
 if (require.main === module && process.argv[2] === "--check") check(process.argv[3]).catch(e => { console.error(e.message); process.exit(4); });
 else if (require.main === module) (async () => {
   const [ymd, out] = process.argv.slice(2); fs.mkdirSync(out, { recursive: true });
