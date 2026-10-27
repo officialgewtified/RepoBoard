@@ -37,7 +37,7 @@ ol{margin:10px 0 0 20px;color:var(--mute)}ol li{margin:6px 0}ol b{color:var(--in
 </style></head><body><main>
 <div class="k">Daily stats videos</div>
 <h1>Crossover</h1>
-<p class="lede">The best NFL, college football and NBA stat lines from the day before, as a narrated vertical video. Two a day: the morning recap (ready around 3am Eastern) and tonight's games preview (ready around 3:30pm). Download it, copy the caption, post.</p>
+<p class="lede">The best NFL, college football and NBA stat lines from the day before, as a narrated vertical video. Every night's recap (ready soon after the last game ends), tonight's games preview (around 3:30pm), and a long-form NFL week recap every Tuesday for YouTube, with its thumbnail. Download it, copy the caption, post.</p>
 <div id="latest" class="card"><p class="empty">Loading today's video…</p></div>
 <h3>Earlier videos</h3>
 <div id="older" class="card"><p class="empty">Loading…</p></div>
@@ -60,18 +60,19 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 let REL=[];
 function toast(t){const e=document.getElementById("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),1600)}
 async function copy(i){const t=REL[i].body||"";try{await navigator.clipboard.writeText(t);toast("Caption copied")}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy");toast("Caption copied")}catch(_){toast("Couldn't copy")}a.remove()}}
-const mp4=r=>(r.assets||[]).find(a=>/\.mp4$/.test(a.name));
+const mp4=r=>(r.assets||[]).find(a=>/\.mp4$/.test(a.name)),thumbOf=r=>(r.assets||[]).find(a=>/thumbnail\.jpg$/.test(a.name));
 const ago=d=>{const h=(Date.now()-Date.parse(d))/36e5;return h<1?"just now":h<24?Math.round(h)+"h ago":Math.round(h/24)+"d ago"};
 async function load(){
  try{const r=await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=30`);if(!r.ok)throw new Error(r.status);
-  REL=(await r.json()).filter(x=>/^(clip|preview)-/.test(x.tag_name)&&mp4(x)).sort((a,b)=>Date.parse(b.published_at)-Date.parse(a.published_at))}
+  REL=(await r.json()).filter(x=>/^(clip|preview|weekly)-/.test(x.tag_name)&&mp4(x)).sort((a,b)=>Date.parse(b.published_at)-Date.parse(a.published_at))}
  catch(e){document.getElementById("latest").innerHTML=`<p class="empty">Couldn't reach GitHub just now. Pull down to try again.</p>`;document.getElementById("older").innerHTML="";return}
  if(!REL.length){document.getElementById("latest").innerHTML=`<p class="empty">The first video shows up here after the next morning run.</p>`;document.getElementById("older").innerHTML=`<p class="empty">None yet.</p>`;return}
  const L=REL[0],v=mp4(L);
  document.getElementById("latest").innerHTML=`<div class="top"><h2>${esc(L.name)}</h2><span class="when">${ago(L.published_at)}</span></div>
   <video controls playsinline preload="metadata" src="${esc(v.browser_download_url)}" onerror="this.remove()"></video>
   <div class="btns"><a class="btn p" href="${esc(v.browser_download_url)}" download>Download video</a><button class="btn" onclick="copy(0)">Copy caption</button></div>
+  ${thumbOf(L)?`<div class="btns"><a class="btn" href="${esc(thumbOf(L).browser_download_url)}" download>Download thumbnail</a></div>`:""}
   <div class="cap">${esc(L.body||"")}</div>`;
- document.getElementById("older").innerHTML=REL.length>1?REL.slice(1).map((r,i)=>`<div class="row"><b>${esc(r.name)}</b><a class="btn" href="${esc(mp4(r).browser_download_url)}" download>Video</a><button class="btn" onclick="copy(${i+1})">Caption</button></div>`).join(""):`<p class="empty">None yet.</p>`}
+ document.getElementById("older").innerHTML=REL.length>1?REL.slice(1).map((r,i)=>`<div class="row"><b>${esc(r.name)}</b><a class="btn" href="${esc(mp4(r).browser_download_url)}" download>Video</a>${thumbOf(r)?`<a class="btn" href="${esc(thumbOf(r).browser_download_url)}" download>Thumb</a>`:""}<button class="btn" onclick="copy(${i+1})">Caption</button></div>`).join(""):`<p class="empty">None yet.</p>`}
 load();
 </script></body></html>

@@ -20,7 +20,8 @@ async function pool(items, n, f) { const out = []; let i = 0; await Promise.all(
 function team(x) {
   const t = x.team || {};
   return { ab: t.abbreviation, name: t.displayName, short: t.shortDisplayName, loc: t.location, color: t.color, alt: t.alternateColor, score: x.score,
-    rank: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : null, rec: ((x.records || [])[0] || {}).summary || null };
+    rank: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : null, rec: ((x.records || [])[0] || {}).summary || null,
+    ls: (x.linescores || []).map(l => +l.value || 0) };
 }
 function players(sum, kind) {
   const out = kind === "bb" ? [] : {};
@@ -65,7 +66,7 @@ async function check(ymd) {
   console.log(`${ymd}: ${fin} final, ${left} not finished`);
   process.exit(fin + left === 0 ? 3 : left ? 4 : 0);
 }
-module.exports = { day };
+module.exports = { day, get, pool, team, players, BASE, SPORTS };
 if (require.main === module && process.argv[2] === "--check") check(process.argv[3]).catch(e => { console.error(e.message); process.exit(4); });
 else if (require.main === module) (async () => {
   const [ymd, out] = process.argv.slice(2); fs.mkdirSync(out, { recursive: true });

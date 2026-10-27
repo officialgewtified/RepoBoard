@@ -1,0 +1,94 @@
+name: Weekly NFL recap video (long-form)
+on:
+  schedule:
+    # Monday night into Tuesday (about 12:15am to 4:15am Eastern): makes the week's recap once Monday Night Football is final
+    - cron: "17 4,5,6,7,8 * * 2"
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "NFL week number (blank = the latest finished week)"
+        required: false
+permissions:
+  contents: write
+concurrency:
+  group: weekly
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    defaults:
+      run:
+        working-directory: clips
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: The week's games
+        id: prep
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p out
+          set +e
+          if [ -z "${{ inputs.week }}" ]; then node weekly.js --check || { echo "Week not finished yet"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; }; fi
+          node weekly.js out/data.json ${{ inputs.week }}
+          code=$?; [ $code -eq 3 ] && { echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; }; [ $code -ne 0 ] && exit $code
+          WK=$(node -e "const d=require('./out/data.json');process.stdout.write(d.season+'-w'+d.week)")
+          echo "TAG=weekly-nfl-$WK" >> "$GITHUB_ENV"
+          # already made this week (and this wasn't a manual run)? then nothing to do
+          if [ -z "${{ inputs.week }}" ] && gh api "repos/${{ github.repository }}/releases/tags/weekly-nfl-$WK" --jq .id >/dev/null 2>&1; then echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-python@v5
+        if: steps.prep.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        if: steps.prep.outputs.skip != '1'
+        with:
+          path: |
+            clips/.models
+            ~/.cache/huggingface
+          key: voices-kokoro-chatterbox-v1
+      - name: Voiceover
+        if: steps.prep.outputs.skip != '1'
+        # about 8-10 minutes of narration: Chatterbox on a plain CPU takes a couple of hours for this, which is fine overnight
+        continue-on-error: true
+        timeout-minutes: 240
+        run: |
+          mkdir -p .models
+          [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          pip install -q kokoro-onnx soundfile
+          python ref.py
+          pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
+          python tts_cb.py out/data.json out/voice ref.wav || python tts.py out/data.json out/voice
+        env:
+          VOICE: am_puck
+          SPEED: "1.05"
+          EXAGGERATION: "0.7"
+          CFG: "0.4"
+      - name: Browser and ffmpeg
+        if: steps.prep.outputs.skip != '1'
+        timeout-minutes: 12
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
+          which ffmpeg
+      - name: Render
+        if: steps.prep.outputs.skip != '1'
+        run: |
+          PITCH=0.93 node render.js out/data.json out/nfl-week-recap.mp4 24
+          node -e "const d=require('./out/data.json'),fs=require('fs');const ch=fs.existsSync('out/nfl-week-recap.chapters.txt')?fs.readFileSync('out/nfl-week-recap.chapters.txt','utf8').trim():'';process.stdout.write(d.ytTitle+'\n\n'+d.description.replace('{{chapters}}',ch))" > out/description.txt
+          cat out/description.txt
+      - name: Publish
+        if: steps.prep.outputs.skip != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          TITLE=$(node -e "process.stdout.write(require('./out/data.json').ytTitle)")
+          gh release create "$TAG" out/nfl-week-recap.mp4 out/nfl-week-recap-thumbnail.jpg out/data.json --title "$TITLE" --notes-file out/description.txt --latest=false
+          gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^weekly-' | sort -r | tail -n +13 | xargs -r -I{} gh release delete {} --yes --cleanup-tag

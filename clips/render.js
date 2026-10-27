@@ -7,9 +7,10 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
 (async () => {
   const [dataFile, out, fpsArg] = process.argv.slice(2), fps = +fpsArg || 30;
   const data = JSON.parse(fs.readFileSync(dataFile, "utf8"));
-  const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}), page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+  const W = data.w || 1080, H = data.h || 1920;   // the shorts are 1080x1920; the weekly long-form is 1920x1080
+  const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}), page = await browser.newPage({ viewport: { width: W, height: H } });
   page.on("pageerror", e => { console.error("page error:", e.message); process.exit(1); });
-  await page.goto("file://" + path.join(__dirname, "recap.html"));
+  await page.goto("file://" + path.join(__dirname, data.template || "recap.html"));
   await page.evaluate(() => window.ready ? window.ready() : document.fonts.ready);
   const total = await page.evaluate(d => window.build(d), data);
   // wait for the player photos too
@@ -26,7 +27,14 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once("drain", r));
     if (i % 300 === 0) process.stderr.write(`frame ${i}/${frames}\n`);
   }
-  ff.stdin.end(); await done; await browser.close();
+  ff.stdin.end(); await done;
+  // long-form extras: YouTube chapters (from each scene's start) and a thumbnail
+  const base = out.replace(/\.mp4$/, "");
+  const ch = SC.filter(s => s.chapter);
+  if (ch.length) { const ts = x => { const s = Math.max(0, Math.floor(x)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+    fs.writeFileSync(base + ".chapters.txt", ch.map((s, i) => `${ts(i ? s.t0 : 0)} ${s.chapter}`).join("\n") + "\n"); }
+  if (await page.evaluate(() => typeof window.thumb === "function")) { await page.evaluate(() => window.thumb()); await page.screenshot({ path: base + "-thumbnail.jpg", type: "jpeg", quality: 90 }); }
+  await browser.close();
   if (sound) {
     // sound effects are made right here (no sound files to license): a whoosh for each swipe, a pop for each pop-up, a thump for the stamp
     const tmp = fs.mkdtempSync(path.join(require("os").tmpdir(), "sfx-"));
