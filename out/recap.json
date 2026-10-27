@@ -1,0 +1,1153 @@
+{
+ "brand": "Crossover",
+ "day": "2026-10-26",
+ "date": "Oct 26",
+ "title": "Monday's best stats",
+ "source": "Stats: official box scores via ESPN",
+ "hook": {
+  "big": "47",
+  "label": "points",
+  "who": "Anthony Edwards",
+  "ctx": "<b>MIN</b> at CLE · <b>L 127-125</b>",
+  "color": "#266092",
+  "tm": "MIN",
+  "sport": "NBA",
+  "viz": {
+   "t": "court",
+   "shots": [
+    [
+     3,
+     19,
+     0,
+     1
+    ],
+    [
+     27,
+     3,
+     1,
+     0
+    ],
+    [
+     24,
+     0,
+     1,
+     0
+    ],
+    [
+     27,
+     8,
+     1,
+     0
+    ],
+    [
+     39,
+     0,
+     1,
+     0
+    ],
+    [
+     2,
+     13,
+     0,
+     1
+    ],
+    [
+     26,
+     0,
+     1,
+     0
+    ],
+    [
+     10,
+     12,
+     1,
+     0
+    ],
+    [
+     42,
+     26,
+     0,
+     1
+    ],
+    [
+     26,
+     2,
+     1,
+     0
+    ],
+    [
+     25,
+     14,
+     1,
+     0
+    ],
+    [
+     23,
+     26,
+     0,
+     1
+    ],
+    [
+     10,
+     0,
+     0,
+     0
+    ],
+    [
+     15,
+     14,
+     0,
+     0
+    ],
+    [
+     17,
+     26,
+     1,
+     1
+    ],
+    [
+     10,
+     5,
+     1,
+     0
+    ],
+    [
+     22,
+     26,
+     0,
+     1
+    ],
+    [
+     46,
+     16,
+     0,
+     1
+    ],
+    [
+     44,
+     20,
+     0,
+     1
+    ],
+    [
+     25,
+     2,
+     1,
+     0
+    ],
+    [
+     16,
+     24,
+     1,
+     1
+    ],
+    [
+     34,
+     25,
+     0,
+     1
+    ],
+    [
+     36,
+     24,
+     0,
+     1
+    ],
+    [
+     41,
+     2,
+     0,
+     0
+    ],
+    [
+     19,
+     14,
+     1,
+     0
+    ],
+    [
+     21,
+     7,
+     1,
+     0
+    ],
+    [
+     32,
+     8,
+     1,
+     0
+    ],
+    [
+     25,
+     4,
+     0,
+     0
+    ],
+    [
+     41,
+     21,
+     1,
+     1
+    ],
+    [
+     3,
+     4,
+     1,
+     0
+    ],
+    [
+     12,
+     9,
+     0,
+     0
+    ],
+    [
+     1,
+     3,
+     1,
+     1
+    ],
+    [
+     27,
+     25,
+     0,
+     1
+    ],
+    [
+     8,
+     23,
+     1,
+     1
+    ]
+   ],
+   "fg": "19-34",
+   "tp": "5-15",
+   "ft": "4-6"
+  }
+ },
+ "sections": [
+  {
+   "sport": "NFL",
+   "games": [
+    {
+     "a": {
+      "ab": "DAL",
+      "s": "38",
+      "w": true,
+      "c": "#b0b7bc",
+      "rk": null
+     },
+     "h": {
+      "ab": "PHI",
+      "s": "21",
+      "w": false,
+      "c": "#1f555f",
+      "rk": null
+     },
+     "note": ""
+    }
+   ],
+   "total": 1,
+   "when": "Oct 26",
+   "top": [
+    {
+     "first": "Dak",
+     "last": "Prescott",
+     "tag": "Top passer",
+     "tm": "DAL",
+     "team": {
+      "name": "Dallas Cowboys",
+      "short": "Cowboys",
+      "loc": "Dallas"
+     },
+     "ctx": "<b>DAL</b> at PHI · <b>W 38-21</b>",
+     "color": "#b0b7bc",
+     "stats": [
+      [
+       212,
+       "Pass yds"
+      ],
+      [
+       3,
+       "TDs"
+      ],
+      [
+       "7.9",
+       "Yds/att"
+      ]
+     ],
+     "sub": [
+      "15/27 comp",
+      "0 INT",
+      "118.1 rating"
+     ],
+     "say": "What a day for Dak Prescott! 212 passing yards and 3 touchdowns, no interceptions, in the Cowboys' 38 to 21 win at Philadelphia!",
+     "viz": {
+      "t": "field",
+      "k": "pass",
+      "yds": 212,
+      "td": 3
+     }
+    },
+    {
+     "first": "Javonte",
+     "last": "Williams",
+     "tag": "Top rusher",
+     "tm": "DAL",
+     "team": {
+      "name": "Dallas Cowboys",
+      "short": "Cowboys",
+      "loc": "Dallas"
+     },
+     "ctx": "<b>DAL</b> at PHI · <b>W 38-21</b>",
+     "color": "#b0b7bc",
+     "stats": [
+      [
+       155,
+       "Rush yds"
+      ],
+      [
+       1,
+       "TD"
+      ],
+      [
+       25,
+       "Carries"
+      ]
+     ],
+     "sub": [
+      "6.2 per carry",
+      "Long of 34"
+     ],
+     "say": "Javonte Williams was unstoppable on the ground! 155 rushing yards and a touchdown in the Cowboys' 38 to 21 win at Philadelphia!",
+     "viz": {
+      "t": "field",
+      "k": "rush",
+      "yds": 155,
+      "td": 1
+     }
+    },
+    {
+     "first": "CeeDee",
+     "last": "Lamb",
+     "tag": "Top receiver",
+     "tm": "DAL",
+     "team": {
+      "name": "Dallas Cowboys",
+      "short": "Cowboys",
+      "loc": "Dallas"
+     },
+     "ctx": "<b>DAL</b> at PHI · <b>W 38-21</b>",
+     "color": "#b0b7bc",
+     "stats": [
+      [
+       74,
+       "Rec yds"
+      ],
+      [
+       5,
+       "Catches"
+      ],
+      [
+       2,
+       "TDs"
+      ]
+     ],
+     "sub": [
+      "12 targets",
+      "Long of 30",
+      "14.8 per catch"
+     ],
+     "say": "CeeDee Lamb caught 5 passes for 74 yards and 2 touchdowns in the Cowboys' 38 to 21 win at Philadelphia.",
+     "viz": {
+      "t": "field",
+      "k": "rec",
+      "yds": 74,
+      "td": 2
+     }
+    }
+   ],
+   "note": "The Cowboys beat the Eagles by 17"
+  },
+  {
+   "sport": "NBA",
+   "games": [
+    {
+     "a": {
+      "ab": "WSH",
+      "s": "103",
+      "w": false,
+      "c": "#e31837",
+      "rk": null
+     },
+     "h": {
+      "ab": "CHA",
+      "s": "110",
+      "w": true,
+      "c": "#008ca8",
+      "rk": null
+     },
+     "note": ""
+    },
+    {
+     "a": {
+      "ab": "MIN",
+      "s": "125",
+      "w": false,
+      "c": "#266092",
+      "rk": null
+     },
+     "h": {
+      "ab": "CLE",
+      "s": "127",
+      "w": true,
+      "c": "#860038",
+      "rk": null
+     },
+     "note": "Final OT"
+    },
+    {
+     "a": {
+      "ab": "CHI",
+      "s": "99",
+      "w": false,
+      "c": "#ce1141",
+      "rk": null
+     },
+     "h": {
+      "ab": "BOS",
+      "s": "134",
+      "w": true,
+      "c": "#008348",
+      "rk": null
+     },
+     "note": ""
+    },
+    {
+     "a": {
+      "ab": "DAL",
+      "s": "113",
+      "w": true,
+      "c": "#0064b1",
+      "rk": null
+     },
+     "h": {
+      "ab": "MIA",
+      "s": "109",
+      "w": false,
+      "c": "#98002e",
+      "rk": null
+     },
+     "note": ""
+    },
+    {
+     "a": {
+      "ab": "IND",
+      "s": "102",
+      "w": false,
+      "c": "#ffd520",
+      "rk": null
+     },
+     "h": {
+      "ab": "MIL",
+      "s": "110",
+      "w": true,
+      "c": "#00471b",
+      "rk": null
+     },
+     "note": ""
+    },
+    {
+     "a": {
+      "ab": "PHX",
+      "s": "114",
+      "w": false,
+      "c": "#e56020",
+      "rk": null
+     },
+     "h": {
+      "ab": "OKC",
+      "s": "125",
+      "w": true,
+      "c": "#007ac1",
+      "rk": null
+     },
+     "note": ""
+    },
+    {
+     "a": {
+      "ab": "ATL",
+      "s": "110",
+      "w": false,
+      "c": "#c8102e",
+      "rk": null
+     },
+     "h": {
+      "ab": "HOU",
+      "s": "120",
+      "w": true,
+      "c": "#ce0e2d",
+      "rk": null
+     },
+     "note": ""
+    },
+    {
+     "a": {
+      "ab": "MEM",
+      "s": "110",
+      "w": true,
+      "c": "#5d76a9",
+      "rk": null
+     },
+     "h": {
+      "ab": "UTAH",
+      "s": "105",
+      "w": false,
+      "c": "#79a3dc",
+      "rk": null
+     },
+     "note": ""
+    },
+    {
+     "a": {
+      "ab": "GS",
+      "s": "134",
+      "w": true,
+      "c": "#fdb927",
+      "rk": null
+     },
+     "h": {
+      "ab": "DEN",
+      "s": "114",
+      "w": false,
+      "c": "#fec524",
+      "rk": null
+     },
+     "note": ""
+    }
+   ],
+   "total": 9,
+   "when": "Oct 26",
+   "top": [
+    {
+     "first": "Anthony",
+     "last": "Edwards",
+     "rank": "#3",
+     "tm": "MIN",
+     "team": {
+      "name": "Minnesota Timberwolves",
+      "short": "Timberwolves",
+      "loc": "Minnesota"
+     },
+     "tag": "Top performer",
+     "ctx": "<b>MIN</b> at CLE · <b>L 127-125</b> · 41 min",
+     "color": "#266092",
+     "stats": [
+      [
+       47,
+       "Points"
+      ],
+      [
+       2,
+       "Steals"
+      ],
+      [
+       2,
+       "Blocks"
+      ]
+     ],
+     "sub": [
+      "19-34 FG",
+      "5-15 from three",
+      "4 assists",
+      "4 rebounds"
+     ],
+     "say": "Coming in at number three, Anthony Edwards! 47 points, 2 steals and 2 blocks, with 5 threes, in the Timberwolves' 127 to 125 loss at Cleveland.",
+     "viz": {
+      "t": "court",
+      "shots": [
+       [
+        3,
+        19,
+        0,
+        1
+       ],
+       [
+        27,
+        3,
+        1,
+        0
+       ],
+       [
+        24,
+        0,
+        1,
+        0
+       ],
+       [
+        27,
+        8,
+        1,
+        0
+       ],
+       [
+        39,
+        0,
+        1,
+        0
+       ],
+       [
+        2,
+        13,
+        0,
+        1
+       ],
+       [
+        26,
+        0,
+        1,
+        0
+       ],
+       [
+        10,
+        12,
+        1,
+        0
+       ],
+       [
+        42,
+        26,
+        0,
+        1
+       ],
+       [
+        26,
+        2,
+        1,
+        0
+       ],
+       [
+        25,
+        14,
+        1,
+        0
+       ],
+       [
+        23,
+        26,
+        0,
+        1
+       ],
+       [
+        10,
+        0,
+        0,
+        0
+       ],
+       [
+        15,
+        14,
+        0,
+        0
+       ],
+       [
+        17,
+        26,
+        1,
+        1
+       ],
+       [
+        10,
+        5,
+        1,
+        0
+       ],
+       [
+        22,
+        26,
+        0,
+        1
+       ],
+       [
+        46,
+        16,
+        0,
+        1
+       ],
+       [
+        44,
+        20,
+        0,
+        1
+       ],
+       [
+        25,
+        2,
+        1,
+        0
+       ],
+       [
+        16,
+        24,
+        1,
+        1
+       ],
+       [
+        34,
+        25,
+        0,
+        1
+       ],
+       [
+        36,
+        24,
+        0,
+        1
+       ],
+       [
+        41,
+        2,
+        0,
+        0
+       ],
+       [
+        19,
+        14,
+        1,
+        0
+       ],
+       [
+        21,
+        7,
+        1,
+        0
+       ],
+       [
+        32,
+        8,
+        1,
+        0
+       ],
+       [
+        25,
+        4,
+        0,
+        0
+       ],
+       [
+        41,
+        21,
+        1,
+        1
+       ],
+       [
+        3,
+        4,
+        1,
+        0
+       ],
+       [
+        12,
+        9,
+        0,
+        0
+       ],
+       [
+        1,
+        3,
+        1,
+        1
+       ],
+       [
+        27,
+        25,
+        0,
+        1
+       ],
+       [
+        8,
+        23,
+        1,
+        1
+       ]
+      ],
+      "fg": "19-34",
+      "tp": "5-15",
+      "ft": "4-6"
+     }
+    },
+    {
+     "first": "Alperen",
+     "last": "Sengun",
+     "rank": "#2",
+     "tm": "HOU",
+     "team": {
+      "name": "Houston Rockets",
+      "short": "Rockets",
+      "loc": "Houston"
+     },
+     "tag": "Top performer",
+     "ctx": "<b>HOU</b> vs ATL · <b>W 120-110</b> · 37 min",
+     "color": "#ce0e2d",
+     "stats": [
+      [
+       29,
+       "Points"
+      ],
+      [
+       6,
+       "Steals"
+      ],
+      [
+       9,
+       "Assists"
+      ]
+     ],
+     "sub": [
+      "11-15 FG",
+      "1-1 from three",
+      "9 rebounds",
+      "+29 on court"
+     ],
+     "say": "At number two, Alperen Sengun! 29 points, 6 steals and 9 assists, on 11 of 15 shooting, in the Rockets' 120 to 110 win over Atlanta.",
+     "viz": {
+      "t": "court",
+      "shots": [
+       [
+        8,
+        21,
+        1,
+        1
+       ],
+       [
+        25,
+        7,
+        0,
+        0
+       ],
+       [
+        25,
+        0,
+        0,
+        0
+       ],
+       [
+        25,
+        0,
+        1,
+        0
+       ],
+       [
+        24,
+        2,
+        1,
+        0
+       ],
+       [
+        26,
+        3,
+        1,
+        0
+       ],
+       [
+        27,
+        2,
+        1,
+        0
+       ],
+       [
+        23,
+        -1,
+        1,
+        0
+       ],
+       [
+        27,
+        2,
+        1,
+        0
+       ],
+       [
+        27,
+        3,
+        1,
+        0
+       ],
+       [
+        22,
+        16,
+        0,
+        0
+       ],
+       [
+        27,
+        2,
+        0,
+        0
+       ],
+       [
+        25,
+        1,
+        1,
+        0
+       ],
+       [
+        25,
+        3,
+        1,
+        0
+       ],
+       [
+        26,
+        2,
+        1,
+        0
+       ]
+      ],
+      "fg": "11-15",
+      "tp": "1-1",
+      "ft": "6-8"
+     }
+    },
+    {
+     "first": "Cooper",
+     "last": "Flagg",
+     "rank": "#1",
+     "tm": "DAL",
+     "team": {
+      "name": "Dallas Mavericks",
+      "short": "Mavericks",
+      "loc": "Dallas"
+     },
+     "tag": "Double-double",
+     "ctx": "<b>DAL</b> at MIA · <b>W 113-109</b> · 40 min",
+     "color": "#0064b1",
+     "stats": [
+      [
+       29,
+       "Points"
+      ],
+      [
+       5,
+       "Steals"
+      ],
+      [
+       11,
+       "Assists"
+      ]
+     ],
+     "sub": [
+      "12-23 FG",
+      "2-8 from three",
+      "3 blocks",
+      "6 rebounds"
+     ],
+     "say": "And the top performance of the night... Cooper Flagg! 29 points, 5 steals and 11 assists in the Mavericks' 113 to 109 win at Miami.",
+     "viz": {
+      "t": "court",
+      "shots": [
+       [
+        21,
+        25,
+        0,
+        1
+       ],
+       [
+        25,
+        2,
+        1,
+        0
+       ],
+       [
+        28,
+        2,
+        0,
+        0
+       ],
+       [
+        41,
+        23,
+        0,
+        1
+       ],
+       [
+        12,
+        2,
+        1,
+        0
+       ],
+       [
+        39,
+        22,
+        0,
+        1
+       ],
+       [
+        36,
+        2,
+        1,
+        0
+       ],
+       [
+        28,
+        25,
+        0,
+        1
+       ],
+       [
+        26,
+        1,
+        1,
+        0
+       ],
+       [
+        22,
+        2,
+        1,
+        0
+       ],
+       [
+        28,
+        26,
+        1,
+        1
+       ],
+       [
+        38,
+        1,
+        1,
+        0
+       ],
+       [
+        16,
+        5,
+        0,
+        0
+       ],
+       [
+        36,
+        22,
+        0,
+        1
+       ],
+       [
+        20,
+        1,
+        0,
+        0
+       ],
+       [
+        22,
+        2,
+        0,
+        0
+       ],
+       [
+        28,
+        25,
+        0,
+        1
+       ],
+       [
+        24,
+        0,
+        1,
+        0
+       ],
+       [
+        20,
+        11,
+        1,
+        0
+       ],
+       [
+        19,
+        5,
+        1,
+        0
+       ],
+       [
+        28,
+        1,
+        0,
+        0
+       ],
+       [
+        23,
+        24,
+        1,
+        1
+       ],
+       [
+        23,
+        1,
+        1,
+        0
+       ]
+      ],
+      "fg": "12-23",
+      "tp": "2-8",
+      "ft": "3-3"
+     }
+    }
+   ],
+   "note": "The Cavaliers beat the Timberwolves in overtime, 127 to 125"
+  }
+ ],
+ "more": [
+  {
+   "sport": "NFL",
+   "name": "Makai Lemon",
+   "tm": "PHI",
+   "team": {
+    "name": "Philadelphia Eagles",
+    "short": "Eagles",
+    "loc": "Philadelphia"
+   },
+   "color": "#1f555f",
+   "txt": "7 rec, 67 yds, 1 TD",
+   "say": "Makai Lemon had 67 receiving yards and a touchdown."
+  },
+  {
+   "sport": "NFL",
+   "name": "George Pickens",
+   "tm": "DAL",
+   "team": {
+    "name": "Dallas Cowboys",
+    "short": "Cowboys",
+    "loc": "Dallas"
+   },
+   "color": "#b0b7bc",
+   "txt": "4 rec, 57 yds, 1 TD",
+   "say": "George Pickens had 57 receiving yards and a touchdown."
+  },
+  {
+   "sport": "NBA",
+   "name": "Giannis Antetokounmpo",
+   "tm": "MIA",
+   "team": {
+    "name": "Miami Heat",
+    "short": "Heat",
+    "loc": "Miami"
+   },
+   "color": "#98002e",
+   "txt": "29 pts · 14 reb · 11 ast",
+   "say": "Giannis Antetokounmpo had 29 points, 14 rebounds and 11 assists."
+  }
+ ],
+ "voice": {
+  "hook": "47 points! Anthony Edwards just had the night of Monday. Here's everything you missed!",
+  "s0": "Let's start in the NFL, where one game went final. The Cowboys beat the Eagles by 17.",
+  "p0_0": "What a day for Dak Prescott! 212 passing yards and 3 touchdowns, no interceptions, in the Cowboys' 38 to 21 win at Philadelphia!",
+  "p0_1": "Javonte Williams was unstoppable on the ground! 155 rushing yards and a touchdown in the Cowboys' 38 to 21 win at Philadelphia!",
+  "p0_2": "CeeDee Lamb caught 5 passes for 74 yards and 2 touchdowns in the Cowboys' 38 to 21 win at Philadelphia.",
+  "s1": "Now to the NBA, with nine games on the board. The Cavaliers beat the Timberwolves in overtime, 127 to 125.",
+  "p1_0": "Coming in at number three, Anthony Edwards! 47 points, 2 steals and 2 blocks, with 5 threes, in the Timberwolves' 127 to 125 loss at Cleveland.",
+  "p1_1": "At number two, Alperen Sengun! 29 points, 6 steals and 9 assists, on 11 of 15 shooting, in the Rockets' 120 to 110 win over Atlanta.",
+  "p1_2": "And the top performance of the night... Cooper Flagg! 29 points, 5 steals and 11 assists in the Mavericks' 113 to 109 win at Miami.",
+  "more": "A few more big performances. Makai Lemon had 67 receiving yards and a touchdown. George Pickens had 57 receiving yards and a touchdown. Giannis Antetokounmpo had 29 points, 14 rebounds and 11 assists.",
+  "outro": "That's your recap! Follow Crossover for tomorrow's best stats!"
+ },
+ "caption": "Anthony Edwards scored 47 points on Monday 🔥\n\nMonday's best stats (Oct 26) 📊\n🏈 Dak Prescott: 212 pass yds, 3 TDs, 7.9 yds/att\n🏈 Javonte Williams: 155 rush yds, 1 TD, 25 carries\n🏈 CeeDee Lamb: 74 rec yds, 5 catches, 2 TDs\n🏀 #1 Cooper Flagg: 29 points, 5 steals, 11 assists\n🏀 #2 Alperen Sengun: 29 points, 6 steals, 9 assists\n🏀 #3 Anthony Edwards: 47 points, 2 steals, 2 blocks\n\nWho had the best night? Drop it in the comments 👇\nFollow for tomorrow's best stats ✅\n\n#NFL #NBA #AnthonyEdwards #DakPrescott #CooperFlagg #Timberwolves #FantasyFootball #NBAStats #SportsStats #fyp",
+ "ytTitle": "Anthony Edwards Drops 47 🔥 Monday's Best NFL & NBA Stats"
+}

@@ -1,0 +1,3605 @@
+{
+ "mode": "weekly",
+ "template": "weekly.html",
+ "w": 1920,
+ "h": 1080,
+ "brand": "Crossover",
+ "day": "2026-10-27",
+ "week": 7,
+ "season": 2026,
+ "range": "Oct 22 – Oct 26",
+ "title": "NFL Week 7 Recap",
+ "ytTitle": "NFL Week 7 Recap: Pollard's 3 Rushing Touchdowns, Every Score & Week 8 Preview",
+ "description": "Tony Pollard: 3 rushing touchdowns 🔥 Every score from NFL Week 7 (Oct 22 – Oct 26), the games everyone is talking about, the stat leaders, defense, fantasy top 5, the player of the week, the best records, the NBA's best games, and the Week 8 matchups to watch.\n\nCHAPTERS\n{{chapters}}\n\nWho's your player of the week? Tell us in the comments 👇\nNew stat recaps every day. Subscribe for next week's recap!\n\n#NFL #NFLWeek7 #FantasyFootball #NFLHighlights #TonyPollard #Crossover",
+ "source": "Stats: ESPN box scores",
+ "scenes": [
+  {
+   "kind": "hook",
+   "id": "hook",
+   "chapter": "Intro",
+   "big": "3",
+   "label": "rushing touchdowns",
+   "who": "Tony Pollard",
+   "tm": "TEN",
+   "color": "#4495d2",
+   "line": "25 car · 129 yds · 3 TD",
+   "viz": {
+    "t": "field",
+    "k": "rush",
+    "yds": 129,
+    "td": 3
+   }
+  },
+  {
+   "kind": "finals",
+   "id": "f0",
+   "chapter": "Every Week 7 score",
+   "part": 0,
+   "games": [
+    {
+     "away": {
+      "ab": "NE",
+      "name": "New England Patriots",
+      "short": "Patriots",
+      "loc": "New England",
+      "color": "#c60c30",
+      "alt": "c60c30",
+      "score": "24",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [
+       0,
+       14,
+       7,
+       3
+      ],
+      "yds": 380,
+      "to": 1,
+      "nick": "Patriots"
+     },
+     "home": {
+      "ab": "CHI",
+      "name": "Chicago Bears",
+      "short": "Bears",
+      "loc": "Chicago",
+      "color": "#e64100",
+      "alt": "e64100",
+      "score": "30",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [
+       10,
+       10,
+       7,
+       3
+      ],
+      "yds": 405,
+      "to": 0,
+      "nick": "Bears"
+     },
+     "ot": false,
+     "day": "THU"
+    },
+    {
+     "away": {
+      "ab": "PIT",
+      "name": "Pittsburgh Steelers",
+      "short": "Steelers",
+      "loc": "Pittsburgh",
+      "color": "#ffb612",
+      "alt": "ffb612",
+      "score": "16",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [
+       3,
+       10,
+       3,
+       0
+      ],
+      "yds": 343,
+      "to": 0,
+      "nick": "Steelers"
+     },
+     "home": {
+      "ab": "NO",
+      "name": "New Orleans Saints",
+      "short": "Saints",
+      "loc": "New Orleans",
+      "color": "#d3bc8d",
+      "alt": "000000",
+      "score": "10",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [
+       0,
+       10,
+       0,
+       0
+      ],
+      "yds": 281,
+      "to": 1,
+      "nick": "Saints"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "SF",
+      "name": "San Francisco 49ers",
+      "short": "49ers",
+      "loc": "San Francisco",
+      "color": "#aa0000",
+      "alt": "b3995d",
+      "score": "20",
+      "rank": null,
+      "rec": "6-1",
+      "ls": [
+       7,
+       7,
+       0,
+       6
+      ],
+      "yds": 400,
+      "to": 4,
+      "nick": "49ers"
+     },
+     "home": {
+      "ab": "ATL",
+      "name": "Atlanta Falcons",
+      "short": "Falcons",
+      "loc": "Atlanta",
+      "color": "#a71930",
+      "alt": "000000",
+      "score": "29",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [
+       3,
+       9,
+       7,
+       10
+      ],
+      "yds": 295,
+      "to": 0,
+      "nick": "Falcons"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "CLE",
+      "name": "Cleveland Browns",
+      "short": "Browns",
+      "loc": "Cleveland",
+      "color": "#ff3c00",
+      "alt": "ff3c00",
+      "score": "27",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [
+       7,
+       10,
+       0,
+       10
+      ],
+      "yds": 491,
+      "to": 2,
+      "nick": "Browns"
+     },
+     "home": {
+      "ab": "TEN",
+      "name": "Tennessee Titans",
+      "short": "Titans",
+      "loc": "Tennessee",
+      "color": "#4495d2",
+      "alt": "001532",
+      "score": "24",
+      "rank": null,
+      "rec": "1-6",
+      "ls": [
+       14,
+       0,
+       0,
+       10
+      ],
+      "yds": 322,
+      "to": 2,
+      "nick": "Titans"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "IND",
+      "name": "Indianapolis Colts",
+      "short": "Colts",
+      "loc": "Indianapolis",
+      "color": "#1a4f83",
+      "alt": "ffffff",
+      "score": "10",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [
+       7,
+       3,
+       0,
+       0
+      ],
+      "yds": 218,
+      "to": 1,
+      "nick": "Colts"
+     },
+     "home": {
+      "ab": "MIN",
+      "name": "Minnesota Vikings",
+      "short": "Vikings",
+      "loc": "Minnesota",
+      "color": "#4f2683",
+      "alt": "ffc62f",
+      "score": "16",
+      "rank": null,
+      "rec": "6-0",
+      "ls": [
+       0,
+       6,
+       0,
+       10
+      ],
+      "yds": 275,
+      "to": 0,
+      "nick": "Vikings"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "MIA",
+      "name": "Miami Dolphins",
+      "short": "Dolphins",
+      "loc": "Miami",
+      "color": "#008e97",
+      "alt": "fc4c02",
+      "score": "28",
+      "rank": null,
+      "rec": "1-5",
+      "ls": [
+       14,
+       7,
+       0,
+       7
+      ],
+      "yds": 360,
+      "to": 0,
+      "nick": "Dolphins"
+     },
+     "home": {
+      "ab": "NYJ",
+      "name": "New York Jets",
+      "short": "Jets",
+      "loc": "New York",
+      "color": "#115740",
+      "alt": "ffffff",
+      "score": "25",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [
+       7,
+       0,
+       7,
+       11
+      ],
+      "yds": 377,
+      "to": 1,
+      "nick": "Jets"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "TB",
+      "name": "Tampa Bay Buccaneers",
+      "short": "Buccaneers",
+      "loc": "Tampa Bay",
+      "color": "#bd1c36",
+      "alt": "3e3a35",
+      "score": "43",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [
+       7,
+       26,
+       3,
+       7
+      ],
+      "yds": 322,
+      "to": 0,
+      "nick": "Buccaneers"
+     },
+     "home": {
+      "ab": "CAR",
+      "name": "Carolina Panthers",
+      "short": "Panthers",
+      "loc": "Carolina",
+      "color": "#0085ca",
+      "alt": "000000",
+      "score": "13",
+      "rank": null,
+      "rec": "3-3",
+      "ls": [
+       0,
+       6,
+       0,
+       7
+      ],
+      "yds": 266,
+      "to": 4,
+      "nick": "Panthers"
+     },
+     "ot": false,
+     "day": "SUN"
+    }
+   ]
+  },
+  {
+   "kind": "finals",
+   "id": "f1",
+   "part": 1,
+   "games": [
+    {
+     "away": {
+      "ab": "CIN",
+      "name": "Cincinnati Bengals",
+      "short": "Bengals",
+      "loc": "Cincinnati",
+      "color": "#fb4f14",
+      "alt": "000000",
+      "score": "35",
+      "rank": null,
+      "rec": "4-2",
+      "ls": [
+       0,
+       0,
+       14,
+       21
+      ],
+      "yds": 357,
+      "to": 0,
+      "nick": "Bengals"
+     },
+     "home": {
+      "ab": "BAL",
+      "name": "Baltimore Ravens",
+      "short": "Ravens",
+      "loc": "Baltimore",
+      "color": "#54418c",
+      "alt": "000000",
+      "score": "13",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [
+       7,
+       6,
+       0,
+       0
+      ],
+      "yds": 359,
+      "to": 1,
+      "nick": "Ravens"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "NYG",
+      "name": "New York Giants",
+      "short": "Giants",
+      "loc": "New York",
+      "color": "#003c7f",
+      "alt": "c9243f",
+      "score": "27",
+      "rank": null,
+      "rec": "4-2-1",
+      "ls": [
+       7,
+       7,
+       0,
+       7,
+       6
+      ],
+      "yds": 420,
+      "to": 0,
+      "nick": "Giants"
+     },
+     "home": {
+      "ab": "HOU",
+      "name": "Houston Texans",
+      "short": "Texans",
+      "loc": "Houston",
+      "color": "#eb0028",
+      "alt": "eb0028",
+      "score": "21",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [
+       3,
+       11,
+       0,
+       7,
+       0
+      ],
+      "yds": 237,
+      "to": 0,
+      "nick": "Texans"
+     },
+     "ot": true,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "DEN",
+      "name": "Denver Broncos",
+      "short": "Broncos",
+      "loc": "Denver",
+      "color": "#fc4c02",
+      "alt": "fc4c02",
+      "score": "30",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [
+       6,
+       7,
+       14,
+       3
+      ],
+      "yds": 377,
+      "to": 0,
+      "nick": "Broncos"
+     },
+     "home": {
+      "ab": "ARI",
+      "name": "Arizona Cardinals",
+      "short": "Cardinals",
+      "loc": "Arizona",
+      "color": "#a40227",
+      "alt": "ffffff",
+      "score": "16",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [
+       0,
+       6,
+       7,
+       3
+      ],
+      "yds": 353,
+      "to": 0,
+      "nick": "Cardinals"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "GB",
+      "name": "Green Bay Packers",
+      "short": "Packers",
+      "loc": "Green Bay",
+      "color": "#204e32",
+      "alt": "ffb612",
+      "score": "17",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [
+       7,
+       0,
+       7,
+       3
+      ],
+      "yds": 324,
+      "to": 1,
+      "nick": "Packers"
+     },
+     "home": {
+      "ab": "DET",
+      "name": "Detroit Lions",
+      "short": "Lions",
+      "loc": "Detroit",
+      "color": "#0076b6",
+      "alt": "bbbbbb",
+      "score": "20",
+      "rank": null,
+      "rec": "4-2",
+      "ls": [
+       7,
+       3,
+       7,
+       3
+      ],
+      "yds": 415,
+      "to": 2,
+      "nick": "Lions"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "LAR",
+      "name": "Los Angeles Rams",
+      "short": "Rams",
+      "loc": "Los Angeles",
+      "color": "#003594",
+      "alt": "ffd100",
+      "score": "35",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [
+       7,
+       21,
+       0,
+       7
+      ],
+      "yds": 386,
+      "to": 2,
+      "nick": "Rams"
+     },
+     "home": {
+      "ab": "LV",
+      "name": "Las Vegas Raiders",
+      "short": "Raiders",
+      "loc": "Las Vegas",
+      "color": "#a5acaf",
+      "alt": "a5acaf",
+      "score": "21",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [
+       3,
+       3,
+       0,
+       15
+      ],
+      "yds": 350,
+      "to": 0,
+      "nick": "Raiders"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "KC",
+      "name": "Kansas City Chiefs",
+      "short": "Chiefs",
+      "loc": "Kansas City",
+      "color": "#e31837",
+      "alt": "ffb612",
+      "score": "3",
+      "rank": null,
+      "rec": "5-1",
+      "ls": [
+       0,
+       0,
+       3,
+       0
+      ],
+      "yds": 213,
+      "to": 1,
+      "nick": "Chiefs"
+     },
+     "home": {
+      "ab": "SEA",
+      "name": "Seattle Seahawks",
+      "short": "Seahawks",
+      "loc": "Seattle",
+      "color": "#69be28",
+      "alt": "69be28",
+      "score": "20",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [
+       0,
+       10,
+       3,
+       7
+      ],
+      "yds": 410,
+      "to": 1,
+      "nick": "Seahawks"
+     },
+     "ot": false,
+     "day": "SUN"
+    },
+    {
+     "away": {
+      "ab": "DAL",
+      "name": "Dallas Cowboys",
+      "short": "Cowboys",
+      "loc": "Dallas",
+      "color": "#b0b7bc",
+      "alt": "b0b7bc",
+      "score": "38",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [
+       10,
+       10,
+       8,
+       10
+      ],
+      "yds": 416,
+      "to": 0,
+      "nick": "Cowboys"
+     },
+     "home": {
+      "ab": "PHI",
+      "name": "Philadelphia Eagles",
+      "short": "Eagles",
+      "loc": "Philadelphia",
+      "color": "#1f555f",
+      "alt": "000000",
+      "score": "21",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [
+       7,
+       7,
+       7,
+       0
+      ],
+      "yds": 321,
+      "to": 1,
+      "nick": "Eagles"
+     },
+     "ot": false,
+     "day": "MON"
+    }
+   ]
+  },
+  {
+   "kind": "game",
+   "id": "g0",
+   "chapter": "Games of the week",
+   "tag": "Overtime",
+   "head": "Giants win it in OT",
+   "day": "SUN",
+   "date": "Oct 25",
+   "away": {
+    "ab": "NYG",
+    "name": "New York Giants",
+    "short": "Giants",
+    "loc": "New York",
+    "color": "#003c7f",
+    "alt": "c9243f",
+    "score": "27",
+    "rank": null,
+    "rec": "4-2-1",
+    "ls": [
+     7,
+     7,
+     0,
+     7,
+     6
+    ],
+    "yds": 420,
+    "to": 0,
+    "nick": "Giants"
+   },
+   "home": {
+    "ab": "HOU",
+    "name": "Houston Texans",
+    "short": "Texans",
+    "loc": "Houston",
+    "color": "#eb0028",
+    "alt": "eb0028",
+    "score": "21",
+    "rank": null,
+    "rec": "2-5",
+    "ls": [
+     3,
+     11,
+     0,
+     7,
+     0
+    ],
+    "yds": 237,
+    "to": 0,
+    "nick": "Texans"
+   },
+   "ot": true,
+   "stars": [
+    {
+     "name": "Cam Skattebo",
+     "tm": "NYG",
+     "color": "#003c7f",
+     "line": "17 car · 124 yds · 1 TD"
+    },
+    {
+     "name": "Malik Nabers",
+     "tm": "NYG",
+     "color": "#003c7f",
+     "line": "7 rec · 111 yds · 0 TD"
+    },
+    {
+     "name": "C.J. Stroud",
+     "tm": "HOU",
+     "color": "#eb0028",
+     "line": "17/28 · 153 yds · 2 TD"
+    }
+   ],
+   "winner": "NYG",
+   "viz": {
+    "t": "field",
+    "k": "rush",
+    "yds": 124,
+    "td": 1
+   },
+   "vizWho": "Cam Skattebo",
+   "vizTm": "NYG"
+  },
+  {
+   "kind": "game",
+   "id": "g1",
+   "tag": "Upset",
+   "head": "Falcons stun 49ers",
+   "day": "SUN",
+   "date": "Oct 25",
+   "away": {
+    "ab": "SF",
+    "name": "San Francisco 49ers",
+    "short": "49ers",
+    "loc": "San Francisco",
+    "color": "#aa0000",
+    "alt": "b3995d",
+    "score": "20",
+    "rank": null,
+    "rec": "6-1",
+    "ls": [
+     7,
+     7,
+     0,
+     6
+    ],
+    "yds": 400,
+    "to": 4,
+    "nick": "49ers"
+   },
+   "home": {
+    "ab": "ATL",
+    "name": "Atlanta Falcons",
+    "short": "Falcons",
+    "loc": "Atlanta",
+    "color": "#a71930",
+    "alt": "000000",
+    "score": "29",
+    "rank": null,
+    "rec": "3-4",
+    "ls": [
+     3,
+     9,
+     7,
+     10
+    ],
+    "yds": 295,
+    "to": 0,
+    "nick": "Falcons"
+   },
+   "ot": false,
+   "stars": [
+    {
+     "name": "Christian McCaffrey",
+     "tm": "SF",
+     "color": "#aa0000",
+     "line": "6 rec · 61 yds · 0 TD"
+    },
+    {
+     "name": "Michael Penix Jr.",
+     "tm": "ATL",
+     "color": "#a71930",
+     "line": "25/34 · 213 yds · 3 TD"
+    },
+    {
+     "name": "Drake London",
+     "tm": "ATL",
+     "color": "#a71930",
+     "line": "7 rec · 66 yds · 1 TD"
+    }
+   ],
+   "winner": "ATL",
+   "viz": {
+    "t": "field",
+    "k": "rec",
+    "yds": 61,
+    "td": 0
+   },
+   "vizWho": "Christian McCaffrey",
+   "vizTm": "SF"
+  },
+  {
+   "kind": "game",
+   "id": "g2",
+   "tag": "Nail-biter",
+   "head": "Browns edge Titans",
+   "day": "SUN",
+   "date": "Oct 25",
+   "away": {
+    "ab": "CLE",
+    "name": "Cleveland Browns",
+    "short": "Browns",
+    "loc": "Cleveland",
+    "color": "#ff3c00",
+    "alt": "ff3c00",
+    "score": "27",
+    "rank": null,
+    "rec": "5-2",
+    "ls": [
+     7,
+     10,
+     0,
+     10
+    ],
+    "yds": 491,
+    "to": 2,
+    "nick": "Browns"
+   },
+   "home": {
+    "ab": "TEN",
+    "name": "Tennessee Titans",
+    "short": "Titans",
+    "loc": "Tennessee",
+    "color": "#4495d2",
+    "alt": "001532",
+    "score": "24",
+    "rank": null,
+    "rec": "1-6",
+    "ls": [
+     14,
+     0,
+     0,
+     10
+    ],
+    "yds": 322,
+    "to": 2,
+    "nick": "Titans"
+   },
+   "ot": false,
+   "stars": [
+    {
+     "name": "Tony Pollard",
+     "tm": "TEN",
+     "color": "#4495d2",
+     "line": "25 car · 129 yds · 3 TD"
+    },
+    {
+     "name": "Quinshon Judkins",
+     "tm": "CLE",
+     "color": "#ff3c00",
+     "line": "17 car · 96 yds · 2 TD"
+    },
+    {
+     "name": "KC Concepcion",
+     "tm": "CLE",
+     "color": "#ff3c00",
+     "line": "8 rec · 129 yds · 0 TD"
+    }
+   ],
+   "winner": "CLE",
+   "viz": {
+    "t": "field",
+    "k": "rush",
+    "yds": 129,
+    "td": 3
+   },
+   "vizWho": "Tony Pollard",
+   "vizTm": "TEN"
+  },
+  {
+   "kind": "game",
+   "id": "g3",
+   "tag": "Nail-biter",
+   "head": "Dolphins edge Jets",
+   "day": "SUN",
+   "date": "Oct 25",
+   "away": {
+    "ab": "MIA",
+    "name": "Miami Dolphins",
+    "short": "Dolphins",
+    "loc": "Miami",
+    "color": "#008e97",
+    "alt": "fc4c02",
+    "score": "28",
+    "rank": null,
+    "rec": "1-5",
+    "ls": [
+     14,
+     7,
+     0,
+     7
+    ],
+    "yds": 360,
+    "to": 0,
+    "nick": "Dolphins"
+   },
+   "home": {
+    "ab": "NYJ",
+    "name": "New York Jets",
+    "short": "Jets",
+    "loc": "New York",
+    "color": "#115740",
+    "alt": "ffffff",
+    "score": "25",
+    "rank": null,
+    "rec": "2-5",
+    "ls": [
+     7,
+     0,
+     7,
+     11
+    ],
+    "yds": 377,
+    "to": 1,
+    "nick": "Jets"
+   },
+   "ot": false,
+   "stars": [
+    {
+     "name": "Malik Willis",
+     "tm": "MIA",
+     "color": "#008e97",
+     "line": "14/21 · 208 yds · 2 TD"
+    },
+    {
+     "name": "Mason Taylor",
+     "tm": "NYJ",
+     "color": "#115740",
+     "line": "5 rec · 62 yds · 2 TD"
+    },
+    {
+     "name": "Omar Cooper Jr.",
+     "tm": "NYJ",
+     "color": "#115740",
+     "line": "5 rec · 115 yds · 1 TD"
+    }
+   ],
+   "winner": "MIA",
+   "viz": {
+    "t": "field",
+    "k": "pass",
+    "yds": 208,
+    "td": 2
+   },
+   "vizWho": "Malik Willis",
+   "vizTm": "MIA"
+  },
+  {
+   "kind": "game",
+   "id": "g4",
+   "tag": "Nail-biter",
+   "head": "Lions edge Packers",
+   "day": "SUN",
+   "date": "Oct 25",
+   "away": {
+    "ab": "GB",
+    "name": "Green Bay Packers",
+    "short": "Packers",
+    "loc": "Green Bay",
+    "color": "#204e32",
+    "alt": "ffb612",
+    "score": "17",
+    "rank": null,
+    "rec": "4-3",
+    "ls": [
+     7,
+     0,
+     7,
+     3
+    ],
+    "yds": 324,
+    "to": 1,
+    "nick": "Packers"
+   },
+   "home": {
+    "ab": "DET",
+    "name": "Detroit Lions",
+    "short": "Lions",
+    "loc": "Detroit",
+    "color": "#0076b6",
+    "alt": "bbbbbb",
+    "score": "20",
+    "rank": null,
+    "rec": "4-2",
+    "ls": [
+     7,
+     3,
+     7,
+     3
+    ],
+    "yds": 415,
+    "to": 2,
+    "nick": "Lions"
+   },
+   "ot": false,
+   "stars": [
+    {
+     "name": "Jameson Williams",
+     "tm": "DET",
+     "color": "#0076b6",
+     "line": "5 rec · 91 yds · 2 TD"
+    },
+    {
+     "name": "Amon-Ra St. Brown",
+     "tm": "DET",
+     "color": "#0076b6",
+     "line": "9 rec · 153 yds · 0 TD"
+    },
+    {
+     "name": "Josh Jacobs",
+     "tm": "GB",
+     "color": "#204e32",
+     "line": "5 rec · 55 yds · 1 TD"
+    }
+   ],
+   "winner": "DET",
+   "viz": {
+    "t": "field",
+    "k": "rec",
+    "yds": 91,
+    "td": 2
+   },
+   "vizWho": "Jameson Williams",
+   "vizTm": "DET"
+  },
+  {
+   "kind": "game",
+   "id": "g5",
+   "tag": "Upset",
+   "head": "Seahawks stun Chiefs",
+   "day": "SUN",
+   "date": "Oct 25",
+   "away": {
+    "ab": "KC",
+    "name": "Kansas City Chiefs",
+    "short": "Chiefs",
+    "loc": "Kansas City",
+    "color": "#e31837",
+    "alt": "ffb612",
+    "score": "3",
+    "rank": null,
+    "rec": "5-1",
+    "ls": [
+     0,
+     0,
+     3,
+     0
+    ],
+    "yds": 213,
+    "to": 1,
+    "nick": "Chiefs"
+   },
+   "home": {
+    "ab": "SEA",
+    "name": "Seattle Seahawks",
+    "short": "Seahawks",
+    "loc": "Seattle",
+    "color": "#69be28",
+    "alt": "69be28",
+    "score": "20",
+    "rank": null,
+    "rec": "4-3",
+    "ls": [
+     0,
+     10,
+     3,
+     7
+    ],
+    "yds": 410,
+    "to": 1,
+    "nick": "Seahawks"
+   },
+   "ot": false,
+   "stars": [
+    {
+     "name": "Jaxon Smith-Njigba",
+     "tm": "SEA",
+     "color": "#69be28",
+     "line": "9 rec · 150 yds · 1 TD"
+    },
+    {
+     "name": "Emanuel Wilson",
+     "tm": "SEA",
+     "color": "#69be28",
+     "line": "24 car · 100 yds · 1 TD"
+    },
+    {
+     "name": "Sam Darnold",
+     "tm": "SEA",
+     "color": "#69be28",
+     "line": "20/28 · 257 yds · 1 TD · 1 INT"
+    }
+   ],
+   "winner": "SEA",
+   "viz": {
+    "t": "field",
+    "k": "rec",
+    "yds": 150,
+    "td": 1
+   },
+   "vizWho": "Jaxon Smith-Njigba",
+   "vizTm": "SEA"
+  },
+  {
+   "kind": "numbers",
+   "id": "num",
+   "chapter": "By the numbers",
+   "tiles": [
+    {
+     "v": 632,
+     "l": "Points scored",
+     "s": "14 games"
+    },
+    {
+     "v": 7,
+     "l": "One-score games",
+     "s": "1 in overtime"
+    },
+    {
+     "v": 63,
+     "l": "Longest catch",
+     "s": "Caleb Douglas"
+    },
+    {
+     "v": 43,
+     "l": "Most by a team",
+     "s": "Buccaneers"
+    }
+   ]
+  },
+  {
+   "kind": "numbers",
+   "id": "tm",
+   "chapter": "Offense & defense of the week",
+   "title": "Offense & defense",
+   "tiles": [
+    {
+     "v": 491,
+     "l": "Total yards",
+     "s": "Browns vs Titans"
+    },
+    {
+     "v": 213,
+     "l": "Yards allowed",
+     "s": "Seahawks defense"
+    },
+    {
+     "v": 4,
+     "l": "Takeaways",
+     "s": "Falcons vs 49ers"
+    },
+    {
+     "v": 30,
+     "l": "Biggest win",
+     "s": "Buccaneers over Panthers"
+    }
+   ]
+  },
+  {
+   "kind": "leader",
+   "id": "l0",
+   "chapter": "Stat leaders",
+   "title": "Passing yards",
+   "rows": [
+    {
+     "name": "Drake Maye",
+     "tm": "NE",
+     "color": "#c60c30",
+     "v": 321,
+     "sub": "24/31 · 2 TD · 1 INT",
+     "td": 2
+    },
+    {
+     "name": "Caleb Williams",
+     "tm": "CHI",
+     "color": "#e64100",
+     "v": 308,
+     "sub": "22/33 · 2 TD · 0 INT",
+     "td": 2
+    },
+    {
+     "name": "Deshaun Watson",
+     "tm": "CLE",
+     "color": "#ff3c00",
+     "v": 308,
+     "sub": "25/36 · 0 TD · 1 INT",
+     "td": 0
+    },
+    {
+     "name": "Jared Goff",
+     "tm": "DET",
+     "color": "#0076b6",
+     "v": 303,
+     "sub": "22/32 · 2 TD · 0 INT",
+     "td": 2
+    },
+    {
+     "name": "Tyler Huntley",
+     "tm": "BAL",
+     "color": "#54418c",
+     "v": 298,
+     "sub": "23/34 · 1 TD · 1 INT",
+     "td": 1
+    }
+   ],
+   "viz": {
+    "t": "field",
+    "k": "pass",
+    "yds": 321,
+    "td": 2
+   }
+  },
+  {
+   "kind": "leader",
+   "id": "l1",
+   "title": "Rushing yards",
+   "rows": [
+    {
+     "name": "Javonte Williams",
+     "tm": "DAL",
+     "color": "#b0b7bc",
+     "v": 155,
+     "sub": "25 car · 1 TD · long 34",
+     "td": 1
+    },
+    {
+     "name": "Tony Pollard",
+     "tm": "TEN",
+     "color": "#4495d2",
+     "v": 129,
+     "sub": "25 car · 3 TD · long 36",
+     "td": 3
+    },
+    {
+     "name": "Cam Skattebo",
+     "tm": "NYG",
+     "color": "#003c7f",
+     "v": 124,
+     "sub": "17 car · 1 TD · long 42",
+     "td": 1
+    },
+    {
+     "name": "Jahmyr Gibbs",
+     "tm": "DET",
+     "color": "#0076b6",
+     "v": 116,
+     "sub": "29 car · 0 TD · long 15",
+     "td": 0
+    },
+    {
+     "name": "Bucky Irving",
+     "tm": "TB",
+     "color": "#bd1c36",
+     "v": 106,
+     "sub": "24 car · 2 TD · long 15",
+     "td": 2
+    }
+   ],
+   "viz": {
+    "t": "field",
+    "k": "rush",
+    "yds": 155,
+    "td": 1
+   }
+  },
+  {
+   "kind": "leader",
+   "id": "l2",
+   "title": "Receiving yards",
+   "rows": [
+    {
+     "name": "Amon-Ra St. Brown",
+     "tm": "DET",
+     "color": "#0076b6",
+     "v": 153,
+     "sub": "9 rec · 0 TD · long 40",
+     "td": 0
+    },
+    {
+     "name": "Jaxon Smith-Njigba",
+     "tm": "SEA",
+     "color": "#69be28",
+     "v": 150,
+     "sub": "9 rec · 1 TD · long 33",
+     "td": 1
+    },
+    {
+     "name": "Tee Higgins",
+     "tm": "CIN",
+     "color": "#fb4f14",
+     "v": 148,
+     "sub": "6 rec · 1 TD · long 44",
+     "td": 1
+    },
+    {
+     "name": "Zay Flowers",
+     "tm": "BAL",
+     "color": "#54418c",
+     "v": 137,
+     "sub": "8 rec · 1 TD · long 48",
+     "td": 1
+    },
+    {
+     "name": "Luther Burden III",
+     "tm": "CHI",
+     "color": "#e64100",
+     "v": 130,
+     "sub": "4 rec · 1 TD · long 58",
+     "td": 1
+    }
+   ],
+   "viz": {
+    "t": "field",
+    "k": "rec",
+    "yds": 153,
+    "td": 0
+   }
+  },
+  {
+   "kind": "board",
+   "id": "def",
+   "chapter": "Defense",
+   "title": "Defensive standouts",
+   "unit": "",
+   "rows": [
+    {
+     "name": "Yaya Diaby",
+     "tm": "TB",
+     "color": "#bd1c36",
+     "v": 3,
+     "u": "SK",
+     "sub": "3 tackles · 3 sacks · 3 TFL"
+    },
+    {
+     "name": "Blake Cashman",
+     "tm": "MIN",
+     "color": "#4f2683",
+     "v": 2,
+     "u": "SK",
+     "sub": "12 tackles · 2 sacks · 2 TFL"
+    },
+    {
+     "name": "Adetomiwa Adebawore",
+     "tm": "IND",
+     "color": "#1a4f83",
+     "v": 2,
+     "u": "SK",
+     "sub": "5 tackles · 2 sacks · 2 TFL"
+    },
+    {
+     "name": "Alex Singleton",
+     "tm": "DEN",
+     "color": "#fc4c02",
+     "v": 1,
+     "u": "SK",
+     "sub": "19 tackles · 1 sacks · 1 TFL"
+    },
+    {
+     "name": "Boye Mafe",
+     "tm": "CIN",
+     "color": "#fb4f14",
+     "v": 1.5,
+     "u": "SK",
+     "sub": "5 tackles · 1.5 sacks · 1 TFL"
+    }
+   ]
+  },
+  {
+   "kind": "pow",
+   "id": "pow",
+   "chapter": "Player of the week",
+   "who": "Tony Pollard",
+   "tm": "TEN",
+   "color": "#4495d2",
+   "chips": [
+    "129 rush yds · 3 TD",
+    "3 catches · 26 yds"
+   ],
+   "fan": 36.5,
+   "result": "L 27-24 vs Browns",
+   "viz": {
+    "t": "field",
+    "k": "rush",
+    "yds": 129,
+    "td": 3
+   },
+   "hon": [
+    {
+     "name": "Jaxon Smith-Njigba",
+     "tm": "SEA",
+     "color": "#69be28",
+     "line": "9 rec · 150 yds · 1 TD"
+    },
+    {
+     "name": "Joe Burrow",
+     "tm": "CIN",
+     "color": "#fb4f14",
+     "line": "22/30 · 292 yds · 4 TD"
+    }
+   ]
+  },
+  {
+   "kind": "board",
+   "id": "fan",
+   "chapter": "Fantasy top 5",
+   "title": "Fantasy points (PPR)",
+   "unit": "PTS",
+   "rows": [
+    {
+     "name": "Tony Pollard",
+     "tm": "TEN",
+     "color": "#4495d2",
+     "v": 36.5,
+     "sub": "25 car · 129 yds · 3 TD"
+    },
+    {
+     "name": "Jaxon Smith-Njigba",
+     "tm": "SEA",
+     "color": "#69be28",
+     "v": 31.3,
+     "sub": "9 rec · 150 yds · 1 TD"
+    },
+    {
+     "name": "Joe Burrow",
+     "tm": "CIN",
+     "color": "#fb4f14",
+     "v": 28.9,
+     "sub": "22/30 · 292 yds · 4 TD"
+    },
+    {
+     "name": "Zay Flowers",
+     "tm": "BAL",
+     "color": "#54418c",
+     "v": 27.7,
+     "sub": "8 rec · 137 yds · 1 TD"
+    },
+    {
+     "name": "Drake Maye",
+     "tm": "NE",
+     "color": "#c60c30",
+     "v": 27.4,
+     "sub": "24/31 · 321 yds · 2 TD · 1 INT"
+    }
+   ]
+  },
+  {
+   "kind": "standings",
+   "id": "std",
+   "chapter": "Best records",
+   "rows": [
+    {
+     "ab": "MIN",
+     "nick": "Vikings",
+     "w": 6,
+     "l": 0,
+     "t": 0,
+     "pct": 1,
+     "color": "#a1a1aa",
+     "rec": "6-0"
+    },
+    {
+     "ab": "SF",
+     "nick": "49ers",
+     "w": 6,
+     "l": 1,
+     "t": 0,
+     "pct": 0.85714287,
+     "color": "#a1a1aa",
+     "rec": "6-1"
+    },
+    {
+     "ab": "KC",
+     "nick": "Chiefs",
+     "w": 5,
+     "l": 1,
+     "t": 0,
+     "pct": 0.8333333,
+     "color": "#a1a1aa",
+     "rec": "5-1"
+    },
+    {
+     "ab": "BUF",
+     "nick": "Bills",
+     "w": 5,
+     "l": 1,
+     "t": 0,
+     "pct": 0.8333333,
+     "color": "#a1a1aa",
+     "rec": "5-1"
+    },
+    {
+     "ab": "CLE",
+     "nick": "Browns",
+     "w": 5,
+     "l": 2,
+     "t": 0,
+     "pct": 0.71428573,
+     "color": "#a1a1aa",
+     "rec": "5-2"
+    },
+    {
+     "ab": "DEN",
+     "nick": "Broncos",
+     "w": 5,
+     "l": 2,
+     "t": 0,
+     "pct": 0.71428573,
+     "color": "#a1a1aa",
+     "rec": "5-2"
+    },
+    {
+     "ab": "PIT",
+     "nick": "Steelers",
+     "w": 5,
+     "l": 2,
+     "t": 0,
+     "pct": 0.71428573,
+     "color": "#a1a1aa",
+     "rec": "5-2"
+    },
+    {
+     "ab": "CHI",
+     "nick": "Bears",
+     "w": 5,
+     "l": 2,
+     "t": 0,
+     "pct": 0.71428573,
+     "color": "#a1a1aa",
+     "rec": "5-2"
+    }
+   ]
+  },
+  {
+   "kind": "nbap",
+   "id": "n0",
+   "chapter": "Around the NBA",
+   "rank": 1,
+   "name": "Luka Doncic",
+   "tm": "LAL",
+   "color": "#552583",
+   "pts": 52,
+   "reb": 8,
+   "ast": 10,
+   "stl": 2,
+   "blk": 0,
+   "fg": "17-30",
+   "tp": "8-18",
+   "opp": "Jazz",
+   "date": "Oct 25",
+   "score": "W 132-123",
+   "viz": {
+    "t": "court",
+    "shots": [
+     [
+      15,
+      7,
+      1,
+      0
+     ],
+     [
+      12,
+      22,
+      0,
+      1
+     ],
+     [
+      16,
+      7,
+      1,
+      0
+     ],
+     [
+      6,
+      19,
+      0,
+      1
+     ],
+     [
+      22,
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      10,
+      0,
+      1
+     ],
+     [
+      13,
+      25,
+      0,
+      1
+     ],
+     [
+      46,
+      13,
+      0,
+      0
+     ],
+     [
+      41,
+      20,
+      1,
+      1
+     ],
+     [
+      40,
+      23,
+      1,
+      1
+     ],
+     [
+      42,
+      20,
+      0,
+      1
+     ],
+     [
+      15,
+      11,
+      0,
+      0
+     ],
+     [
+      34,
+      5,
+      1,
+      0
+     ],
+     [
+      30,
+      12,
+      1,
+      0
+     ],
+     [
+      14,
+      25,
+      1,
+      1
+     ],
+     [
+      14,
+      15,
+      0,
+      0
+     ],
+     [
+      26,
+      10,
+      1,
+      0
+     ],
+     [
+      21,
+      27,
+      1,
+      1
+     ],
+     [
+      35,
+      23,
+      0,
+      1
+     ],
+     [
+      10,
+      20,
+      0,
+      1
+     ],
+     [
+      23,
+      10,
+      1,
+      0
+     ],
+     [
+      33,
+      4,
+      0,
+      0
+     ],
+     [
+      6,
+      3,
+      1,
+      0
+     ],
+     [
+      31,
+      3,
+      1,
+      0
+     ],
+     [
+      43,
+      19,
+      0,
+      1
+     ],
+     [
+      14,
+      24,
+      1,
+      1
+     ],
+     [
+      6,
+      16,
+      1,
+      1
+     ],
+     [
+      4,
+      19,
+      1,
+      1
+     ],
+     [
+      3,
+      18,
+      1,
+      1
+     ],
+     [
+      1,
+      8,
+      0,
+      0
+     ]
+    ],
+    "fg": "17-30",
+    "tp": "8-18",
+    "ft": "10-11"
+   }
+  },
+  {
+   "kind": "nbap",
+   "id": "n1",
+   "rank": 2,
+   "name": "Nikola Jokic",
+   "tm": "DEN",
+   "color": "#fec524",
+   "pts": 35,
+   "reb": 15,
+   "ast": 10,
+   "stl": 2,
+   "blk": 3,
+   "fg": "12-23",
+   "tp": "3-10",
+   "opp": "Pelicans",
+   "date": "Oct 24",
+   "score": "W 141-135",
+   "viz": {
+    "t": "court",
+    "shots": [
+     [
+      33,
+      24,
+      0,
+      1
+     ],
+     [
+      25,
+      7,
+      0,
+      0
+     ],
+     [
+      25,
+      1,
+      1,
+      0
+     ],
+     [
+      22,
+      9,
+      0,
+      0
+     ],
+     [
+      24,
+      26,
+      0,
+      1
+     ],
+     [
+      25,
+      1,
+      1,
+      0
+     ],
+     [
+      19,
+      3,
+      1,
+      0
+     ],
+     [
+      23,
+      26,
+      0,
+      1
+     ],
+     [
+      25,
+      27,
+      1,
+      1
+     ],
+     [
+      24,
+      1,
+      1,
+      0
+     ],
+     [
+      27,
+      5,
+      0,
+      0
+     ],
+     [
+      41,
+      21,
+      0,
+      1
+     ],
+     [
+      11,
+      1,
+      1,
+      0
+     ],
+     [
+      6,
+      16,
+      1,
+      1
+     ],
+     [
+      26,
+      26,
+      0,
+      1
+     ],
+     [
+      28,
+      5,
+      0,
+      0
+     ],
+     [
+      26,
+      2,
+      1,
+      0
+     ],
+     [
+      23,
+      26,
+      0,
+      1
+     ],
+     [
+      27,
+      3,
+      1,
+      0
+     ],
+     [
+      44,
+      19,
+      1,
+      1
+     ],
+     [
+      43,
+      20,
+      0,
+      1
+     ],
+     [
+      26,
+      6,
+      1,
+      0
+     ],
+     [
+      27,
+      4,
+      1,
+      0
+     ]
+    ],
+    "fg": "12-23",
+    "tp": "3-10",
+    "ft": "8-8"
+   }
+  },
+  {
+   "kind": "nbap",
+   "id": "n2",
+   "rank": 3,
+   "name": "Cooper Flagg",
+   "tm": "DAL",
+   "color": "#0064b1",
+   "pts": 29,
+   "reb": 6,
+   "ast": 11,
+   "stl": 5,
+   "blk": 3,
+   "fg": "12-23",
+   "tp": "2-8",
+   "opp": "Heat",
+   "date": "Oct 26",
+   "score": "W 113-109",
+   "viz": {
+    "t": "court",
+    "shots": [
+     [
+      21,
+      25,
+      0,
+      1
+     ],
+     [
+      25,
+      2,
+      1,
+      0
+     ],
+     [
+      28,
+      2,
+      0,
+      0
+     ],
+     [
+      41,
+      23,
+      0,
+      1
+     ],
+     [
+      12,
+      2,
+      1,
+      0
+     ],
+     [
+      39,
+      22,
+      0,
+      1
+     ],
+     [
+      36,
+      2,
+      1,
+      0
+     ],
+     [
+      28,
+      25,
+      0,
+      1
+     ],
+     [
+      26,
+      1,
+      1,
+      0
+     ],
+     [
+      22,
+      2,
+      1,
+      0
+     ],
+     [
+      28,
+      26,
+      1,
+      1
+     ],
+     [
+      38,
+      1,
+      1,
+      0
+     ],
+     [
+      16,
+      5,
+      0,
+      0
+     ],
+     [
+      36,
+      22,
+      0,
+      1
+     ],
+     [
+      20,
+      1,
+      0,
+      0
+     ],
+     [
+      22,
+      2,
+      0,
+      0
+     ],
+     [
+      28,
+      25,
+      0,
+      1
+     ],
+     [
+      24,
+      0,
+      1,
+      0
+     ],
+     [
+      20,
+      11,
+      1,
+      0
+     ],
+     [
+      19,
+      5,
+      1,
+      0
+     ],
+     [
+      28,
+      1,
+      0,
+      0
+     ],
+     [
+      23,
+      24,
+      1,
+      1
+     ],
+     [
+      23,
+      1,
+      1,
+      0
+     ]
+    ],
+    "fg": "12-23",
+    "tp": "2-8",
+    "ft": "3-3"
+   }
+  },
+  {
+   "kind": "board",
+   "id": "nbr",
+   "title": "More big NBA games",
+   "unit": "PTS",
+   "rows": [
+    {
+     "name": "Anthony Edwards",
+     "tm": "MIN",
+     "color": "#266092",
+     "v": 45,
+     "sub": "10 reb · 3 ast · 16-29 FG · vs Heat · Oct 21"
+    },
+    {
+     "name": "Alperen Sengun",
+     "tm": "HOU",
+     "color": "#ce0e2d",
+     "v": 29,
+     "sub": "9 reb · 9 ast · 11-15 FG · vs Hawks · Oct 26"
+    },
+    {
+     "name": "Jalen Johnson",
+     "tm": "ATL",
+     "color": "#c8102e",
+     "v": 26,
+     "sub": "9 reb · 16 ast · 8-19 FG · vs Rockets · Oct 24"
+    }
+   ]
+  },
+  {
+   "kind": "slate",
+   "id": "sl",
+   "chapter": "Week 8 preview",
+   "week": 8,
+   "games": [
+    {
+     "away": {
+      "ab": "CAR",
+      "name": "Carolina Panthers",
+      "short": "Panthers",
+      "loc": "Carolina",
+      "color": "#0085ca",
+      "alt": "000000",
+      "score": "0",
+      "rank": null,
+      "rec": "3-3",
+      "ls": [],
+      "nick": "Panthers",
+      "lead": {
+       "passingLeader": {
+        "n": "Bryce Young",
+        "v": "135/228, 1712 YDS, 12 TD, 4 INT"
+       },
+       "rushingLeader": {
+        "n": "Chuba Hubbard",
+        "v": "96 CAR, 459 YDS, 4 TD"
+       },
+       "receivingLeader": {
+        "n": "Tetairoa McMillan",
+        "v": "36 REC, 511 YDS, 2 TD"
+       },
+       "rushingYards": {
+        "n": "Chuba Hubbard",
+        "v": "96 CAR, 459 YDS, 4 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "GB",
+      "name": "Green Bay Packers",
+      "short": "Packers",
+      "loc": "Green Bay",
+      "color": "#204e32",
+      "alt": "ffb612",
+      "score": "0",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [],
+      "nick": "Packers",
+      "lead": {
+       "passingLeader": {
+        "n": "Jordan Love",
+        "v": "162/270, 1958 YDS, 13 TD, 5 INT"
+       },
+       "rushingLeader": {
+        "n": "MarShawn Lloyd",
+        "v": "54 CAR, 142 YDS, 2 TD"
+       },
+       "receivingLeader": {
+        "n": "Christian Watson",
+        "v": "34 REC, 595 YDS, 6 TD"
+       },
+       "passingYards": {
+        "n": "Jordan Love",
+        "v": "1958 YDS, 13 TD, 5 INT"
+       },
+       "receivingYards": {
+        "n": "Christian Watson",
+        "v": "34 REC, 595 YDS, 6 TD"
+       }
+      }
+     },
+     "day": "THU",
+     "time": "8:15 PM",
+     "tv": "Prime Video"
+    },
+    {
+     "away": {
+      "ab": "BAL",
+      "name": "Baltimore Ravens",
+      "short": "Ravens",
+      "loc": "Baltimore",
+      "color": "#54418c",
+      "alt": "000000",
+      "score": "0",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [],
+      "nick": "Ravens",
+      "lead": {
+       "passingLeader": {
+        "n": "Lamar Jackson",
+        "v": "68/96, 967 YDS, 6 TD, 1 INT"
+       },
+       "rushingLeader": {
+        "n": "Derrick Henry",
+        "v": "147 CAR, 579 YDS, 7 TD"
+       },
+       "receivingLeader": {
+        "n": "Zay Flowers",
+        "v": "40 REC, 608 YDS, 3 TD"
+       },
+       "receivingYards": {
+        "n": "Zay Flowers",
+        "v": "40 REC, 608 YDS, 3 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "BUF",
+      "name": "Buffalo Bills",
+      "short": "Bills",
+      "loc": "Buffalo",
+      "color": "#d50a0a",
+      "alt": "d50a0a",
+      "score": "0",
+      "rank": null,
+      "rec": "5-1",
+      "ls": [],
+      "nick": "Bills",
+      "lead": {
+       "passingLeader": {
+        "n": "Josh Allen",
+        "v": "114/171, 1504 YDS, 9 TD, 4 INT"
+       },
+       "rushingLeader": {
+        "n": "James Cook III",
+        "v": "117 CAR, 627 YDS, 6 TD"
+       },
+       "receivingLeader": {
+        "n": "Dalton Kincaid",
+        "v": "23 REC, 315 YDS, 1 TD"
+       },
+       "passingYards": {
+        "n": "Josh Allen",
+        "v": "1504 YDS, 9 TD, 4 INT"
+       },
+       "rushingYards": {
+        "n": "James Cook III",
+        "v": "117 CAR, 627 YDS, 6 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "CBS"
+    },
+    {
+     "away": {
+      "ab": "TEN",
+      "name": "Tennessee Titans",
+      "short": "Titans",
+      "loc": "Tennessee",
+      "color": "#4495d2",
+      "alt": "001532",
+      "score": "0",
+      "rank": null,
+      "rec": "1-6",
+      "ls": [],
+      "nick": "Titans",
+      "lead": {
+       "passingLeader": {
+        "n": "Cam Ward",
+        "v": "129/208, 1179 YDS, 4 TD, 5 INT"
+       },
+       "rushingLeader": {
+        "n": "Tony Pollard",
+        "v": "112 CAR, 478 YDS, 4 TD"
+       },
+       "receivingLeader": {
+        "n": "Carnell Tate",
+        "v": "34 REC, 413 YDS, 1 TD"
+       },
+       "rushingYards": {
+        "n": "Tony Pollard",
+        "v": "112 CAR, 478 YDS, 4 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "CIN",
+      "name": "Cincinnati Bengals",
+      "short": "Bengals",
+      "loc": "Cincinnati",
+      "color": "#fb4f14",
+      "alt": "000000",
+      "score": "0",
+      "rank": null,
+      "rec": "4-2",
+      "ls": [],
+      "nick": "Bengals",
+      "lead": {
+       "passingLeader": {
+        "n": "Joe Burrow",
+        "v": "157/219, 1653 YDS, 15 TD, 3 INT"
+       },
+       "rushingLeader": {
+        "n": "Chase Brown",
+        "v": "82 CAR, 285 YDS, 1 TD"
+       },
+       "receivingLeader": {
+        "n": "Tee Higgins",
+        "v": "33 REC, 571 YDS, 2 TD"
+       },
+       "passingYards": {
+        "n": "Joe Burrow",
+        "v": "1653 YDS, 15 TD, 3 INT"
+       },
+       "receivingYards": {
+        "n": "Tee Higgins",
+        "v": "33 REC, 571 YDS, 2 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "CBS"
+    },
+    {
+     "away": {
+      "ab": "ARI",
+      "name": "Arizona Cardinals",
+      "short": "Cardinals",
+      "loc": "Arizona",
+      "color": "#a40227",
+      "alt": "ffffff",
+      "score": "0",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [],
+      "nick": "Cardinals",
+      "lead": {
+       "passingLeader": {
+        "n": "Jacoby Brissett",
+        "v": "183/282, 1600 YDS, 10 TD, 6 INT"
+       },
+       "rushingLeader": {
+        "n": "Jeremiyah Love",
+        "v": "67 CAR, 245 YDS, 1 TD"
+       },
+       "receivingLeader": {
+        "n": "Trey McBride",
+        "v": "59 REC, 472 YDS, 4 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "DAL",
+      "name": "Dallas Cowboys",
+      "short": "Cowboys",
+      "loc": "Dallas",
+      "color": "#b0b7bc",
+      "alt": "b0b7bc",
+      "score": "0",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [],
+      "nick": "Cowboys",
+      "lead": {
+       "passingLeader": {
+        "n": "Dak Prescott",
+        "v": "178/273, 1851 YDS, 13 TD, 5 INT"
+       },
+       "rushingLeader": {
+        "n": "Javonte Williams",
+        "v": "110 CAR, 472 YDS, 8 TD"
+       },
+       "receivingLeader": {
+        "n": "CeeDee Lamb",
+        "v": "53 REC, 651 YDS, 6 TD"
+       },
+       "passingYards": {
+        "n": "Dak Prescott",
+        "v": "1851 YDS, 13 TD, 5 INT"
+       },
+       "rushingYards": {
+        "n": "Javonte Williams",
+        "v": "110 CAR, 472 YDS, 8 TD"
+       },
+       "receivingYards": {
+        "n": "CeeDee Lamb",
+        "v": "53 REC, 651 YDS, 6 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "Fox"
+    },
+    {
+     "away": {
+      "ab": "MIN",
+      "name": "Minnesota Vikings",
+      "short": "Vikings",
+      "loc": "Minnesota",
+      "color": "#4f2683",
+      "alt": "ffc62f",
+      "score": "0",
+      "rank": null,
+      "rec": "6-0",
+      "ls": [],
+      "nick": "Vikings",
+      "lead": {
+       "passingLeader": {
+        "n": "Kyler Murray",
+        "v": "83/125, 812 YDS, 3 TD, 2 INT"
+       },
+       "rushingLeader": {
+        "n": "Aaron Jones Sr.",
+        "v": "105 CAR, 436 YDS, 2 TD"
+       },
+       "receivingLeader": {
+        "n": "Justin Jefferson",
+        "v": "23 REC, 302 YDS, 3 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "DET",
+      "name": "Detroit Lions",
+      "short": "Lions",
+      "loc": "Detroit",
+      "color": "#0076b6",
+      "alt": "bbbbbb",
+      "score": "0",
+      "rank": null,
+      "rec": "4-2",
+      "ls": [],
+      "nick": "Lions",
+      "lead": {
+       "passingLeader": {
+        "n": "Jared Goff",
+        "v": "150/223, 1788 YDS, 14 TD"
+       },
+       "rushingLeader": {
+        "n": "Jahmyr Gibbs",
+        "v": "134 CAR, 620 YDS, 7 TD"
+       },
+       "receivingLeader": {
+        "n": "Amon-Ra St. Brown",
+        "v": "46 REC, 525 YDS, 5 TD"
+       },
+       "passingYards": {
+        "n": "Jared Goff",
+        "v": "1788 YDS, 14 TD"
+       },
+       "rushingYards": {
+        "n": "Jahmyr Gibbs",
+        "v": "134 CAR, 620 YDS, 7 TD"
+       },
+       "receivingYards": {
+        "n": "Amon-Ra St. Brown",
+        "v": "46 REC, 525 YDS, 5 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "Fox"
+    },
+    {
+     "away": {
+      "ab": "LV",
+      "name": "Las Vegas Raiders",
+      "short": "Raiders",
+      "loc": "Las Vegas",
+      "color": "#a5acaf",
+      "alt": "a5acaf",
+      "score": "0",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [],
+      "nick": "Raiders",
+      "lead": {
+       "passingLeader": {
+        "n": "Kirk Cousins",
+        "v": "161/257, 1877 YDS, 16 TD, 5 INT"
+       },
+       "rushingLeader": {
+        "n": "Ashton Jeanty",
+        "v": "106 CAR, 328 YDS, 1 TD"
+       },
+       "receivingLeader": {
+        "n": "Tre Tucker",
+        "v": "29 REC, 474 YDS, 4 TD"
+       },
+       "passingYards": {
+        "n": "Kirk Cousins",
+        "v": "1877 YDS, 16 TD, 5 INT"
+       },
+       "receivingYards": {
+        "n": "Tre Tucker",
+        "v": "29 REC, 474 YDS, 4 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "NYJ",
+      "name": "New York Jets",
+      "short": "Jets",
+      "loc": "New York",
+      "color": "#115740",
+      "alt": "ffffff",
+      "score": "0",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [],
+      "nick": "Jets",
+      "lead": {
+       "passingLeader": {
+        "n": "Geno Smith",
+        "v": "145/207, 1623 YDS, 10 TD, 2 INT"
+       },
+       "rushingLeader": {
+        "n": "Braelon Allen",
+        "v": "91 CAR, 418 YDS, 2 TD"
+       },
+       "receivingLeader": {
+        "n": "Garrett Wilson",
+        "v": "37 REC, 444 YDS, 3 TD"
+       },
+       "rushingYards": {
+        "n": "Braelon Allen",
+        "v": "91 CAR, 418 YDS, 2 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "Fox"
+    },
+    {
+     "away": {
+      "ab": "CLE",
+      "name": "Cleveland Browns",
+      "short": "Browns",
+      "loc": "Cleveland",
+      "color": "#ff3c00",
+      "alt": "ff3c00",
+      "score": "0",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [],
+      "nick": "Browns",
+      "lead": {
+       "passingLeader": {
+        "n": "Deshaun Watson",
+        "v": "136/210, 1482 YDS, 7 TD, 3 INT"
+       },
+       "rushingLeader": {
+        "n": "Quinshon Judkins",
+        "v": "90 CAR, 317 YDS, 3 TD"
+       },
+       "receivingLeader": {
+        "n": "Denzel Boston",
+        "v": "20 REC, 372 YDS, 3 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "PIT",
+      "name": "Pittsburgh Steelers",
+      "short": "Steelers",
+      "loc": "Pittsburgh",
+      "color": "#ffb612",
+      "alt": "ffb612",
+      "score": "0",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [],
+      "nick": "Steelers",
+      "lead": {
+       "passingLeader": {
+        "n": "Aaron Rodgers",
+        "v": "162/263, 1699 YDS, 13 TD, 5 INT"
+       },
+       "rushingLeader": {
+        "n": "Jaylen Warren",
+        "v": "102 CAR, 561 YDS, 1 TD"
+       },
+       "receivingLeader": {
+        "n": "DK Metcalf",
+        "v": "32 REC, 374 YDS, 1 TD"
+       },
+       "passingYards": {
+        "n": "Aaron Rodgers",
+        "v": "1699 YDS, 13 TD, 5 INT"
+       },
+       "rushingYards": {
+        "n": "Jaylen Warren",
+        "v": "102 CAR, 561 YDS, 1 TD"
+       },
+       "receivingYards": {
+        "n": "DK Metcalf",
+        "v": "32 REC, 374 YDS, 1 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "CBS"
+    },
+    {
+     "away": {
+      "ab": "ATL",
+      "name": "Atlanta Falcons",
+      "short": "Falcons",
+      "loc": "Atlanta",
+      "color": "#a71930",
+      "alt": "000000",
+      "score": "0",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [],
+      "nick": "Falcons",
+      "lead": {
+       "passingLeader": {
+        "n": "Michael Penix Jr.",
+        "v": "96/144, 1157 YDS, 9 TD, 1 INT"
+       },
+       "rushingLeader": {
+        "n": "Bijan Robinson",
+        "v": "131 CAR, 704 YDS, 4 TD"
+       },
+       "receivingLeader": {
+        "n": "Drake London",
+        "v": "38 REC, 616 YDS, 1 TD"
+       },
+       "passingYards": {
+        "n": "Michael Penix Jr.",
+        "v": "1157 YDS, 9 TD, 1 INT"
+       },
+       "rushingYards": {
+        "n": "Bijan Robinson",
+        "v": "131 CAR, 704 YDS, 4 TD"
+       },
+       "receivingYards": {
+        "n": "Drake London",
+        "v": "38 REC, 616 YDS, 1 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "TB",
+      "name": "Tampa Bay Buccaneers",
+      "short": "Buccaneers",
+      "loc": "Tampa Bay",
+      "color": "#bd1c36",
+      "alt": "3e3a35",
+      "score": "0",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [],
+      "nick": "Buccaneers",
+      "lead": {
+       "passingLeader": {
+        "n": "Baker Mayfield",
+        "v": "68/107, 679 YDS, 3 TD, 2 INT"
+       },
+       "rushingLeader": {
+        "n": "Bucky Irving",
+        "v": "120 CAR, 558 YDS, 4 TD"
+       },
+       "receivingLeader": {
+        "n": "Chris Godwin Jr.",
+        "v": "27 REC, 243 YDS"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "Fox"
+    },
+    {
+     "away": {
+      "ab": "IND",
+      "name": "Indianapolis Colts",
+      "short": "Colts",
+      "loc": "Indianapolis",
+      "color": "#1a4f83",
+      "alt": "ffffff",
+      "score": "0",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [],
+      "nick": "Colts",
+      "lead": {
+       "passingLeader": {
+        "n": "Daniel Jones",
+        "v": "143/240, 1398 YDS, 4 TD, 7 INT"
+       },
+       "rushingLeader": {
+        "n": "Jonathan Taylor",
+        "v": "140 CAR, 587 YDS, 8 TD"
+       },
+       "receivingLeader": {
+        "n": "Josh Downs",
+        "v": "26 REC, 307 YDS"
+       },
+       "rushingYards": {
+        "n": "Jonathan Taylor",
+        "v": "140 CAR, 587 YDS, 8 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "JAX",
+      "name": "Jacksonville Jaguars",
+      "short": "Jaguars",
+      "loc": "Jacksonville",
+      "color": "#007487",
+      "alt": "d7a22a",
+      "score": "0",
+      "rank": null,
+      "rec": "4-2",
+      "ls": [],
+      "nick": "Jaguars",
+      "lead": {
+       "passingLeader": {
+        "n": "Trevor Lawrence",
+        "v": "120/184, 1480 YDS, 14 TD, 4 INT"
+       },
+       "rushingLeader": {
+        "n": "Bhayshul Tuten",
+        "v": "94 CAR, 388 YDS, 2 TD"
+       },
+       "receivingLeader": {
+        "n": "Parker Washington",
+        "v": "26 REC, 416 YDS, 4 TD"
+       },
+       "passingYards": {
+        "n": "Trevor Lawrence",
+        "v": "1480 YDS, 14 TD, 4 INT"
+       },
+       "receivingYards": {
+        "n": "Parker Washington",
+        "v": "26 REC, 416 YDS, 4 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "1 PM",
+     "tv": "CBS"
+    },
+    {
+     "away": {
+      "ab": "LAC",
+      "name": "Los Angeles Chargers",
+      "short": "Chargers",
+      "loc": "Los Angeles",
+      "color": "#0080c6",
+      "alt": "ffc20e",
+      "score": "0",
+      "rank": null,
+      "rec": "0-6",
+      "ls": [],
+      "nick": "Chargers",
+      "lead": {
+       "passingLeader": {
+        "n": "Justin Herbert",
+        "v": "107/180, 1141 YDS, 5 TD, 8 INT"
+       },
+       "rushingLeader": {
+        "n": "Omarion Hampton",
+        "v": "80 CAR, 289 YDS, 3 TD"
+       },
+       "receivingLeader": {
+        "n": "Tre' Harris",
+        "v": "15 REC, 225 YDS"
+       }
+      }
+     },
+     "home": {
+      "ab": "LAR",
+      "name": "Los Angeles Rams",
+      "short": "Rams",
+      "loc": "Los Angeles",
+      "color": "#003594",
+      "alt": "ffd100",
+      "score": "0",
+      "rank": null,
+      "rec": "3-4",
+      "ls": [],
+      "nick": "Rams",
+      "lead": {
+       "passingLeader": {
+        "n": "Matthew Stafford",
+        "v": "187/278, 1989 YDS, 14 TD, 7 INT"
+       },
+       "rushingLeader": {
+        "n": "Kyren Williams",
+        "v": "96 CAR, 492 YDS, 5 TD"
+       },
+       "receivingLeader": {
+        "n": "Puka Nacua",
+        "v": "45 REC, 485 YDS, 2 TD"
+       },
+       "passingYards": {
+        "n": "Matthew Stafford",
+        "v": "1989 YDS, 14 TD, 7 INT"
+       },
+       "rushingYards": {
+        "n": "Kyren Williams",
+        "v": "96 CAR, 492 YDS, 5 TD"
+       },
+       "receivingYards": {
+        "n": "Puka Nacua",
+        "v": "45 REC, 485 YDS, 2 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "4:05 PM",
+     "tv": "Fox"
+    },
+    {
+     "away": {
+      "ab": "KC",
+      "name": "Kansas City Chiefs",
+      "short": "Chiefs",
+      "loc": "Kansas City",
+      "color": "#e31837",
+      "alt": "ffb612",
+      "score": "0",
+      "rank": null,
+      "rec": "5-1",
+      "ls": [],
+      "nick": "Chiefs",
+      "lead": {
+       "passingLeader": {
+        "n": "Patrick Mahomes",
+        "v": "124/191, 1474 YDS, 9 TD, 4 INT"
+       },
+       "rushingLeader": {
+        "n": "Kenneth Walker III",
+        "v": "120 CAR, 701 YDS, 6 TD"
+       },
+       "receivingLeader": {
+        "n": "Travis Kelce",
+        "v": "24 REC, 343 YDS, 2 TD"
+       },
+       "passingYards": {
+        "n": "Patrick Mahomes",
+        "v": "1474 YDS, 9 TD, 4 INT"
+       },
+       "rushingYards": {
+        "n": "Kenneth Walker III",
+        "v": "120 CAR, 701 YDS, 6 TD"
+       },
+       "receivingYards": {
+        "n": "Travis Kelce",
+        "v": "24 REC, 343 YDS, 2 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "DEN",
+      "name": "Denver Broncos",
+      "short": "Broncos",
+      "loc": "Denver",
+      "color": "#fc4c02",
+      "alt": "fc4c02",
+      "score": "0",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [],
+      "nick": "Broncos",
+      "lead": {
+       "passingLeader": {
+        "n": "Bo Nix",
+        "v": "129/218, 1271 YDS, 7 TD, 3 INT"
+       },
+       "rushingLeader": {
+        "n": "J.K. Dobbins",
+        "v": "87 CAR, 293 YDS, 3 TD"
+       },
+       "receivingLeader": {
+        "n": "Jaylen Waddle",
+        "v": "26 REC, 276 YDS, 1 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "4:25 PM",
+     "tv": "CBS"
+    },
+    {
+     "away": {
+      "ab": "NE",
+      "name": "New England Patriots",
+      "short": "Patriots",
+      "loc": "New England",
+      "color": "#c60c30",
+      "alt": "c60c30",
+      "score": "0",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [],
+      "nick": "Patriots",
+      "lead": {
+       "passingLeader": {
+        "n": "Drake Maye",
+        "v": "141/214, 1784 YDS, 13 TD, 8 INT"
+       },
+       "rushingLeader": {
+        "n": "Rhamondre Stevenson",
+        "v": "77 CAR, 285 YDS, 2 TD"
+       },
+       "receivingLeader": {
+        "n": "Hunter Henry",
+        "v": "26 REC, 296 YDS, 2 TD"
+       },
+       "passingYards": {
+        "n": "Drake Maye",
+        "v": "1784 YDS, 13 TD, 8 INT"
+       },
+       "receivingYards": {
+        "n": "Hunter Henry",
+        "v": "26 REC, 296 YDS, 2 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "MIA",
+      "name": "Miami Dolphins",
+      "short": "Dolphins",
+      "loc": "Miami",
+      "color": "#008e97",
+      "alt": "fc4c02",
+      "score": "0",
+      "rank": null,
+      "rec": "1-5",
+      "ls": [],
+      "nick": "Dolphins",
+      "lead": {
+       "passingLeader": {
+        "n": "Malik Willis",
+        "v": "87/151, 1057 YDS, 4 TD, 4 INT"
+       },
+       "rushingLeader": {
+        "n": "Ollie Gordon II",
+        "v": "72 CAR, 339 YDS, 4 TD"
+       },
+       "receivingLeader": {
+        "n": "Malik Washington",
+        "v": "26 REC, 289 YDS"
+       },
+       "rushingYards": {
+        "n": "Ollie Gordon II",
+        "v": "72 CAR, 339 YDS, 4 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "4:25 PM",
+     "tv": "CBS"
+    },
+    {
+     "away": {
+      "ab": "PHI",
+      "name": "Philadelphia Eagles",
+      "short": "Eagles",
+      "loc": "Philadelphia",
+      "color": "#1f555f",
+      "alt": "000000",
+      "score": "0",
+      "rank": null,
+      "rec": "2-5",
+      "ls": [],
+      "nick": "Eagles",
+      "lead": {
+       "passingLeader": {
+        "n": "Tanner McKee",
+        "v": "49/80, 426 YDS, 2 TD, 1 INT"
+       },
+       "rushingLeader": {
+        "n": "Saquon Barkley",
+        "v": "43 CAR, 244 YDS, 1 TD"
+       },
+       "receivingLeader": {
+        "n": "DeVonta Smith",
+        "v": "26 REC, 310 YDS, 2 TD"
+       },
+       "rushingYards": {
+        "n": "Saquon Barkley",
+        "v": "43 CAR, 244 YDS, 1 TD"
+       },
+       "receivingYards": {
+        "n": "DeVonta Smith",
+        "v": "26 REC, 310 YDS, 2 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "WSH",
+      "name": "Washington Commanders",
+      "short": "Commanders",
+      "loc": "Washington",
+      "color": "#ffb612",
+      "alt": "ffb612",
+      "score": "0",
+      "rank": null,
+      "rec": "1-4-1",
+      "ls": [],
+      "nick": "Commanders",
+      "lead": {
+       "passingLeader": {
+        "n": "Jayden Daniels",
+        "v": "75/116, 759 YDS, 5 TD"
+       },
+       "rushingLeader": {
+        "n": "Jayden Daniels",
+        "v": "25 CAR, 213 YDS, 2 TD"
+       },
+       "receivingLeader": {
+        "n": "Stefon Diggs",
+        "v": "24 REC, 214 YDS, 4 TD"
+       },
+       "passingYards": {
+        "n": "Jayden Daniels",
+        "v": "759 YDS, 5 TD"
+       }
+      }
+     },
+     "day": "SUN",
+     "time": "8:20 PM",
+     "tv": "NBC"
+    },
+    {
+     "away": {
+      "ab": "CHI",
+      "name": "Chicago Bears",
+      "short": "Bears",
+      "loc": "Chicago",
+      "color": "#e64100",
+      "alt": "e64100",
+      "score": "0",
+      "rank": null,
+      "rec": "5-2",
+      "ls": [],
+      "nick": "Bears",
+      "lead": {
+       "passingLeader": {
+        "n": "Caleb Williams",
+        "v": "88/124, 1020 YDS, 5 TD, 1 INT"
+       },
+       "rushingLeader": {
+        "n": "D'Andre Swift",
+        "v": "116 CAR, 476 YDS, 7 TD"
+       },
+       "receivingLeader": {
+        "n": "Luther Burden III",
+        "v": "35 REC, 491 YDS, 2 TD"
+       },
+       "rushingYards": {
+        "n": "D'Andre Swift",
+        "v": "116 CAR, 476 YDS, 7 TD"
+       }
+      }
+     },
+     "home": {
+      "ab": "SEA",
+      "name": "Seattle Seahawks",
+      "short": "Seahawks",
+      "loc": "Seattle",
+      "color": "#69be28",
+      "alt": "69be28",
+      "score": "0",
+      "rank": null,
+      "rec": "4-3",
+      "ls": [],
+      "nick": "Seahawks",
+      "lead": {
+       "passingLeader": {
+        "n": "Sam Darnold",
+        "v": "110/177, 1290 YDS, 8 TD, 8 INT"
+       },
+       "rushingLeader": {
+        "n": "Emanuel Wilson",
+        "v": "111 CAR, 403 YDS, 3 TD"
+       },
+       "receivingLeader": {
+        "n": "Jaxon Smith-Njigba",
+        "v": "58 REC, 867 YDS, 8 TD"
+       },
+       "passingYards": {
+        "n": "Sam Darnold",
+        "v": "1290 YDS, 8 TD, 8 INT"
+       },
+       "receivingYards": {
+        "n": "Jaxon Smith-Njigba",
+        "v": "58 REC, 867 YDS, 8 TD"
+       }
+      }
+     },
+     "day": "MON",
+     "time": "8:15 PM",
+     "tv": "ESPN"
+    }
+   ]
+  },
+  {
+   "kind": "matchup",
+   "id": "m0",
+   "away": {
+    "ab": "MIN",
+    "name": "Minnesota Vikings",
+    "short": "Vikings",
+    "loc": "Minnesota",
+    "color": "#4f2683",
+    "alt": "ffc62f",
+    "score": "0",
+    "rank": null,
+    "rec": "6-0",
+    "ls": [],
+    "nick": "Vikings",
+    "lead": {
+     "passingLeader": {
+      "n": "Kyler Murray",
+      "v": "83/125, 812 YDS, 3 TD, 2 INT"
+     },
+     "rushingLeader": {
+      "n": "Aaron Jones Sr.",
+      "v": "105 CAR, 436 YDS, 2 TD"
+     },
+     "receivingLeader": {
+      "n": "Justin Jefferson",
+      "v": "23 REC, 302 YDS, 3 TD"
+     }
+    }
+   },
+   "home": {
+    "ab": "DET",
+    "name": "Detroit Lions",
+    "short": "Lions",
+    "loc": "Detroit",
+    "color": "#0076b6",
+    "alt": "bbbbbb",
+    "score": "0",
+    "rank": null,
+    "rec": "4-2",
+    "ls": [],
+    "nick": "Lions",
+    "lead": {
+     "passingLeader": {
+      "n": "Jared Goff",
+      "v": "150/223, 1788 YDS, 14 TD"
+     },
+     "rushingLeader": {
+      "n": "Jahmyr Gibbs",
+      "v": "134 CAR, 620 YDS, 7 TD"
+     },
+     "receivingLeader": {
+      "n": "Amon-Ra St. Brown",
+      "v": "46 REC, 525 YDS, 5 TD"
+     },
+     "passingYards": {
+      "n": "Jared Goff",
+      "v": "1788 YDS, 14 TD"
+     },
+     "rushingYards": {
+      "n": "Jahmyr Gibbs",
+      "v": "134 CAR, 620 YDS, 7 TD"
+     },
+     "receivingYards": {
+      "n": "Amon-Ra St. Brown",
+      "v": "46 REC, 525 YDS, 5 TD"
+     }
+    }
+   },
+   "last": [
+    "W 16-10 vs IND",
+    "W 20-17 vs GB"
+   ],
+   "day": "Sunday",
+   "time": "1 PM ET",
+   "tv": "Fox",
+   "frame": "The Vikings haven't lost yet. Can the Lions change that?",
+   "lead": [
+    {
+     "n": "Jared Goff",
+     "v": "1788 YDS, 14 TD",
+     "tm": "DET",
+     "color": "#0076b6"
+    }
+   ]
+  },
+  {
+   "kind": "matchup",
+   "id": "m1",
+   "away": {
+    "ab": "KC",
+    "name": "Kansas City Chiefs",
+    "short": "Chiefs",
+    "loc": "Kansas City",
+    "color": "#e31837",
+    "alt": "ffb612",
+    "score": "0",
+    "rank": null,
+    "rec": "5-1",
+    "ls": [],
+    "nick": "Chiefs",
+    "lead": {
+     "passingLeader": {
+      "n": "Patrick Mahomes",
+      "v": "124/191, 1474 YDS, 9 TD, 4 INT"
+     },
+     "rushingLeader": {
+      "n": "Kenneth Walker III",
+      "v": "120 CAR, 701 YDS, 6 TD"
+     },
+     "receivingLeader": {
+      "n": "Travis Kelce",
+      "v": "24 REC, 343 YDS, 2 TD"
+     },
+     "passingYards": {
+      "n": "Patrick Mahomes",
+      "v": "1474 YDS, 9 TD, 4 INT"
+     },
+     "rushingYards": {
+      "n": "Kenneth Walker III",
+      "v": "120 CAR, 701 YDS, 6 TD"
+     },
+     "receivingYards": {
+      "n": "Travis Kelce",
+      "v": "24 REC, 343 YDS, 2 TD"
+     }
+    }
+   },
+   "home": {
+    "ab": "DEN",
+    "name": "Denver Broncos",
+    "short": "Broncos",
+    "loc": "Denver",
+    "color": "#fc4c02",
+    "alt": "fc4c02",
+    "score": "0",
+    "rank": null,
+    "rec": "5-2",
+    "ls": [],
+    "nick": "Broncos",
+    "lead": {
+     "passingLeader": {
+      "n": "Bo Nix",
+      "v": "129/218, 1271 YDS, 7 TD, 3 INT"
+     },
+     "rushingLeader": {
+      "n": "J.K. Dobbins",
+      "v": "87 CAR, 293 YDS, 3 TD"
+     },
+     "receivingLeader": {
+      "n": "Jaylen Waddle",
+      "v": "26 REC, 276 YDS, 1 TD"
+     }
+    }
+   },
+   "last": [
+    "L 3-20 at SEA",
+    "W 30-16 at ARI"
+   ],
+   "day": "Sunday",
+   "time": "4:25 PM ET",
+   "tv": "CBS",
+   "frame": "Both teams come in with winning records.",
+   "lead": [
+    {
+     "n": "Patrick Mahomes",
+     "v": "1474 YDS, 9 TD, 4 INT",
+     "tm": "KC",
+     "color": "#e31837"
+    }
+   ]
+  },
+  {
+   "kind": "matchup",
+   "id": "m2",
+   "away": {
+    "ab": "CLE",
+    "name": "Cleveland Browns",
+    "short": "Browns",
+    "loc": "Cleveland",
+    "color": "#ff3c00",
+    "alt": "ff3c00",
+    "score": "0",
+    "rank": null,
+    "rec": "5-2",
+    "ls": [],
+    "nick": "Browns",
+    "lead": {
+     "passingLeader": {
+      "n": "Deshaun Watson",
+      "v": "136/210, 1482 YDS, 7 TD, 3 INT"
+     },
+     "rushingLeader": {
+      "n": "Quinshon Judkins",
+      "v": "90 CAR, 317 YDS, 3 TD"
+     },
+     "receivingLeader": {
+      "n": "Denzel Boston",
+      "v": "20 REC, 372 YDS, 3 TD"
+     }
+    }
+   },
+   "home": {
+    "ab": "PIT",
+    "name": "Pittsburgh Steelers",
+    "short": "Steelers",
+    "loc": "Pittsburgh",
+    "color": "#ffb612",
+    "alt": "ffb612",
+    "score": "0",
+    "rank": null,
+    "rec": "5-2",
+    "ls": [],
+    "nick": "Steelers",
+    "lead": {
+     "passingLeader": {
+      "n": "Aaron Rodgers",
+      "v": "162/263, 1699 YDS, 13 TD, 5 INT"
+     },
+     "rushingLeader": {
+      "n": "Jaylen Warren",
+      "v": "102 CAR, 561 YDS, 1 TD"
+     },
+     "receivingLeader": {
+      "n": "DK Metcalf",
+      "v": "32 REC, 374 YDS, 1 TD"
+     },
+     "passingYards": {
+      "n": "Aaron Rodgers",
+      "v": "1699 YDS, 13 TD, 5 INT"
+     },
+     "rushingYards": {
+      "n": "Jaylen Warren",
+      "v": "102 CAR, 561 YDS, 1 TD"
+     },
+     "receivingYards": {
+      "n": "DK Metcalf",
+      "v": "32 REC, 374 YDS, 1 TD"
+     }
+    }
+   },
+   "last": [
+    "W 27-24 at TEN",
+    "W 16-10 at NO"
+   ],
+   "day": "Sunday",
+   "time": "1 PM ET",
+   "tv": "CBS",
+   "frame": "Two of the better teams in the league, head to head.",
+   "lead": [
+    {
+     "n": "Aaron Rodgers",
+     "v": "1699 YDS, 13 TD, 5 INT",
+     "tm": "PIT",
+     "color": "#ffb612"
+    }
+   ]
+  },
+  {
+   "kind": "matchup",
+   "id": "m3",
+   "away": {
+    "ab": "CHI",
+    "name": "Chicago Bears",
+    "short": "Bears",
+    "loc": "Chicago",
+    "color": "#e64100",
+    "alt": "e64100",
+    "score": "0",
+    "rank": null,
+    "rec": "5-2",
+    "ls": [],
+    "nick": "Bears",
+    "lead": {
+     "passingLeader": {
+      "n": "Caleb Williams",
+      "v": "88/124, 1020 YDS, 5 TD, 1 INT"
+     },
+     "rushingLeader": {
+      "n": "D'Andre Swift",
+      "v": "116 CAR, 476 YDS, 7 TD"
+     },
+     "receivingLeader": {
+      "n": "Luther Burden III",
+      "v": "35 REC, 491 YDS, 2 TD"
+     },
+     "rushingYards": {
+      "n": "D'Andre Swift",
+      "v": "116 CAR, 476 YDS, 7 TD"
+     }
+    }
+   },
+   "home": {
+    "ab": "SEA",
+    "name": "Seattle Seahawks",
+    "short": "Seahawks",
+    "loc": "Seattle",
+    "color": "#69be28",
+    "alt": "69be28",
+    "score": "0",
+    "rank": null,
+    "rec": "4-3",
+    "ls": [],
+    "nick": "Seahawks",
+    "lead": {
+     "passingLeader": {
+      "n": "Sam Darnold",
+      "v": "110/177, 1290 YDS, 8 TD, 8 INT"
+     },
+     "rushingLeader": {
+      "n": "Emanuel Wilson",
+      "v": "111 CAR, 403 YDS, 3 TD"
+     },
+     "receivingLeader": {
+      "n": "Jaxon Smith-Njigba",
+      "v": "58 REC, 867 YDS, 8 TD"
+     },
+     "passingYards": {
+      "n": "Sam Darnold",
+      "v": "1290 YDS, 8 TD, 8 INT"
+     },
+     "receivingYards": {
+      "n": "Jaxon Smith-Njigba",
+      "v": "58 REC, 867 YDS, 8 TD"
+     }
+    }
+   },
+   "last": [
+    "W 30-24 vs NE",
+    "W 20-3 vs KC"
+   ],
+   "day": "Monday",
+   "time": "8:15 PM ET",
+   "tv": "ESPN",
+   "frame": "A big one at the top of the standings.",
+   "lead": [
+    {
+     "n": "D'Andre Swift",
+     "v": "116 CAR, 476 YDS, 7 TD",
+     "tm": "CHI",
+     "color": "#e64100"
+    },
+    {
+     "n": "Sam Darnold",
+     "v": "1290 YDS, 8 TD, 8 INT",
+     "tm": "SEA",
+     "color": "#69be28"
+    }
+   ]
+  },
+  {
+   "kind": "matchup",
+   "id": "m4",
+   "away": {
+    "ab": "BAL",
+    "name": "Baltimore Ravens",
+    "short": "Ravens",
+    "loc": "Baltimore",
+    "color": "#54418c",
+    "alt": "000000",
+    "score": "0",
+    "rank": null,
+    "rec": "4-3",
+    "ls": [],
+    "nick": "Ravens",
+    "lead": {
+     "passingLeader": {
+      "n": "Lamar Jackson",
+      "v": "68/96, 967 YDS, 6 TD, 1 INT"
+     },
+     "rushingLeader": {
+      "n": "Derrick Henry",
+      "v": "147 CAR, 579 YDS, 7 TD"
+     },
+     "receivingLeader": {
+      "n": "Zay Flowers",
+      "v": "40 REC, 608 YDS, 3 TD"
+     },
+     "receivingYards": {
+      "n": "Zay Flowers",
+      "v": "40 REC, 608 YDS, 3 TD"
+     }
+    }
+   },
+   "home": {
+    "ab": "BUF",
+    "name": "Buffalo Bills",
+    "short": "Bills",
+    "loc": "Buffalo",
+    "color": "#d50a0a",
+    "alt": "d50a0a",
+    "score": "0",
+    "rank": null,
+    "rec": "5-1",
+    "ls": [],
+    "nick": "Bills",
+    "lead": {
+     "passingLeader": {
+      "n": "Josh Allen",
+      "v": "114/171, 1504 YDS, 9 TD, 4 INT"
+     },
+     "rushingLeader": {
+      "n": "James Cook III",
+      "v": "117 CAR, 627 YDS, 6 TD"
+     },
+     "receivingLeader": {
+      "n": "Dalton Kincaid",
+      "v": "23 REC, 315 YDS, 1 TD"
+     },
+     "passingYards": {
+      "n": "Josh Allen",
+      "v": "1504 YDS, 9 TD, 4 INT"
+     },
+     "rushingYards": {
+      "n": "James Cook III",
+      "v": "117 CAR, 627 YDS, 6 TD"
+     }
+    }
+   },
+   "last": [
+    "L 13-35 vs CIN",
+    "Bye"
+   ],
+   "day": "Sunday",
+   "time": "1 PM ET",
+   "tv": "CBS",
+   "frame": "Two winning teams, and only one can leave happy.",
+   "lead": [
+    {
+     "n": "Josh Allen",
+     "v": "1504 YDS, 9 TD, 4 INT",
+     "tm": "BUF",
+     "color": "#d50a0a"
+    }
+   ]
+  },
+  {
+   "kind": "outro",
+   "id": "outro",
+   "chapter": "Outro"
+  }
+ ],
+ "voice": {
+  "hook": "3 rushing touchdowns! Tony Pollard just had the biggest day of Week 7. We've got every score, the games everyone is talking about, our player of the week, the stat leaders and the matchups you can't miss in Week 8. Let's go!",
+  "f0": "Let's run through every final from Week 7. The Bears beat the Patriots, 30 to 24, behind 130 receiving yards from Luther Burden III. The Steelers took down the Saints, 16 to 10, behind 101 rushing yards from Jaylen Warren. The Falcons got past the 49ers, 29 to 20, behind 213 passing yards from Michael Penix Jr.. The Browns edged the Titans, 27 to 24, behind 96 rushing yards from Quinshon Judkins. The Vikings beat the Colts, 16 to 10. The Dolphins held off the Jets, 28 to 25, behind 208 passing yards from Malik Willis. The Buccaneers blew out the Panthers, 43 to 13, behind 106 rushing yards from Bucky Irving.",
+  "f1": "Here's the rest. The Bengals blew out the Ravens, 35 to 13, behind 292 passing yards from Joe Burrow. The Giants beat the Texans in overtime, 27 to 21, behind 124 rushing yards from Cam Skattebo. The Broncos took down the Cardinals, 30 to 16, behind 73 rushing yards from Bo Nix. The Lions squeaked past the Packers, 20 to 17, behind 91 receiving yards from Jameson Williams. The Rams beat the Raiders, 35 to 21, behind 68 receiving yards from Puka Nacua. The Seahawks took down the Chiefs, 20 to 3, behind 150 receiving yards from Jaxon Smith-Njigba. The Cowboys handled the Eagles, 38 to 21, behind 74 receiving yards from CeeDee Lamb.",
+  "g0": "Now, the games everyone is talking about. This one needed overtime! The Giants beat the Texans, 27 to 21. Cam Skattebo ran for 124 yards and a touchdown. Malik Nabers caught 7 passes for 111 yards. The Giants move to 4, 2 and 1, and the Texans fall to 2 and 5.",
+  "g1": "Upset alert! The Falcons took down the 49ers at home, 29 to 20. Christian McCaffrey caught 6 passes for 61 yards. Michael Penix Jr. threw for 213 yards and 3 touchdowns without an interception. The Falcons move to 3 and 4, and the 49ers fall to 6 and 1.",
+  "g2": "A nail-biter! The Browns held off the Titans, 27 to 24. Tony Pollard ran for 129 yards and 3 touchdowns. Quinshon Judkins ran for 96 yards and 2 touchdowns. The Browns move to 5 and 2, and the Titans fall to 1 and 6.",
+  "g3": "A nail-biter! The Dolphins held off the Jets, 28 to 25. Malik Willis threw for 208 yards and 2 touchdowns without an interception. Mason Taylor caught 5 passes for 62 yards and 2 touchdowns. The Dolphins move to 1 and 5, and the Jets fall to 2 and 5.",
+  "g4": "A nail-biter! The Lions held off the Packers, 20 to 17. Jameson Williams caught 5 passes for 91 yards and 2 touchdowns. Amon-Ra St. Brown caught 9 passes for 153 yards. The Lions move to 4 and 2, and the Packers fall to 4 and 3.",
+  "g5": "Upset alert! The Seahawks took down the Chiefs at home, 20 to 3. Jaxon Smith-Njigba caught 9 passes for 150 yards and a touchdown. Emanuel Wilson ran for 100 yards and a touchdown. The Seahawks move to 4 and 3, and the Chiefs fall to 5 and 1.",
+  "num": "Week 7 by the numbers. 632 points were scored across 14 games. Seven of them were one-score games, and one went to overtime. The longest play of the week was a 63 yard catch by Caleb Douglas. And the Buccaneers put up the most points, with 43.",
+  "tm": "The best offense of the week belonged to the Browns, with 491 total yards against the Titans. The toughest defense? The Seahawks, who allowed just 213 yards. The Falcons forced 4 turnovers. And the biggest win of the week was the Buccaneers, by 30 points over the Panthers.",
+  "l0": "On to the stat leaders. The top passer of the week was Drake Maye, with 321 yards. That's more than three football fields! Caleb Williams was next with 308, followed by Deshaun Watson with 308.",
+  "l1": "The top rusher of the week was Javonte Williams, with 155 yards. That's a field and a half! Tony Pollard was next with 129, followed by Cam Skattebo with 124.",
+  "l2": "The top receiver of the week was Amon-Ra St. Brown, with 153 yards. That's a field and a half! Jaxon Smith-Njigba was next with 150, followed by Tee Higgins with 148.",
+  "def": "On defense, Yaya Diaby led everyone with 3 sacks. D'Marco Jackson picked off a pass. And Alex Singleton was everywhere, with 19 tackles.",
+  "pow": "And now, our player of the week... Tony Pollard! He ran for 129 yards and 3 touchdowns. The Titans lost to the Browns, 27 to 24, and he scored 36.5 fantasy points. Honorable mentions go to Jaxon Smith-Njigba and Joe Burrow.",
+  "fan": "In fantasy football, Tony Pollard led everyone with 36.5 points in PPR leagues. Jaxon Smith-Njigba had 31.3, Joe Burrow had 28.9, and Zay Flowers and Drake Maye rounded out the top five.",
+  "std": "After Week 7, the Vikings have the best record in the league at 6 and 0. The 49ers, the Chiefs and the Bills are right behind them, with the Browns, Broncos, Steelers and Bears close behind.",
+  "n0": "Around the NBA this week, nobody was better than Luka Doncic. 52 points, 8 rebounds and 10 assists against the Jazz, on 17 of 30 shooting!",
+  "n1": "Nikola Jokic dropped 35 on the Pelicans, on 12 of 23 shooting, with 15 rebounds and 10 assists.",
+  "n2": "And Cooper Flagg had 29 points, 6 rebounds and 11 assists against the Heat, on 12 of 23 shooting.",
+  "nbr": "A few more big NBA games this week. Anthony Edwards scored 45 against the Heat. Alperen Sengun scored 29 against the Hawks. Jalen Johnson scored 26 against the Rockets.",
+  "sl": "Now let's look ahead to Week 8. Fourteen games are on the schedule, starting Thursday night with the Panthers at the Packers.",
+  "m0": "Here are the matchups you can't miss. Sunday at 1, the Vikings, at 6 and 0, visit the Lions, at 4 and 2. The Vikings haven't lost yet. Can the Lions change that?",
+  "m1": "Sunday afternoon, the Chiefs, at 5 and 1, visit the Broncos, at 5 and 2. Both teams come in with winning records.",
+  "m2": "Sunday at 1, the Browns, at 5 and 2, visit the Steelers, at 5 and 2. Two of the better teams in the league, head to head.",
+  "m3": "Monday night, the Bears, at 5 and 2, visit the Seahawks, at 4 and 3. A big one at the top of the standings. Keep an eye on Sam Darnold, with 1290 passing yards and 8 touchdowns this season.",
+  "m4": "Sunday at 1, the Ravens, at 4 and 3, visit the Bills, at 5 and 1. Two winning teams, and only one can leave happy. Keep an eye on Zay Flowers, with 608 receiving yards and 3 touchdowns this season.",
+  "outro": "That's Week 7! Drop your player of the week in the comments, subscribe to Crossover for daily stats, and we'll see you next week!"
+ }
+}

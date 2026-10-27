@@ -1,0 +1,14 @@
+m3 | Monday night, the Bears, at 5 and 2, visit the Seahawks, at 4 and 3. A big one at the top of the standings. Keep an eye on Sam Darnold, with 1290 passing yards and 8 touchdowns this season.
+m4 | Sunday at 1, the Ravens, at 4 and 3, visit the Bills, at 5 and 1. Two winning teams, and only one can leave happy. Keep an eye on Zay Flowers, with 608 receiving yards and 3 touchdowns this season.
+outro | That's Week 7! Drop your player of the week in the comments, subscribe to Crossover for daily stats, and we'll see you next week!
+Week 7: 29 scenes, 1178 words
+nfl: 1 finals
+cfb: 0 finals
+nba: 9 finals
+prep exit 0
+total 232
+drwxr-xr-x 2 runner runner   4096 Oct 27 14:27 .
+drwxr-xr-x 8 runner runner   4096 Oct 27 14:27 ..
+-rw-r--r-- 1 runner runner  17311 Oct 27 14:27 recap.json
+-rw-r--r-- 1 runner runner  71832 Oct 27 14:27 wk.json
+-rw-r--r-- 1 runner runner 132605 Oct 27 14:27 wkraw.json
