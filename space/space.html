@@ -7,7 +7,7 @@
 @font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-800.woff2) format("woff2");font-weight:800}
 @font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
 /* Liftoff. Mission-control look: deep space black, ion cyan, solar amber, aurora green. Transparent page: NASA footage plays underneath. */
-:root{--void:#03040A;--ink:#EAF2FF;--dim:#8A97B2;--ion:#4FF3FF;--sol:#FFB547;--aur:#5CFFA8;--mag:#FF4FD8;--red:#FF5A5A;--glass:rgba(4,8,20,.66);--line:rgba(79,243,255,.32)}
+:root{--void:#03040A;--ink:#EAF2FF;--dim:#A9B6CF;--ion:#4FF3FF;--sol:#FFB547;--aur:#5CFFA8;--mag:#FF4FD8;--red:#FF5A5A;--glass:rgba(4,8,20,.66);--line:rgba(79,243,255,.32)}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:1080px;height:1920px;overflow:hidden;background:transparent}
 body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
@@ -27,6 +27,9 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #tick{position:absolute;left:70px;right:70px;top:186px;height:14px;background:repeating-linear-gradient(90deg,rgba(79,243,255,.5) 0 2px,transparent 2px 24px);opacity:.5;-webkit-mask-image:linear-gradient(90deg,#000,transparent)}
 #prog{position:absolute;left:70px;top:206px;height:4px;width:0;background:var(--ion);box-shadow:0 0 14px var(--ion)}
 .sc{position:absolute;left:64px;right:120px;top:240px;bottom:330px;opacity:0;will-change:transform}
+/* a dark scrim behind the data screens so text stays readable over bright footage (the hook keeps the footage vivid) */
+.sc:not(#hook)::before{content:"";position:absolute;left:-64px;right:-120px;top:-60px;bottom:-60px;z-index:-1;
+ background:linear-gradient(180deg,rgba(3,4,10,.62) 0%,rgba(3,4,10,.42) 45%,rgba(3,4,10,.62) 100%)}
 .kick{display:inline-flex;align-items:center;gap:14px;padding:14px 22px;border:2px solid var(--ion);color:var(--ion);font:800 28px/1 "JBM";letter-spacing:.14em;text-transform:uppercase;background:rgba(4,8,20,.6)}
 .kick i{width:12px;height:12px;background:var(--ion);box-shadow:0 0 14px var(--ion)}
 .t1{font:800 84px/1 "Unbounded";letter-spacing:.01em;text-transform:uppercase;margin-top:22px;white-space:nowrap;text-shadow:0 6px 30px rgba(0,0,0,.6)}
