@@ -93,6 +93,9 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
         `;[${mi}:a]aresample=48000,aformat=channel_layouts=stereo,atrim=0:${T},volume=${process.env.MUSIC_VOL || "0.16"},afade=t=in:d=1.2,afade=t=out:st=${Math.max(0, total - 2.5).toFixed(3)}:d=2.5[m0]` +
         `;[v2]aformat=channel_layouts=stereo[sc];[m0][sc]sidechaincompress=threshold=0.02:ratio=6:attack=15:release=400[m1]` +
         `;[v1]${sx}[m1]amix=inputs=${2 + ns}:normalize=0,atrim=0:${T},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]`;
+    } else if (track) {   // no narration: the music plays a little louder under the sound effects
+      f += `;[${mi}:a]aresample=48000,aformat=channel_layouts=stereo,atrim=0:${T},volume=0.32,afade=t=in:d=1.2,afade=t=out:st=${Math.max(0, total - 2.5).toFixed(3)}:d=2.5[m0]` +
+        `;${ins.map((_, i) => `[a${i}]`).join("")}[m0]amix=inputs=${ins.length + 1}:normalize=0,apad,atrim=0:${T},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]`;
     } else {
       f += `;${ins.map((_, i) => `[a${i}]`).join("")}amix=inputs=${ins.length}:normalize=0,apad,atrim=0:${T},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]`;
     }
