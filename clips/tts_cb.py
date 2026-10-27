@@ -53,8 +53,9 @@ def fix(t):
             continue
         if v.startswith("/") or k in ("NFL", "NBA", "rebounds", "rebound"):
             continue
-        t = re.sub(r"\b" + re.escape(k) + r"\b", v.replace("|", "-").lower() if "|" in v else v, t)
-    return t
+        t = re.sub(r"\b" + re.escape(k) + r"\b", v.replace("|", "").lower() if "|" in v else v, t)
+    # hyphens inside names made this voice drop the rest of the name ("Cam Skat", "Jaxon Smith"): read them as one flow
+    return re.sub(r"(?<=[A-Za-z])-(?=[A-Z])", " ", t)
 
 def trim(a, sr):
     """cut leading/trailing near-silence"""
