@@ -130,7 +130,9 @@ function build(day, nba, nfl, cfb, brand) {
     "Who are you watching tonight? Comments 👇", "Follow for the morning recap ✅", "",
     [...new Set([...[nfl.length && "#NFL", cfb.length && "#CollegeFootball", nba.length && "#NBA"].filter(Boolean), ...(hot ? ["#" + hot.name.replace(/[^A-Za-z0-9]/g, "")] : []),
       ...feat.slice(0, 2).flatMap(g => ["#" + g.home.nick.replace(/[^A-Za-z0-9]/g, "")]), "#GameDay", "#SportsStats", "#fyp"])].slice(0, 10).join(" ")];
-  return { mode: "preview", brand, day, date: md, title: `${wd}'s games to watch`, source: "Schedule, stats and injuries: ESPN",
+  const sp = [nba.length && "NBA", nfl.length && "NFL", cfb.length && "College"].filter(Boolean).join(" & ");
+  const ytTitle = (hot ? `${hot.name} Is Averaging ${Math.round(hot.big)} a Game 🔥 ${wd}'s ${sp} Games to Watch` : `${wd}'s ${sp} Games to Watch: ${count} 🔥`).slice(0, 100);
+  return { mode: "preview", ytTitle, brand, day, date: md, title: `${wd}'s games to watch`, source: "Schedule, stats and injuries: ESPN",
     hook: { big: hot ? String(hot.big) : String(all.length), label: hot ? "PPG last 5" : "games tonight", who: hot ? hot.name : count + " games", tm: hotSide ? hotSide.ab : "", color: hotSide ? hotSide.color : "#a1a1aa", sport: hot ? "NBA" : "", ctx: count + " games tonight" },
     games: scenes, slate: all.map(g => ({ sport: g.sport, a: g.away.ab, h: g.home.ab, ac: g.away.color, hc: g.home.color, t: g.time })), voice, caption: lines.join("\n") };
 }

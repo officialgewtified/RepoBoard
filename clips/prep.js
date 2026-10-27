@@ -180,7 +180,8 @@ function build(day, nflGames, nbaGames, opts, cfbGames) {
     source: "Stats: official box scores via ESPN",
     hook: { big: String(h[1]), label: h[2], who: h[3].n, ctx: h[4].txt, color: col(h[4].me), tm: h[4].me.ab, sport: h[5] },
     sections, more, voice,
-    caption: caption(wd, md, sections, h, hs)
+    caption: caption(wd, md, sections, h, hs),
+    ytTitle: ytTitle(wd, sections, h, hs)
   };
 }
 
@@ -201,6 +202,18 @@ function caption(wd, md, sections, h, hs) {
   const tags = [...sp.map(x => x === "CFB" ? "#CollegeFootball" : "#" + x), ...stars.filter(Boolean).map(tag), ...teams.map(tag),
     ...(sp.some(x => x !== "NBA") ? ["#FantasyFootball"] : []), ...(sp.includes("NBA") ? ["#NBAStats"] : []), "#SportsStats", "#fyp"];
   return lines.join("\n") + "\n\n" + [...new Set(tags)].slice(0, 11).join(" ");
+}
+
+// the YouTube Shorts title: the day's biggest stat as a headline, then what the video is (kept under YouTube's 100 characters)
+const TITLE_VERB = { points: (w, v) => `${w} Drops ${v}`, rebounds: (w, v) => `${w} Grabs ${v} Boards`, assists: (w, v) => `${w} Dishes ${v} Assists`,
+  blocks: (w, v) => `${w} Blocks ${v} Shots`, "passing yards": (w, v) => `${w} Throws for ${v} Yards`, "touchdown passes": (w, v) => `${w} Throws ${v} TDs`,
+  "rushing yards": (w, v) => `${w} Runs for ${v} Yards`, "rushing touchdowns": (w, v) => `${w} Runs for ${v} TDs`, "receiving yards": (w, v) => `${w} Goes for ${v} Yards`,
+  catches: (w, v) => `${w} Catches ${v} Passes` };
+function ytTitle(wd, sections, h, hs) {
+  const sp = sections.map(s => s.sport === "CFB" ? "College" : s.sport).join(" & ");
+  const head = (TITLE_VERB[h[2]] || ((w, v) => `${w}: ${v} ${h[2]}`))(h[3].n, h[1]);
+  const t = `${head} 🔥 ${wd}'s Best ${sp} Stats${hs && hs.top ? " (Season High)" : ""}`;
+  return t.length <= 100 ? t : `${head} 🔥 ${wd}'s Best Stats`.slice(0, 100);
 }
 
 module.exports = { build };

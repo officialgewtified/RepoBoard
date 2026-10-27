@@ -136,7 +136,7 @@ jobs:
         run: |
           TAG="clip-$DAY"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" "out/best-stats-$DAY.mp4" out/data.json --title "Best stats · $(date -d "$DAY" '+%a %b %-d')" --notes-file out/caption.txt --latest
+          gh release create "$TAG" "out/best-stats-$DAY.mp4" out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest
           # keep the newest 30 videos
           gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^clip-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag
       - name: Save season bests and photos

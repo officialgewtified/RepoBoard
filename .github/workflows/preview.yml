@@ -92,6 +92,6 @@ jobs:
         run: |
           TAG="preview-$DAY"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" "out/tonight-$DAY.mp4" out/data.json --title "Tonight · $(date -d "$DAY" '+%a %b %-d')" --notes-file out/caption.txt --latest=false
+          gh release create "$TAG" "out/tonight-$DAY.mp4" out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
           # keep the newest 30 previews
           gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^preview-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag
