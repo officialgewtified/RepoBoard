@@ -53,6 +53,8 @@ jobs:
       - name: Browser and ffmpeg
         if: steps.prep.outputs.skip != '1'
         timeout-minutes: 12
+        # Playwright goes next to render.js (clips/), which is where it's loaded from
+        working-directory: clips
         run: |
           npm i --no-save --no-package-lock playwright@1.63.0
           if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
