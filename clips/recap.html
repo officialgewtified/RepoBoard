@@ -206,6 +206,11 @@ function build(data){D=data;SC=[];SFX=[];
  // the card strip: the cards of whichever sport is on screen
  // pop-up sounds: the season-best stamp, and the tags on each card
  for(const s of SC){if(s.kind==="scores"&&document.querySelector("#"+s.id+" .view"))SFX.push({t:s.t0+1.1,k:"pop"});if(s.kind==="card"||s.kind==="game"){SFX.push({t:s.t0+.75,k:"pop"});if(s.note)SFX.push({t:s.t0+1.25,k:"stamp"})}if(s.kind==="outro")SFX.push({t:s.t0+1.2,k:"pop"})}
+ // more sound: an impact on the hook's number, a riser into each sport, a tick per score, a tick when a stat finishes counting, a swish for NBA cards
+ const hk=SC.find(x=>x.id==="hook");if(hk)SFX.push({t:hk.t0+.35,k:"impact"});
+ for(const s of SC){if(s.kind==="scores"){SFX.push({t:Math.max(.05,s.t0-.75),k:"riser"});const n=document.querySelectorAll("#"+s.id+" .g").length;for(let i=0;i<Math.min(n,12);i++)SFX.push({t:s.t0+.32+i*.06,k:"tick"})}
+  if(s.kind==="card"){SFX.push({t:s.t0+1.1,k:"tick"});const S0=D.sections&&D.sections[s.si];if(S0&&S0.sport==="NBA")SFX.push({t:s.t0+.2,k:"swish"})}
+  if(s.kind==="more")document.querySelectorAll("#more .mr").forEach((r,i)=>SFX.push({t:s.t0+.3+i*.45,k:"tick"}))}
  return TOTAL}
 function stripFor(si,i){const S=D.sections[si],el=document.getElementById("strip");const key=si+"_"+i;if(el.dataset.k===key)return;el.dataset.k=key;
  el.innerHTML=S.top.map((p,j)=>`<div class="c2 ${j===i?"on":""}"><div class="av" style="background:radial-gradient(circle at 35% 28%,${p.color},${shade(p.color,.55)})">${p.photo?`<img src="${esc(p.photo)}" alt="">`:esc(p.tm||"")}</div>

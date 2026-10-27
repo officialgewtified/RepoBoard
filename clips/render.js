@@ -57,6 +57,14 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
       pop: ["aevalsrc=sin(2*PI*(620*t+2600*t*t))*exp(-26*t):d=0.18:s=48000", "volume=0.35"],
       stamp: ["aevalsrc=sin(2*PI*85*t)*exp(-12*t)+0.3*(random(0)*2-1)*exp(-70*t):d=0.4:s=48000", "volume=0.7"],
       // the Crossover sting: a deep hit and a rising three-note chime, the same at the end of every video
+      // the bigger set: a deep impact for headline numbers, a riser into big moments, ticks and beeps for data popping in,
+      // a rocket rumble (space), a net swish (NBA)
+      impact: ["aevalsrc=0.9*sin(2*PI*(38*t+10*(1-exp(-6*t))))*exp(-2.4*t)+0.35*(random(0)*2-1)*exp(-18*t):d=1.6:s=48000", "lowpass=f=2500,volume=0.75"],
+      riser: ["aevalsrc=0.25*sin(2*PI*(200*t+700*t*t))*t+0.2*(random(0)*2-1)*t*t:d=0.9:s=48000", "highpass=f=200,afade=t=out:st=0.85:d=0.05,volume=0.6"],
+      tick: ["aevalsrc=sin(2*PI*2400*t)*exp(-90*t):d=0.05:s=48000", "volume=0.22"],
+      beep: ["aevalsrc=0.6*sin(2*PI*1320*t):d=0.09:s=48000", "afade=t=out:st=0.05:d=0.04,volume=0.22"],
+      rumble: ["anoisesrc=d=1.8:c=brown:a=0.9", "lowpass=f=420,afade=t=in:st=0:d=0.35,afade=t=out:st=1.1:d=0.7,volume=1.1"],
+      swish: ["anoisesrc=d=0.25:c=pink:a=0.6", "bandpass=f=4000:w=3000,afade=t=in:d=0.03,afade=t=out:st=0.08:d=0.17,volume=0.5"],
       sting: ["aevalsrc=0.9*sin(2*PI*55*t)*exp(-3.5*t)+0.25*(random(0)*2-1)*exp(-40*t)+0.32*sin(2*PI*329.6*(t-0.05))*exp(-5*(t-0.05))*(1+sgn(t-0.05))/2+0.32*sin(2*PI*493.9*(t-0.22))*exp(-5*(t-0.22))*(1+sgn(t-0.22))/2+0.36*sin(2*PI*659.3*(t-0.39))*exp(-3.2*(t-0.39))*(1+sgn(t-0.39))/2:d=1.8:s=48000", "volume=0.6"] };
     for (const [k, [src, fx]] of Object.entries(SYN)) await run(["-y", "-loglevel", "error", "-f", "lavfi", "-i", src, "-af", fx, "-ar", "48000", "-ac", "1", path.join(tmp, k + ".wav")]);
     // the voice: optionally shifted deeper (PITCH < 1, Kokoro only) without changing its speed

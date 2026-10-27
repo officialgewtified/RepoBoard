@@ -249,6 +249,14 @@ function build(data){D=data;SC=[];SFX=[];
  document.querySelectorAll(".side .t b").forEach(e=>fit(e,30));document.querySelectorAll(".star b,.row .nm b,.hk .nm,.mr2 b,.hon b,.ld .who b,.pw .nmw,.nb .nmw,.mu .tm b").forEach(e=>fit(e,18));
  for(const s of SC)if(s.kind==="finals"||s.kind==="slate")SFX.push({t:s.t0+.4,k:"pop"});else if(s.kind==="pow")SFX.push({t:s.t0+.5,k:"stamp"});
  for(const s of SC)SFX.push({t:s.t0,k:"whoosh"});SFX.push({t:t+.1,k:"sting"});
+ {const hk=SC.find(x=>x.kind==="hook");if(hk)SFX.push({t:hk.t0+.3,k:"impact"});
+  for(const s of SC){const c=D.cues&&D.cues[s.id];
+   if(s.kind==="finals"&&c)c.slice(1).forEach(x=>SFX.push({t:s.va+x-.1,k:"tick"}));
+   if(s.kind==="game"||s.kind==="pow"||s.kind==="slate")SFX.push({t:Math.max(.05,s.t0-.7),k:"riser"});
+   if(s.kind==="game"||s.kind==="pow")SFX.push({t:s.t0+.3,k:"impact"});
+   if(s.kind==="numbers"||s.kind==="leader"||s.kind==="board")document.querySelectorAll("#"+s.id+" .nm4,#"+s.id+" .mr2,#"+s.id+" .row").forEach((x,i)=>SFX.push({t:s.t0+.5+i*.1,k:"tick"}));
+   if(s.kind==="nbap")SFX.push({t:s.t0+.25,k:"swish"});
+   if(s.kind==="matchup")SFX.push({t:s.t0+.4,k:"impact"})}}
  return TOTAL}
 function render(t){
  for(let j=0;j<SC.length;j++){const s=SC[j],el=document.getElementById(s.id),on=t>=s.t0-.01&&t<s.t1+.45;

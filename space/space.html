@@ -212,7 +212,12 @@ function build(data){D=data;SC=[];SFX=[];
  document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
  document.querySelectorAll(".t1,.lc .r b").forEach(e=>fit(e,40));document.querySelectorAll("#hook .big").forEach(e=>fit(e,90));
  for(const s of SC){if(s.kind!=="hook")SFX.push({t:s.t0,k:"whoosh"});if(s.kind==="hook"||s.kind==="outro")SFX.push({t:s.t0+.5,k:"pop"})}
- SFX.push({t:.05,k:"whoosh"},{t:1.15,k:"stamp"},{t:INTRO-.35,k:"whoosh"},{t:t+.1,k:"sting"},{t:t+1.3,k:"whoosh"});
+ SFX.push({t:.02,k:"rumble"},{t:.05,k:"whoosh"},{t:1.15,k:"stamp"},{t:INTRO-.75,k:"riser"},{t:INTRO-.35,k:"whoosh"},{t:t+.1,k:"sting"},{t:t+1.2,k:"rumble"},{t:t+1.3,k:"whoosh"});
+ // data sounds: an impact on the headline number, a beep as each panel locks in, ticks as the tiles land
+ for(const s of SC){if(s.kind==="hook")SFX.push({t:s.t0+.3,k:"impact"});
+  if(s.kind==="ast"){const at2=(i,fb)=>s.t0+at(s,i,fb);SFX.push({t:at2(1,1.2),k:"beep"},{t:at2(2,4),k:"beep"});for(let i=0;i<3;i++)SFX.push({t:at2(3,7)+i*.12,k:"tick"})}
+  if(s.kind==="aur"||s.kind==="sun"||s.kind==="moon"){SFX.push({t:s.t0+.5,k:"beep"},{t:s.t0+.95,k:"beep"});if(s.kind==="aur")SFX.push({t:s.t0+.9,k:"riser"})}
+  if(s.kind==="lau")document.querySelectorAll("#lau .lc").forEach((x,i)=>SFX.push({t:s.t0+at(s,i+1,1+i*2.5)-.1,k:"beep"}))}
  return TOTAL}
 // when the cue-th sentence of this scene starts (or a fallback time)
 function at(s,i,fb){const c=D.cues&&D.cues[s.id];return c&&c[i]!=null?s.va-s.t0+c[i]-.2:fb}
