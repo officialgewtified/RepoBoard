@@ -1,11 +1,11 @@
-/* ZENITH sky report: the day's space data turned into what space.html draws and what the narrator says.
+/* LIFTOFF space report (@liftoffnews): the day's space data turned into what space.html draws and what the narrator says.
    Asteroid flybys (NASA JPL close-approach data), the northern lights forecast (NOAA SWPC Kp), the Sun (NOAA GOES
    flares, NASA SDO image), upcoming launches (The Space Devs Launch Library), and the Moon (phase computed here).
    Picks the most dramatic story for the hook. Every number on screen comes from those feeds.
    usage: node sky.js out/data.json [YYYY-MM-DD]     (downloads the Sun and aurora images next to data.json) */
 "use strict";
 const fs = require("fs"), path = require("path");
-const UA = { headers: { "User-Agent": "Mozilla/5.0 (zenith sky report)" } };
+const UA = { headers: { "User-Agent": "Mozilla/5.0 (liftoff space report)" } };
 async function get(u, tries = 3) { for (let i = 0; ; i++) { try { const r = await fetch(u, UA); if (!r.ok) throw new Error(r.status + " " + u); return await r.json(); } catch (e) { if (i >= tries - 1) throw e; await new Promise(r => setTimeout(r, 2000 * (i + 1))); } } }
 async function save(u, f) { try { const r = await fetch(u, UA); if (!r.ok) throw new Error(r.status); fs.writeFileSync(f, Buffer.from(await r.arrayBuffer())); return f; } catch (e) { console.error("image", u, e.message); return null; } }
 const ET = (d, o) => new Date(d).toLocaleString("en-US", Object.assign({ timeZone: "America/New_York" }, o));
@@ -219,7 +219,7 @@ function caption(H, S, voice, brand, d) {
 module.exports = { build, moon, sayDes };
 if (require.main === module) (async () => {
   const out = process.argv[2], today = process.argv[3] || etDay(Date.now());
-  const D = await build(today, path.dirname(path.resolve(out)), process.env.BRAND || "Zenith");
+  const D = await build(today, path.dirname(path.resolve(out)), process.env.BRAND || "Liftoff");
   if (!D) { console.error("No space data today."); process.exit(3); }
   for (const [k, v] of Object.entries(D.voice)) console.log(k, "|", v);
   fs.writeFileSync(out, JSON.stringify(D, null, 1)); console.log(D.ytTitle);
