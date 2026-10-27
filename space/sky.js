@@ -41,8 +41,10 @@ async function asteroids() {
     const [y, mo, dd, hm] = String(at(r, "cd")).split(/[- ]/), date = new Date(`${dd} ${mo} ${y} ${hm} UTC`);
     const H = +at(r, "h"), dia = +at(r, "diameter"), mid = dia ? dia * 1000 : 1329e3 / Math.sqrt(.14) * Math.pow(10, -H / 5);
     const lo = dia ? mid : 1329e3 / Math.sqrt(.25) * Math.pow(10, -H / 5), hi = dia ? mid : 1329e3 / Math.sqrt(.05) * Math.pow(10, -H / 5);
-    const dist = +at(r, "dist"), v = +at(r, "v_rel");
-    return { des: String(at(r, "des")), date: date.toISOString(), ld: dist / LD, miles: dist * AU_MI, minMiles: +at(r, "dist_min") * AU_MI, mph: v * 2236.94, m: mid, lo, hi, H };
+    const dist = +at(r, "dist"), v = +at(r, "v_rel"), sg = String(at(r, "t_sigma_f") || ""), sm = sg.match(/(?:(\d+)_)?(\d+):(\d+)/);
+    const sigmaMin = /^</.test(sg.trim()) ? 1 : sm ? (+(sm[1] || 0)) * 1440 + (+sm[2]) * 60 + (+sm[3]) : 9999;
+    return { des: String(at(r, "des")), date: date.toISOString(), ld: dist / LD, ldMax: +at(r, "dist_max") / LD, miles: dist * AU_MI, minMiles: +at(r, "dist_min") * AU_MI,
+      mph: v * 2236.94, m: mid, lo, hi, H, known: !!dia, sigmaMin };
   }).filter(a => isFinite(a.ld));
 }
 
@@ -53,13 +55,16 @@ const VIEW = [[0, "Alaska and far northern Canada"], [4, "Alaska, Canada, and th
 const SHORT = { 0: "Alaska", 4: "the northern border", 5: "Minnesota and Michigan", 6: "New York and Wisconsin", 7: "Iowa and Pennsylvania", 8: "Missouri and Virginia", 9: "Texas and Alabama" };
 async function aurora(today) {
   const d = await get("https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json");
-  const rows = Array.isArray(d[0]) ? d.slice(1).map(r => ({ time_tag: r[0], kp: +r[1], observed: r[2] })) : d;
+  const rows = Array.isArray(d[0]) ? d.slice(1).map(r => ({ time_tag: r[0], kp: +r[1], observed: r[2], noaa_scale: r[3] })) : d;
   const s = Date.parse(today + "T23:00:00Z"), e = s + 12 * 36e5;   // 7pm to 7am Eastern (daylight time; close enough in winter)
   const night = rows.filter(r => { const t = Date.parse(r.time_tag + "Z"); return t >= s - 36e5 && t <= e; });
   const kp = Math.max(0, ...night.map(r => +r.kp)), k = Math.floor(kp + .34);
   const v = VIEW.filter(x => x[0] <= k).pop();
   const curve = rows.filter(r => { const t = Date.parse(r.time_tag + "Z"); return t >= s - 24 * 36e5 && t <= e + 24 * 36e5; }).map(r => ({ t: r.time_tag, kp: +r.kp, p: r.observed }));
-  return { kp: r1(kp), k, g: k >= 5 ? "G" + Math.min(5, k - 4) : "", where: v[1], short: SHORT[v[0]], curve };
+  const gN = Math.max(0, ...night.map(r => +(String(r.noaa_scale || "").match(/G(\d)/) || [0, 0])[1]));
+  const gK = k >= 5 ? Math.min(5, k - 4) : 0, g = Math.max(gN, gK);
+  if (gN !== gK) console.error(`aurora: NOAA scale G${gN} vs Kp-derived G${gK}; using G${g}`);
+  return { kp: r1(kp), k, g: g ? "G" + g : "", where: v[1], short: SHORT[v[0]], curve };
 }
 
 // ---------- the Sun
@@ -87,7 +92,8 @@ async function launches() {
     .map(r => { const [rocket, mission] = String(r.name).split(" | "), prov = (r.launch_service_provider || {}).name || "";
       const crew = /crew|astronaut|soyuz ms|shenzhou|axiom/i.test(r.name + " " + ((r.mission || {}).type || ""));
       return { rocket: (rocket || "").replace(/ Block 5$/, ""), mission: mission || "", prov: PROV[prov] || prov, net: r.net, loc: place((r.pad || {}).location && r.pad.location.name),
-        orbit: ((r.mission || {}).orbit || {}).abbrev || "", type: (r.mission || {}).type || "", crew, star: /starlink/i.test(mission || ""), tbd: /TBD|TBC/.test((r.status || {}).abbrev || "") }; }).slice(0, 3);
+        orbit: ((r.mission || {}).orbit || {}).abbrev || "", type: (r.mission || {}).type || "", crew,
+        dayOnly: /day|week|month|quarter|half|year/i.test(((r.net_precision || {}).name) || ""), url: r.url || "", star: /starlink/i.test(mission || ""), tbd: /TBD|TBC/.test((r.status || {}).abbrev || "") }; }).slice(0, 3);
 }
 
 // ---------- the Moon (Meeus, Astronomical Algorithms ch. 49: new and full moon times to within minutes)
@@ -117,31 +123,56 @@ function moon(at) {
   return { age: r1(age), frac: +frac.toFixed(4), illum, phase: PH.find(p => age < p[0])[1], waxing: frac < .5, nextFull: nextFull.toISOString(), fullName: name, nextNew: nextNew.toISOString() };
 }
 
+// the US Naval Observatory's own phase times and illumination: if they disagree with the math above, theirs win
+async function usno(today, MO) {
+  try {
+    const p = await get(`https://aa.usno.navy.mil/api/moon/phases/date?date=${today}&nump=4`), full = (p.phasedata || []).find(x => x.phase === "Full Moon");
+    if (full) { const f = new Date(Date.UTC(full.year, full.month - 1, full.day, ...full.time.split(":").map(Number)));
+      if (Math.abs(f - new Date(MO.nextFull)) > 3 * 36e5) { console.error("moon: USNO full moon", f.toISOString(), "vs", MO.nextFull, "- using USNO"); MO.nextFull = f.toISOString(); } }
+    const o = await get(`https://aa.usno.navy.mil/api/rstt/oneday?date=${today}&coords=40.71,-74.01&tz=-4`), fi = parseInt(((o.properties || {}).data || {}).fracillum);
+    if (isFinite(fi) && Math.abs(fi - MO.illum) > 3) { console.error("moon: USNO illumination", fi, "vs", MO.illum, "- using USNO"); MO.illum = fi; }
+    MO.checked = true;
+  } catch (e) { console.error("moon: USNO check unavailable,", e.message); }
+  return MO;
+}
+// last line of defence: anything outside what's physically plausible is dropped rather than posted
+function sane(S) {
+  const bad = [], ok = (k, c) => { if (!c) { bad.push(k); delete S[k]; } };
+  if (S.ast) ok("ast", S.ast.ld > 0 && S.ast.ld < 25 && S.ast.mph > 1000 && S.ast.mph < 160000 && S.ast.ft > 1 && S.ast.ft < 70000 && S.ast.miles > 4000);
+  if (S.aur) ok("aur", S.aur.kp >= 0 && S.aur.kp <= 9);
+  if (S.sun) ok("sun", !S.sun.c24 || /^[ABCMX]\d/.test(S.sun.c24));
+  if (S.lau) ok("lau", S.lau.items.length > 0 && S.lau.items.every(l => Date.parse(l.net) > Date.now() - 36e5 && l.rocket));
+  if (S.moon) ok("moon", S.moon.illum >= 0 && S.moon.illum <= 100);
+  if (bad.length) console.error("dropped (failed sanity check):", bad.join(", "));
+}
 async function build(today, outDir, brand) {
   const imgDir = path.join(outDir, "img"); fs.mkdirSync(imgDir, { recursive: true });
   const safe = async (f, name) => { try { return await f(); } catch (e) { console.error(name + ":", e.message); return null; } };
   const [A, AU, SU, LA] = await Promise.all([safe(asteroids, "asteroids"), safe(() => aurora(today), "aurora"), safe(sun, "sun"), safe(launches, "launches")]);
-  const MO = moon(new Date(today + "T23:30:00Z"));
+  const MO = await usno(today, moon(new Date(today + "T23:30:00Z")));
   const sunImg = await save("https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg", path.join(imgDir, "sun.jpg"));
   const aurImg = await save("https://services.swpc.noaa.gov/images/animations/ovation/north/latest.jpg", path.join(imgDir, "aurora.jpg"));
   const S = {}, V = {}, score = {}, hooks = [];
 
   // asteroid: the most notable flyby (big and close), plus how many are passing
-  if (A && A.length) {
-    const pickA = A.slice().sort((a, b) => (Math.log10(b.m) - 1.3 * Math.log10(b.ld) + (b.ld < 1 ? 1 : 0)) - (Math.log10(a.m) - 1.3 * Math.log10(a.ld) + (a.ld < 1 ? 1 : 0)))[0];
-    const a = pickA, ref = refFor(a.m), w = when(a.date, today), feet = ft(a.m), mi = Math.round(a.miles / 1000) * 1000, us = Math.max(1, Math.round(2800 / a.mph * 60));
-    const sizeSay = feet < 100 ? `about ${Math.round(feet)} feet wide` : feet < 1000 ? `about ${comma(Math.round(feet / 10) * 10)} feet wide` : `about ${r1(a.m / 1609)} miles wide`;
-    const dist = a.ld < 1 ? `That's closer than the Moon, only about ${Math.round(a.ld * 100)} percent of the way there!` : a.ld < 2 ? `That's just ${r1(a.ld)} times the distance to the Moon.` : `That's about ${Math.round(a.ld)} times the distance to the Moon.`;
-    S.ast = { kind: "ast", id: "ast", des: a.des, when: ET(a.date, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), time: fmtTime(a.date) + " ET",
-      ld: +a.ld.toFixed(2), miles: mi, mph: Math.round(a.mph / 100) * 100, ft: Math.round(feet), loFt: Math.round(ft(a.lo)), hiFt: Math.round(ft(a.hi)), ref, us, count: A.length,
-      list: A.slice(0, 5).map(x => ({ des: x.des, ld: +x.ld.toFixed(2), ft: Math.round(ft(x.m)), when: ET(x.date, { month: "short", day: "numeric" }) })) };
+  const AS = (A || []).filter(a => a.minMiles > 10000);   // anything that could come within 10,000 miles is too big a claim to automate: skipped
+  if (AS.length) {
+    const pickA = AS.slice().sort((a, b) => (Math.log10(b.m) - 1.3 * Math.log10(b.ld) + (b.ld < 1 ? 1 : 0)) - (Math.log10(a.m) - 1.3 * Math.log10(a.ld) + (a.ld < 1 ? 1 : 0)))[0];
+    const a = pickA, ref = refFor(a.m), w0 = when(a.date, today), w = a.sigmaMin > 360 ? "around " + w0.replace(/^on /, "") : w0, feet = ft(a.m), mi = Math.round(a.miles / 1000) * 1000, us = Math.max(1, Math.round(2800 / a.mph * 60));
+    const sizeSay = a.known ? (feet < 1000 ? `about ${comma(Math.round(feet))} feet wide` : `about ${r1(a.m / 1609)} miles wide`) : feet < 100 ? `an estimated ${Math.round(feet)} feet wide` : feet < 1000 ? `an estimated ${comma(Math.round(feet / 10) * 10)} feet wide` : `an estimated ${r1(a.m / 1609)} miles wide`;
+    const closer = a.ldMax < 1;   // only "closer than the Moon" when even JPL's farthest estimate is inside the Moon's distance
+    const dist = closer ? `That's closer than the Moon, only about ${Math.round(a.ld * 100)} percent of the way there!` : a.ld < 1.05 ? `That's about as far as the Moon.` : a.ld < 2 ? `That's just ${r1(a.ld)} times the distance to the Moon.` : `That's about ${Math.round(a.ld)} times the distance to the Moon.`;
+    S.ast = { kind: "ast", id: "ast", des: a.des, when: ET(a.date, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), closer,
+      time: a.sigmaMin <= 30 ? fmtTime(a.date) + " ET" : a.sigmaMin <= 360 ? "± " + Math.ceil(a.sigmaMin / 60) + " HR" : "TIME ± " + Math.ceil(a.sigmaMin / 1440) + " DAY",
+      ld: +a.ld.toFixed(2), miles: mi, mph: Math.round(a.mph / 100) * 100, ft: Math.round(feet), loFt: Math.round(ft(a.lo)), hiFt: Math.round(ft(a.hi)), ref, us, count: AS.length,
+      list: AS.slice(0, 5).map(x => ({ des: x.des, ld: +x.ld.toFixed(2), ft: Math.round(ft(x.m)), when: ET(x.date, { month: "short", day: "numeric" }) })) };
     V.ast = `Asteroid watch! ${cap(w)}, asteroid ${sayDes(a.des)} will fly past Earth at about ${comma(mi)} miles away. ${dist} It's ${sizeSay}, about the size of ${ref.name}, ` +
       `and it's moving at ${comma(Math.round(a.mph / 100) * 100)} miles per hour, fast enough to cross the entire United States in ${us === 1 ? "one minute" : "about " + us + " minutes"}. ` +
-      `Don't worry, it will safely miss us. ${A.length > 1 ? `In all, ${A.length} asteroids will pass within twenty Moon distances of Earth over the next ten days.` : ""}`;
-    score.ast = a.ld < 1 ? 10 : a.m >= 150 && a.ld < 10 ? 6 : 3;
-    if (a.ld < 1) hooks.push([10, "ast", `An asteroid the size of ${ref.name} will pass closer to Earth than the Moon ${w}!`, { big: comma(mi), unit: "Miles from Earth", kicker: "Closer than the Moon", sub: `Asteroid ${a.des} · ${S.ast.when}` }]);
+      `Don't worry, it will safely miss us. ${AS.length > 1 ? `In all, ${AS.length} asteroids will pass within twenty Moon distances of Earth over the next ten days.` : ""}`;
+    score.ast = closer ? 10 : a.m >= 150 && a.ld < 10 ? 6 : 3;
+    if (closer) hooks.push([10, "ast", `An asteroid the size of ${ref.name} will pass closer to Earth than the Moon ${w}!`, { big: comma(mi), unit: "Miles from Earth", kicker: "Closer than the Moon", sub: `Asteroid ${a.des} · ${S.ast.when}` }]);
     else if (a.m >= 150) hooks.push([6, "ast", `An asteroid bigger than ${ref.name} is about to fly past Earth!`, { big: comma(Math.round(feet)), unit: "Feet wide", kicker: "Asteroid flyby", sub: `${a.des} · ${S.ast.when}` }]);
-    hooks.push([2, "ast", `${cap(w2(A.length))} asteroids will fly past Earth in the next ten days!`, { big: String(A.length), unit: "Asteroids flying by", kicker: "Next 10 days", sub: `Closest: ${A[0].des}` }]);
+    hooks.push([2, "ast", `${cap(w2(AS.length))} asteroids will fly past Earth in the next ten days!`, { big: String(AS.length), unit: "Asteroids flying by", kicker: "Next 10 days", sub: `Closest: ${AS[0].des}` }]);
   }
   // northern lights
   if (AU) {
@@ -167,13 +198,13 @@ async function build(today, outDir, brand) {
   }
   // launches
   if (LA && LA.length) {
-    S.lau = { kind: "lau", id: "lau", items: LA.map(l => ({ ...l, day: ET(l.net, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), time: fmtTime(l.net) + " ET" })) };
-    const one = (l, i) => { const w = when(l.net, today), m = l.mission.replace(/\s*\(.*?\)\s*/g, " ").trim();
+    S.lau = { kind: "lau", id: "lau", items: LA.map(l => ({ ...l, day: ET(l.net, { weekday: "short", month: "short", day: "numeric" }).toUpperCase(), time: l.dayOnly ? "TIME TBD" : fmtTime(l.net) + " ET" })) };
+    const one = (l, i) => { const w = l.dayOnly ? "on " + ET(l.net, { weekday: "long" }) : when(l.net, today), m = l.mission.replace(/\s*\(.*?\)\s*/g, " ").trim();
       // code-like names (IRNSS-1L, USSF-432) are read as what the mission is instead
       const what = l.star ? "a batch of Starlink satellites" : l.crew ? `the ${m} crew` : /[A-Z]{3,}|\d/.test(m) ? (l.type ? `a ${l.type.toLowerCase()} mission` : "a satellite") : m;
       const art = /^[aeiou]/i.test(l.rocket) ? "an " : "a ";
-      return `${i === 0 ? cap(w) : w === when(LA[i - 1].net, today) ? "Then" : cap(w)},${l.tbd ? " if the date holds," : ""} ${l.prov} launches ${what} on ${art}${l.rocket} from ${l.loc}.`; };
-    V.lau = `Launch schedule! ${LA.map(one).join(" ")}`;
+      return `${i === 0 ? cap(w) : w === when(LA[i - 1].net, today) ? "Then" : cap(w)},${l.tbd ? " if the date holds," : ""} ${l.prov} is scheduled to launch ${what} on ${art}${l.rocket} from ${l.loc}.`; };
+    V.lau = `Launch schedule! ${LA.map(one).join(" ")} Launch times can slip, so check before you watch.`;
     score.lau = LA.some(l => l.crew) ? 7 : LA.some(l => !l.star) ? 3 : 2;
     const cr = LA.find(l => l.crew); if (cr) hooks.push([7, "lau", `Astronauts are launching ${when(cr.net, today)}!`, { big: "LIFTOFF", unit: cr.rocket, kicker: "Crew launch", sub: S.lau.items[LA.indexOf(cr)].day }]);
   }
@@ -186,7 +217,9 @@ async function build(today, outDir, brand) {
     score.moon = MO.illum >= 97 ? 6 : dTo <= 1 ? 4 : 1;
     if (MO.illum >= 97) hooks.push([6, "moon", `Tonight's full ${MO.fullName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.fullName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]);
   }
+  sane(S);
   if (!Object.keys(S).length) return null;
+  for (let i = hooks.length - 1; i >= 0; i--) if (!S[hooks[i][1]]) hooks.splice(i, 1);
   hooks.sort((a, b) => b[0] - a[0]);
   const H = hooks[0] || [1, "moon", "Here's what's happening in the sky this week!", { big: S.moon.illum + "%", unit: "Moon lit tonight", kicker: "Sky report", sub: "" }];
   const order = Object.keys(S).sort((a, b) => (b === H[1]) - (a === H[1]) || score[b] - score[a]);
@@ -197,19 +230,34 @@ async function build(today, outDir, brand) {
   for (const k of order) voice[k] = V[k];
   voice.outro = `That's your sky report! Follow ${brand} so you never miss what's happening above you.`;
   const dateLabel = ET(today + "T16:00:00Z", { month: "short", day: "numeric" });
+  // the fact sheet: every claim in the video with where to check it (published next to the video, not in the caption)
+  const facts = [`LIFTOFF fact sheet for ${today}. Every number in the video, and where to verify it before posting.`, ""];
+  if (S.ast) { const a = AS.find(x => x.des === S.ast.des);
+    facts.push(`ASTEROID ${a.des}: closest approach ${new Date(a.date).toUTCString()} (timing uncertainty ${a.sigmaMin >= 9999 ? "unknown" : a.sigmaMin + " min"})`,
+      `  distance ${comma(a.miles)} mi = ${a.ld.toFixed(2)} lunar distances (JPL range ${(a.minMiles / AU_MI / LD).toFixed(2)} to ${a.ldMax.toFixed(2)} LD); ${S.ast.closer ? "entire range inside the Moon's distance" : "not claimed as closer than the Moon"}`,
+      `  speed ${comma(a.mph)} mph; size ${a.known ? "measured " + comma(ft(a.m)) + " ft" : `estimated ${comma(ft(a.lo))} to ${comma(ft(a.hi))} ft from brightness (H ${a.H})`}`,
+      `  check: https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=${encodeURIComponent(a.des)}  and  https://cneos.jpl.nasa.gov/ca/`, ""); }
+  if (S.aur) facts.push(`NORTHERN LIGHTS: max Kp ${S.aur.kp} forecast for tonight (7pm-7am ET)${S.aur.g ? ", " + S.aur.g : ""}; viewing line is NOAA's rule of thumb for that Kp`,
+    "  check: https://www.swpc.noaa.gov/products/3-day-forecast  and  https://www.swpc.noaa.gov/products/aurora-viewline-tonight-and-tomorrow-night-experimental", "");
+  if (S.sun) facts.push(`SUN: biggest flare in the last 24h ${S.sun.c24 || "none"}; 7-day max ${S.sun.c7 || "none"} (${S.sun.t7}); NOAA odds M ${S.sun.m}%, X ${S.sun.x}%`,
+    "  check: https://www.swpc.noaa.gov/products/goes-x-ray-flux  and  https://www.swpc.noaa.gov/products/solar-and-geophysical-activity-summary", "");
+  if (S.lau) { facts.push("LAUNCHES (times slip often; re-check the morning you post):"); for (const l of S.lau.items) facts.push(`  ${l.day} ${l.time}: ${l.prov} ${l.rocket}, ${l.mission} from ${l.loc}${l.tbd ? " (date not confirmed)" : ""}  ${l.url}`); facts.push(""); }
+  if (S.moon) facts.push(`MOON: ${S.moon.phase}, ${S.moon.illum}% lit tonight; next full moon ${new Date(S.moon.nextFull).toUTCString()} (${S.moon.fullName})${S.moon.checked ? ", matches the US Naval Observatory" : ", USNO check unavailable"}`,
+    "  check: https://aa.usno.navy.mil/data/MoonPhases", "");
+  facts.push("Footage: NASA Image and Video Library (images.nasa.gov). Data: NASA JPL, NOAA SWPC, The Space Devs, USNO.");
   const title = ytTitle(H, S, dateLabel);
   return { mode: "space", template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), scenes, voice,
-    music: "../space/music", source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA", ytTitle: title, caption: caption(H, S, voice, brand, dateLabel) };
+    music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA", ytTitle: title, caption: caption(H, S, voice, brand, dateLabel) };
 }
 
 function ytTitle(H, S, d) {
-  const t = { ast: S.ast && S.ast.ld < 1 ? "Asteroid Passes Closer Than the Moon ☄️" : S.ast ? `${S.ast.count} Asteroids Fly Past Earth This Week ☄️` : "",
+  const t = { ast: S.ast && S.ast.closer ? "Asteroid Passes Closer Than the Moon ☄️" : S.ast ? `${S.ast.count} Asteroids Fly Past Earth This Week ☄️` : "",
     aur: "Northern Lights Alert Tonight 🌌", sun: "The Sun Just Fired an X-Class Flare ☀️", lau: "Astronauts Launching This Week 🚀", moon: S.moon && `Full ${S.moon.fullName} Moon Tonight 🌕` }[H[1]] || "Tonight's Sky Report 🔭";
   return `${t} | Sky Report ${d}`.slice(0, 100);
 }
 function caption(H, S, voice, brand, d) {
   const L = [H[2], "", `Your sky report for ${d} 🔭`];
-  if (S.ast) L.push(`☄️ Asteroid ${S.ast.des}: ${comma(S.ast.miles)} miles from Earth on ${S.ast.when.replace(/^\w+ /, "")} (${S.ast.ld < 1 ? "closer than the Moon" : S.ast.ld.toFixed(1) + "x the Moon's distance"}), about ${comma(S.ast.ft)} ft wide`);
+  if (S.ast) L.push(`☄️ Asteroid ${S.ast.des}: ${comma(S.ast.miles)} miles from Earth on ${S.ast.when.replace(/^\w+ /, "")} (${S.ast.closer ? "closer than the Moon" : S.ast.ld.toFixed(1) + "x the Moon's distance"}), roughly ${comma(S.ast.ft)} ft wide`);
   if (S.aur) L.push(`🌌 Northern lights: Kp ${S.aur.kp} tonight${S.aur.g ? ` (${S.aur.g} storm)` : ""}, best in ${S.aur.where.replace(/^as far south as /, "areas as far south as ")}`);
   if (S.sun) L.push(`☀️ Sun: biggest flare in the last day ${S.sun.c24 || "none"}; ${S.sun.m}% chance of M-class flares`);
   if (S.lau) for (const l of S.lau.items.slice(0, 2)) L.push(`🚀 ${l.day} ${l.time}: ${l.prov} ${l.rocket}, ${l.mission} (${l.loc})`);

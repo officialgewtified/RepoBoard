@@ -90,6 +90,7 @@ jobs:
         run: |
           node ../clips/render.js out/data.json "out/liftoff-$DAY.mp4" 30
           node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
+          node -e "process.stdout.write((require('./out/data.json').facts||[]).join('\n'))" > out/fact-sheet.txt
       - name: Publish
         if: steps.prep.outputs.skip != '1'
         env:
@@ -98,5 +99,5 @@ jobs:
           TAG="space-$DAY"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           THUMB=$(ls out/liftoff-$DAY-thumbnail.jpg 2>/dev/null || true)
-          gh release create "$TAG" "out/liftoff-$DAY.mp4" $THUMB out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
+          gh release create "$TAG" "out/liftoff-$DAY.mp4" $THUMB out/fact-sheet.txt out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
           gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^space-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag
