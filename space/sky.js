@@ -152,7 +152,7 @@ async function build(today, outDir, brand) {
   const MO = await usno(today, moon(new Date(today + "T23:30:00Z")));
   const sunImg = await save("https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg", path.join(imgDir, "sun.jpg"));
   const aurImg = await save("https://services.swpc.noaa.gov/images/animations/ovation/north/latest.jpg", path.join(imgDir, "aurora.jpg"));
-  const S = {}, V = {}, score = {}, hooks = [];
+  const S = {}, V = {}, score = {}, hooks = [], QH = {}, QV = {};   // QH/QV: each story's own hook and short read, for the quick hits
 
   // asteroid: the most notable flyby (big and close), plus how many are passing
   const AS = (A || []).filter(a => a.minMiles > 10000);   // anything that could come within 10,000 miles is too big a claim to automate: skipped
@@ -172,6 +172,9 @@ async function build(today, outDir, brand) {
     score.ast = closer ? 10 : a.m >= 150 && a.ld < 10 ? 6 : 3;
     if (closer) hooks.push([10, "ast", `An asteroid the size of ${ref.name} will pass closer to Earth than the Moon ${w}!`, { big: comma(mi), unit: "Miles from Earth", kicker: "Closer than the Moon", sub: `Asteroid ${a.des} · ${S.ast.when}` }]);
     else if (a.m >= 150) hooks.push([6, "ast", `An asteroid bigger than ${ref.name} is about to fly past Earth!`, { big: comma(Math.round(feet)), unit: "Feet wide", kicker: "Asteroid flyby", sub: `${a.des} · ${S.ast.when}` }]);
+    QH.ast = [closer ? `An asteroid the size of ${ref.name} will pass closer to Earth than the Moon ${w}!` : `An asteroid the size of ${ref.name} is flying past Earth ${w}!`,
+      { big: comma(mi), unit: "Miles from Earth", kicker: closer ? "Closer than the Moon" : "Asteroid flyby", sub: `${a.des} · ${S.ast.when}` }];
+    QV.ast = `It's ${sizeSay}, moving at ${comma(Math.round(a.mph / 100) * 100)} miles per hour. ${dist} Don't worry, it will safely miss us.`;
     hooks.push([2, "ast", `${cap(w2(AS.length))} asteroids will fly past Earth in the next ten days!`, { big: String(AS.length), unit: "Asteroids flying by", kicker: "Next 10 days", sub: `Closest: ${AS[0].des}` }]);
   }
   // northern lights
@@ -182,6 +185,9 @@ async function build(today, outDir, brand) {
       : k === 4 ? `The northern lights are active tonight, with a Kp of ${AU.kp}. Best chances are in ${AU.where}. Look north after dark.`
       : `For the northern lights, it's a quiet night, with a Kp of ${AU.kp}. Your best chances are in ${AU.where}.`;
     score.aur = k >= 7 ? 10 : k >= 5 ? 8 : k === 4 ? 4 : 1;
+    QH.aur = k >= 5 ? [`The northern lights could be visible as far south as ${AU.short} tonight!`, { big: "KP " + AU.kp, unit: AU.g + " geomagnetic storm", kicker: "Aurora alert", sub: "Tonight · look north" }]
+      : [`Can you see the northern lights tonight? Here's the forecast.`, { big: "KP " + AU.kp, unit: "Tonight's forecast", kicker: "Aurora forecast", sub: "NOAA · tonight" }];
+    QV.aur = k >= 5 ? `NOAA is forecasting a Kp of ${AU.kp} tonight, a ${AU.g} geomagnetic storm. Find a dark spot away from city lights, and look north after dark!` : V.aur;
     if (k >= 5) hooks.push([k >= 7 ? 11 : 8, "aur", `The northern lights could be visible as far south as ${AU.short} tonight!`, { big: "KP " + AU.kp, unit: AU.g + " geomagnetic storm", kicker: "Aurora alert", sub: "Tonight · look north" }]);
   }
   // the Sun
@@ -194,6 +200,9 @@ async function build(today, outDir, brand) {
       : `The Sun has been fairly calm, with ${SU.n24 === 1 ? "one small flare" : SU.n24 + " small flares"} in the last day${c24 ? `, the biggest a ${say(c24)}` : ""}.`;
     V.sun += ` NOAA gives a ${SU.mProb} percent chance of M-class flares${SU.xProb ? ` and a ${SU.xProb} percent chance of an X-class flare` : ""} over the next day.`;
     score.sun = big >= 1e-4 ? 9 : big >= 5e-5 ? 6 : big >= 1e-5 ? 4 : 1;
+    QH.sun = big >= 1e-5 ? [`The Sun just fired off ${big >= 1e-4 ? "a powerful X-class" : "an M-class"} solar flare!`, { big: c24, unit: "Solar flare", kicker: "Solar flare alert", sub: "Last 24 hours" }]
+      : [`This is what the Sun looks like right now.`, { big: c24 || "CALM", unit: c24 ? "Biggest flare today" : "Solar activity", kicker: "Space weather", sub: "NASA SDO · today" }];
+    QV.sun = big >= 1e-5 ? `It was an ${say(c24)}${big >= 1e-4 ? ", the strongest class there is" : ""}, strong enough to cause radio blackouts on the sunny side of Earth. NOAA gives a ${SU.mProb} percent chance of more M-class flares over the next day.` : V.sun;
     if (big >= 1e-4) hooks.push([9, "sun", `The Sun just fired off a powerful X-class solar flare!`, { big: c24, unit: "Solar flare", kicker: "Solar flare alert", sub: "Strongest flare class" }]);
   }
   // launches
@@ -206,6 +215,9 @@ async function build(today, outDir, brand) {
       return `${i === 0 ? cap(w) : w === when(LA[i - 1].net, today) ? "Then" : cap(w)},${l.tbd ? " if the date holds," : ""} ${l.prov} is scheduled to launch ${what} on ${art}${l.rocket} from ${l.loc}.`; };
     V.lau = `Launch schedule! ${LA.map(one).join(" ")} Launch times can slip, so check before you watch.`;
     score.lau = LA.some(l => l.crew) ? 7 : LA.some(l => !l.star) ? 3 : 2;
+    { const l = LA[0], w = l.dayOnly ? "on " + ET(l.net, { weekday: "long" }) : when(l.net, today), it = S.lau.items[0];
+      QH.lau = [`${l.prov} is launching ${l.star ? "more Starlink satellites" : l.crew ? "astronauts" : "a " + l.rocket} ${w}!`, { big: l.dayOnly ? it.day.split(" ")[0].replace(",", "") : it.time.replace(" ET", ""), unit: l.dayOnly ? "Launch day" : "Eastern · " + it.day.replace(",", ""), kicker: "Launch alert", sub: `${l.rocket} · ${l.loc}` }];
+      QV.lau = `${one(l, 0)} Launch times can slip, so check before you watch.`; }
     const cr = LA.find(l => l.crew); if (cr) hooks.push([7, "lau", `Astronauts are launching ${when(cr.net, today)}!`, { big: "LIFTOFF", unit: cr.rocket, kicker: "Crew launch", sub: S.lau.items[LA.indexOf(cr)].day }]);
   }
   // the Moon
@@ -215,6 +227,9 @@ async function build(today, outDir, brand) {
     V.moon = MO.illum >= 97 ? `And look up tonight: it's the full ${MO.fullName} Moon, ${MO.illum} percent lit!`
       : `Tonight's Moon is a ${MO.phase.toLowerCase()}, ${MO.illum} percent lit. The next full moon, the ${MO.fullName} Moon, rises ${dTo <= 1 ? when(nf, today) : "on " + ET(nf, { weekday: "long", month: "long", day: "numeric" })}.`;
     score.moon = MO.illum >= 97 ? 6 : dTo <= 1 ? 4 : 1;
+    QH.moon = MO.illum >= 97 ? [`Tonight's full ${MO.fullName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.fullName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]
+      : [`Tonight's Moon is ${MO.illum} percent lit. Here's what's next.`, { big: MO.illum + "%", unit: MO.phase, kicker: "Moon tonight", sub: `Next full: ${S.moon.full}` }];
+    QV.moon = V.moon;
     if (MO.illum >= 97) hooks.push([6, "moon", `Tonight's full ${MO.fullName} Moon is one you don't want to miss!`, { big: MO.illum + "%", unit: `Full ${MO.fullName} Moon`, kicker: "Tonight", sub: "Look east at sunset" }]);
   }
   sane(S);
@@ -246,7 +261,15 @@ async function build(today, outDir, brand) {
     "  check: https://aa.usno.navy.mil/data/MoonPhases", "");
   facts.push("Footage: NASA Image and Video Library (images.nasa.gov). Data: NASA JPL, NOAA SWPC, The Space Devs, USNO.");
   const title = ytTitle(H, S, dateLabel);
-  return { mode: "space", template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), scenes, voice,
+  const base = { template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA" };
+  const quick = Object.keys(S).filter(k => QH[k]).sort((a, b) => score[b] - score[a]).slice(0, 2).map((k, i) => {
+    const [line, big] = QH[k], tag = { ast: "#asteroid", aur: "#northernlights", sun: "#sun", lau: "#rocketlaunch", moon: "#moon" }[k];
+    return { ...base, mode: "space-quick", quick: true, min: 0, part: i + 1, scenes: [{ kind: "hook", id: "hook", topic: k, bg: BG[k], ...big }, S[k], { kind: "outro", id: "outro", bg: "earth" }],
+      voice: { hook: line, [k]: QV[k], outro: `Follow ${brand} for more!` },
+      ytTitle: `${line.replace(/[!.?]+$/, "")} ${{ ast: "☄️", aur: "🌌", sun: "☀️", lau: "🚀", moon: "🌕" }[k]}`.slice(0, 100),
+      caption: [line, "", `Follow ${brand} for the space report every day ✅`, "", "Data: NASA JPL, NOAA SWPC, The Space Devs. Footage: NASA.", "", `#space ${tag} #astronomy #spacenews #nightsky #fyp`].join("\n") };
+  });
+  return { mode: "space", quick, template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), scenes, voice,
     music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA", ytTitle: title, caption: caption(H, S, voice, brand, dateLabel) };
 }
 
@@ -273,5 +296,7 @@ if (require.main === module) (async () => {
   const D = await build(today, path.dirname(path.resolve(out)), process.env.BRAND || "Liftoff");
   if (!D) { console.error("No space data today."); process.exit(3); }
   for (const [k, v] of Object.entries(D.voice)) console.log(k, "|", v);
+  const Q = D.quick; delete D.quick;
   fs.writeFileSync(out, JSON.stringify(D, null, 1)); console.log(D.ytTitle);
+  Q.forEach((q, i) => { fs.writeFileSync(path.join(path.dirname(out), `quick-${i + 1}.json`), JSON.stringify(q, null, 1)); console.log(`quick ${i + 1}:`, q.ytTitle, "|", Object.values(q.voice).join(" ")); });
 })().catch(e => { console.error(e); process.exit(1); });

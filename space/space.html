@@ -112,7 +112,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 <script>
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3),eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[],STARS=[];const INTRO=1.9,TAIL=3,MIN=61.5;
+let D=null,SC=[],TOTAL=30,SFX=[],STARS=[];const INTRO=2.3,TAIL=2.4,MIN=61.5;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const com=x=>Math.round(+x).toLocaleString("en-US");
 function rnd(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
@@ -208,11 +208,11 @@ function build(data){D=data;SC=[];SFX=[];
    <div class="panel"><div class="plab">Lunar cycle</div><div class="phases">${["New","Wax Cr","1st Q","Wax Gib","Full","Wan Gib","Last Q","Wan Cr"].map((n,i)=>`<div class="${Math.round(s.frac*8)%8===i?"on":""}"><div style="width:80px;margin:0 auto 10px">${moonSvg(i/8,80).replace(/id="(mg|lit)"/g,'id="$1'+i+'"').replace(/url\(#(mg|lit)\)/g,"url(#$1"+i+")")}</div>${n}</div>`).join("")}</div></div>`);
   else if(s.kind==="outro")add(s,3.6,`<div class="mid"><div class="kick" style="margin:0 auto"><i></i>New report every day</div><div class="t1" style="margin-top:30px">Follow<br>${esc(D.brand)}</div><div class="follow"><span id="fl">Follow</span><div class="ring"></div></div></div>`);
  }
- const short=MIN-(t+TAIL);if(short>0){const mids=SC.filter(s=>s.kind!=="hook"),per=short/mids.length;let sh=0;for(const s of SC){s.t0+=sh;s.va+=sh;if(s.kind!=="hook")sh+=per;s.t1+=sh}t+=short}
+ const short=(D.min??MIN)-(t+TAIL);if(short>0){const mids=SC.filter(s=>s.kind!=="hook"),per=short/mids.length;let sh=0;for(const s of SC){s.t0+=sh;s.va+=sh;if(s.kind!=="hook")sh+=per;s.t1+=sh}t+=short}
  document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
  document.querySelectorAll(".t1,.lc .r b").forEach(e=>fit(e,40));document.querySelectorAll("#hook .big").forEach(e=>fit(e,90));
  for(const s of SC){if(s.kind!=="hook")SFX.push({t:s.t0,k:"whoosh"});if(s.kind==="hook"||s.kind==="outro")SFX.push({t:s.t0+.5,k:"pop"})}
- SFX.push({t:.05,k:"whoosh"},{t:1.02,k:"stamp"},{t:INTRO-.35,k:"whoosh"},{t:t+.1,k:"sting"},{t:t+1.75,k:"whoosh"});
+ SFX.push({t:.05,k:"whoosh"},{t:1.15,k:"stamp"},{t:INTRO-.35,k:"whoosh"},{t:t+.1,k:"sting"},{t:t+1.3,k:"whoosh"});
  return TOTAL}
 // when the cue-th sentence of this scene starts (or a fallback time)
 function at(s,i,fb){const c=D.cues&&D.cues[s.id];return c&&c[i]!=null?s.va-s.t0+c[i]-.2:fb}
@@ -252,11 +252,11 @@ function render(t){
  // the rocket: it flies up from below the screen and docks in the ring (intro), then at the end lifts off out of the top of the
  // frame and leaves the empty ring, which is exactly how the video starts, so it loops
  const end=TOTAL-TAIL;let lo=0,ls=1,bk=0,wd=0,fl=0,ry=0,trl=0,fs=1;
- if(t<INTRO+.15){bk=1;lo=1;ry=560*(1-pop(t/1.2));trl=.9*clamp(1-t/1.1);fs=1+.8*clamp(1-t/1.1);const x=t>1.55?ease((t-1.55)/.35):0;
+ if(t<INTRO+.15){bk=1;lo=1;ry=560*(1-pop(t/1.35));trl=.9*clamp(1-t/1.25);fs=1+.8*clamp(1-t/1.25);const x=t>1.95?ease((t-1.95)/.35):0;
   // after it docks, LIFTOFF shows under the logo for a beat, then the camera flies through
-  wd=clamp((t-.95)/.3)*(1-x);if(x){ls=1+x*6;lo=1-x;bk=1-x}fl=t>1.6&&t<1.84?1-Math.abs(t-1.72)/.12:0}
- if(t>end+.1){const k=t-end-.1;bk=clamp(k/.3);lo=clamp(k/.2);ls=1+.4*(1-pop(k/.5));wd=Math.min(ease((k-.45)/.4),ease((2.55-k)/.3));
-  const ig=clamp((k-1.5)/.2),go=clamp((k-1.7)/.8);fs=1+.9*ig;ry=-620*Math.pow(go,2.2);trl=k<2.75?.9*ig:0}
+  wd=clamp((t-1.05)/.3)*(1-x);if(x){ls=1+x*6;lo=1-x;bk=1-x}fl=t>2.0&&t<2.24?1-Math.abs(t-2.12)/.12:0}
+ if(t>end+.1){const k=t-end-.1;bk=clamp(k/.25);lo=clamp(k/.2);ls=1+.4*(1-pop(k/.45));wd=Math.min(ease((k-.35)/.35),ease((1.95-k)/.25));
+  const ig=clamp((k-1.1)/.15),go=clamp((k-1.25)/.65);fs=1+.9*ig;ry=-620*Math.pow(go,2.2);trl=k<2.15?.9*ig:0}
  document.getElementById("black").style.opacity=bk.toFixed(3);const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`scale(${ls.toFixed(3)})`;
  const ang=2.2*(t<TOTAL/2?t:t-TOTAL),[lx,ly]=orbPos(ang);const lm=document.getElementById("lmoon");lm.setAttribute("cx",lx.toFixed(1));lm.setAttribute("cy",ly.toFixed(1));
  const rk=document.getElementById("lrkt");rk.setAttribute("transform",`translate(0 ${ry.toFixed(1)})`);document.getElementById("ltrail").setAttribute("opacity",trl.toFixed(3));

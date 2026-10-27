@@ -47,7 +47,9 @@ async function clip(topic, day, out) {
   fs.mkdirSync(dir, { recursive: true });
   const topics = [...new Set(D.scenes.map(s => s.bg).filter(Boolean))];
   D.broll = {};
-  for (const t of topics) { const c = await clip(t, D.day, path.join(dir, t + ".mp4")); if (c) D.broll[t] = c.file; }
+  for (const t of topics) { const f = path.join(dir, t + ".mp4");
+    if (fs.existsSync(f)) { D.broll[t] = path.resolve(f); continue; }   // already cut for today's other video
+    const c = await clip(t, D.day, f); if (c) D.broll[t] = c.file; }
   fs.writeFileSync(df, JSON.stringify(D, null, 1));
   console.log("b-roll:", Object.keys(D.broll).join(", ") || "none");
 })().catch(e => { console.error(e); process.exit(0); });   // no footage just means the graphics play over the starfield

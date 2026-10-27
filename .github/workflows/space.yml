@@ -16,7 +16,7 @@ concurrency:
 jobs:
   make:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 170
     defaults:
       run:
         working-directory: space
@@ -63,12 +63,12 @@ jobs:
         if: steps.prep.outputs.skip != '1'
         continue-on-error: true
         timeout-minutes: 15
-        run: node broll.js out/data.json
+        run: for f in out/data.json out/quick-*.json; do node broll.js "$f"; done
       - name: Voiceover
         if: steps.prep.outputs.skip != '1'
         # Chatterbox reads it, cloned from a Kokoro af_bella read (Liftoff's own narrator); Kokoro reads it if that fails
         continue-on-error: true
-        timeout-minutes: 45
+        timeout-minutes: 100
         working-directory: clips
         run: |
           mkdir -p .models
@@ -77,7 +77,8 @@ jobs:
           pip install -q kokoro-onnx soundfile
           python ref.py
           pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
-          python tts_cb.py ../space/out/data.json ../space/out/voice ref.wav || python tts.py ../space/out/data.json ../space/out/voice
+          for f in data quick-1 quick-2; do [ -f ../space/out/$f.json ] || continue
+            python tts_cb.py ../space/out/$f.json ../space/out/voice-$f ref.wav || python tts.py ../space/out/$f.json ../space/out/voice-$f; done
         env:
           REF_VOICE: af_bella
           VOICE: af_bella
@@ -90,14 +91,21 @@ jobs:
         run: |
           node ../clips/render.js out/data.json "out/liftoff-$DAY.mp4" 30
           node -e "process.stdout.write(require('./out/data.json').caption)" > out/caption.txt
+          for i in 1 2; do [ -f out/quick-$i.json ] || continue
+            node ../clips/render.js out/quick-$i.json "out/liftoff-$DAY-quick-$i.mp4" 30 && node -e "process.stdout.write(require('./out/quick-$i.json').caption)" > out/caption-quick-$i.txt; done
           node -e "process.stdout.write((require('./out/data.json').facts||[]).join('\n'))" > out/fact-sheet.txt
       - name: Publish
         if: steps.prep.outputs.skip != '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # the quick hits first, so the full report is the newest on the videos page
+          for i in 2 1; do [ -f "out/liftoff-$DAY-quick-$i.mp4" ] || continue; T="space-$DAY-quick-$i"
+            gh release delete "$T" --yes --cleanup-tag 2>/dev/null || true
+            Q=$(ls out/liftoff-$DAY-quick-$i-thumbnail.jpg 2>/dev/null || true)
+            gh release create "$T" "out/liftoff-$DAY-quick-$i.mp4" $Q out/fact-sheet.txt --title "$(node -e "process.stdout.write(require('./out/quick-$i.json').ytTitle||'')")" --notes-file out/caption-quick-$i.txt --latest=false; done
           TAG="space-$DAY"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           THUMB=$(ls out/liftoff-$DAY-thumbnail.jpg 2>/dev/null || true)
           gh release create "$TAG" "out/liftoff-$DAY.mp4" $THUMB out/fact-sheet.txt out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
-          gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^space-' | sort -r | tail -n +31 | xargs -r -I{} gh release delete {} --yes --cleanup-tag
+          gh release list --limit 200 --json tagName --jq '.[].tagName' | grep '^space-' | sort -r | tail -n +91 | xargs -r -I{} gh release delete {} --yes --cleanup-tag
