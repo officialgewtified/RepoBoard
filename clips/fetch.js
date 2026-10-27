@@ -54,8 +54,20 @@ async function day(sport, ymd) {
   });
   return games.filter(Boolean);
 }
+// is the day over? exit 0 when there were games and every one is final, 4 while any is still scheduled or live, 3 when there were none
+async function check(ymd) {
+  let fin = 0, left = 0;
+  for (const s of Object.keys(SPORTS)) {
+    const S = SPORTS[s], sb = await get(`${BASE}${S.p}/scoreboard?dates=${ymd.replace(/-/g, "")}&limit=300${S.q}`);
+    for (const e of sb.events || []) { if (![2, 3].includes((e.season || {}).type || 2)) continue;
+      const st = ((e.competitions[0].status || {}).type || {}).state; if (st === "post") fin++; else left++; }
+  }
+  console.log(`${ymd}: ${fin} final, ${left} not finished`);
+  process.exit(fin + left === 0 ? 3 : left ? 4 : 0);
+}
 module.exports = { day };
-if (require.main === module) (async () => {
+if (require.main === module && process.argv[2] === "--check") check(process.argv[3]).catch(e => { console.error(e.message); process.exit(4); });
+else if (require.main === module) (async () => {
   const [ymd, out] = process.argv.slice(2); fs.mkdirSync(out, { recursive: true });
   for (const s of Object.keys(SPORTS)) {
     try { const g = await day(s, ymd); if (g.length) fs.writeFileSync(path.join(out, s + ".json"), JSON.stringify(g)); console.log(`${s}: ${g.length} finals`); }
