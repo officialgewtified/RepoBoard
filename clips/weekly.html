@@ -158,19 +158,31 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 .mlead{display:flex;justify-content:center;gap:18px;margin-top:auto}
 .frame{align-self:center;margin-top:26px;font:700 36px/1.2 "Archivo";color:#e4e4e7;text-align:center}
 .mu .tm small{font:700 24px/1 "Archivo";letter-spacing:.08em;color:var(--haze);text-transform:uppercase}
-/* thumbnail */
-#thumb{position:absolute;inset:0;display:none;z-index:20;overflow:hidden;background:#09090a}
-#thumb .gl{position:absolute;inset:0;background:radial-gradient(45% 60% at 26% 52%,var(--tc) 0%,transparent 75%);opacity:.65}
-#thumb .gr{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 30px)}
-#thumb .wk{position:absolute;left:80px;top:56px;font:900 150px/.85 "Big Shoulders";letter-spacing:.01em}
-#thumb .wk span{color:#FFD60A}
-#thumb .big{position:absolute;left:62px;top:196px;font:900 500px/.8 "Big Shoulders";letter-spacing:-.02em;text-shadow:0 14px 0 rgba(0,0,0,.45),0 0 120px var(--tc)}
-#thumb .lab{position:absolute;left:84px;top:618px;transform:rotate(-2.5deg);transform-origin:left;background:#FFD60A;color:#0b0b0c;padding:16px 34px;border-radius:14px;font:900 96px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;box-shadow:0 22px 40px -12px rgba(0,0,0,.7)}
-#thumb .nm{position:absolute;left:84px;top:778px;font:900 170px/.86 "Big Shoulders";text-transform:uppercase;white-space:nowrap;max-width:1000px}
-#thumb .vz2{position:absolute;right:50px;top:120px;width:860px;height:640px}
-#thumb .vz2 svg{width:100%;height:100%;filter:drop-shadow(0 30px 50px rgba(0,0,0,.7))}
-#thumb .bn{position:absolute;right:-30px;bottom:70px;transform:rotate(-2deg);background:#fff;color:#0b0b0c;padding:22px 70px 22px 44px;font:900 70px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;box-shadow:0 20px 50px rgba(0,0,0,.6)}
-#thumb .x{position:absolute;right:70px;top:56px;font:900 64px/1 "Big Shoulders";letter-spacing:.08em}
+/* thumbnail: the Crossover poster (same look as the shorts' covers) in 16:9. Team colour full-bleed, halftone, the brand
+   X crossing behind a giant hard-shadowed number, black-and-volt bars. */
+#thumb{position:absolute;inset:0;display:none;z-index:20;overflow:hidden;--volt:#D7FF3A;background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 85%,#fff) 0%,var(--tc) 40%,color-mix(in srgb,var(--tc) 45%,#000) 100%)}
+#thumb .ht{position:absolute;inset:-20%;background:radial-gradient(circle,rgba(0,0,0,.28) 1.6px,transparent 2px) 0 0/18px 18px;transform:rotate(18deg);opacity:.55}
+#thumb .sp{position:absolute;left:-30%;right:-30%;top:-10%;height:120%;background:repeating-linear-gradient(115deg,rgba(255,255,255,.07) 0 26px,transparent 26px 120px)}
+#thumb .sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,0) 26%,rgba(0,0,0,0) 64%,rgba(0,0,0,.6) 100%)}
+#thumb .xb{position:absolute;width:4400px;height:190px;margin:-95px 0 0 -2200px}
+#thumb .xb.a{background:var(--volt);transform:rotate(-38deg)}#thumb .xb.b{background:#000;transform:rotate(38deg)}
+#thumb .tb{position:absolute;left:64px;top:52px;display:flex;gap:22px;align-items:center;z-index:2}
+#thumb .wm{background:#fff;color:#000;font:900 60px/1 "Big Shoulders";letter-spacing:.06em;padding:11px 22px 8px;transform:skewX(-12deg)}
+#thumb .wm span,#thumb .cl span,#thumb .bar span,#thumb .pr span,#thumb .wkb span{display:inline-block;transform:skewX(12deg)}
+#thumb .when{background:#000;color:var(--volt);font:900 32px/1 "Archivo";font-stretch:118%;letter-spacing:.12em;text-transform:uppercase;padding:16px 22px;transform:skewX(-12deg)}
+#thumb .cv{position:absolute;left:64px;top:190px;bottom:60px;width:1080px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;z-index:2}
+#thumb .cn{font:900 520px/.76 "Big Shoulders";color:#fff;white-space:nowrap;letter-spacing:-.01em;text-shadow:16px 16px 0 #000;padding-right:16px}
+#thumb .cl{margin-top:34px;background:#000;color:var(--volt);font:900 76px/1 "Big Shoulders";letter-spacing:.05em;text-transform:uppercase;padding:12px 26px 7px;transform:skewX(-12deg);white-space:nowrap}
+#thumb .fn{margin-top:26px;font:900 42px/1 "Archivo";font-stretch:118%;letter-spacing:.1em;color:#fff;text-transform:uppercase;background:#000;padding:9px 14px 7px}
+#thumb .ln{font:900 190px/.82 "Big Shoulders";color:#fff;text-transform:uppercase;white-space:nowrap;text-shadow:10px 10px 0 #000;max-width:100%;overflow:hidden;padding:0 12px 12px 0;margin-top:6px}
+#thumb .bar{margin-top:14px;display:inline-flex;background:#000;color:#fff;font:700 34px/1 "Archivo";padding:15px 22px;transform:skewX(-12deg)}
+#thumb .rt{position:absolute;right:80px;top:150px;bottom:70px;width:620px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:44px;z-index:2}
+#thumb .ct{width:560px;background:#000;padding:18px 14px 12px;transform:rotate(4deg);box-shadow:16px 16px 0 var(--volt)}
+#thumb .ct svg{display:block;width:100%;height:auto;max-height:520px}
+#thumb .wkb{background:#fff;color:#000;transform:skewX(-12deg);box-shadow:16px 16px 0 #000;padding:16px 40px 6px;text-align:center}
+#thumb .wkb small{display:block;font:900 44px/1 "Archivo";font-stretch:118%;letter-spacing:.2em}
+#thumb .wkb b{display:block;font:900 300px/.82 "Big Shoulders"}
+#thumb .pr{background:var(--volt);color:#000;font:900 58px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;padding:16px 28px 11px;transform:skewX(-12deg);white-space:nowrap;box-shadow:12px 12px 0 #000}
 </style></head><body>
 <div id="sky"></div>
 <div class="top"><span class="wm" id="wm"></span><span class="dt" id="dt"></span></div>
@@ -286,13 +298,23 @@ function render(t){
  const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`translate(-50%,-50%) scale(${ls.toFixed(3)})`;
  document.querySelector("#logo i").style.transform=`scale(${Math.max(0,dp).toFixed(3)})`;document.getElementById("sig").style.opacity=sg.toFixed(3);
  for(const q of [".top",".nav"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
-// the YouTube thumbnail: week number, the week's biggest stat, a promise
+// the YouTube thumbnail: the Crossover poster. The week's biggest stat and who did it on the left, the week (or the stat
+// graphic) and the promise on the right
 window.thumb=()=>{const s=D.scenes.find(x=>x.kind==="hook"),T=document.getElementById("thumb"),nx=D.scenes.some(x=>x.kind==="slate");
- T.style.setProperty("--tc",s.color||"#4ade80");
- T.innerHTML=`<div class="gl"></div><div class="gr"></div><div class="wk">NFL WEEK <span>${D.week}</span></div><div class="x">CROSSOVER</div>
-  <div class="big">${esc(s.big)}</div><div class="lab">${esc(s.label)}</div><div class="nm">${esc(s.who.split(" ").slice(1).join(" ")||s.who)}</div>
-  ${s.viz?`<div class="vz2">${VIZ.html(s.viz,s.color,s.tm)}</div>`:""}<div class="bn">${nx?`Every score + Week ${D.week+1} preview`:"Every score recapped"}</div>`;
- T.style.display="block";fit(T.querySelector(".nm"),80);VIZ.anim(T,30,0);return true};
+ const nm=String(s.who||"").trim().split(/\s+/),first=nm.length>1?nm[0]:"",last=nm.length>1?nm.slice(1).join(" "):nm[0];
+ T.style.setProperty("--tc",s.bg||s.color||"#1d4ed8");
+ T.innerHTML=`<div class="ht"></div><div class="sp"></div><div class="sh"></div><i class="xb b"></i><i class="xb a"></i>
+  <div class="tb"><div class="wm"><span>CROSSOVER</span></div><div class="when">NFL · Week ${D.week}</div></div>
+  <div class="cv"><div class="cn">${esc(s.big)}</div><div class="cl"><span>${esc(s.label)}</span></div>
+   ${first?`<div class="fn">${esc(first)}</div>`:""}<div class="ln">${esc(last)}</div>${s.line?`<div class="bar"><span>${esc(s.line)}</span></div>`:""}</div>
+  <div class="rt">${s.viz?`<div class="ct">${VIZ.html(s.viz,"#D7FF3A",s.tm)}</div>`:`<div class="wkb"><small>NFL</small><b>WEEK ${D.week}</b></div>`}
+   <div class="pr"><span>${nx?`Every score + Week ${D.week+1} preview`:"Every score recapped"}</span></div></div>`;
+ T.style.display="block";
+ const n=T.querySelector(".cn"),cv=T.querySelector(".cv");let fs=520;while(n.getBoundingClientRect().width>cv.clientWidth-40&&fs>200){fs-=20;n.style.fontSize=fs+"px"}
+ const l=T.querySelector(".ln");let f2=190;while(l.scrollWidth>l.clientWidth+1&&f2>90){f2-=6;l.style.fontSize=f2+"px"}
+ while(cv.scrollHeight>cv.clientHeight+1&&fs>200){fs-=20;n.style.fontSize=fs+"px"}
+ const r=n.getBoundingClientRect();T.querySelectorAll(".xb").forEach(x=>{x.style.top=((r.top+r.bottom)/2).toFixed(0)+"px";x.style.left=((r.left+r.right)/2+80).toFixed(0)+"px"});
+ VIZ.anim(T,30,0);return true};
 window.ready=()=>Promise.all(['500 100px "Archivo"','800 100px "Archivo"','900 100px "Big Shoulders"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;
 </script></body></html>

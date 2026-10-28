@@ -77,7 +77,25 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #logo .wd{position:absolute;left:0;right:0;top:calc(44% + 470px);text-align:center;font:900 130px/1 "Big Shoulders";letter-spacing:.1em;color:#fff}
 #logo .wd small{display:block;font:800 30px/1 "Archivo";font-stretch:118%;letter-spacing:.22em;color:var(--volt);margin-top:20px}
 #src{position:absolute;left:70px;bottom:150px;font:600 21px/1 "Archivo";color:rgba(255,255,255,.55);z-index:5}
+/* cover image: a sports poster. Team colour full-bleed, the brand X crossing behind a giant hard-shadowed number,
+   black-and-volt bars, the stat graphic in a volt-edged panel. Nothing centred, no banner, no glow. */
 #thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden}
+#thumb .xb{position:absolute;left:50%;width:3600px;height:250px;margin:-125px 0 0 -1800px}
+#thumb .xb.a{background:var(--volt);transform:rotate(-38deg)}
+#thumb .xb.b{background:#000;transform:rotate(38deg)}
+#thumb .top{position:absolute;left:60px;right:60px;top:92px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+#thumb .wm{background:#fff;color:#000;font:900 62px/1 "Big Shoulders";letter-spacing:.06em;padding:12px 22px 9px;transform:skewX(-12deg)}
+#thumb .wm span,#thumb .cl span{display:inline-block;transform:skewX(12deg)}
+#thumb .when{background:#000;color:var(--volt);font:900 32px/1 "Archivo";font-stretch:118%;letter-spacing:.12em;text-transform:uppercase;padding:17px 22px;transform:skewX(-12deg)}
+#thumb .cv{position:absolute;left:60px;right:60px;top:210px;bottom:120px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;z-index:2}
+#thumb .cn{font:900 900px/.76 "Big Shoulders";color:#fff;white-space:nowrap;letter-spacing:-.01em;text-shadow:18px 18px 0 #000;padding-right:18px}
+#thumb .cl{margin-top:48px;background:#000;color:var(--volt);font:900 96px/1 "Big Shoulders";letter-spacing:.05em;text-transform:uppercase;padding:14px 30px 8px;transform:skewX(-12deg);white-space:nowrap}
+#thumb .fn{margin-top:40px;font:900 56px/1 "Archivo";font-stretch:118%;letter-spacing:.1em;color:#fff;text-transform:uppercase;background:#000;padding:10px 16px 8px}
+#thumb .ln{font:900 280px/.82 "Big Shoulders";color:#fff;text-transform:uppercase;white-space:nowrap;text-shadow:12px 12px 0 #000;max-width:100%;overflow:hidden;padding:0 14px 14px 0;margin-top:8px}
+#thumb .cx{margin-top:22px}#thumb .cx.bar{font-size:36px;padding:18px 26px}
+#thumb .hd{display:flex;align-items:center;justify-content:space-between;align-self:stretch;gap:20px}
+#thumb .ct{flex:none;width:400px;background:#000;padding:16px 12px 10px;transform:rotate(4deg);box-shadow:16px 16px 0 var(--volt);margin-right:12px}
+#thumb .ct svg{display:block;width:100%;height:auto}
 </style></head><body>
 <div id="stage"></div>
 <div id="bug"><div class="wm"><span>CROSSOVER</span></div><div class="dt" id="dt"></div></div>
@@ -181,14 +199,22 @@ function render(t){
  else if(t>end){const k=t-end;lo=clamp(k/.12);k1=-(1-ease(k/.35));sc=1+.12*(1-pop((k-.3)/.4));wo=clamp((k-.4)/.25)}
  L.style.opacity=lo;s1.style.transform=`rotate(-38deg) translateX(${(k1*2200).toFixed(0)}px) scale(${sc.toFixed(3)})`;s2.style.transform=`rotate(38deg) translateX(${(-k1*2200).toFixed(0)}px) scale(${sc.toFixed(3)})`;wd.style.opacity=wo;
  for(const q of ["#bug","#segs","#src"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
-// the cover image: team colour, halftone, the giant number, the label, the name, the X
-window.thumb=()=>{const H=D.hook,T=document.getElementById("thumb"),pv=D.mode==="preview",nm=String(H.who||"").split(" "),last=nm.length>1?nm.slice(1).join(" "):nm[0];
- T.innerHTML=`<div class="sc" style="opacity:1;--tc:${H.bg||H.color}">${bg()}<div class="in" style="top:150px;bottom:200px;right:70px">${tag(pv?"Tonight":"Last night","k")}
-  <div style="margin-top:40px"><div class="big" style="font-size:620px">${esc(H.big)}</div></div><div style="margin-top:30px">${tag(esc(H.label))}</div>
-  <div class="nm" style="margin-top:40px"><small>${esc(nm.length>1?nm[0]:"")}</small><b style="font-size:230px">${esc(last)}</b></div>
-  ${!pv&&H.viz?`<div style="margin-top:30px">${viz(H.viz,H.tm)}</div>`:""}</div>
-  <div style="position:absolute;left:-40px;right:-40px;bottom:120px;transform:rotate(-4deg);background:#fff;color:#000;text-align:center;font:900 92px/1 'Big Shoulders';padding:22px 0;letter-spacing:.04em;box-shadow:0 14px 0 #D7FF3A">${pv?"TONIGHT'S GAMES":"CROSSOVER · "+esc(D.date)}</div></div>`;
- T.style.display="block";T.querySelectorAll(".big").forEach(e=>{let fs=620;while(e.getBoundingClientRect().width>940&&fs>200){fs-=20;e.style.fontSize=fs+"px"}});T.querySelectorAll(".nm b").forEach(e=>fit(e,90));VIZ.anim(T,30,0);return true};
+// the cover image: a poster in the team's colour with the brand X behind the number
+window.thumb=()=>{const H=D.hook,T=document.getElementById("thumb"),pv=D.mode==="preview",nm=String(H.who||"").trim().split(/\s+/),first=nm.length>1?nm[0]:"",last=nm.length>1?nm.slice(1).join(" "):nm[0],
+  court=!pv&&H.viz&&H.viz.t==="court",field=!pv&&H.viz&&H.viz.t==="field";
+ T.innerHTML=`<div class="sc" style="opacity:1;--tc:${H.bg||H.color}">${bg()}<i class="xb b"></i><i class="xb a"></i>
+  <div class="top"><div class="wm"><span>CROSSOVER</span></div><div class="when">${pv?"Tonight":"Last night"} · ${esc(D.date)}</div></div>
+  <div class="cv"><div class="hd"><div class="cn">${esc(H.big)}</div>${court||field?`<div class="ct">${VIZ.html(H.viz,"#D7FF3A",H.tm)}</div>`:""}</div><div class="cl"><span>${esc(H.label)}</span></div>
+   ${first?`<div class="fn">${esc(first)}</div>`:""}<div class="ln">${esc(last)}</div>
+   ${H.ctx?`<div class="bar cx"><span>${H.ctx}</span></div>`:""}
+   </div></div>`;
+ T.style.display="block";
+ const n=T.querySelector(".cn"),cv=T.querySelector(".cv"),room=cv.clientWidth-(court||field?450:0);let fs=900;while(n.getBoundingClientRect().width>room&&fs>240){fs-=20;n.style.fontSize=fs+"px"}
+ const l=T.querySelector(".ln");let f2=280;while(l.scrollWidth>l.clientWidth+1&&f2>110){f2-=10;l.style.fontSize=f2+"px"}
+ // shrink the number until the whole poster fits
+ while(cv.scrollHeight>cv.clientHeight+1&&fs>240){fs-=20;n.style.fontSize=fs+"px"}
+ const r=n.getBoundingClientRect(),cy=(r.top+r.bottom)/2;T.querySelectorAll(".xb").forEach(x=>x.style.top=cy.toFixed(0)+"px");
+ VIZ.anim(T,30,0);return true};
 window.ready=()=>Promise.all(['800 100px "Archivo"','900 100px "Archivo"','900 100px "Big Shoulders"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;
 </script></body></html>

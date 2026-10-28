@@ -150,7 +150,7 @@ async function build(force, brand) {
 // everything after the downloads (separate so it can be tested offline)
 function assemble(wk, season, games, std, nba, brand, next) {
   next = next || [];
-  for (const g of games) for (const t of [g.away, g.home]) { t.nick = nick(t); t.color = col(t); }
+  for (const g of games) for (const t of [g.away, g.home]) { t.nick = nick(t); t.bg = /^[0-9a-f]{6}$/i.test(t.color || "") ? "#" + t.color : null; t.color = col(t); }
   const all = games.flatMap(g => g.players.map(p => Object.assign({ g }, p)));
   const tcol = p => (p.g.home.ab === p.tm ? p.g.home : p.g.away).color;
   const voice = {}, scenes = [];
@@ -163,7 +163,7 @@ function assemble(wk, season, games, std, nba, brand, next) {
       [n(r.TD) / 2.4, n(r.TD), "rushing touchdowns", p, "rush"], [n(c.YDS) / 150, n(c.YDS), "receiving yards", p, "rec"], [n(c.REC) / 12, n(c.REC), "catches", p, "rec"]); }
   const h = hooks.sort((a, b) => b[0] - a[0])[0], hp = h[3], hteam = hp.g.home.ab === hp.tm ? hp.g.home : hp.g.away;
   const nx = next.length ? ` and the matchups you can't miss in Week ${wk + 1}` : "";
-  scene({ kind: "hook", id: "hook", chapter: "Intro", big: String(h[1]), label: h[2], who: hp.n, tm: hp.tm, color: hteam.color, line: statLine(hp).txt, viz: fieldViz(hp, h[4]) },
+  scene({ kind: "hook", id: "hook", chapter: "Intro", big: String(h[1]), label: h[2], who: hp.n, tm: hp.tm, color: hteam.color, bg: hteam.bg, line: statLine(hp).txt, viz: fieldViz(hp, h[4]) },
     `${h[1]} ${h[2]}! ${hp.n} just had the biggest day of Week ${wk}. We've got every score, the games everyone is talking about, our player of the week,${nx ? "" : " and"} the stat leaders${nx}. Let's go!`);
 
   // ---- every final, in quick grids

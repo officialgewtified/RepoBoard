@@ -105,7 +105,7 @@ jobs:
           for i in 2 1; do [ -f "out/liftoff-$DAY-quick-$i.mp4" ] || continue; T="space-$DAY-quick-$i"
             gh release delete "$T" --yes --cleanup-tag 2>/dev/null || true
             Q=$(ls out/liftoff-$DAY-quick-$i-thumbnail.jpg 2>/dev/null || true)
-            gh release create "$T" "out/liftoff-$DAY-quick-$i.mp4" $Q out/fact-sheet.txt --title "$(node -e "process.stdout.write(require('./out/quick-$i.json').ytTitle||'')")" --notes-file out/caption-quick-$i.txt --latest=false; done
+            gh release create "$T" "out/liftoff-$DAY-quick-$i.mp4" $Q out/fact-sheet.txt "out/quick-$i.json" --title "$(node -e "process.stdout.write(require('./out/quick-$i.json').ytTitle||'')")" --notes-file out/caption-quick-$i.txt --latest=false; done
           TAG="space-$DAY"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           THUMB=$(ls out/liftoff-$DAY-thumbnail.jpg 2>/dev/null || true)

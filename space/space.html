@@ -95,18 +95,27 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #black{position:absolute;inset:0;background:var(--void);opacity:0;z-index:8}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:10;pointer-events:none}
 #src{position:absolute;left:70px;right:140px;bottom:120px;font:400 20px/1.3 "JBM";color:rgba(234,242,255,.45);letter-spacing:.04em}
-/* cover image */
-#thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden;background:radial-gradient(70% 45% at 50% 34%,#0f2a4a 0%,#060a18 55%,#020309 100%)}
-#thumb .neb{position:absolute;inset:0;background:radial-gradient(40% 30% at 25% 20%,rgba(255,79,216,.25),transparent 70%),radial-gradient(45% 35% at 80% 60%,rgba(79,243,255,.18),transparent 70%)}
-#thumb .art{position:absolute;left:90px;right:90px;top:210px;height:820px;display:flex;align-items:center;justify-content:center}
-#thumb .art img{width:760px;height:760px;border-radius:50%;object-fit:cover;box-shadow:0 0 140px rgba(255,181,71,.6)}
-#thumb .k{position:absolute;left:0;right:0;top:1000px;text-align:center}
-#thumb .k span{display:inline-block;background:#FFD60A;color:#05060c;font:900 64px/1 "Unbounded";padding:20px 34px;transform:rotate(-2deg);text-transform:uppercase;box-shadow:0 20px 40px rgba(0,0,0,.6);white-space:nowrap}
-#thumb .bigt{position:absolute;left:30px;right:30px;top:1140px;text-align:center;font:900 190px/.92 "Unbounded";letter-spacing:-.03em;text-shadow:0 0 60px rgba(79,243,255,.6),0 12px 0 rgba(0,0,0,.4);white-space:nowrap}
-#thumb .u{position:absolute;left:0;right:0;top:1340px;text-align:center;font:800 58px/1.1 "Unbounded";color:var(--ion);text-transform:uppercase}
-#thumb .bn{position:absolute;left:-20px;right:-20px;bottom:150px;background:#fff;color:#05060c;text-align:center;padding:26px 0;font:900 64px/1 "Unbounded";letter-spacing:.04em;transform:rotate(-2deg);text-transform:uppercase}
-#thumb .tl{position:absolute;left:70px;top:80px;font:900 60px/1 "Unbounded";letter-spacing:.08em;display:flex;align-items:center;gap:18px}
-#thumb .tl svg{width:70px;height:70px}
+/* cover image: mission control has a target. The subject sits inside a tracking reticle, a mono readout tag above the
+   number, a HUD rule at the bottom. Everything centred, glowing and thin-lined: nothing like Crossover's flat poster. */
+#thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden;background:radial-gradient(62% 40% at 50% 36%,#12305a 0%,#07102a 50%,#020309 100%)}
+#thumb .neb{position:absolute;inset:0;background:radial-gradient(42% 26% at 18% 22%,rgba(255,79,216,.28),transparent 70%),radial-gradient(46% 30% at 86% 58%,rgba(79,243,255,.2),transparent 70%),radial-gradient(60% 22% at 50% 96%,rgba(255,181,71,.16),transparent 70%)}
+#thumb .cb{position:absolute;width:96px;height:96px;border:5px solid var(--ion);opacity:.85}
+#thumb .cb.a{left:44px;top:44px;border-right:0;border-bottom:0}#thumb .cb.b{right:44px;top:44px;border-left:0;border-bottom:0}
+#thumb .cb.c{left:44px;bottom:44px;border-right:0;border-top:0}#thumb .cb.d{right:44px;bottom:44px;border-left:0;border-top:0}
+#thumb .tl{position:absolute;left:0;right:0;top:92px;display:flex;align-items:center;justify-content:center;gap:20px;font:900 62px/1 "Unbounded";letter-spacing:.14em}
+#thumb .tl svg{width:92px;height:92px}
+#thumb .ret{position:absolute;left:50%;top:250px;width:960px;height:960px;margin-left:-480px}
+#thumb .ret>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#thumb .art{position:absolute;left:150px;top:150px;width:660px;height:660px;display:flex;align-items:center;justify-content:center}
+#thumb .art img{width:640px;height:640px;border-radius:50%;object-fit:cover;box-shadow:0 0 120px rgba(255,181,71,.55)}
+#thumb .lk{position:absolute;font:800 28px/1 "JBM";letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+#thumb .lk.r span{display:inline-block}#thumb .lk.l{left:40px;top:20px;color:var(--ion)}#thumb .lk.r{left:0;right:0;top:930px;text-align:center;color:var(--ink);opacity:.9}
+#thumb .lk i{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--red);box-shadow:0 0 14px var(--red);margin-right:12px;vertical-align:-1px}
+#thumb .lo{position:absolute;left:30px;right:30px;top:1236px;bottom:186px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#thumb .k{display:inline-block;border:3px solid var(--ion);background:rgba(4,8,20,.7);color:var(--ion);font:800 40px/1 "JBM";letter-spacing:.18em;text-transform:uppercase;padding:16px 26px;white-space:nowrap;box-shadow:0 0 30px rgba(79,243,255,.35)}
+#thumb .bigt{align-self:stretch;text-align:center;margin-top:26px;font:900 270px/.9 "Unbounded";letter-spacing:-.03em;white-space:nowrap;color:#fff;text-shadow:0 0 50px rgba(79,243,255,.75),0 0 120px rgba(79,243,255,.35)}
+#thumb .u{align-self:stretch;margin-top:20px;text-align:center;font:800 58px/1.1 "Unbounded";color:var(--sol);text-transform:uppercase;white-space:nowrap;text-shadow:0 0 30px rgba(255,181,71,.45)}
+#thumb .ft{position:absolute;left:150px;right:150px;bottom:100px;display:flex;justify-content:space-between;align-items:center;font:700 28px/1 "JBM";letter-spacing:.2em;color:var(--dim);text-transform:uppercase;border-top:2px solid var(--line);padding-top:20px}
 </style></head><body>
 <svg id="stars"></svg>
 <div id="vt"></div><div id="scan"></div>
@@ -288,12 +297,35 @@ function render(t){
  document.getElementById("wordm").style.opacity=wd.toFixed(3);document.getElementById("flash").style.opacity=(fl*.8).toFixed(3);
  for(const q of ["#hud","#tick","#prog","#src"])document.querySelector(q).style.opacity=(1-Math.max(lo,bk)).toFixed(3)}
 // cover image: the hook's number and label over the day's picture (Sun, aurora, asteroid or Moon)
+// the cover image: the story's subject locked in a tracking reticle, then the kicker, the number and what it counts
+function rocketArt(){return `<svg viewBox="40 0 120 300" style="height:640px;transform:rotate(14deg);filter:drop-shadow(0 0 60px rgba(255,181,71,.55))">
+ <defs><linearGradient id="cvfl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".25" stop-color="#FFB547"/><stop offset=".7" stop-color="#FF4F2E" stop-opacity=".55"/><stop offset="1" stop-color="#FF4F2E" stop-opacity="0"/></linearGradient>
+ <linearGradient id="cvbd" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9c6e0"/></linearGradient></defs>
+ <path d="M84 138 C86 190 94 240 100 298 C106 240 114 190 116 138Z" fill="url(#cvfl)"/><path d="M92 138 C93 160 97 180 100 204 C103 180 107 160 108 138Z" fill="#FFF6D6"/>
+ <path d="M79 106 L60 132 L60 148 L80 138Z M121 106 L140 132 L140 148 L120 138Z" fill="#4FF3FF"/><path d="M100 30 C117 46 122 68 122 94 L122 136 L78 136 L78 94 C78 68 83 46 100 30Z" fill="url(#cvbd)"/>
+ <rect x="86" y="134" width="28" height="8" rx="2" fill="#5b6785"/><circle cx="100" cy="82" r="10" fill="#03040A" stroke="#4FF3FF" stroke-width="4"/></svg>`}
+function reticle(){let t="";for(let a=0;a<360;a+=5){const big=a%30===0,r1=440,r2=big?404:422,c=Math.cos(a*Math.PI/180),s=Math.sin(a*Math.PI/180);
+  t+=`<line x1="${(r1*c).toFixed(1)}" y1="${(r1*s).toFixed(1)}" x2="${(r2*c).toFixed(1)}" y2="${(r2*s).toFixed(1)}" stroke="#4FF3FF" stroke-width="${big?4:2}" opacity="${big?.9:.5}"/>`}
+ const arc=(a0,a1,r)=>{const p=a=>[(r*Math.cos(a*Math.PI/180)).toFixed(1),(r*Math.sin(a*Math.PI/180)).toFixed(1)],[x0,y0]=p(a0),[x1,y1]=p(a1);return `M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`};
+ const tri=a=>{const c=Math.cos(a*Math.PI/180),s=Math.sin(a*Math.PI/180),q=(r,o)=>[((r)*c-o*s).toFixed(1),((r)*s+o*c).toFixed(1)];return `<path d="M${q(452,0)} L${q(478,-14)} L${q(478,14)}Z" fill="#4FF3FF"/>`};
+ return `<svg viewBox="-480 -480 960 960"><circle r="440" fill="none" stroke="#4FF3FF" stroke-width="3" opacity=".6"/><circle r="380" fill="none" stroke="#4FF3FF" stroke-width="2" stroke-dasharray="3 13" opacity=".55"/>${t}
+  <path d="${arc(-70,-20,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/><path d="${arc(110,160,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/>
+  ${[0,180,270].map(tri).join("")}</svg>`}
 window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),sc=D.scenes.find(s=>s.kind===H.topic)||{};
- const art=H.topic==="sun"&&sc.img?`<img src="${esc(sc.img)}">`:H.topic==="aur"&&sc.img?`<img src="${esc(sc.img)}" style="box-shadow:0 0 140px rgba(92,255,168,.6)">`:H.topic==="moon"?`<div style="width:760px">${moonSvg(sc.frac||.5,760)}</div>`
-  :`<svg viewBox="-400 -400 800 800" style="width:760px;filter:drop-shadow(0 0 80px rgba(255,181,71,.55))"><defs><radialGradient id="rk" cx="35%" cy="30%"><stop offset="0" stop-color="#d4ccc0"/><stop offset=".6" stop-color="#7a7066"/><stop offset="1" stop-color="#2a2622"/></radialGradient></defs>${rock(11,330)}</svg>`;
- T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1080 1920">${document.getElementById("stars").innerHTML}</svg><div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
-  <div class="art">${art}</div><div class="k"><span>${esc(H.kicker)}</span></div><div class="bigt">${esc(H.big)}</div><div class="u">${esc(H.unit)}</div><div class="bn">Sky report · ${esc(D.date)}</div>`;
- T.style.display="block";fit(T.querySelector(".bigt"),90);const ks=T.querySelector(".k span");let f=64;while(ks.offsetWidth>1000&&f>30){f-=3;ks.style.fontSize=f+"px"}const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
+ const art=H.topic==="sun"&&sc.img?`<img src="${esc(sc.img)}">`:H.topic==="aur"&&sc.img?`<img src="${esc(sc.img)}" style="box-shadow:0 0 120px rgba(92,255,168,.6)">`:H.topic==="moon"?`<div style="width:640px">${moonSvg(sc.frac||.5,640)}</div>`
+  :H.topic==="lau"?rocketArt()
+  :`<svg viewBox="-400 -400 800 800" style="width:640px;filter:drop-shadow(0 0 70px rgba(255,181,71,.55))"><defs><radialGradient id="rk" cx="35%" cy="30%"><stop offset="0" stop-color="#d4ccc0"/><stop offset=".6" stop-color="#7a7066"/><stop offset="1" stop-color="#2a2622"/></radialGradient></defs>${rock(11,330)}</svg>`;
+ const lock={ast:"Tracking",lau:"Launch watch",moon:"Moon watch",sun:"Solar watch",aur:"Aurora watch"}[H.topic]||"Tracking";
+ T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1080 1920">${document.getElementById("stars").innerHTML}</svg>
+  <i class="cb a"></i><i class="cb b"></i><i class="cb c"></i><i class="cb d"></i>
+  <div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
+  <div class="ret">${reticle()}<div class="art">${art}</div><div class="lk l"><i></i>${lock}</div>${H.sub?`<div class="lk r"><span>${esc(H.sub)}</span></div>`:""}</div>
+  <div class="lo"><div class="k">${esc(H.kicker)}</div><div class="bigt">${esc(H.big)}</div><div class="u">${esc(H.unit)}</div></div>
+  <div class="ft"><span>Sky report</span><span>${esc(D.date)}</span></div>`;
+ T.style.display="block";fit(T.querySelector(".bigt"),90);fit(T.querySelector(".u"),30);
+ const ks=T.querySelector(".k");let f=40;while(ks.offsetWidth>960&&f>24){f-=2;ks.style.fontSize=f+"px"}
+ const lr=T.querySelector(".lk.r span");if(lr){let g=28;while(lr.offsetWidth>820&&g>18){g-=1;lr.parentNode.style.fontSize=g+"px"}}
+ const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
 window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;
 </script></body></html>
