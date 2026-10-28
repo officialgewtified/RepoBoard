@@ -55,6 +55,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 .tm{position:absolute;left:70px;right:150px;text-transform:uppercase}
 .tm .ab{font-size:260px;line-height:.8;text-shadow:8px 8px 0 rgba(0,0,0,.3);color:#fff}
 .tm .rc{font:800 40px/1 "Archivo";letter-spacing:.06em;margin-top:8px}
+.tm .pw{margin-top:22px}.tm .pw .bar{font-size:34px;padding:16px 22px}
 .vsx{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;background:#000;border:6px solid var(--volt);display:grid;place-items:center;font:900 70px/1 "Big Shoulders";color:var(--volt)}
 .ml{display:flex;flex-direction:column;gap:16px;margin-top:30px}
 .mr{display:grid;grid-template-columns:24px 1fr;background:#000;transform:skewX(-8deg)}
@@ -122,23 +123,26 @@ const tag=(t,c="")=>`<div class="tag ${c}"><span>${t}</span></div>`;
 const viz=(v,tm)=>v?`<div class="viz">${VIZ.html(v,"#D7FF3A",tm)}</div>`:"";
 const bg=()=>`<div class="stripes"></div><div class="shade"></div>`;
 const SPORTC={NBA:"#c2410c",NFL:"#065f46",CFB:"#7c2d12"};
+// a team's player to watch, under its name in the matchup screen
+const who=p=>!p?"":`<div class="pw"><div class="bar"><span>${p.txt?esc(p.txt):`<b>${esc(p.v)}</b> ${esc(p.lab)} · ${esc(p.who)}`}</span></div></div>`;
 function build(data){D=data;SC=[];SFX=[];
  document.getElementById("dt").textContent=(D.mode==="preview"?"Tonight · ":"")+D.date;document.getElementById("src").textContent=D.source||"";
  document.getElementById("lgs").textContent=D.mode==="preview"?"Tonight's games · every day":"Best stats · every day";
- let h="",t=INTRO;const add=(id,dur,tc,html,extra={})=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.35);
+ let h="",t=INTRO;const add=(id,dur,tc,html,extra={})=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(extra.hold||2.4,v+off+.35);
   SC.push(Object.assign({id,t0:t,t1:t+dur,va:t+off},extra));t+=dur;h+=`<div class="sc" id="${id}" style="--tc:${tc||"#1d4ed8"}">${bg()}${html}</div>`};
  const hook=(H,lab)=>`<div class="in">${tag(esc(lab))}<div style="margin-top:70px"><div class="big">${esc(H.big)}</div></div><div style="margin-top:30px">${tag(esc(H.label),"w")}</div>
    <div class="nm" style="margin-top:50px"><b>${esc(H.who)}</b></div><div style="margin-top:36px"><div class="bar"><span>${H.ctx||""}</span></div></div></div>`;
  if(D.mode==="preview"){const H=D.hook;
   add("hook",3.4,H.bg||H.color,hook(H,(H.sport||"")+" · Tonight"),{kind:"hook"});
   D.games.forEach((g,i)=>add("g"+i,4,g.home.bg||g.home.color,`<div class="vs" style="--ac:${g.away.bg||g.away.color};--hc:${g.home.bg||g.home.color}"><div class="a"></div><div class="h"></div><div class="seam"></div></div>
-   <div class="tm" style="top:250px"><div class="ab">${g.away.rank?"#"+g.away.rank+" ":""}${esc(g.away.ab)}</div><div class="rc">${esc(g.away.nick)} · ${esc(g.away.rec||"")}</div></div>
+   <div class="tm" style="top:230px"><div class="ab">${g.away.rank?"#"+g.away.rank+" ":""}${esc(g.away.ab)}</div><div class="rc">${esc(g.away.nick)} · ${esc(g.away.rec||"")}</div>${who(g.away.p)}</div>
    <div class="vsx">@</div>
-   <div class="tm" style="top:1010px;text-align:right"><div class="ab">${g.home.rank?"#"+g.home.rank+" ":""}${esc(g.home.ab)}</div><div class="rc">${esc(g.home.nick)} · ${esc(g.home.rec||"")}</div></div>
-   <div class="tm" style="top:1330px">${tag(esc(g.sport+" · "+g.time+" ET"+(g.tv?" · "+g.tv:"")))}${g.big?`<div style="margin-top:18px"><div class="bar"><span><b>${esc(g.big.v)}</b> ${esc(g.big.lab)} · ${esc(g.big.who)}</span></div></div>`:""}</div>`,{kind:"game"}));
+   <div class="tm" style="top:990px;text-align:right"><div class="ab">${g.home.rank?"#"+g.home.rank+" ":""}${esc(g.home.ab)}</div><div class="rc">${esc(g.home.nick)} · ${esc(g.home.rec||"")}</div>${who(g.home.p)}</div>
+   <div class="tm" style="top:1420px">${tag(esc(g.sport+" · "+g.time+" ET"+(g.tv?" · "+g.tv:"")))}${!g.away.p&&!g.home.p&&g.big?`<div style="margin-top:18px"><div class="bar"><span><b>${esc(g.big.v)}</b> ${esc(g.big.lab)} · ${esc(g.big.who)}</span></div></div>`:""}</div>`,{kind:"game"}));
   const n=D.slate.length,two=n>7;
-  add("slate",Math.min(5,2.6+n*.15),"#18181b",`<div class="in">${tag("Full slate · "+n+" games")}<div style="margin-top:30px"><div class="big" style="font-size:200px">Tonight</div></div>
-   <div class="rows ${two?"two":""}">${D.slate.map(g=>`<div class="g"><div>${[[g.a,g.ac],[g.h,g.hc]].map(([ab,c])=>`<div class="r w"><i style="background:${c}"></i><span class="ab">${esc(ab)}</span></div>`).join("")}<em>${esc(g.t)} ET · ${esc(g.sport)}</em></div></div>`).join("")}</div></div>`,{kind:"scores"});
+  // the full slate stays up a few seconds after she's done so people can read it
+  add("slate",Math.min(8,4.5+n*.3),"#18181b",`<div class="in">${tag("Full slate · "+n+" games")}<div style="margin-top:30px"><div class="big" style="font-size:200px">Tonight</div></div>
+   <div class="rows ${two?"two":""}">${D.slate.map(g=>`<div class="g"><div>${[[g.a,g.ac],[g.h,g.hc]].map(([ab,c])=>`<div class="r w"><i style="background:${c}"></i><span class="ab">${esc(ab)}</span></div>`).join("")}<em>${esc(g.t)} ET · ${esc(g.sport)}</em></div></div>`).join("")}</div></div>`,{kind:"scores",hold:Math.min(8,4.5+n*.3)});
  }else{
   const H=D.hook;
   add("hook",3.4,H.bg||H.color,hook(H,(H.sport||"")+" · "+(H.tm||"")),{kind:"hook"});

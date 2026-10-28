@@ -91,11 +91,27 @@ function star(s, sport) {
   if (sport === "NBA") { const p = s.lead.points || s.lead.pointsPerGame; if (!p) return null;
     const hot = p.l5 && p.l5.p - p.value >= 2 && p.l5.p >= 18;
     const gw = p.l5 ? (WORDS[p.l5.g] || p.l5.g) : "";
-    return { name: p.name, short: p.short, big: p.l5 ? p.l5.p : r1(p.value), lab: p.l5 ? `PPG last ${p.l5.g}` : "PPG", season: r1(p.value), l5: p.l5, hot,
-      chip: p.l5 ? `${p.short}: ${p.l5.p} / ${p.l5.r} / ${p.l5.a} last ${p.l5.g}` : `${p.short}: ${p.show} PPG`,
-      say: p.l5 ? `Keep an eye on ${p.name}, averaging ${Math.round(p.l5.p)} points over his last ${gw} games${hot ? ", up from " + Math.round(p.value) + " on the season" : ""}` : `${p.name} is averaging ${Math.round(p.value)} points per game` }; }
+    return { name: p.name, short: p.short, big: p.l5 ? p.l5.p : r1(p.value), lab: p.l5 ? `PPG last ${p.l5.g}` : "PPG", season: r1(p.value), l5: p.l5, hot, gw,
+      chip: p.l5 ? `${p.short}: ${p.l5.p} / ${p.l5.r} / ${p.l5.a} last ${p.l5.g}` : `${p.short}: ${p.show} PPG`, say: true }; }
   const p = s.lead.passingYards || s.lead.rushingYards || s.lead.receivingYards; if (!p) return null;
   return { name: p.name, short: p.short, big: null, chip: `${p.short}: ${p.show}`, say: "" };
+}
+
+// what the narrator says about a game's two players: different wording for the second one, and it rotates game to game
+// so it never sounds like the same sentence twice in a row
+function sayPlayers(g, i) {
+  const P = x => Math.round(x.l5 ? x.l5.p : x.season), xs = [g.a, g.h].filter(x => x && x.say);
+  const first = [
+    x => `Keep an eye on ${x.name}, averaging ${P(x)} points over his last ${x.gw} games${x.hot ? `, up from ${Math.round(x.season)} on the season` : ""}`,
+    x => `${x.name} comes in averaging ${P(x)} points over his last ${x.gw} games${x.hot ? `, up from ${Math.round(x.season)} on the season` : ""}`,
+    x => `Watch for ${x.name}, who's putting up ${P(x)} a game over his last ${x.gw}${x.hot ? `, well above his ${Math.round(x.season)} for the season` : ""}`];
+  const second = [
+    (x, t) => `On the other side, ${x.name} is scoring ${P(x)} a game over his last ${x.gw}${x.hot ? `, above his ${Math.round(x.season)} season average` : ""}`,
+    (x, t) => `For the ${t.nick}, ${x.name} has averaged ${P(x)}${x.hot ? `, up from ${Math.round(x.season)} on the season` : " over that same stretch"}`,
+    (x, t) => `And ${x.name} answers with ${P(x)} points a game lately${x.hot ? `, up from ${Math.round(x.season)} on the season` : ""}`];
+  const season = x => `${x.name} is averaging ${Math.round(x.season)} points per game this season`;
+  let h = 0; for (const c of DAYKEY) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return xs.map((x, k) => " " + (!x.l5 ? season(x) : k === 0 ? first[(h + i) % 3](x) : second[(h + i + 1) % 3](x, x === g.h ? g.home : g.away)) + ".").join("");
 }
 
 function build(day, nba, nfl, cfb, brand) {
@@ -115,10 +131,11 @@ function build(day, nba, nfl, cfb, brand) {
     const outs = [...g.away.out.map(x => [x, g.away]), ...g.home.out.map(x => [x, g.home])];
     const starOut = outs.find(([x]) => (g.a && x === g.a.name) || (g.h && x === g.h.name));
     const say = `${g.away.rank ? "Number " + g.away.rank + " " : ""}${g.sport === "CFB" ? g.away.nick : "The " + g.away.nick} at ${g.home.rank ? "number " + g.home.rank + " " : ""}${g.sport === "CFB" ? g.home.nick : "the " + g.home.nick}, ${g.sport === "NBA" ? "tip-off" : "kickoff"} at ${g.say}${g.tv ? " on " + g.tv : ""}.` +
-      [g.a, g.h].filter(x => x && x.say).map(x => " " + x.say + ".").join("") + (starOut ? ` ${starOut[0]} is out tonight.` : "");
+      sayPlayers(g, i) + (starOut ? ` ${starOut[0]} is out tonight.` : "");
     voice["g" + i] = say;
-    return { sport: g.sport, time: g.time, tv: g.tv, away: { ab: g.away.ab, nick: g.away.nick, rec: g.away.rec, color: g.away.color, rank: g.away.rank },
-      home: { ab: g.home.ab, nick: g.home.nick, rec: g.home.rec, color: g.home.color, rank: g.home.rank },
+    const who = x => !x ? null : x.big != null ? { v: x.big, lab: x.lab, who: x.name } : { txt: x.chip };
+    return { sport: g.sport, time: g.time, tv: g.tv, away: { ab: g.away.ab, nick: g.away.nick, rec: g.away.rec, color: g.away.color, bg: g.away.bg, rank: g.away.rank, p: who(g.a) },
+      home: { ab: g.home.ab, nick: g.home.nick, rec: g.home.rec, color: g.home.color, bg: g.home.bg, rank: g.home.rank, p: who(g.h) },
       chips: [g.a && g.a.chip, g.h && g.h.chip].filter(Boolean), out: outs.slice(0, 3).map(([x, t]) => `${x} (${t.ab})`),
       big: g.a && g.h && g.a.big != null && g.h.big != null ? (g.a.big >= g.h.big ? [g.a, g.away] : [g.h, g.home]) : null };
   }).map(s => { if (s.big) { const [p, t] = s.big; s.big = { v: p.big, lab: p.lab, who: p.name, tm: t.ab }; } return s; });
