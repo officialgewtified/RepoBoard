@@ -3,274 +3,192 @@
 <style>
 @font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
 @font-face{font-family:"Big Shoulders";src:url(../fonts/big-shoulders.woff) format("woff");font-weight:700 900}
-/* Studio look, same as the Crossover site and Early Bird: graphite and white, like a sneaker drop page */
-:root{--night:#111113;--deep:#1A1A1D;--deep2:#232327;--rim:#2C2C31;--paper:#F4F4F5;--haze:#A1A1AA;--dim:#63636B;--go:#4ADE80;--stop:#F87171;
- --hero:radial-gradient(75% 55% at 55% 42%,#303035 0%,#1B1B1E 58%,#141416 100%)}
+/* CROSSOVER broadcast look: every screen takes the team's colour full-bleed, halftone and speed stripes on top,
+   giant extruded numbers, a volt-yellow accent, and an X-shaped diagonal wipe between screens. */
+:root{--volt:#D7FF3A;--ink:#fff;--night:#09090B;--tc:#1d4ed8}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:1080px;height:1920px;overflow:hidden;background:var(--night)}
-body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:antialiased}
-#sky{position:absolute;inset:0;background:radial-gradient(80% 45% at 50% -5%,rgba(255,255,255,.08),transparent 70%),linear-gradient(180deg,#18181B 0%,#111113 45%)}
-/* top bar: wordmark, date, and the carousel bar with its dot */
-.top{position:absolute;left:72px;right:72px;top:84px;display:flex;justify-content:space-between;align-items:center}
-.wm{font:900 50px/1 "Big Shoulders";letter-spacing:.07em;text-transform:uppercase}
-.dt{font:700 24px/1 "Archivo";font-stretch:112%;letter-spacing:.14em;text-transform:uppercase;color:var(--haze);padding:14px 20px;border-radius:999px;background:rgba(244,244,245,.07)}
-.nav{position:absolute;left:50%;top:166px;width:300px;margin-left:-150px;height:3px;border-radius:3px;background:rgba(244,244,245,.16)}
-.nav i{position:absolute;top:-4px;width:11px;height:11px;border-radius:50%;background:var(--paper);transform:translateX(-50%)}
-/* scenes: each one is a card that swipes in from the right and out to the left */
-.sc{position:absolute;left:72px;right:132px;top:210px;bottom:540px;opacity:0;will-change:transform}
-.sc.tall{bottom:400px}
-.hero{position:relative;height:100%;border-radius:60px;background:var(--hero);border:2px solid var(--rim);overflow:hidden;isolation:isolate;padding:46px 46px 40px;display:flex;flex-direction:column}
-.wmk{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:-1;font:900 560px/.78 "Big Shoulders";text-transform:uppercase;white-space:nowrap;color:transparent;
- background:linear-gradient(180deg,rgba(244,244,245,.16),rgba(244,244,245,.03));-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:2px rgba(244,244,245,.10);letter-spacing:-.005em}
-.htop{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
-.h2{font:500 92px/.92 "Archivo";font-stretch:112%;text-transform:uppercase;letter-spacing:-.01em;min-width:0;flex:1}
-.h2 .fit{display:block;white-space:nowrap}
-.rank{text-align:right;font:700 24px/1.4 "Archivo";font-stretch:90%;letter-spacing:.1em;text-transform:uppercase;color:var(--haze);flex:none}
-.rank b{display:block;font:900 96px/1 "Big Shoulders";color:var(--paper);letter-spacing:0}
-.shot{position:relative;flex:1;min-height:0;margin-top:10px}
-.ph{position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-end}
-.ph.d{align-items:center}
-.ph img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:50% 100%;transform-origin:50% 100%;
- -webkit-mask-image:linear-gradient(180deg,#000 82%,transparent 100%);mask-image:linear-gradient(180deg,#000 82%,transparent 100%);filter:drop-shadow(0 30px 40px rgba(0,0,0,.55))}
-.gs{position:absolute;left:50%;top:50%;width:320px;height:40px;margin:150px 0 0 -160px;border-radius:50%;background:rgba(0,0,0,.6);filter:blur(18px);z-index:-1}
-.disc{width:340px;height:340px;border-radius:50%;display:grid;place-items:center;font:900 140px/1 "Big Shoulders";letter-spacing:.02em;color:#fff;
- box-shadow:0 60px 90px -30px rgba(0,0,0,.8),inset 0 0 0 3px rgba(255,255,255,.14),inset 0 -30px 60px rgba(0,0,0,.35)}
-.stamp{position:absolute;right:6px;top:10px;width:210px;height:210px;border-radius:50%;background:var(--paper);color:var(--night);display:grid;place-items:center;text-align:center;
- font:900 40px/.9 "Big Shoulders";text-transform:uppercase;letter-spacing:.02em;box-shadow:0 30px 50px -20px rgba(0,0,0,.7);padding:24px}
-.stamp small{display:block;font:800 17px/1.1 "Archivo";letter-spacing:.12em;margin-top:6px}
-.spec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 24px;align-items:end;margin-top:14px}
-.spec .nm{font:800 40px/1.15 "Archivo";text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden}
-.spec .s2{font:600 30px/1.2 "Archivo";font-stretch:90%;color:var(--haze);white-space:nowrap}
-.spec .s2 b{color:var(--paper)}
-.spec .pr{grid-row:1/3;grid-column:2;text-align:right}
-.spec .pr b{display:block;font:900 168px/.86 "Big Shoulders"}
-.spec .pr span{display:block;font:800 26px/1 "Archivo";font-stretch:110%;letter-spacing:.12em;text-transform:uppercase;color:var(--haze);margin-top:8px}
-.tags{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
-.tag{display:inline-flex;align-items:center;gap:12px;border-radius:999px;padding:15px 22px;font:700 29px/1 "Archivo";font-stretch:92%;background:rgba(244,244,245,.08)}
-.tag i{width:14px;height:14px;border-radius:50%;background:var(--c,var(--haze))}
-.view{margin-top:22px;min-height:92px;border-radius:999px;background:var(--paper);color:var(--night);display:flex;align-items:center;justify-content:center;gap:14px;
- font:800 32px/1 "Archivo";text-transform:uppercase;letter-spacing:.06em;padding:0 30px;white-space:nowrap}
-.view svg{width:30px;height:30px;flex:none}
-/* card strip under the hero */
-.strip{position:absolute;left:72px;right:132px;top:1402px;display:flex;gap:14px;opacity:0}
-.c2{flex:1;min-width:0;display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:center;padding:14px;border-radius:26px;background:var(--deep);border:2px solid var(--rim)}
-.c2.on{border-color:var(--paper)}
-.c2 .av{width:76px;height:76px;border-radius:20px;overflow:hidden;display:grid;place-items:center;font:900 30px/1 "Big Shoulders";color:#fff;background:var(--deep2)}
-.c2 .av img{width:100%;height:100%;object-fit:cover;object-position:50% 12%}
-.c2 b{display:block;font:800 21px/1.15 "Archivo";text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.c2 small{display:block;font:600 19px/1.2 "Archivo";font-stretch:88%;color:var(--haze);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* hook */
-#hook .h2{font-size:70px}
-#hook .spec .pr b{font-size:260px}
-/* scores */
-.k{font:700 28px/1 "Archivo";font-stretch:116%;letter-spacing:.16em;text-transform:uppercase;color:var(--haze)}
-.grid{display:grid;gap:16px;margin-top:30px}
-.g{padding:18px 20px;border-radius:26px;background:rgba(17,17,19,.55);border:2px solid var(--rim)}
-.r{display:flex;align-items:center;gap:12px;height:60px}
-.r i{width:12px;height:12px;border-radius:50%;flex:none;background:var(--c)}
-.r b{font:900 52px/1 "Big Shoulders";flex:1;color:var(--dim)}
-.r s{text-decoration:none;font:900 52px/1 "Big Shoulders";color:var(--dim)}
-.r.w b,.r.w s{color:var(--paper)}
-.r b u{text-decoration:none;font-size:.58em;color:var(--haze);margin-right:8px;vertical-align:.14em}
-.g em{display:block;font:800 19px/1 "Archivo";font-style:normal;letter-spacing:.14em;color:var(--haze);margin-top:6px}
-.c3 .r b,.c3 .r s{font-size:46px}
-.ph.vs{gap:10px}.vs .disc{width:270px;height:270px;font-size:100px}.vs .at{font:900 96px/1 "Big Shoulders";color:var(--haze)}
-.view.note{margin-top:auto;font-size:28px;white-space:normal;text-align:center;line-height:1.15;padding:18px 34px}
-/* more */
-.mlist{display:flex;flex-direction:column;gap:18px;margin-top:30px}
-.mr{display:grid;grid-template-columns:150px minmax(0,1fr);gap:24px;align-items:center;padding:18px;border-radius:34px;background:rgba(17,17,19,.55);border:2px solid var(--rim)}
-.mr .av{width:150px;height:150px;border-radius:28px;overflow:hidden;display:grid;place-items:center;font:900 54px/1 "Big Shoulders";color:#fff}
-.mr .av img{width:100%;height:100%;object-fit:cover;object-position:50% 12%}
+body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.big,.nm,.g .s,.ab{font-family:"Big Shoulders",sans-serif;font-weight:900;text-transform:uppercase}
+.sc{position:absolute;inset:0;opacity:0;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 85%,#fff) 0%,var(--tc) 38%,color-mix(in srgb,var(--tc) 45%,#000) 100%)}
+.sc::before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle,rgba(0,0,0,.28) 1.6px,transparent 2px) 0 0/18px 18px;transform:rotate(18deg);opacity:.55}
+.sc .stripes{position:absolute;left:-30%;right:-30%;top:-10%;height:120%;background:repeating-linear-gradient(115deg,rgba(255,255,255,.07) 0 26px,transparent 26px 120px)}
+.sc .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 62%,rgba(0,0,0,.72) 100%)}
+.in{position:absolute;left:70px;right:150px;top:250px;bottom:400px}
+.tag{display:inline-block;background:var(--volt);color:#000;font:900 34px/1 "Archivo";font-stretch:118%;letter-spacing:.06em;text-transform:uppercase;padding:14px 22px 13px;transform:skewX(-12deg)}
+.tag>span{display:inline-block;transform:skewX(12deg)}
+.tag.w{background:#fff}.tag.k{background:#000;color:#fff}
+.big{display:inline-block;font-size:520px;line-height:.78;letter-spacing:-.01em;color:#fff;white-space:nowrap;text-shadow:6px 6px 0 rgba(0,0,0,.35),12px 12px 0 rgba(0,0,0,.25),18px 18px 0 rgba(0,0,0,.18)}
+.nm{line-height:.84;color:#fff}
+.nm small{display:block;font:800 46px/1 "Archivo";font-stretch:115%;letter-spacing:.08em;color:rgba(255,255,255,.85);margin-bottom:10px}
+.nm b{display:block;font-size:168px;white-space:nowrap;text-shadow:5px 5px 0 rgba(0,0,0,.3)}
+.bar{display:inline-flex;align-items:center;background:#000;color:#fff;font:700 31px/1 "Archivo";padding:16px 24px;transform:skewX(-12deg)}
+.bar>span{transform:skewX(12deg);display:inline-block}
+.bar b{color:var(--volt)}
+.chips{display:flex;flex-wrap:wrap;gap:12px}
+.chip{background:rgba(0,0,0,.55);border:3px solid #fff;padding:14px 18px 12px;min-width:150px}
+.chip b{display:block;font:900 64px/.9 "Big Shoulders"}
+.chip span{display:block;font:800 19px/1 "Archivo";letter-spacing:.12em;text-transform:uppercase;margin-top:6px;color:rgba(255,255,255,.85)}
+.viz{background:rgba(0,0,0,.6);border:4px solid #fff;padding:12px;height:400px;display:flex;align-items:center;justify-content:center}
+.viz svg{width:100%;height:100%}
+.rank{position:absolute;right:0;top:0;width:190px;height:190px;border-radius:50%;background:var(--volt);color:#000;display:grid;place-items:center;font:900 120px/1 "Big Shoulders";box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.stamp{position:absolute;right:-10px;top:330px;background:#fff;color:#000;font:900 40px/.95 "Big Shoulders";text-transform:uppercase;padding:16px 20px;transform:rotate(-8deg);box-shadow:8px 8px 0 var(--volt);text-align:center}
+.stamp small{display:block;font:800 17px/1.1 "Archivo";letter-spacing:.1em;margin-top:6px}
+.rows{display:flex;flex-direction:column;gap:12px;margin-top:26px}
+.rows.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g{background:#000;transform:skewX(-8deg);overflow:hidden}
+.g>div{transform:skewX(8deg);display:flex;flex-direction:column}
+.g .r{display:flex;align-items:center;height:62px}
+.g .r i{width:16px;align-self:stretch;flex:none}
+.g .ab{font-size:50px;padding:0 16px;color:#777;flex:1;white-space:nowrap}
+.g .s{font-size:54px;padding:0 18px;color:#777;text-align:right}
+.g .r.w .ab{color:#fff}.g .r.w .s{color:var(--volt)}
+.g em{display:block;font:800 17px/1 "Archivo";font-style:normal;letter-spacing:.12em;color:var(--volt);padding:0 0 8px 34px}
+.rows.two .g .ab{font-size:42px}.rows.two .g .s{font-size:46px}.rows.two .g .r{height:54px}
+.note{margin-top:24px;background:#fff;color:#000;font:800 30px/1.2 "Archivo";padding:18px 22px;transform:skewX(-8deg)}
+.note>span{display:block;transform:skewX(8deg)}
+.vs{position:absolute;inset:0}
+.vs .a,.vs .h{position:absolute;inset:0}
+.vs .a{clip-path:polygon(0 0,100% 0,100% 38%,0 62%);background:linear-gradient(160deg,var(--ac),color-mix(in srgb,var(--ac) 45%,#000))}
+.vs .h{clip-path:polygon(0 62%,100% 38%,100% 100%,0 100%);background:linear-gradient(200deg,var(--hc),color-mix(in srgb,var(--hc) 45%,#000))}
+.vs .seam{position:absolute;left:-10%;right:-10%;top:50%;height:16px;margin-top:-8px;background:var(--volt);transform:rotate(-12.5deg);box-shadow:0 0 30px rgba(215,255,58,.6)}
+.tm{position:absolute;left:70px;right:150px;text-transform:uppercase}
+.tm .ab{font-size:260px;line-height:.8;text-shadow:8px 8px 0 rgba(0,0,0,.3);color:#fff}
+.tm .rc{font:800 40px/1 "Archivo";letter-spacing:.06em;margin-top:8px}
+.vsx{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;background:#000;border:6px solid var(--volt);display:grid;place-items:center;font:900 70px/1 "Big Shoulders";color:var(--volt)}
+.ml{display:flex;flex-direction:column;gap:16px;margin-top:30px}
+.mr{display:grid;grid-template-columns:24px 1fr;background:#000;transform:skewX(-8deg)}
+.mr>div{transform:skewX(8deg);padding:16px 22px;min-width:0}
 .mr b{display:block;font:900 66px/.9 "Big Shoulders";text-transform:uppercase;white-space:nowrap}
-.mr small{display:flex;align-items:center;gap:10px;margin-top:10px;font:600 29px/1.2 "Archivo";color:var(--haze);white-space:nowrap}
-.mr small em{font-style:normal;font:800 19px/1 "Archivo";letter-spacing:.12em;padding:8px 11px;border-radius:999px;background:rgba(244,244,245,.1);color:var(--paper)}
-/* outro */
-#outro .h2{font-size:110px;margin-top:auto}
-#outro .view{margin-bottom:auto;margin-top:40px;min-height:120px;font-size:42px}
-.ring{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:4px solid var(--paper);opacity:0;pointer-events:none}
-.src{position:absolute;left:72px;right:72px;bottom:150px;font:600 22px/1.3 "Archivo";color:var(--dim)}
-/* the Crossover X: the intro zooms through it, and the video ends on it so it loops */
-#logo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;z-index:9}
-#logo span{display:block;font:900 640px/.8 "Big Shoulders";color:var(--paper)}
-#logo i{position:absolute;right:-70px;bottom:20px;width:110px;height:110px;border-radius:50%;background:var(--go)}
-#sig{position:absolute;left:0;right:0;top:calc(46% + 300px);text-align:center;opacity:0;z-index:9}
-#sig b{display:block;font:900 120px/1 "Big Shoulders";letter-spacing:.08em;color:var(--paper)}
-#sig small{display:block;margin-top:18px;font:700 30px/1 "Archivo";font-stretch:116%;letter-spacing:.2em;text-transform:uppercase;color:var(--haze)}
-/* stat graphics (viz.js): the field or the court in place of the team disc */
-.ph.v{align-items:center;justify-content:center}
-.ph.v svg{width:100%;height:100%;filter:drop-shadow(0 30px 40px rgba(0,0,0,.55))}
-/* cover image for TikTok / Shorts (thumb()) */
-#thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden;background:#09090a}
-#thumb .gl{position:absolute;inset:0;background:radial-gradient(60% 34% at 50% 30%,var(--tc) 0%,transparent 72%);opacity:.7}
-#thumb .gr{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px)}
-#thumb .tb{position:absolute;left:64px;right:64px;top:70px;display:flex;justify-content:space-between;align-items:center}
-#thumb .tb b{font:900 64px/1 "Big Shoulders";letter-spacing:.08em}
-#thumb .tb span{font:800 30px/1 "Archivo";letter-spacing:.12em;text-transform:uppercase;padding:16px 24px;border-radius:999px;background:rgba(255,255,255,.12)}
-#thumb .bg{position:absolute;left:0;right:0;top:170px;text-align:center;font:900 760px/.8 "Big Shoulders";color:#fff;letter-spacing:-.02em;
- text-shadow:0 14px 0 rgba(0,0,0,.45),0 0 90px var(--tc)}
-#thumb .lb{position:absolute;left:50%;top:770px;transform:translateX(-50%) rotate(-3deg);background:#FFD60A;color:#0b0b0c;padding:18px 40px;border-radius:14px;
- font:900 92px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;box-shadow:0 22px 40px -12px rgba(0,0,0,.7)}
-#thumb .nm{position:absolute;left:50px;right:50px;top:930px;text-align:center}
-#thumb .nm small{display:block;font:800 60px/1 "Archivo";font-stretch:115%;letter-spacing:.1em;text-transform:uppercase;color:#e4e4e7}
-#thumb .nm b{display:block;font:900 230px/.86 "Big Shoulders";text-transform:uppercase;white-space:nowrap;margin-top:12px}
-#thumb .vz2{position:absolute;left:110px;right:110px;top:1205px;height:445px;display:flex;justify-content:center;align-items:center}
-#thumb .vz2 svg{width:100%;height:100%}
-#thumb .mu{display:flex;flex-direction:column;gap:18px;width:100%}
-#thumb .mu div{display:flex;justify-content:center;align-items:center;gap:22px;font:900 92px/1 "Big Shoulders";padding:14px;border-radius:24px;background:rgba(255,255,255,.08)}
-#thumb .mu i{font-style:normal;color:#a1a1aa;font-size:60px}
-#thumb .bn{position:absolute;left:-20px;right:-20px;bottom:96px;transform:rotate(-2deg);background:#fff;color:#0b0b0c;text-align:center;padding:26px 0;
- font:900 84px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;box-shadow:0 -10px 50px rgba(0,0,0,.6)}
+.mr span{display:block;font:700 28px/1.2 "Archivo";color:#ddd;margin-top:8px}
+#bug{position:absolute;left:70px;right:70px;top:110px;display:flex;justify-content:space-between;align-items:center;z-index:5}
+#bug .wm{background:#fff;color:#000;font:900 44px/1 "Big Shoulders";letter-spacing:.06em;padding:10px 18px 8px;transform:skewX(-12deg)}
+#bug .wm span{display:inline-block;transform:skewX(12deg)}
+#bug .dt{background:#000;color:var(--volt);font:800 24px/1 "Archivo";font-stretch:115%;letter-spacing:.12em;text-transform:uppercase;padding:13px 18px;transform:skewX(-12deg)}
+#segs{position:absolute;left:70px;right:70px;top:184px;display:flex;gap:6px;z-index:5}
+#segs i{flex:1;height:6px;background:rgba(255,255,255,.3);position:relative;overflow:hidden}
+#segs i b{position:absolute;left:0;top:0;bottom:0;background:#fff}
+#wipe{position:absolute;inset:0;z-index:7;pointer-events:none}
+#wipe i{position:absolute;left:-60%;width:220%;height:700px;top:50%;margin-top:-350px;opacity:0}
+#wipe .a{background:var(--volt)}#wipe .b{background:#fff}
+#logo{position:absolute;inset:0;z-index:8;background:var(--night);opacity:0;overflow:hidden}
+#logo .s1,#logo .s2{position:absolute;left:50%;top:44%;width:3000px;height:150px;margin:-75px 0 0 -1500px}
+#logo .s1{background:var(--volt)}#logo .s2{background:#fff}
+#logo .wd{position:absolute;left:0;right:0;top:calc(44% + 470px);text-align:center;font:900 130px/1 "Big Shoulders";letter-spacing:.1em;color:#fff}
+#logo .wd small{display:block;font:800 30px/1 "Archivo";font-stretch:118%;letter-spacing:.22em;color:var(--volt);margin-top:20px}
+#src{position:absolute;left:70px;bottom:150px;font:600 21px/1 "Archivo";color:rgba(255,255,255,.55);z-index:5}
+#thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden}
 </style></head><body>
-<div id="sky"></div>
-<div class="top"><span class="wm" id="wm"></span><span class="dt" id="dt"></span></div>
-<div class="nav"><i id="dot"></i></div>
 <div id="stage"></div>
-<div class="strip" id="strip"></div>
-<div class="src" id="src"></div>
-<div id="logo"><span>X</span><i></i></div>
-<div id="sig"><b>CROSSOVER</b><small>Best stats · every day</small></div>
+<div id="bug"><div class="wm"><span>CROSSOVER</span></div><div class="dt" id="dt"></div></div>
+<div id="segs"></div>
+<div id="src"></div>
+<div id="wipe"><i class="a"></i><i class="b"></i></div>
+<div id="logo"><i class="s1"></i><i class="s2"></i><div class="wd">CROSSOVER<small id="lgs">Best stats · every day</small></div></div>
 <div id="thumb"></div>
 <script src="viz.js"></script>
 <script>
-/* build(data) lays out every scene once; render(t) poses the frame at t seconds. Same t, same picture, every time.
-   SFX lists the moments that get a sound (whoosh on each swipe, pop on each pop-up); render.js mixes them in. */
-const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3);
-// springy pop: overshoots a little and settles
-const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.4,TAIL=2.6,MIN=61.5;
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3),eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.6;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.75,TAIL=2.6,MIN=61.5;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const num=v=>/^\d+$/.test(String(v))?` data-v="${v}"`:"";
-const ARROW=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
-const STAR=`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>`;
-function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+1&&fs>min){fs-=3;el.style.fontSize=fs+"px"}}
-function shade(hex,f){const h=String(hex||"#71717a").replace("#","");if(h.length<6)return "#3f3f46";return "#"+[0,2,4].map(i=>Math.round(parseInt(h.slice(i,i+2),16)*(1-f)).toString(16).padStart(2,"0")).join("")}
-const disc=(tm,c,cls="disc")=>`<div class="${cls}" style="background:radial-gradient(circle at 35% 28%,${c},${shade(c,.55)})">${esc(tm||"")}</div>`;
-const shot=(p,tm,c)=>p?`<div class="ph"><img src="${esc(p)}" alt=""></div>`:`<div class="ph d">${disc(tm,c)}</div><div class="gs"></div>`;
-const viz=(v,tm,c)=>`<div class="ph v">${VIZ.html(v,c,tm)}</div>`;
-const plain=h=>String(h||"").replace(/<[^>]+>/g,"");
+function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+1&&fs>min){fs-=4;el.style.fontSize=fs+"px"}}
+const tag=(t,c="")=>`<div class="tag ${c}"><span>${t}</span></div>`;
+const viz=(v,tm)=>v?`<div class="viz">${VIZ.html(v,"#D7FF3A",tm)}</div>`:"";
+const bg=()=>`<div class="stripes"></div><div class="shade"></div>`;
+const SPORTC={NBA:"#c2410c",NFL:"#065f46",CFB:"#7c2d12"};
 function build(data){D=data;SC=[];SFX=[];
- document.getElementById("wm").textContent=D.brand;document.getElementById("dt").textContent=D.date;
- document.getElementById("src").textContent=(D.source||"")+(D.credits&&D.credits.length?" · Photos: Wikimedia Commons (see caption)":"");
- // with a voiceover each scene lasts as long as its line (data.dur, from tts.py) plus a beat; the line starts at va
- let h="",t=INTRO;const add=(id,dur,html,extra={})=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.35);
-  SC.push(Object.assign({id,t0:t,t1:t+dur,va:t+off},extra));t+=dur;h+=`<div class="sc ${extra.kind==="card"?"":"tall"}" id="${id}">${html}</div>`};
- const OUT=D.mode==="preview"?["Follow for","the morning","recap"]:["Follow for","tomorrow's","best stats"];
+ document.getElementById("dt").textContent=(D.mode==="preview"?"Tonight · ":"")+D.date;document.getElementById("src").textContent=D.source||"";
+ document.getElementById("lgs").textContent=D.mode==="preview"?"Tonight's games · every day":"Best stats · every day";
+ let h="",t=INTRO;const add=(id,dur,tc,html,extra={})=>{const v=D.dur&&D.dur[id],off=id==="hook"?.1:.3;if(v!=null)dur=Math.max(2.4,v+off+.35);
+  SC.push(Object.assign({id,t0:t,t1:t+dur,va:t+off},extra));t+=dur;h+=`<div class="sc" id="${id}" style="--tc:${tc||"#1d4ed8"}">${bg()}${html}</div>`};
+ const hook=(H,lab)=>`<div class="in">${tag(esc(lab))}<div style="margin-top:70px"><div class="big">${esc(H.big)}</div></div><div style="margin-top:30px">${tag(esc(H.label),"w")}</div>
+   <div class="nm" style="margin-top:50px"><b>${esc(H.who)}</b></div><div style="margin-top:36px"><div class="bar"><span>${H.ctx||""}</span></div></div></div>`;
  if(D.mode==="preview"){const H=D.hook;
-  add("hook",3.4,`<div class="hero"><div class="wmk">Tonight</div>
-   <div class="htop"><div class="h2">${esc(D.title)}</div><div class="rank">${esc(H.sport||"Tonight")}<b>${esc(H.tm||"")}</b></div></div>
-   <div class="shot"><div class="ph d">${disc(H.tm||"X",H.color)}</div><div class="gs"></div></div>
-   <div class="spec"><div class="nm">${esc(H.who)}</div><div class="pr"><b>${esc(H.big)}</b><span>${esc(H.label)}</span></div><div class="s2">${esc(H.ctx)}</div></div>
-   <div class="view">Games to watch ${ARROW}</div></div>`);
-  D.games.forEach((g,i)=>add("g"+i,4,`<div class="hero"><div class="wmk">${esc(g.home.nick)}</div>
-   <div class="htop"><div class="h2"><span class="fit">${g.away.rank?"#"+g.away.rank+" ":""}${esc(g.away.nick)}</span><span class="fit">@ ${g.home.rank?"#"+g.home.rank+" ":""}${esc(g.home.nick)}</span></div><div class="rank">${esc(g.sport)}<b>${esc(g.time)}</b></div></div>
-   <div class="shot"><div class="ph d vs">${disc(g.away.ab,g.away.color)}<span class="at">@</span>${disc(g.home.ab,g.home.color)}</div></div>
-   <div class="spec"><div class="nm">${esc(g.away.ab)} ${esc(g.away.rec)} · ${esc(g.home.ab)} ${esc(g.home.rec)}</div>${g.big?`<div class="pr"><b>${esc(g.big.v)}</b><span>${esc(g.big.lab)}</span></div>`:""}<div class="s2">${g.big?esc(g.big.who):""}${g.tv?(g.big?" · ":"")+esc(g.tv):""}</div></div>
-   <div class="tags">${g.chips.map(c=>`<span class="tag" style="--c:var(--go)"><i></i>${esc(c)}</span>`).join("")}</div>
-   <div class="view">${g.out.length?"Out: "+esc(g.out.slice(0,2).join(", ")):esc(g.time+" ET"+(g.tv?" · "+g.tv:""))}</div></div>`,{kind:"game"}));
-  const n=D.slate.length,c3=n>10;
-  add("slate",Math.min(5,2.6+n*.15),`<div class="hero"><div class="wmk">Slate</div><div class="htop"><div><div class="k">Full slate</div><div class="h2" style="margin-top:10px">Tonight</div></div><div class="rank">${esc(D.date)}<b>${n}</b></div></div>
-   <div class="grid ${c3?"c3":""}" style="grid-template-columns:repeat(${c3?3:2},1fr)">${D.slate.map(g=>`<div class="g"><div class="r w" style="--c:${g.ac}"><i></i><b>${esc(g.a)}</b></div><div class="r w" style="--c:${g.hc}"><i></i><b>${esc(g.h)}</b></div><em>${esc(g.t)} ET · ${esc(g.sport)}</em></div>`).join("")}</div></div>`,{kind:"scores"});
+  add("hook",3.4,H.bg||H.color,hook(H,(H.sport||"")+" · Tonight"),{kind:"hook"});
+  D.games.forEach((g,i)=>add("g"+i,4,g.home.bg||g.home.color,`<div class="vs" style="--ac:${g.away.bg||g.away.color};--hc:${g.home.bg||g.home.color}"><div class="a"></div><div class="h"></div><div class="seam"></div></div>
+   <div class="tm" style="top:250px"><div class="ab">${g.away.rank?"#"+g.away.rank+" ":""}${esc(g.away.ab)}</div><div class="rc">${esc(g.away.nick)} · ${esc(g.away.rec||"")}</div></div>
+   <div class="vsx">@</div>
+   <div class="tm" style="top:1010px;text-align:right"><div class="ab">${g.home.rank?"#"+g.home.rank+" ":""}${esc(g.home.ab)}</div><div class="rc">${esc(g.home.nick)} · ${esc(g.home.rec||"")}</div></div>
+   <div class="tm" style="top:1330px">${tag(esc(g.sport+" · "+g.time+" ET"+(g.tv?" · "+g.tv:"")))}${g.big?`<div style="margin-top:18px"><div class="bar"><span><b>${esc(g.big.v)}</b> ${esc(g.big.lab)} · ${esc(g.big.who)}</span></div></div>`:""}</div>`,{kind:"game"}));
+  const n=D.slate.length,two=n>7;
+  add("slate",Math.min(5,2.6+n*.15),"#18181b",`<div class="in">${tag("Full slate · "+n+" games")}<div style="margin-top:30px"><div class="big" style="font-size:200px">Tonight</div></div>
+   <div class="rows ${two?"two":""}">${D.slate.map(g=>`<div class="g"><div>${[[g.a,g.ac],[g.h,g.hc]].map(([ab,c])=>`<div class="r w"><i style="background:${c}"></i><span class="ab">${esc(ab)}</span></div>`).join("")}<em>${esc(g.t)} ET · ${esc(g.sport)}</em></div></div>`).join("")}</div></div>`,{kind:"scores"});
  }else{
- const H=D.hook,lab=String(H.label||"");
- add("hook",3.4,`<div class="hero"><div class="wmk">${esc(lab.split(" ").pop())}</div>
-  <div class="htop"><div class="h2">${esc(D.title)}</div><div class="rank">${esc(H.sport||"")}<b>${esc(H.tm||"")}</b></div></div>
-  <div class="shot">${H.viz?viz(H.viz,H.tm,H.color):shot(H.photo,H.tm,H.color)}</div>
-  <div class="spec"><div class="nm">${esc(H.who)}</div><div class="pr"><b>${esc(H.big)}</b><span>${esc(lab)}</span></div><div class="s2">${H.ctx}</div></div>
-  <div class="view">${D.sections.map(s=>`${esc(s.sport)} ${s.total}`).join(" · ")} finals ${ARROW}</div></div>`);
- D.sections.forEach((S,si)=>{const n=S.games.length,cols=n>10?3:n>1?2:1;
-  add("s"+si,Math.min(5.2,2.4+n*.22),`<div class="hero"><div class="wmk">${esc(S.sport)}</div>
-   <div class="htop"><div><div class="k">Final scores</div><div class="h2" style="margin-top:10px">${esc(S.sport)}</div></div><div class="rank">${esc(S.when||"")}<b>${S.total}</b></div></div>
-   ${""}<div class="grid ${cols===3?"c3":""}" style="grid-template-columns:repeat(${cols},1fr)">${S.games.map(g=>`<div class="g">${[g.a,g.h].map(x=>`<div class="r ${x.w?"w":""}" style="--c:${x.w?"var(--go)":"var(--rim)"}"><i></i><b>${x.rk?`<u>${x.rk}</u>`:""}${esc(x.ab)}</b><s>${esc(x.s)}</s></div>`).join("")}${g.note?`<em>${esc(g.note)}</em>`:""}</div>`).join("")}</div>${S.note?`<div class="view note">${esc(S.note)}</div>`:""}</div>`,{kind:"scores"});
-  S.top.forEach((p,i)=>{const id=`p${si}_${i}`,main=p.stats[0],rest=p.stats.slice(1);
-   add(id,3.9,`<div class="hero"><div class="wmk">${esc(p.last)}</div>
-    <div class="htop"><div class="h2"><span class="fit">${esc(p.first)}</span><span class="fit">${esc(p.last)}</span></div><div class="rank">${esc(S.sport)}<b>${esc(p.rank||({"Top passer":"PASS","Top rusher":"RUSH","Top receiver":"REC"})[p.tag]||"")}</b></div></div>
-    <div class="shot">${p.viz?viz(p.viz,p.tm,p.color):shot(p.photo,p.tm,p.color)}${p.note?`<div class="stamp"><div>Season<br>best<small>${esc(p.note.replace(/ this season$/i,""))}</small></div></div>`:""}</div>
-    <div class="spec"><div class="nm">${esc(p.tag)}</div><div class="pr"><b${num(main[0])}>${esc(main[0])}</b><span>${esc(main[1])}</span></div><div class="s2">${p.ctx}</div></div>
-    <div class="tags">${rest.map(s=>`<span class="tag" style="--c:var(--go)"><i></i>${esc(s[0])} ${esc(s[1])}</span>`).join("")}${p.sub.slice(0,2).map(s=>`<span class="tag"><i></i>${esc(s)}</span>`).join("")}</div>
-    <div class="view">${p.note?STAR+esc(p.note):esc(S.sport+" · "+p.tag)}</div></div>`,{kind:"card",si,i,note:!!p.note})})});
- if(D.more&&D.more.length)add("more",2.6+D.more.length*.6,`<div class="hero"><div class="wmk">More</div><div class="k">A few more big ones</div><div class="mlist">${D.more.map(r=>`<div class="mr">
-   ${r.photo?`<div class="av" style="background:radial-gradient(circle at 35% 28%,${r.color},${shade(r.color,.55)})"><img src="${esc(r.photo)}" alt=""></div>`:disc(r.tm,r.color,"av")}
-   <div style="min-width:0"><b class="fit">${esc(r.name)}</b><small><em>${esc(r.sport)}</em>${esc(r.tm)} · ${esc(r.txt)}</small></div></div>`).join("")}</div></div>`,{kind:"more"});
+  const H=D.hook;
+  add("hook",3.4,H.bg||H.color,hook(H,(H.sport||"")+" · "+(H.tm||"")),{kind:"hook"});
+  D.sections.forEach((S,si)=>{const n=S.games.length,two=n>7;
+   add("s"+si,Math.min(5.2,2.4+n*.22),SPORTC[S.sport]||"#18181b",`<div class="in">${tag(esc(S.sport)+" · Final scores")}<div style="margin-top:26px"><div class="big" style="font-size:210px">${S.total} final${S.total===1?"":"s"}</div></div>
+    <div class="rows ${two?"two":""}">${S.games.map(g=>`<div class="g"><div>${[g.a,g.h].map(x=>`<div class="r ${x.w?"w":""}"><i style="background:${x.c}"></i><span class="ab">${x.rk?"#"+x.rk+" ":""}${esc(x.ab)}</span><span class="s">${esc(x.s)}</span></div>`).join("")}${g.note?`<em>${esc(g.note)}</em>`:""}</div></div>`).join("")}</div>
+    ${S.note?`<div class="note"><span>${esc(S.note)}</span></div>`:""}</div>`,{kind:"scores"});
+   S.top.forEach((p,i)=>{const id=`p${si}_${i}`,main=p.stats[0],rest=p.stats.slice(1);
+    add(id,3.9,p.bg||p.color,`<div class="in">${tag(esc(S.sport)+" · "+esc(p.tag))}${p.rank?`<div class="rank">${esc(p.rank)}</div>`:""}
+     <div style="display:flex;align-items:flex-end;gap:26px;margin-top:40px"><div class="big" data-v="${esc(main[0])}" style="font-size:330px">${esc(main[0])}</div><div style="padding-bottom:30px">${tag(esc(main[1]),"w")}</div></div>
+     <div class="nm" style="margin-top:26px"><small>${esc(p.first)}</small><b>${esc(p.last)}</b></div>
+     ${p.note?`<div class="stamp">Season best<small>${esc(p.note.replace(/ this season$/i,""))}</small></div>`:""}
+     <div style="margin-top:28px">${viz(p.viz,p.tm)}</div>
+     <div class="chips" style="margin-top:20px">${rest.map(s=>`<div class="chip"><b>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join("")}${p.sub.slice(0,1).map(s=>`<div class="chip"><b>${esc(s.split(" ")[0])}</b><span>${esc(s.split(" ").slice(1).join(" "))}</span></div>`).join("")}</div>
+     <div style="margin-top:22px"><div class="bar"><span>${p.ctx}</span></div></div></div>`,{kind:"card",si,i,note:!!p.note,sport:S.sport})})});
+  if(D.more&&D.more.length)add("more",2.6+D.more.length*.6,"#18181b",`<div class="in">${tag("More big games")}<div class="ml">${D.more.map(r=>`<div class="mr"><i style="background:${r.color}"></i><div><b>${esc(r.name)}</b><span>${esc(r.sport)} · ${esc(r.tm)} · ${esc(r.txt)}</span></div></div>`).join("")}</div></div>`,{kind:"more"});
  }
- add("outro",3.4,`<div class="hero"><div class="wmk">${esc(D.brand)}</div><div class="k">Every morning</div>
-  <div class="h2">${OUT.map(x=>`<span class="fit">${esc(x)}</span>`).join("")}</div>
-  <div class="view" style="position:relative"><span id="fl">Follow ${esc(D.brand)}</span><div class="ring"></div></div></div>`,{kind:"outro"});
- // over a minute, every time (TikTok only pays on videos longer than 1:00): if it runs short, each screen holds a little longer
- const short=MIN-(t+TAIL);if(short>0){const mids=SC.filter(s=>s.id!=="hook"),per=short/mids.length;let sh=0;
-  for(const s of SC){s.t0+=sh;s.va+=sh;if(s.id!=="hook")sh+=per;s.t1+=sh}t+=short}
- for(const s of SC)if(s.id!=="hook")SFX.push({t:s.t0,k:"whoosh"});
- document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;SFX.push({t:.05,k:"whoosh"},{t:t+.1,k:"sting"});
- document.querySelectorAll(".h2 .fit").forEach(e=>fit(e,48));document.querySelectorAll(".mr .fit").forEach(e=>fit(e,40));
- document.querySelectorAll(".spec .nm").forEach(e=>fit(e,24));
- document.querySelectorAll(".wmk").forEach(e=>{const w=e.parentElement.clientWidth*1.5;let fs=560;e.style.fontSize=fs+"px";while(e.scrollWidth>w&&fs>200){fs-=20;e.style.fontSize=fs+"px"}});
- // the card strip: the cards of whichever sport is on screen
- // pop-up sounds: the season-best stamp, and the tags on each card
- for(const s of SC){if(s.kind==="scores"&&document.querySelector("#"+s.id+" .view"))SFX.push({t:s.t0+1.1,k:"pop"});if(s.kind==="card"||s.kind==="game"){SFX.push({t:s.t0+.75,k:"pop"});if(s.note)SFX.push({t:s.t0+1.25,k:"stamp"})}if(s.kind==="outro")SFX.push({t:s.t0+1.2,k:"pop"})}
- // more sound: an impact on the hook's number, a riser into each sport, a tick per score, a tick when a stat finishes counting, a swish for NBA cards
- const hk=SC.find(x=>x.id==="hook");if(hk)SFX.push({t:hk.t0+.35,k:"impact"});
- for(const s of SC){if(s.kind==="scores"){SFX.push({t:Math.max(.05,s.t0-.75),k:"riser"});const n=document.querySelectorAll("#"+s.id+" .g").length;for(let i=0;i<Math.min(n,12);i++)SFX.push({t:s.t0+.32+i*.06,k:"tick"})}
-  if(s.kind==="card"){SFX.push({t:s.t0+1.1,k:"tick"});const S0=D.sections&&D.sections[s.si];if(S0&&S0.sport==="NBA")SFX.push({t:s.t0+.2,k:"swish"})}
-  if(s.kind==="more")document.querySelectorAll("#more .mr").forEach((r,i)=>SFX.push({t:s.t0+.3+i*.45,k:"tick"}))}
+ // over a minute every time (TikTok only pays on videos longer than 1:00)
+ const short=(D.min??MIN)-(t+TAIL);if(short>0){const mids=SC.filter(s=>s.id!=="hook"),per=short/mids.length;let sh=0;for(const s of SC){s.t0+=sh;s.va+=sh;if(s.id!=="hook")sh+=per;s.t1+=sh}t+=short}
+ document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
+ document.getElementById("segs").innerHTML=SC.map(()=>`<i><b></b></i>`).join("");
+ document.querySelectorAll(".nm b,.mr b").forEach(e=>fit(e,60));
+ document.querySelectorAll(".big").forEach(e=>{const w=(e.closest(".in")||document.body).clientWidth-(e.dataset.v!=null?300:0);let fs=parseFloat(getComputedStyle(e).fontSize);while(e.getBoundingClientRect().width>w&&fs>120){fs-=10;e.style.fontSize=fs+"px"}});
+ document.querySelectorAll(".tm .ab").forEach(e=>{let fs=260;while(e.scrollWidth>860&&fs>120){fs-=10;e.style.fontSize=fs+"px"}});
+ // sound: a whoosh on every wipe, an impact on the big numbers, a tick per score, a swish for NBA cards, the stamp, a riser into each section
+ SFX.push({t:.05,k:"impact"},{t:INTRO-.35,k:"whoosh"});
+ for(const s of SC){if(s.id!=="hook")SFX.push({t:Math.max(.05,s.t0-.2),k:"whoosh"});
+  if(s.kind==="hook"||s.kind==="card")SFX.push({t:s.t0+.3,k:"impact"});
+  if(s.kind==="scores"){SFX.push({t:Math.max(.05,s.t0-.8),k:"riser"});document.querySelectorAll("#"+s.id+" .g").forEach((g,i)=>{if(i<14)SFX.push({t:s.t0+.35+i*.07,k:"tick"})})}
+  if(s.kind==="card"){SFX.push({t:s.t0+1.2,k:"pop"});if(s.note)SFX.push({t:s.t0+1.5,k:"stamp"});if(s.sport==="NBA")SFX.push({t:s.t0+.15,k:"swish"})}
+  if(s.kind==="game")SFX.push({t:s.t0+.45,k:"impact"});
+  if(s.kind==="more")document.querySelectorAll("#more .mr").forEach((r,i)=>SFX.push({t:s.t0+.3+i*.4,k:"tick"}))}
+ SFX.push({t:t+.05,k:"whoosh"},{t:t+.35,k:"impact"},{t:t+.5,k:"sting"});
  return TOTAL}
-function stripFor(si,i){const S=D.sections[si],el=document.getElementById("strip");const key=si+"_"+i;if(el.dataset.k===key)return;el.dataset.k=key;
- el.innerHTML=S.top.map((p,j)=>`<div class="c2 ${j===i?"on":""}"><div class="av" style="background:radial-gradient(circle at 35% 28%,${p.color},${shade(p.color,.55)})">${p.photo?`<img src="${esc(p.photo)}" alt="">`:esc(p.tm||"")}</div>
-  <div style="min-width:0"><b>${esc(p.last)}</b><small>${esc(p.stats[0][0])} ${esc(p.stats[0][1])}</small></div></div>`).join("")}
-function countUp(el,k){if(!el||el.dataset.v==null)return;const v=+el.dataset.v;if(!isNaN(v))el.textContent=Math.round(v*k)}
-function render(t){const N=SC.length;let cur=0;
- for(let j=0;j<N;j++){const s=SC[j],el=document.getElementById(s.id),on=t>=s.t0-.01&&t<s.t1+.4;
+function render(t){
+ for(let j=0;j<SC.length;j++){const s=SC[j],el=document.getElementById(s.id),on=t>=s.t0-.25&&t<s.t1+.2;
   if(!on){el.style.opacity=0;continue}
-  const lt=t-s.t0,a=s.id==="hook"?ease((lt+.08)/.3):ease(lt/.5),b=s.id==="outro"?ease((s.t1+.45-t)/.45):ease((s.t1-t+.4)/.4);
-  if(t>=s.t0)cur=j;
-  // swipe: in from the right, out to the left, like flicking through the card strip
-  const x=(1-a)*260-(1-b)*260,sc=.94+.06*Math.min(a,b);
-  el.style.opacity=Math.min(a,b).toFixed(3);el.style.transform=`translateX(${x.toFixed(1)}px) scale(${sc.toFixed(4)})`;el.style.zIndex=t>=s.t0?2:1;
-  el.querySelectorAll(".ph img, .ph .disc").forEach((img,q)=>{const f=Math.sin((t+j+q*1.7)*1.4);img.style.transform=`translateY(${(f*12-(1-ease((lt-.1)/.6))*-80).toFixed(1)}px) rotate(${(s.kind==="card"||s.id==="hook"?-3+f*1.5:-6+f*2).toFixed(2)}deg) scale(${(.85+.15*ease((lt-.05)/.6)).toFixed(3)})`;
-   const gs=el.querySelector(".gs");if(gs)gs.style.transform=`scale(${(1-.12*(f+1)/2).toFixed(3)})`})
-  const w=el.querySelector(".wmk");if(w)w.style.transform=`translate(calc(-50% + ${((1-ease(lt/1.2))*120-lt*6).toFixed(1)}px),-50%)`;
-  VIZ.anim(el,lt,s.id==="hook"?.3:.45);
-  if(s.id==="hook"){const v=el.querySelector(".view"),y=pop((lt-.9)/.45);v.style.transform=`scale(${y.toFixed(3)})`;v.style.opacity=clamp((lt-.9)/.15)}
-  if(s.kind==="scores"){const v=el.querySelector(".view");if(v){const y=pop((lt-1.1)/.45);v.style.opacity=clamp((lt-1.1)/.12).toFixed(3);v.style.transform=`scale(${(.7+.3*y).toFixed(3)})`}}
-  if(s.kind==="scores")el.querySelectorAll(".g").forEach((g,i)=>{const y=pop((lt-.3-i*.06)/.42);g.style.opacity=clamp((lt-.3-i*.06)/.12).toFixed(3);g.style.transform=`scale(${(.6+.4*y).toFixed(3)})`});
-  if(s.kind==="card"||s.kind==="game"){el.querySelectorAll(".h2 .fit").forEach((n,i)=>{const y=ease((lt-i*.08)/.5);n.style.transform=`translateX(${((1-y)*-90).toFixed(1)}px)`;n.style.opacity=y.toFixed(3)});
-   countUp(el.querySelector(".pr b"),ease((lt-.2)/.9));
-   el.querySelectorAll(".tag").forEach((g,i)=>{const y=pop((lt-.75-i*.09)/.4);g.style.opacity=clamp((lt-.75-i*.09)/.12).toFixed(3);g.style.transform=`scale(${(.5+.5*y).toFixed(3)})`});
-   const st=el.querySelector(".stamp");if(st){const y=pop((lt-1.25)/.45);st.style.opacity=clamp((lt-1.25)/.08).toFixed(3);st.style.transform=`scale(${(2.2-1.2*y).toFixed(3)}) rotate(${(-28+18*y).toFixed(1)}deg)`}
-   const v=el.querySelector(".view"),y=pop((lt-1.05)/.45);v.style.opacity=clamp((lt-1.05)/.12).toFixed(3);v.style.transform=`translateY(${((1-y)*40).toFixed(1)}px)`}
-  if(s.kind==="more"){const cue=D.cues&&D.cues.more;el.querySelectorAll(".mr").forEach((r,i)=>{const at=cue&&cue[i+1]!=null?s.va-s.t0+cue[i+1]-.15:.3+i*.45,y=pop((lt-at)/.45);
-    r.style.opacity=clamp((lt-at)/.12).toFixed(3);r.style.transform=`translateX(${((1-ease((lt-at)/.45))*-120).toFixed(1)}px) scale(${(.8+.2*y).toFixed(3)})`})}
-  if(s.kind==="outro"){el.querySelectorAll(".h2 .fit").forEach((f,i)=>{const y=ease((lt-.1-i*.1)/.5);f.style.transform=`translateX(${((1-y)*-80).toFixed(1)}px)`;f.style.opacity=y.toFixed(3)});
-   // the Follow button gets tapped: press, ring, and it flips to Following
-   const v=el.querySelector(".view"),r=el.querySelector(".ring"),tp=lt-1.2;v.style.transform=`scale(${tp<0?pop((lt-.5)/.5):tp<.12?1-.06*(tp/.12):1-.06+.06*pop((tp-.12)/.4)})`;
-   if(tp>0){const y=ease(tp/.7);r.style.opacity=(1-y).toFixed(3);r.style.transform=`scale(${(1+y*5).toFixed(3)})`}
-   const fl=document.getElementById("fl");fl.textContent=tp>.12?"Following ✓":"Follow "+D.brand;v.style.background=tp>.12?"var(--go)":"var(--paper)"}}
- // the card strip shows on player cards; the dot walks along the bar through the video
- const c=SC[cur],strip=document.getElementById("strip");
- if(c&&c.kind==="card"){stripFor(c.si,c.i);const y=ease((t-c.t0)/.4);strip.style.opacity=SC[cur-1]&&SC[cur-1].kind==="card"?1:y;strip.style.transform=`translateY(${SC[cur-1]&&SC[cur-1].kind==="card"?0:((1-y)*60).toFixed(1)}px)`}
- else strip.style.opacity=0;
- document.getElementById("dot").style.left=(clamp(t/TOTAL)*100).toFixed(2)+"%";
- // intro: the X holds, then the camera flies through it into the first card. Outro: everything fades back to the X, the same frame the video starts on.
- let lo=0,ls=1;if(t<INTRO+.1){if(t<.08){lo=1;ls=1}else{const x=ease((t-.08)/.36);ls=1+x*7;lo=1-x}}
- // the signature end card: the X slams in, the dot pops, CROSSOVER spreads out under it, then it settles on the X alone (the first frame)
- const end=TOTAL-TAIL;let sg=0,dp=1;
- if(t>end+.1){const k=t-end-.1;lo=clamp(k/.1);ls=1+.55*(1-pop(k/.42));dp=pop((k-.3)/.35);
-  sg=Math.min(ease((k-.45)/.35),ease((TOTAL-.08-t)/.5))}
- const SG=document.getElementById("sig");SG.style.opacity=sg.toFixed(3);SG.querySelector("b").style.letterSpacing=`${(.08+.1*(1-ease((t-end-.55)/.6))).toFixed(3)}em`;
- document.querySelector("#logo i").style.transform=`scale(${Math.max(0,dp).toFixed(3)})`;
- const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`translate(-50%,-50%) scale(${ls.toFixed(3)})`;
- for(const q of [".top",".nav","#src"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
-// fonts load only when first used, so load them before build() measures any text
-window.ready=()=>Promise.all(['500 100px "Archivo"','800 100px "Archivo"','900 100px "Big Shoulders"'].map(f=>document.fonts.load(f)));
-// the cover image (TikTok cover / Shorts thumbnail): the big number, the label in a yellow block, the name, the graphic
-window.thumb=()=>{const H=D.hook,T=document.getElementById("thumb"),pv=D.mode==="preview",nm=String(H.who||"").split(" ");
- const last=nm.length>1?nm.slice(1).join(" "):nm[0],first=nm.length>1?nm[0]:"";
- const art=!pv&&H.viz?`<div class="vz2">${VIZ.html(H.viz,H.color,H.tm)}</div>`:pv?`<div class="vz2"><div class="mu">${(D.games||[]).slice(0,3).map(g=>`<div>${esc(g.away.ab)}<i>@</i>${esc(g.home.ab)}</div>`).join("")}</div></div>`:"";
- T.style.setProperty("--tc",H.color||"#4ade80");
- T.innerHTML=`<div class="gl"></div><div class="gr"></div><div class="tb"><b>CROSSOVER</b><span>${esc(pv?"Tonight":D.date)}</span></div>
-  <div class="bg">${esc(H.big)}</div><div class="lb">${esc(H.label)}</div><div class="nm"><small>${esc(first)}</small><b>${esc(last)}</b></div>${art}
-  <div class="bn">${pv?"Tonight's games to watch":esc(D.title)}</div>`;
- T.style.display="block";
- const b=T.querySelector(".nm b");fit(b,90);const bg=T.querySelector(".bg");let fs=760;while(bg.scrollWidth>bg.clientWidth+1&&fs>300){fs-=20;bg.style.fontSize=fs+"px"}
- const lb=T.querySelector(".lb");let f2=92;while(lb.offsetWidth>960&&f2>40){f2-=4;lb.style.fontSize=f2+"px"}
- VIZ.anim(T,30,0);return true};
+  const lt=t-s.t0;el.style.opacity=t>=s.t0-.05?1:0;el.style.zIndex=t>=s.t0?2:1;
+  el.querySelector(".stripes").style.transform=`translateX(${(-(lt*60)%120).toFixed(1)}px)`;
+  const big=el.querySelector(".big");if(big&&s.kind!=="scores"){const y=pop((lt-.12)/.45),sh=lt>.12&&lt<.5?Math.sin(lt*90)*10*(1-(lt-.12)/.38):0;big.style.transform=`translate(${sh.toFixed(1)}px,0) scale(${(2.2-1.2*y).toFixed(3)})`;big.style.transformOrigin="0 80%";big.style.opacity=clamp((lt-.1)/.08)}
+  const bv=el.querySelector(".big[data-v]");if(bv){const v=+bv.dataset.v;if(!isNaN(v)&&Number.isInteger(v))bv.textContent=Math.round(v*ease((lt-.1)/.8))}
+  el.querySelectorAll(".tag,.bar,.note").forEach((x,i)=>{const y=ease((lt-.25-i*.12)/.35);x.style.opacity=clamp((lt-.25-i*.12)/.1);x.style.translate=`${((1-y)*-140).toFixed(1)}px 0`});
+  el.querySelectorAll(".nm").forEach(x=>{const y=ease((lt-.35)/.4);x.style.opacity=clamp((lt-.35)/.1);x.style.translate=`${((1-y)*200).toFixed(1)}px 0`});
+  el.querySelectorAll(".chip").forEach((x,i)=>{const y=pop((lt-1.2-i*.1)/.4);x.style.opacity=clamp((lt-1.2-i*.1)/.1);x.style.transform=`scale(${(.4+.6*y).toFixed(3)})`});
+  el.querySelectorAll(".viz").forEach(x=>{const y=ease((lt-.7)/.45);x.style.opacity=clamp((lt-.7)/.15);x.style.translate=`0 ${((1-y)*60).toFixed(1)}px`});
+  VIZ.anim(el,lt,.9);
+  const rk=el.querySelector(".rank");if(rk){const y=pop((lt-.5)/.45);rk.style.transform=`scale(${Math.max(0,y).toFixed(3)}) rotate(${(-30+30*y).toFixed(1)}deg)`}
+  const st=el.querySelector(".stamp");if(st){const y=pop((lt-1.5)/.4);st.style.opacity=clamp((lt-1.5)/.06);st.style.transform=`rotate(-8deg) scale(${(2-y).toFixed(3)})`}
+  el.querySelectorAll(".g").forEach((g,i)=>{const at=.35+i*.07,y=ease((lt-at)/.35);g.style.opacity=clamp((lt-at)/.08);g.style.translate=`${((1-y)*(i%2?1:-1)*700).toFixed(1)}px 0`});
+  el.querySelectorAll(".mr").forEach((r,i)=>{const at=.3+i*.4,y=ease((lt-at)/.4);r.style.opacity=clamp((lt-at)/.1);r.style.translate=`${((1-y)*-700).toFixed(1)}px 0`});
+  if(s.kind==="game"){const a=el.querySelector(".vs .a"),hh=el.querySelector(".vs .h"),y=ease(lt/.45);a.style.translate=`${((1-y)*-1100).toFixed(0)}px 0`;hh.style.translate=`${((1-y)*1100).toFixed(0)}px 0`;
+   el.querySelectorAll(".tm").forEach((x,i)=>{const z=ease((lt-.25-i*.15)/.4);x.style.opacity=clamp((lt-.25-i*.15)/.1);x.style.translate=`${((1-z)*(i===1?300:-300)).toFixed(0)}px 0`});
+   const v=el.querySelector(".vsx"),z=pop((lt-.45)/.4);v.style.transform=`scale(${Math.max(0,z).toFixed(3)}) rotate(${(-90+90*z).toFixed(1)}deg)`}}
+ // the X wipe between screens: a volt stripe and a white stripe cross the frame on the diagonal
+ let w=null;for(const s of SC){const d=t-(s.t0-.22);if(s.id!=="hook"&&d>=0&&d<.5){w=d/.5;break}}
+ const W=document.getElementById("wipe").children;
+ if(w!=null){const x=eio(w);W[0].style.transform=`rotate(-28deg) translateX(${(-1800+3600*x).toFixed(0)}px)`;W[1].style.transform=`rotate(28deg) translateX(${(1800-3600*clamp(x*1.08)).toFixed(0)}px)`;W[0].style.opacity=W[1].style.opacity=1}
+ else{W[0].style.opacity=W[1].style.opacity=0}
+ // progress: one segment per screen, like stories
+ const segs=document.querySelectorAll("#segs i b");SC.forEach((s,j)=>{segs[j].style.width=(clamp((t-s.t0)/(s.t1-s.t0))*100).toFixed(1)+"%"});
+ // intro: the crossed X (frame one) splits apart and flies off; outro: the stripes slam back into the X (the last frame matches the first)
+ const L=document.getElementById("logo"),s1=L.querySelector(".s1"),s2=L.querySelector(".s2"),wd=L.querySelector(".wd"),end=TOTAL-TAIL;
+ let lo=0,k1=0,wo=0,sc=1;
+ if(t<INTRO){lo=1;wo=1-clamp((t-.2)/.2);k1=eio((t-.25)/(INTRO-.25));if(t>INTRO-.12)lo=clamp((INTRO-t)/.12)}
+ else if(t>end){const k=t-end;lo=clamp(k/.12);k1=-(1-ease(k/.35));sc=1+.12*(1-pop((k-.3)/.4));wo=clamp((k-.4)/.25)}
+ L.style.opacity=lo;s1.style.transform=`rotate(-38deg) translateX(${(k1*2200).toFixed(0)}px) scale(${sc.toFixed(3)})`;s2.style.transform=`rotate(38deg) translateX(${(-k1*2200).toFixed(0)}px) scale(${sc.toFixed(3)})`;wd.style.opacity=wo;
+ for(const q of ["#bug","#segs","#src"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
+// the cover image: team colour, halftone, the giant number, the label, the name, the X
+window.thumb=()=>{const H=D.hook,T=document.getElementById("thumb"),pv=D.mode==="preview",nm=String(H.who||"").split(" "),last=nm.length>1?nm.slice(1).join(" "):nm[0];
+ T.innerHTML=`<div class="sc" style="opacity:1;--tc:${H.bg||H.color}">${bg()}<div class="in" style="top:150px;bottom:200px;right:70px">${tag(pv?"Tonight":"Last night","k")}
+  <div style="margin-top:40px"><div class="big" style="font-size:620px">${esc(H.big)}</div></div><div style="margin-top:30px">${tag(esc(H.label))}</div>
+  <div class="nm" style="margin-top:40px"><small>${esc(nm.length>1?nm[0]:"")}</small><b style="font-size:230px">${esc(last)}</b></div>
+  ${!pv&&H.viz?`<div style="margin-top:30px">${viz(H.viz,H.tm)}</div>`:""}</div>
+  <div style="position:absolute;left:-40px;right:-40px;bottom:120px;transform:rotate(-4deg);background:#fff;color:#000;text-align:center;font:900 92px/1 'Big Shoulders';padding:22px 0;letter-spacing:.04em;box-shadow:0 14px 0 #D7FF3A">${pv?"TONIGHT'S GAMES":"CROSSOVER · "+esc(D.date)}</div></div>`;
+ T.style.display="block";T.querySelectorAll(".big").forEach(e=>{let fs=620;while(e.getBoundingClientRect().width>940&&fs>200){fs-=20;e.style.fontSize=fs+"px"}});T.querySelectorAll(".nm b").forEach(e=>fit(e,90));VIZ.anim(T,30,0);return true};
+window.ready=()=>Promise.all(['800 100px "Archivo"','900 100px "Archivo"','900 100px "Big Shoulders"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;
 </script></body></html>

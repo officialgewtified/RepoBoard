@@ -73,7 +73,7 @@ async function slate(sport, label, ymd) {
     if (st.state !== "pre" || ![2, 3].includes((ev.season || {}).type || 2)) continue;
     const T = {};
     for (const x of c.competitors) { const t = x.team || {}, rec = ((x.records || [])[0] || {}).summary || "0-0", [w, l] = rec.split("-").map(n);
-      T[x.homeAway] = { ab: t.abbreviation, nick: t.shortDisplayName || t.name, name: t.displayName, id: String(t.id), color: col({ color: t.color, alt: t.alternateColor }),
+      T[x.homeAway] = { ab: t.abbreviation, nick: t.shortDisplayName || t.name, name: t.displayName, id: String(t.id), color: col({ color: t.color, alt: t.alternateColor }), bg: /^[0-9a-f]{6}$/i.test(t.color || "") ? "#" + t.color : null,
         rec, pct: w + l ? w / (w + l) : .5, rank: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : null, lead: leaders(x), out: (outs[String(t.id)] || []).slice(0, 3) }; }
     if (sport.includes("college") && !T.home.rank && !T.away.rank) continue;   // college: Top 25 games only
     const tv = [...new Set([...(c.broadcasts || []).flatMap(b => b.names || []), ...(c.geoBroadcasts || []).map(g => (g.media || {}).shortName)].filter(Boolean))];
@@ -133,7 +133,7 @@ function build(day, nba, nfl, cfb, brand) {
   const sp = [nba.length && "NBA", nfl.length && "NFL", cfb.length && "College"].filter(Boolean).join(" & ");
   const ytTitle = (hot ? `${hot.name} Is Averaging ${Math.round(hot.big)} a Game 🔥 ${wd}'s ${sp} Games to Watch` : `${wd}'s ${sp} Games to Watch: ${count} 🔥`).slice(0, 100);
   return { mode: "preview", ytTitle, brand, day, date: md, title: `${wd}'s games to watch`, source: "Schedule, stats and injuries: ESPN",
-    hook: { big: hot ? String(hot.big) : String(all.length), label: hot ? "PPG last 5" : "games tonight", who: hot ? hot.name : count + " games", tm: hotSide ? hotSide.ab : "", color: hotSide ? hotSide.color : "#a1a1aa", sport: hot ? "NBA" : "", ctx: count + " games tonight" },
+    hook: { big: hot ? String(hot.big) : String(all.length), label: hot ? "PPG last 5" : "games tonight", who: hot ? hot.name : count + " games", tm: hotSide ? hotSide.ab : "", color: hotSide ? hotSide.color : "#a1a1aa", bg: hotSide ? hotSide.bg : null, sport: hot ? "NBA" : "", ctx: count + " games tonight" },
     games: scenes, slate: all.map(g => ({ sport: g.sport, a: g.away.ab, h: g.home.ab, ac: g.away.color, hc: g.home.color, t: g.time })), voice, caption: lines.join("\n") };
 }
 
