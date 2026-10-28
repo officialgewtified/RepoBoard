@@ -11,6 +11,8 @@ on:
         description: "Narrator: af_heart (Crossover) or af_bella (Liftoff)"
         required: false
         default: af_heart
+permissions:
+  contents: write
 jobs:
   say:
     runs-on: ubuntu-latest
@@ -47,7 +49,11 @@ jobs:
           ls out/voice/*.wav | sort | while read f; do echo "file '$PWD/$f'"; echo "file '$PWD/out/gap.wav'"; done > out/list.txt
           ffmpeg -loglevel error -y -f lavfi -i anullsrc=r=24000:cl=mono -t 0.8 out/gap.wav
           ffmpeg -loglevel error -y -f concat -safe 0 -i out/list.txt -ar 24000 -ac 1 -c:a libmp3lame -q:a 3 out/voice-test.mp3
-      - uses: actions/upload-artifact@v4
-        with:
-          name: voice-test
-          path: clips/out/voice-test.mp3
+      - name: Publish
+        # as a release file (tag voice-test, replaced each time), so it can be downloaded like the videos
+        run: |
+          gh release delete voice-test --yes --cleanup-tag 2>/dev/null || true
+          gh release create voice-test out/voice-test.mp3 --title "Voice test" --notes "$LINES" --prerelease --latest=false
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINES: ${{ inputs.lines }}
