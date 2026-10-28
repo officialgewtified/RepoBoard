@@ -37,7 +37,8 @@ a{color:inherit}
 .vid{position:relative;margin-top:12px;display:flex;justify-content:center}
 .vid video{display:block;height:min(48vh,520px);width:auto;max-width:100%;aspect-ratio:9/16;object-fit:cover;background:#000;border-radius:14px}
 .vid.wide video{width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}
-.row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.row{display:grid;grid-template-columns:1.15fr 1fr 1fr 1fr;gap:7px;margin-top:12px}
+.row .btn{font-size:13px;padding:0 6px;gap:5px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:46px;border-radius:13px;border:1px solid var(--line);background:var(--raise);color:var(--ink);font:700 14px/1 "Archivo";text-decoration:none;cursor:pointer;padding:0 10px;text-align:center}
 .btn.p{background:var(--acc);border-color:var(--acc);color:var(--accInk)}
 .btn svg{width:17px;height:17px;flex:none}
