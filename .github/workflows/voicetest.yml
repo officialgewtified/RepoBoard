@@ -1,0 +1,53 @@
+name: Voice test
+# Reads a few lines in the channel's narrator voice (same settings as the daily videos) and saves them as one MP3,
+# to check how names are said before they go in a video. Lines are separated by | .
+on:
+  workflow_dispatch:
+    inputs:
+      lines:
+        description: "Lines to read, separated by |"
+        required: true
+      voice:
+        description: "Narrator: af_heart (Crossover) or af_bella (Liftoff)"
+        required: false
+        default: af_heart
+jobs:
+  say:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: clips
+    steps:
+      - uses: actions/checkout@v4
+      - name: ffmpeg
+        timeout-minutes: 8
+        run: |
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
+          which ffmpeg
+      - name: Read
+        timeout-minutes: 20
+        env:
+          LINES: ${{ inputs.lines }}
+          REF_VOICE: ${{ inputs.voice }}
+          SPEED: "1.12"
+          EXAGGERATION: "0.7"
+          CFG: "0.5"
+          TEMPO: "1.07"
+        run: |
+          mkdir -p .models out
+          curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          pip install -q kokoro-onnx soundfile
+          python ref.py
+          pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts
+          node -e 'const L=process.env.LINES.split("|").map(s=>s.trim()).filter(Boolean),v={};L.forEach((s,i)=>v["l"+String(i).padStart(2,"0")]=s);require("fs").writeFileSync("out/test.json",JSON.stringify({voice:v,voiceEngine:"chatterbox"}))'
+          python tts_cb.py out/test.json out/voice ref.wav
+          ls out/voice/*.wav | sort | while read f; do echo "file '$PWD/$f'"; echo "file '$PWD/out/gap.wav'"; done > out/list.txt
+          ffmpeg -loglevel error -y -f lavfi -i anullsrc=r=24000:cl=mono -t 0.8 out/gap.wav
+          ffmpeg -loglevel error -y -f concat -safe 0 -i out/list.txt -ar 24000 -ac 1 -c:a libmp3lame -q:a 3 out/voice-test.mp3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: voice-test
+          path: clips/out/voice-test.mp3
