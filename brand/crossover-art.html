@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
+@font-face{font-family:"Big Shoulders";src:url(../fonts/big-shoulders.woff) format("woff");font-weight:700 900}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#09090B}
+.f{position:absolute;inset:0;overflow:hidden;background:radial-gradient(70% 60% at 50% 45%,#16233f 0%,#0b0f1c 55%,#09090B 100%)}
+.f::before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle,rgba(255,255,255,.07) 1.6px,transparent 2px) 0 0/18px 18px;transform:rotate(18deg)}
+.st{position:absolute;inset:-20%;background:repeating-linear-gradient(115deg,rgba(255,255,255,.045) 0 26px,transparent 26px 120px)}
+.x{position:absolute;left:50%;top:50%}
+.x i{position:absolute;left:0;top:0}
+.wm{font:900 1px/1 "Big Shoulders";letter-spacing:.06em;color:#fff;text-transform:uppercase}
+.tag{display:inline-block;background:#D7FF3A;color:#000;font:900 1px/1 "Archivo";font-stretch:118%;letter-spacing:.08em;text-transform:uppercase;transform:skewX(-12deg)}
+.tag span{display:inline-block;transform:skewX(12deg)}
+</style></head><body><div class="f"><div class="st"></div><div id="c"></div></div>
+<script>
+const k=new URLSearchParams(location.search).get("k"),W=innerWidth,H=innerHeight,c=document.getElementById("c");
+// the X: a volt stripe and a white stripe crossing, the same as the video intro and outro
+const X=(cx,cy,len,th,rot=38,shadow=true)=>`<div class="x" style="left:${cx}px;top:${cy}px">
+ <i style="width:${len}px;height:${th}px;margin:${-th/2}px 0 0 ${-len/2}px;background:#D7FF3A;transform:rotate(${-rot}deg);${shadow?"box-shadow:0 0 60px rgba(215,255,58,.35)":""}"></i>
+ <i style="width:${len}px;height:${th}px;margin:${-th/2}px 0 0 ${-len/2}px;background:#fff;transform:rotate(${rot}deg);${shadow?"box-shadow:0 10px 40px rgba(0,0,0,.5)":""}"></i></div>`;
+if(k==="icon")c.innerHTML=X(W/2,H/2,W*.86,W*.17);
+if(k==="vids")c.innerHTML=X(W/2,H*.47,W*.8,W*.15)+`<div style="position:absolute;right:${W*.1}px;bottom:${W*.1}px;width:${W*.3}px;height:${W*.3}px;border-radius:50%;background:#09090B;border:${W*.025}px solid #D7FF3A;display:grid;place-items:center">
+ <svg viewBox="0 0 24 24" style="width:46%;margin-left:8%"><path d="M5 3l16 9-16 9z" fill="#D7FF3A"/></svg></div>`;
+if(k==="banner"){c.innerHTML=X(W*.5,H*.5,2400,150,24,false).replace(/#D7FF3A/,"rgba(215,255,58,.22)").replace(/background:#fff/,"background:rgba(255,255,255,.12)")+
+ `<div style="position:absolute;left:0;right:0;top:${H/2-200}px;text-align:center"><div class="wm" style="font-size:300px;line-height:.8;text-shadow:10px 10px 0 rgba(0,0,0,.4)">CROSSOVER</div>
+ <div style="margin-top:34px"><span class="tag" style="font-size:44px;padding:16px 26px"><span>Best stats · every day</span></span><span class="tag" style="font-size:44px;padding:16px 26px;background:#fff;margin-left:18px"><span>NFL · NBA · College</span></span></div></div>`}
+</script></body></html>
