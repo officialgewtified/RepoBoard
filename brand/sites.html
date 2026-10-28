@@ -1,0 +1,45 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:1024px;height:1024px;overflow:hidden;background:#000}svg{display:block}</style></head><body>
+<script>
+// New home-screen emblems for the three picks sites (no text, readable at any size, safe inside a circle crop).
+const k=new URLSearchParams(location.search).get("k")||"grid",pad=+(new URLSearchParams(location.search).get("pad")||1);
+const glow=(id,c,s)=>`<filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${s}" result="b"/><feFlood flood-color="${c}"/><feComposite in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+const football=(cx,cy,rx,ry,rot)=>`<g transform="translate(${cx} ${cy}) rotate(${rot})">
+ <ellipse rx="${rx}" ry="${ry}" fill="url(#fb)"/><ellipse rx="${rx}" ry="${ry}" fill="none" stroke="#2a1306" stroke-width="6"/>
+ <path d="M${-rx*.72} ${-ry*.62} Q${-rx*.62} 0 ${-rx*.72} ${ry*.62}" stroke="#f7efe2" stroke-width="${ry*.11}" fill="none"/><path d="M${rx*.72} ${-ry*.62} Q${rx*.62} 0 ${rx*.72} ${ry*.62}" stroke="#f7efe2" stroke-width="${ry*.11}" fill="none"/>
+ <rect x="${-rx*.36}" y="${-ry*.07}" width="${rx*.72}" height="${ry*.14}" rx="${ry*.07}" fill="#f7efe2"/>
+ ${[-3,-2,-1,0,1,2,3].map(i=>`<rect x="${i*rx*.1-ry*.045}" y="${-ry*.26}" width="${ry*.09}" height="${ry*.52}" rx="${ry*.045}" fill="#f7efe2"/>`).join("")}
+ <ellipse cx="${-rx*.2}" cy="${-ry*.45}" rx="${rx*.45}" ry="${ry*.18}" fill="#fff" opacity=".18"/></g>`;
+const bball=(cx,cy,r,clip)=>`<g transform="translate(${cx} ${cy})" ${clip?`clip-path="url(#${clip})"`:""}><circle r="${r}" fill="url(#bb)"/>
+ <g stroke="#2b1003" stroke-width="${r*.05}" fill="none" stroke-linecap="round"><path d="M0 ${-r} L0 ${r}"/><path d="M${-r} 0 L${r} 0"/>
+ <path d="M${-r*.7} ${-r*.72} Q${-r*.18} 0 ${-r*.7} ${r*.72}"/><path d="M${r*.7} ${-r*.72} Q${r*.18} 0 ${r*.7} ${r*.72}"/></g>
+ <ellipse cx="${-r*.32}" cy="${-r*.42}" rx="${r*.42}" ry="${r*.22}" fill="#fff" opacity=".2" transform="rotate(-30 ${-r*.32} ${-r*.42})"/><circle r="${r}" fill="none" stroke="#3a1504" stroke-width="5"/></g>`;
+const defs=`<defs>${glow("gG","#ffb31a",16)}${glow("gO","#ff8a1f",16)}${glow("gW","#ffffff",10)}${glow("gGr","#38d99a",14)}
+ <radialGradient id="fb" cx="38%" cy="30%"><stop offset="0" stop-color="#b8682e"/><stop offset=".6" stop-color="#7a3d16"/><stop offset="1" stop-color="#3f1c08"/></radialGradient>
+ <radialGradient id="bb" cx="35%" cy="30%"><stop offset="0" stop-color="#ffb066"/><stop offset=".55" stop-color="#e2661a"/><stop offset="1" stop-color="#7a2c06"/></radialGradient>
+ <linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#ffb31a" stop-opacity="0"/><stop offset=".25" stop-color="#ffb31a"/><stop offset=".5" stop-color="#fff3c4"/><stop offset=".75" stop-color="#ffb31a"/><stop offset="1" stop-color="#ffb31a" stop-opacity="0"/></linearGradient>
+ <linearGradient id="beamO" x1="0" x2="1"><stop offset="0" stop-color="#ff8a1f" stop-opacity="0"/><stop offset=".25" stop-color="#ff8a1f"/><stop offset=".5" stop-color="#ffe0b8"/><stop offset=".75" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ff8a1f" stop-opacity="0"/></linearGradient>
+ <clipPath id="left"><path d="M-400 -400 L120 -400 L-120 400 L-400 400Z"/></clipPath><clipPath id="right"><path d="M120 -400 L400 -400 L400 400 L-120 400Z"/></clipPath></defs>`;
+const S=pad;   // emblem scale (the maskable icon is drawn smaller so it survives Android's crop)
+let bg="",em="";
+if(k==="grid"){bg=`<radialGradient id="bgr" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#14402c"/><stop offset=".55" stop-color="#0a1d16"/><stop offset="1" stop-color="#040a08"/></radialGradient><rect width="1024" height="1024" fill="url(#bgr)"/>
+  ${Array.from({length:13},(_,i)=>{const y=560+Math.pow(i/12,1.7)*520;return `<line x1="0" x2="1024" y1="${y}" y2="${y}" stroke="#4fe0a0" stroke-opacity="${.08+.14*i/12}" stroke-width="${2+i*.4}"/>`}).join("")}
+  ${Array.from({length:11},(_,i)=>`<line x1="${512+(i-5)*40}" y1="560" x2="${512+(i-5)*260}" y2="1100" stroke="#4fe0a0" stroke-opacity=".1" stroke-width="2"/>`).join("")}`;
+ em=`<circle r="330" fill="rgba(4,10,8,.55)"/><circle r="330" fill="none" stroke="#ffb31a" stroke-width="18" filter="url(#gG)"/>${Array.from({length:40},(_,i)=>`<line x1="0" y1="-372" x2="0" y2="${i%5?-356:-346}" stroke="#ffb31a" stroke-opacity=".7" stroke-width="5" transform="rotate(${i*9})"/>`).join("")}
+  <rect x="-520" y="-9" width="1040" height="18" rx="9" fill="url(#beam)" filter="url(#gG)"/>
+  <g stroke="#fff3c4" stroke-opacity=".5" stroke-width="8" stroke-linecap="round"><line x1="-250" y1="190" x2="-120" y2="100"/><line x1="-290" y1="120" x2="-150" y2="30"/><line x1="-220" y1="250" x2="-80" y2="160"/></g>
+  ${football(20,-10,230,138,-35)}`}
+if(k==="base"){bg=`<radialGradient id="bgr" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#4a2209"/><stop offset=".55" stop-color="#1c0d05"/><stop offset="1" stop-color="#080402"/></radialGradient><rect width="1024" height="1024" fill="url(#bgr)"/>
+  <g fill="none" stroke="#ffcc99" stroke-opacity=".12" stroke-width="5"><rect x="352" y="640" width="320" height="400"/><circle cx="512" cy="640" r="160"/><path d="M92 1024 Q512 520 932 1024"/></g>`;
+ em=`<circle r="330" fill="rgba(10,5,2,.5)"/><circle r="330" fill="none" stroke="#ff8a1f" stroke-width="18" filter="url(#gO)"/>
+  <rect x="-520" y="222" width="1040" height="18" rx="9" fill="url(#beamO)" filter="url(#gO)"/>
+  ${[[-140,-250,10],[170,-230,8],[230,-60,7],[-250,-40,9],[-60,-300,6]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#ffd8a8" opacity=".55"/>`).join("")}
+  <ellipse cx="0" cy="226" rx="170" ry="22" fill="#000" opacity=".45"/>${bball(0,-12,226)}`}
+if(k==="cross"){bg=`<radialGradient id="bgr" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#1c2550"/><stop offset=".55" stop-color="#0b1026"/><stop offset="1" stop-color="#04050c"/></radialGradient><rect width="1024" height="1024" fill="url(#bgr)"/>`;
+ em=`<g filter="url(#gG)" opacity=".9"><rect x="-470" y="-10" width="940" height="20" rx="10" fill="url(#beam)" transform="rotate(45)"/><rect x="-470" y="-10" width="940" height="20" rx="10" fill="url(#beam)" transform="rotate(-45)"/></g>
+  <circle r="330" fill="rgba(4,6,16,.55)"/><circle r="330" fill="none" stroke="#edf1f7" stroke-width="16" filter="url(#gW)"/>
+  ${bball(0,0,240,"left")}<g clip-path="url(#right)"><circle r="240" fill="url(#fb)"/>
+   <rect x="-12" y="-150" width="24" height="300" rx="12" fill="#f7efe2" transform="rotate(18)"/>${[-2,-1,0,1,2].map(i=>`<rect x="-50" y="${i*48-8}" width="100" height="16" rx="8" fill="#f7efe2" transform="rotate(18)"/>`).join("")}
+   <ellipse cx="90" cy="-120" rx="90" ry="40" fill="#fff" opacity=".14" transform="rotate(-30 90 -120)"/></g>
+  <circle r="240" fill="none" stroke="#2a1306" stroke-width="6"/><line x1="125" y1="-250" x2="-125" y2="250" stroke="#fff" stroke-width="10" filter="url(#gW)"/>`}
+document.body.innerHTML=`<svg width="1024" height="1024" viewBox="0 0 1024 1024">${defs}${bg}<g transform="translate(512 512) scale(${S})">${em}</g></svg>`;
+</script></body></html>
