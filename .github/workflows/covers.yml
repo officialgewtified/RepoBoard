@@ -1,0 +1,46 @@
+name: Redo covers
+# Redraws the cover image of videos that are already published, from each release's own data file, and swaps it in
+# (used when the cover design changes). Waits for any video being made right now (same queue as the daily video).
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Release tags, separated by spaces (e.g. clip-2026-10-27 space-2026-10-28)"
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: clips
+  cancel-in-progress: false
+jobs:
+  covers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: clips
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Browser
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+      - name: Redraw and swap
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p out
+          for T in ${{ inputs.tags }}; do
+            NAME=$(gh api "repos/${{ github.repository }}/releases/tags/$T" --jq '.assets[]|select(.name|endswith("thumbnail.jpg"))|.name' | head -1)
+            if [ -z "$NAME" ]; then echo "::warning::$T has no cover to replace"; continue; fi
+            # the data: a copy kept in covers/ (for older quick hits), else the release's own data file
+            rm -f out/cover.json
+            if [ -f "../covers/$T.json" ]; then cp "../covers/$T.json" out/cover.json
+            else J=$(gh api "repos/${{ github.repository }}/releases/tags/$T" --jq '.assets[]|select(.name|test("^(data|quick-[0-9]+)\\.json$"))|.name' | head -1)
+              [ -n "$J" ] && gh release download "$T" -p "$J" -O out/cover.json; fi
+            if [ ! -f out/cover.json ]; then echo "::warning::$T has no data file, cover left as it was"; continue; fi
+            node cover.js out/cover.json "out/$NAME" && gh release upload "$T" "out/$NAME" --clobber && echo "replaced $T/$NAME"
+          done
