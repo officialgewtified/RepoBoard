@@ -26,7 +26,13 @@ def words(n):
     if n < 100: return TENS[n // 10] + ("-" + ONES[n % 10] if n % 10 else "")
     if n < 1000: return ONES[n // 100] + " hundred" + (" " + words(n % 100) if n % 100 else "")
     return words(n // 1000) + " thousand" + (" " + words(n % 1000) if n % 1000 else "")
+def year(y):
+    """1969 -> nineteen sixty-nine, 1908 -> nineteen oh eight, 1900 -> nineteen hundred"""
+    hi, lo = divmod(y, 100)
+    return words(hi) + (" hundred" if lo == 0 else " oh " + ONES[lo] if lo < 10 else " " + words(lo))
 def say_numbers(t):
+    # four-digit numbers from 1100 to 1999 written without a comma are years (counts always get commas)
+    t = re.sub(r"(?<![\d,.])(1[1-9]\d\d)(?!\d|[.,]\d)", lambda m: year(int(m.group(1))), t)
     t = re.sub(r"(\d+)\.(\d+)", lambda m: words(int(m.group(1))) + " point " + " ".join(ONES[int(c)] for c in m.group(2)), t)
     t = re.sub(r"(?<=\d),(?=\d{3})", "", t)   # 1,250 -> 1250, other commas stay (they make the pauses)
     return re.sub(r"\d+", lambda m: words(int(m.group(0))), t)

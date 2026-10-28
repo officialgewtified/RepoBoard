@@ -16,7 +16,7 @@ concurrency:
 jobs:
   make:
     runs-on: ubuntu-latest
-    timeout-minutes: 170
+    timeout-minutes: 185
     defaults:
       run:
         working-directory: space
@@ -64,7 +64,8 @@ jobs:
       - name: NASA footage
         if: steps.prep.outputs.skip != '1'
         continue-on-error: true
-        timeout-minutes: 15
+        # sharper footage takes longer to fetch (4K sources cut down to the vertical frame)
+        timeout-minutes: 24
         run: for f in out/data.json out/quick-*.json; do node broll.js "$f"; done
       - name: Voiceover
         if: steps.prep.outputs.skip != '1'

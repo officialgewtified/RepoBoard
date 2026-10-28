@@ -316,7 +316,7 @@ function caption(H, S, voice, brand, d) {
   return L.join("\n");
 }
 
-module.exports = { build, moon, sayDes };
+module.exports = { build, moon, usno, sayDes, get, save, ET, etDay, fmtTime, comma, r1, cap, w2, when, refFor, ft, AU_MI, LD, place, PROV, flux, FACTS };
 if (require.main === module) (async () => {
   const out = process.argv[2], today = process.argv[3] || etDay(Date.now());
   const D = await build(today, path.dirname(path.resolve(out)), process.env.BRAND || "Liftoff");
