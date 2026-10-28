@@ -317,7 +317,7 @@ function render(t){
 
 // the YouTube thumbnail: the week's subject locked in the reticle, the headline number, two more numbers, the dates
 window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),lp=D.scenes.find(s=>s.kind==="lpast"),as=D.scenes.find(s=>s.kind==="ast"),su=D.scenes.find(s=>s.kind==="sun");
- const also=[lp&&H.unit!=="Launches this week"&&`${lp.n} launches`,as&&`${as.nP+as.nQ} asteroid flybys`,su&&`${su.C+su.M+su.X} solar flares`].filter(Boolean).slice(0,2).join(" · ");
+ const also=[lp&&H.unit!=="Launches this week"&&`${lp.n} launches`,as&&`${as.nP} asteroid flybys`,su&&`${su.C+su.M+su.X} solar flares`].filter(Boolean).slice(0,2).join(" · ");
  T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1920 1080">${document.getElementById("stars").innerHTML}</svg>
   <i class="cb a"></i><i class="cb b"></i><i class="cb c"></i><i class="cb d"></i>
   <div class="ret">${reticle()}<div class="art" style="inset:170px">${artFor(H.topic,560,"th")}</div></div>

@@ -24,7 +24,7 @@ const dateSay = d => `${wkday(d)}, ${MONTHS[+ET(d, { month: "numeric" }) - 1]} $
 const dayTag = d => ET(d, { weekday: "short", month: "short", day: "numeric" }).toUpperCase().replace(",", "");
 const hm = d => ET(d, { hour: "numeric", minute: "2-digit" });   // "7:30 PM"
 const timeSay = d => { const [t, ap] = hm(d).split(/\s+/), [h, m] = t.split(":").map(Number); return `${numW(h)}${m ? " " + (m < 10 ? "oh " + ONES[m] : numW(m)) : ""} ${ap === "AM" ? "A M" : "P M"}`; };
-const half = d => new Date(Math.round(new Date(d).getTime() / 18e5) * 18e5);   // to the nearest half hour
+const half = d => new Date(Math.round(new Date(d).getTime() / 9e5) * 9e5);   // to the nearest quarter hour
 const plural = (n, w, ws = w + "s") => n === 0 ? `no ${ws}` : `${n === 1 ? "one" : n} ${n === 1 ? w : ws}`;
 const listJoin = a => a.length < 2 ? (a[0] || "") : a.slice(0, -1).join(", ") + (a.length > 2 ? "," : "") + " and " + a[a.length - 1];
 const art = w => /^[aeiou]/i.test(w) || /^[FHLMNRSX]([A-Z0-9]|-\d)/.test(w) ? "an " : "a ";
@@ -54,10 +54,16 @@ function what(l) {
   if (l.kuiper) return "a batch of Amazon Kuiper internet satellites";
   if (l.crew) return `the ${m} ${/crew/i.test(m) ? "astronauts" : "crew"}`;
   if (/group|batch/i.test(m)) return "a batch of " + (BATCH[l.type] || "satellites");
+  if (l.type === "Government/Top Secret") return TYPE[l.type];
   // code-like names (USSF-432, IRNSS-1L) are said as what the mission is instead
-  if (m && !/[A-Z]{3,}|\d[A-Za-z]|[A-Z]\d|\//.test(m) && m.length < 32) return m;
+  if (m && !/[A-Z]{3,}|\d[A-Za-z]|[A-Z]\d|\/|unknown|demo flight|TBD/i.test(m) && m.length < 40) return `a mission called ${m}`;
   return TYPE[l.type] || "a satellite";
 }
+// "On Friday" / "Also on Friday" / "And later that day" for a run of launches on one day (list in time order)
+const dayLead = (L, i, first) => { const w = wkday(L[i].net), p = i && wkday(L[i - 1].net) === w, pp = i > 1 && wkday(L[i - 2].net) === w;
+  return pp ? "And later that day" : p ? "Also on " + w : `${first} ${w}`; };
+// numbered asteroids (524522) are read digit by digit; provisional ones (2026 UE2) the way astronomers say them
+const sayAst = d => /^\d+$/.test(d) ? "asteroid " + d.split("").map(c => ONES[+c]).join(" ") : sayDes(d);
 const notable = l => (l.crew ? 4 : 0) + (!l.star && !l.kuiper ? 2 : 0) + (/NASA|ESA|JAXA|ISRO/.test(l.prov + l.mission) ? 1 : 0) + (/Planetary|Astrophysics|Heliophysics|Human|Robotic|Resupply/.test(l.type) ? 1 : 0);
 async function launchesBetween(kind, from, to) {
   const d = await get(`${LL}/launch/${kind}/?net__gte=${from}&net__lte=${to}&limit=60&mode=normal&ordering=net`);
@@ -215,9 +221,8 @@ async function build(day, outDir, brand) {
     say += provs.length === 1 ? ` All of them were ${p0} launches${starN && p0 === "SpaceX" ? `, ${starN === n0 ? "all" : starN} carrying Starlink internet satellites` : ""}.`
       : ` ${p0} led the way with ${n0}${p0 === "SpaceX" && starN ? `, including ${plural(starN, "Starlink mission")}` : ""}. ${cap(listJoin(rest))}.`; }
   const hi = past.filter(l => notable(l) >= 2 && l.status === "Success").sort((a, b) => notable(b) - notable(a)).slice(0, 5).sort((a, b) => Date.parse(a.net) - Date.parse(b.net));
-  hi.forEach((l, i) => { const w = wkday(l.net), same = i && wkday(hi[i - 1].net) === w;
-    say += ` ${same ? "Also on " + w : i ? "On " + w : "Highlights: on " + w}, ${l.prov} launched ${what(l)} on ${art(l.rocket)}${l.rocket} from ${l.loc}.`; });
-  for (const l of bad.slice(0, 2)) say += ` ${bad.length === 1 ? "One launch didn't go to plan" : "Not every launch went to plan"}: on ${wkday(l.net)}, ${l.prov}'s ${l.rocket} carrying ${what(l)} ${l.status === "Partial Failure" ? "had a partial failure" : "failed"}.`;
+  hi.forEach((l, i) => say += ` ${dayLead(hi, i, i ? "On" : "Highlights: on")}, ${l.prov} launched ${what(l)} on ${art(l.rocket)}${l.rocket} from ${l.loc}.`);
+  bad.slice(0, 2).forEach((l, i) => say += ` ${i ? "And" : bad.length === 1 ? "One launch didn't go to plan:" : "Not every launch went to plan:"} on ${wkday(l.net)}, ${l.prov}'s ${l.rocket} launch ${l.status === "Partial Failure" ? "was a partial failure" : "failed"}.`);
   sc({ kind: "lpast", id: "lpast", chapter: "Launches this week", bg: "launch", n: N, ok: okN, fail: bad.length, provs: provs.slice(0, 5),
     rows: past.slice(-10).map(l => ({ day: dayTag(l.net), rocket: l.rocket, mission: clean(l.mission) || "—", prov: l.prov, loc: l.loc, st: l.status })) }, say);
   F.push(`LAUNCHES, ${from.slice(0, 10)} to ${now.slice(0, 10)}: ${N} (${okN} successful)`); for (const l of past) F.push(`  ${l.net} ${l.prov} ${l.rocket} | ${l.mission} | ${l.loc} | ${l.status}  ${l.url}`); F.push("  check: https://thespacedevs.com/llapi  and  https://nextspaceflight.com/launches/past/", "");
@@ -227,10 +232,10 @@ async function build(day, outDir, brand) {
   const RC = spotL ? await rocketCfg(spotL.cfg) : null;
   if (RC && RC.total > 0) {
     const lenFt = RC.len ? Math.round(RC.len * 3.281 / 5) * 5 : 0, lb = RC.mass * 2204.6, yr = RC.first ? RC.first.slice(0, 4) : "";
-    const bits = [RC.mfr && `built by ${RC.mfr}`, lenFt && `stands about ${lenFt} feet tall`, lb && `weighs about ${lb >= 1e6 ? r1(lb / 1e6) + " million" : comma(Math.round(lb / 1e4) * 1e4)} pounds at liftoff`].filter(Boolean);
+    const bits = [RC.mfr && `built by ${RC.mfr}`, lenFt && `stands about ${lenFt} feet tall`, lb && `weighs about ${lb >= 1e6 ? r1(lb / 1e6) + " million" : comma(Math.round(lb / (lb < 1e5 ? 1e3 : 1e4)) * (lb < 1e5 ? 1e3 : 1e4))} pounds at liftoff`].filter(Boolean);
     let s2 = `Rocket spotlight: the ${RC.name}.${bits.length ? ` It's ${listJoin(bits)}.` : ""}`.replace("It's stands", "It stands").replace("It's weighs", "It weighs");
     s2 += `${yr ? ` It first flew in ${yr}, and it has` : " It has"} now flown ${RC.total} times${RC.ok === RC.total ? ", every one a success" : `, with ${RC.ok} successes`}.`;
-    if (RC.landed > 0) s2 += ` Its boosters have landed back on Earth ${comma(RC.landed)} times.`;
+    if (RC.landed > 0) s2 += ` It has also made ${RC.landed === 1 ? "one successful booster landing" : comma(RC.landed) + " successful booster landings"}.`;
     sc({ kind: "spot", id: "spot", chapter: "Rocket spotlight", bg: "launch", name: RC.name, mfr: RC.mfr, ft: lenFt, lb: lb ? Math.round(lb) : 0, first: yr, total: RC.total, ok: RC.ok, landed: RC.landed }, s2);
     F.push(`ROCKET SPOTLIGHT ${RC.name}: ${RC.len} m tall, ${RC.mass} t at liftoff, first flight ${RC.first}, ${RC.total} launches (${RC.ok} successful), ${RC.landed} booster landings (Launch Library config ${spotL.cfg})`, `  check: ${LL}/config/launcher/${spotL.cfg}/`, "");
   }
@@ -239,7 +244,7 @@ async function build(day, outDir, brand) {
   { const n2 = next.length, pick = next.filter(l => notable(l) >= 2).sort((a, b) => notable(b) - notable(a)).slice(0, 4).sort((a, b) => Date.parse(a.net) - Date.parse(b.net));
     const more = next.filter(l => !pick.includes(l)), moreStar = more.filter(l => l.star).length;
     let s3 = n2 ? `Looking ahead, ${n2} launches are on the schedule for the next seven days.` : "Looking ahead, no launches are on the schedule for the next seven days.";
-    pick.forEach(l => { s3 += ` On ${wkday(l.net)}, ${l.prov} plans to launch ${what(l)} on ${art(l.rocket)}${l.rocket} from ${l.loc}${l.dayOnly ? "" : `, at about ${timeSay(l.net)} Eastern`}${l.tbd ? ", if the date holds" : ""}.`; });
+    pick.forEach((l, i) => { s3 += ` ${dayLead(pick, i, "On")}, ${l.prov} plans to launch ${what(l)} on ${art(l.rocket)}${l.rocket} from ${l.loc}${l.dayOnly ? "" : `, at about ${timeSay(l.net)} Eastern`}${l.tbd ? ", if the date holds" : ""}.`; });
     if (moreStar) s3 += ` ${pick.length ? "Plus" : "That includes"} ${plural(moreStar, "Starlink launch", "Starlink launches")}${pick.length ? "" : " from SpaceX"}.`;
     if (n2) s3 += " Launch times often slip, so check before you watch.";
     sc({ kind: "lnext", id: "lnext", chapter: "Launch schedule", bg: "launch", n: n2,
@@ -252,10 +257,10 @@ async function build(day, outDir, brand) {
     const near = a => a.ldMax < 1 ? ", closer than the Moon" : a.ld < 1.05 ? ", about as far as the Moon" : a.ld < 3 ? `, just ${r1(a.ld)} times the Moon's distance` : "";
     const whenA = a => a.sigmaMin > 360 ? `around ${ET(a.date, { weekday: "long" })}` : `on ${ET(a.date, { weekday: "long" })}`;
     let s4 = `Now, asteroid watch. In the past week, ${P.length === 0 ? "no asteroids" : P.length === 1 ? "one asteroid" : P.length + " asteroids"} passed within twenty Moon distances of Earth.`;
-    if (cP) s4 += ` The closest was ${sayDes(cP.des)}, ${sizeSay(cP)}, which came within about ${miSay(cP.miles)} miles${near(cP)}.`;
+    if (cP) s4 += ` The closest was ${sayAst(cP.des)}, ${sizeSay(cP)}, which came within about ${miSay(cP.miles)} miles${near(cP)}.`;
     s4 += Q.length ? ` Over the next seven days, ${Q.length === 1 ? "one more is" : Q.length + " more are"} expected to fly by.` : " None are expected that close over the next seven days.";
-    if (bQ) s4 += ` The biggest is ${sayDes(bQ.des)}, ${sizeSay(bQ)}, about the size of ${refFor(bQ.m).name}, passing about ${miSay(bQ.miles)} miles away ${whenA(bQ)}.`;
-    if (cQ && cQ !== bQ) s4 += ` The closest, ${sayDes(cQ.des)}, will pass at about ${miSay(cQ.miles)} miles${near(cQ)}.`;
+    if (bQ) s4 += ` The biggest is ${sayAst(bQ.des)}, ${sizeSay(bQ)}, about the size of ${refFor(bQ.m).name}, passing about ${miSay(bQ.miles)} miles away ${whenA(bQ)}.`;
+    if (cQ && cQ !== bQ) s4 += ` The closest, ${sayAst(cQ.des)}, will pass at about ${miSay(cQ.miles)} miles ${whenA(cQ)}${near(cQ)}.`;
     if (P.length || Q.length) s4 += " None of them poses any danger to Earth.";
     const pt = (a, past) => { const f = ft(a.m); return { des: a.des, ld: +a.ld.toFixed(2), ft: f < 100 || a.known ? Math.round(f) : Math.round(f / 10) * 10, day: dayTag(a.date), past }; };
     sc({ kind: "ast", id: "ast", chapter: "Asteroid watch", bg: "asteroid", nP: P.length, nQ: Q.length, pts: [...P.slice(0, 8).map(a => pt(a, true)), ...Q.slice(0, 8).map(a => pt(a, false))],
@@ -348,7 +353,7 @@ async function build(day, outDir, brand) {
   const crewL = [...past.filter(l => l.crew && l.status === "Success").map(l => [l, true]), ...next.filter(l => l.crew).map(l => [l, false])][0];
   if (crewL) hooks.push([7, "launch", `Astronauts ${crewL[1] ? "launched" : "are launching"} this week.`, { big: crewL[1] ? "CREW" : "CREW", unit: crewL[0].rocket, kicker: crewL[1] ? "Crew launch" : "Crew launch ahead" }, crewL[1] ? "Astronauts Launched" : "Astronauts Launching"]);
   const H = hooks.sort((a, b) => b[0] - a[0])[0] || [1, "launch", `${N} rocket launches, ${aN2 || 0} asteroid flybys and ${flN || 0} solar flares.`, { big: String(N), unit: "Launches this week", kicker: "This week in space" }, ""];
-  const range = `${ET(from, { month: "short", day: "numeric" })}–${ET(day + "T16:00:00Z", { month: "short", day: "numeric" })}`;
+  const r0 = ET(from, { month: "short", day: "numeric" }), r1d = ET(day + "T16:00:00Z", { month: "short", day: "numeric" }), range = r0.split(" ")[0] === r1d.split(" ")[0] ? `${r0}–${r1d.split(" ")[1]}` : `${r0}–${r1d}`;
   S.unshift({ kind: "hook", id: "hook", chapter: "Intro", topic: H[1], bg: H[1] === "sun" ? "sun" : H[1] === "ast" ? "asteroid" : "launch", ...H[3], sub: range.toUpperCase() });
   V.hook = `${H[2]} Welcome to This Week in Space, from ${brand}. Here's everything that happened above us, and what's coming next.`;
   // narration in scene order
