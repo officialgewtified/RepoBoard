@@ -73,7 +73,8 @@ def run(here, site, picks, gaps, now):
             continue
         out = []
         for l in e["legs"]:
-            a = acts.get((l["kick"][:10], l["pl"], l["mk"], l["ln"]))
+            # the board files results under the game's Eastern date (a 10pm ET tip is already "tomorrow" in UTC)
+            a = acts.get((_pt(l["kick"]).astimezone(ET).strftime("%Y-%m-%d"), l["pl"], l["mk"], l["ln"]))
             if a is None:
                 # never graded five days after the game (didn't play, game moved): PrizePicks voids it
                 out.append("void" if now - _pt(l["kick"]) > dt.timedelta(days=5) else None)
