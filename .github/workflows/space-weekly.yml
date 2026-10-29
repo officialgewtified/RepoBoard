@@ -1,8 +1,8 @@
 name: Liftoff weekly long-form (This Week in Space)
 on:
   schedule:
-    # Sundays at 13:07 UTC (9:07am Eastern, 8:07 in winter), after the daily report: about 2 hours to make
-    - cron: "7 13 * * 0"
+    # Sundays at 05:37 UTC (1:37am Eastern, 12:37 in winter): about 1.5 hours to make, ready well before 5am
+    - cron: "37 5 * * 0"
   workflow_dispatch:
     inputs:
       day:

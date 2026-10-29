@@ -1,8 +1,8 @@
 name: Liftoff space report video
 on:
   schedule:
-    # 11:37 UTC is 7:37am Eastern (6:37 in winter): fresh asteroid, aurora, Sun and launch data, ready for the morning
-    - cron: "37 11 * * *"
+    # 07:47 UTC is 3:47am Eastern (2:47 in winter): fresh asteroid, aurora, Sun and launch data, ready by about 5am
+    - cron: "47 7 * * *"
   workflow_dispatch:
     inputs:
       day:

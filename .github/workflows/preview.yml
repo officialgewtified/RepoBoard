@@ -1,8 +1,8 @@
 name: Tonight's games preview video
 on:
   schedule:
-    # 19:23 UTC is about 3:23pm Eastern (2:23pm in winter): the slate, injuries and recent form are set, and it's ready well before tip-off.
-    - cron: "23 19 * * *"
+    # 08:13 UTC is 4:13am Eastern (3:13 in winter): tonight's slate, recent form and the morning injury report, ready by 5am
+    - cron: "13 8 * * *"
   workflow_dispatch:
     inputs:
       day:
