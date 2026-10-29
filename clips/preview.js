@@ -120,7 +120,7 @@ function build(day, nba, nfl, cfb, brand) {
   for (const g of all) { g.a = star(g.away, g.sport); g.h = star(g.home, g.sport); g.score = g.away.pct + g.home.pct + (g.nat ? .5 : 0) + (g.a && g.a.hot ? .4 : 0) + (g.h && g.h.hot ? .4 : 0) + (g.away.rank || g.home.rank ? .6 : 0); }
   // featured games: the best matchups by record, national TV and hot players (in start-time order)
   const pick = (G, k) => G.slice().sort((a, b) => b.score - a.score).slice(0, k).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
-  const feat = [...pick(nfl, nfl.length > 4 ? 3 : 2), ...pick(cfb, 2), ...pick(nba, nfl.length ? 3 : 4)];
+  const feat = [...pick(nfl, 2), ...pick(cfb, nfl.length ? 1 : 2), ...pick(nba, nfl.length || cfb.length ? 2 : 3)];
   const hotList = nba.flatMap(g => [g.a, g.h]).filter(x => x && x.l5).sort((a, b) => (b.hot - a.hot) || (b.big - a.big));
   const hot = hotList[0], hotTeam = hot && nba.find(g => g.a === hot || g.h === hot), hotSide = hotTeam && (hotTeam.a === hot ? hotTeam.away : hotTeam.home);
   const count = [nba.length && `${nba.length} NBA`, nfl.length && `${nfl.length} NFL`, cfb.length && `${cfb.length} Top 25`].filter(Boolean).join(" · ");

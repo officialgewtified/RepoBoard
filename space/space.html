@@ -132,7 +132,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 <script>
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3),eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[],STARS=[];const INTRO=2.3,TAIL=2.4,MIN=61.5;
+let D=null,SC=[],TOTAL=30,SFX=[],STARS=[];const INTRO=0,TAIL=2.4,MIN=0;   // open straight on the hook; the rocket logo only plays at the end
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const com=x=>Math.round(+x).toLocaleString("en-US");
 function rnd(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
@@ -234,7 +234,7 @@ function build(data){D=data;SC=[];SFX=[];
  document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
  document.querySelectorAll(".t1,.lc .r b").forEach(e=>fit(e,40));document.querySelectorAll("#hook .big").forEach(e=>fit(e,90));
  for(const s of SC){if(s.kind!=="hook")SFX.push({t:s.t0,k:"whoosh"});if(s.kind==="hook"||s.kind==="outro")SFX.push({t:s.t0+.5,k:"pop"})}
- SFX.push({t:.02,k:"rumble"},{t:.05,k:"whoosh"},{t:1.15,k:"stamp"},{t:INTRO-.75,k:"riser"},{t:INTRO-.35,k:"whoosh"},{t:t+.1,k:"sting"},{t:t+1.2,k:"rumble"},{t:t+1.3,k:"whoosh"});
+ if(INTRO>0)SFX.push({t:.02,k:"rumble"},{t:.05,k:"whoosh"},{t:1.15,k:"stamp"},{t:INTRO-.75,k:"riser"},{t:INTRO-.35,k:"whoosh"});SFX.push({t:.05,k:"impact"},{t:t+.1,k:"sting"},{t:t+1.2,k:"rumble"},{t:t+1.3,k:"whoosh"});
  for(const s of SC){if(D.scenes.find(x=>x.id===s.id&&x.read))SFX.push({t:s.t0+.6,k:"compute"});const sc=D.scenes.find(x=>x.id===s.id);
   if(sc&&sc.fact){const at0=s.t0+Math.max(2.4,(s.t1-s.t0)*.45);for(let k=0;k<Math.ceil(sc.fact.length/34/1.4);k++)SFX.push({t:at0+k*1.4,k:"typing"})}}
  // data sounds: an impact on the headline number, a beep as each panel locks in, ticks as the tiles land
@@ -285,7 +285,7 @@ function render(t){
  // the rocket: it flies up from below the screen and docks in the ring (intro), then at the end lifts off out of the top of the
  // frame and leaves the empty ring, which is exactly how the video starts, so it loops
  const end=TOTAL-TAIL;let lo=0,ls=1,bk=0,wd=0,fl=0,ry=0,trl=0,fs=1;
- if(t<INTRO+.15){bk=1;lo=1;ry=560*(1-pop(t/1.35));trl=.9*clamp(1-t/1.25);fs=1+.8*clamp(1-t/1.25);const x=t>1.95?ease((t-1.95)/.35):0;
+ if(INTRO>0&&t<INTRO+.15){bk=1;lo=1;ry=560*(1-pop(t/1.35));trl=.9*clamp(1-t/1.25);fs=1+.8*clamp(1-t/1.25);const x=t>1.95?ease((t-1.95)/.35):0;
   // after it docks, LIFTOFF shows under the logo for a beat, then the camera flies through
   wd=clamp((t-1.05)/.3)*(1-x);if(x){ls=1+x*6;lo=1-x;bk=1-x}fl=t>2.0&&t<2.24?1-Math.abs(t-2.12)/.12:0}
  if(t>end+.1){const k=t-end-.1;bk=clamp(k/.25);lo=clamp(k/.2);ls=1+.4*(1-pop(k/.45));wd=Math.min(ease((k-.35)/.35),ease((1.95-k)/.25));
@@ -304,7 +304,7 @@ function rocketArt(){return `<svg viewBox="40 0 120 300" style="height:640px;tra
  <path d="M84 138 C86 190 94 240 100 298 C106 240 114 190 116 138Z" fill="url(#cvfl)"/><path d="M92 138 C93 160 97 180 100 204 C103 180 107 160 108 138Z" fill="#FFF6D6"/>
  <path d="M79 106 L60 132 L60 148 L80 138Z M121 106 L140 132 L140 148 L120 138Z" fill="#4FF3FF"/><path d="M100 30 C117 46 122 68 122 94 L122 136 L78 136 L78 94 C78 68 83 46 100 30Z" fill="url(#cvbd)"/>
  <rect x="86" y="134" width="28" height="8" rx="2" fill="#5b6785"/><circle cx="100" cy="82" r="10" fill="#03040A" stroke="#4FF3FF" stroke-width="4"/></svg>`}
-function reticle(){let t="";for(let a=0;a<360;a+=5){const big=a%30===0,r1=440,r2=big?404:422,c=Math.cos(a*Math.PI/180),s=Math.sin(a*Math.PI/180);
+function coverReticle(){let t="";for(let a=0;a<360;a+=5){const big=a%30===0,r1=440,r2=big?404:422,c=Math.cos(a*Math.PI/180),s=Math.sin(a*Math.PI/180);
   t+=`<line x1="${(r1*c).toFixed(1)}" y1="${(r1*s).toFixed(1)}" x2="${(r2*c).toFixed(1)}" y2="${(r2*s).toFixed(1)}" stroke="#4FF3FF" stroke-width="${big?4:2}" opacity="${big?.9:.5}"/>`}
  const arc=(a0,a1,r)=>{const p=a=>[(r*Math.cos(a*Math.PI/180)).toFixed(1),(r*Math.sin(a*Math.PI/180)).toFixed(1)],[x0,y0]=p(a0),[x1,y1]=p(a1);return `M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`};
  const tri=a=>{const c=Math.cos(a*Math.PI/180),s=Math.sin(a*Math.PI/180),q=(r,o)=>[((r)*c-o*s).toFixed(1),((r)*s+o*c).toFixed(1)];return `<path d="M${q(452,0)} L${q(478,-14)} L${q(478,14)}Z" fill="#4FF3FF"/>`};
@@ -319,7 +319,7 @@ window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElemen
  T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1080 1920">${document.getElementById("stars").innerHTML}</svg>
   <i class="cb a"></i><i class="cb b"></i><i class="cb c"></i><i class="cb d"></i>
   <div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
-  <div class="ret">${reticle()}<div class="art">${art}</div><div class="lk l"><i></i>${lock}</div>${H.sub?`<div class="lk r"><span>${esc(H.sub)}</span></div>`:""}</div>
+  <div class="ret">${coverReticle()}<div class="art">${art}</div><div class="lk l"><i></i>${lock}</div>${H.sub?`<div class="lk r"><span>${esc(H.sub)}</span></div>`:""}</div>
   <div class="lo"><div class="k">${esc(H.kicker)}</div><div class="bigt">${esc(H.big)}</div><div class="u">${esc(H.unit)}</div></div>
   <div class="ft"><span>Sky report</span><span>${esc(D.date)}</span></div>`;
  T.style.display="block";fit(T.querySelector(".bigt"),90);fit(T.querySelector(".u"),30);

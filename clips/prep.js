@@ -176,7 +176,11 @@ function build(day, nflGames, nbaGames, opts, cfbGames) {
   const sections = [fb(nflGames, "NFL"), fb(cfbGames, "CFB"), nba(nbaGames)].filter(Boolean);
   if (!sections.length) return null;
   const h = sections.flatMap(s => s.hooks.map(x => x.concat(s.sport))).sort((a, b) => b[0] - a[0])[0];
-  const more = sections.flatMap(s => s.more.slice(0, sections.length > 1 ? 2 : 3)).slice(0, 3);
+  // short and tight: the best two performances (one per sport on multi-sport nights), no extra screen
+  const keep = sections.length > 1 ? 1 : 2, more = [];
+  for (const s of sections) { if (s.sport === "NBA") { s.top = s.top.slice(-keep); continue; }
+    const hi = s.top.findIndex(p => `${p.first || ""} ${p.last || ""}`.trim() === h[3].n);
+    s.top = s.top.map((p, i) => i).sort((a, b) => (b === hi) - (a === hi) || a - b).slice(0, keep).sort((a, b) => a - b).map(i => s.top[i]); }
   const hs = h[5] !== "CFB" && seasonNote(h[5], [HOOK_KEY[h[2]]], h[3].n);
   const voice = { hook: `${h[1]} ${h[2]}! ${h[3].n} ${hs && hs.top ? "just had the biggest night in the league this season" : "just had the night of " + wd + ""}. Here's everything you missed!` };
   sections.forEach((s, si) => { voice["s" + si] = s.say; s.top.forEach((p, i) => voice[`p${si}_${i}`] = p.say); });

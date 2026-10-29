@@ -116,7 +116,7 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 <script>
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3),eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.6;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.75,TAIL=2.6,MIN=61.5;
+let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=0,TAIL=2.6,MIN=0;   // open straight on the hook (people decide in the first second); the X logo only plays at the end
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+1&&fs>min){fs-=4;el.style.fontSize=fs+"px"}}
 const tag=(t,c="")=>`<div class="tag ${c}"><span>${t}</span></div>`;
@@ -173,7 +173,7 @@ function build(data){D=data;SC=[];SFX=[];
  document.querySelectorAll(".big").forEach(e=>{const w=(e.closest(".in")||document.body).clientWidth-(e.dataset.v!=null?300:0);let fs=parseFloat(getComputedStyle(e).fontSize);while(e.getBoundingClientRect().width>w&&fs>120){fs-=10;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".tm .ab").forEach(e=>{let fs=260;while(e.scrollWidth>860&&fs>120){fs-=10;e.style.fontSize=fs+"px"}});
  // sound: a whoosh on every wipe, an impact on the big numbers, a tick per score, a swish for NBA cards, the stamp, a riser into each section
- SFX.push({t:.05,k:"impact"},{t:INTRO-.35,k:"whoosh"});
+ SFX.push({t:.05,k:"impact"});if(INTRO>0)SFX.push({t:INTRO-.35,k:"whoosh"});
  for(const s of SC){if(s.id!=="hook")SFX.push({t:Math.max(.05,s.t0-.2),k:"whoosh"});
   if(s.kind==="hook"||s.kind==="card")SFX.push({t:s.t0+.3,k:"impact"});
   if(s.kind==="scores"){SFX.push({t:Math.max(.05,s.t0-.8),k:"riser"});document.querySelectorAll("#"+s.id+" .g").forEach((g,i)=>{if(i<14)SFX.push({t:s.t0+.35+i*.07,k:"tick"})})}

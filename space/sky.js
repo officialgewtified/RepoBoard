@@ -263,9 +263,9 @@ async function build(today, outDir, brand) {
   for (let i = hooks.length - 1; i >= 0; i--) if (!S[hooks[i][1]]) hooks.splice(i, 1);
   hooks.sort((a, b) => b[0] - a[0]);
   const H = hooks[0] || [1, "moon", "Here's what's happening in the sky this week!", { big: S.moon.illum + "%", unit: "Moon lit tonight", kicker: "Sky report", sub: "" }];
-  const order = Object.keys(S).sort((a, b) => (b === H[1]) - (a === H[1]) || score[b] - score[a]);
+  const order = Object.keys(S).sort((a, b) => (b === H[1]) - (a === H[1]) || score[b] - score[a]).slice(0, 3);   // the three biggest stories keep it under a minute
   const BG = { ast: "asteroid", aur: "aurora", sun: "sun", lau: "launch", moon: "moon" };
-  for (const k of order) S[k].bg = BG[k];
+  for (const k of Object.keys(S)) S[k].bg = BG[k];
   const scenes = [{ kind: "hook", id: "hook", topic: H[1], bg: BG[H[1]] || "earth", ...H[3] }, ...order.map(k => S[k]), { kind: "outro", id: "outro", bg: "earth" }];
   const voice = { hook: `${H[2]} Here's your sky report for ${ET(today + "T16:00:00Z", { weekday: "long" })}.` };
   for (const k of order) voice[k] = V[k];
