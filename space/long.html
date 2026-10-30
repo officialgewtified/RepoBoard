@@ -163,7 +163,7 @@ function reticle(){let t="";for(let a=0;a<360;a+=5){const big=a%30===0,r1=440,r2
  const tri=a=>{const c=Math.cos(a*Math.PI/180),s=Math.sin(a*Math.PI/180),q=(r,o)=>[(r*c-o*s).toFixed(1),(r*s+o*c).toFixed(1)];return `<path d="M${q(452,0)} L${q(478,-14)} L${q(478,14)}Z" fill="#4FF3FF"/>`};
  return `<svg viewBox="-480 -480 960 960"><g class="rr1"><circle r="440" fill="none" stroke="#4FF3FF" stroke-width="3" opacity=".6"/>${t}</g><g class="rr2"><circle r="380" fill="none" stroke="#4FF3FF" stroke-width="2" stroke-dasharray="3 13" opacity=".55"/></g>
   <path d="${arc(-70,-20,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/><path d="${arc(110,160,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/>${[0,180,270].map(tri).join("")}</svg>`}
-const ROCK=(w,seed=11)=>`<svg viewBox="-400 -400 800 800" style="width:${w}px;filter:drop-shadow(0 0 60px rgba(255,181,71,.5))"><defs><radialGradient id="rk" cx="35%" cy="30%"><stop offset="0" stop-color="#d4ccc0"/><stop offset=".6" stop-color="#7a7066"/><stop offset="1" stop-color="#2a2622"/></radialGradient></defs><g class="spin">${rock(seed,330)}</g></svg>`;
+const ROCK=w=>`<img class="spin" src="ref/asteroid.png" style="width:${w}px;filter:drop-shadow(0 0 50px rgba(255,181,71,.45))">`;   // NASA's photo of asteroid Bennu
 // the art for a topic: rocket, asteroid, the Sun (SDO image), the Moon
 function artFor(topic,size,id){const s=D.scenes.find(x=>x.kind==="sun"),m=D.scenes.find(x=>x.kind==="moon");
  if(topic==="sun"&&s&&s.img)return `<img src="${esc(s.img)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;box-shadow:0 0 120px rgba(255,181,71,.6)">`;
@@ -286,7 +286,7 @@ function render(t){
   if(s.kind==="hook"){const rt=el.querySelector(".ret");rt.style.transform=`scale(${(1.4-.4*ease(lt/.8)).toFixed(3)})`;rt.style.opacity=ease(lt/.5);
    el.querySelector(".rr1").setAttribute("transform",`rotate(${(lt*10).toFixed(1)})`);el.querySelector(".rr2").setAttribute("transform",`rotate(${(-lt*24).toFixed(1)})`);
    const bg=el.querySelector(".big"),y=pop((lt-.1)/.5);bg.style.transform=`scale(${(.6+.4*y).toFixed(3)})`;bg.style.transformOrigin="0 50%";rev(".unit,.sub",.3,.15);
-   const sp=el.querySelector(".spin");if(sp)sp.setAttribute("transform",`rotate(${(lt*8).toFixed(1)})`)}
+   const sp=el.querySelector(".spin");if(sp)sp.style.transform=`rotate(${(lt*8).toFixed(1)}deg)`}
   if(s.kind==="spot")el.querySelectorAll(".hb").forEach((x,i)=>{const k=ease((lt-1-i*.3)/.9);x.style.transform=`scaleY(${k.toFixed(3)})`;x.style.transformOrigin="0 "+(540)+"px";x.style.transformBox="view-box"});
   if(s.kind==="ast")el.querySelectorAll(".ad").forEach((x,i)=>{const k=pop((lt-1.2-i*.18)/.45);x.style.opacity=clamp((lt-1.2-i*.18)/.1).toFixed(3);x.style.transform=`translateY(${((1-k)*20).toFixed(1)}px)`});
   if(s.kind==="sun"){el.querySelectorAll(".kb").forEach((x,i)=>{x.style.transform=`scaleY(${ease((lt-1.3-i*.1)/.5).toFixed(3)})`;x.style.transformOrigin="0 120px";x.style.transformBox="view-box"});
