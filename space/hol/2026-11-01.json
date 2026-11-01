@@ -1,0 +1,75 @@
+{
+ "template": "../space/hol.html",
+ "music": "../space/music",
+ "brand": "Liftoff",
+ "day": "2026-11-01",
+ "date": "Nov 1",
+ "kicker": "Higher or lower",
+ "hookBig": "VENUS",
+ "hookUnit": "breaks the rules",
+ "hookSub": "2 questions · beat the clock",
+ "hookPlanet": "venus",
+ "thumbKick": "Higher or lower?",
+ "thumbSub": "2 questions · beat the clock",
+ "hs": "QUIZ · NASA FACTS",
+ "source": "Source: NASA Space Place",
+ "rounds": [
+  {
+   "topic": "Temperature",
+   "a": {
+    "icon": "mercury",
+    "lab": "Daytime high",
+    "name": "Mercury",
+    "sub": "Closest planet to the Sun",
+    "v": 800,
+    "u": "°F"
+   },
+   "b": {
+    "icon": "venus",
+    "lab": "Average temp",
+    "name": "Venus",
+    "sub": "Farther from the Sun",
+    "v": 847,
+    "u": "°F"
+   },
+   "q": "Venus is <b>farther</b> from the Sun. <b>Higher</b> or <b>lower</b>?",
+   "fact": "Its thick carbon dioxide air traps heat like a greenhouse."
+  },
+  {
+   "topic": "Time",
+   "a": {
+    "icon": "venus-orbit",
+    "lab": "One orbit",
+    "name": "Venus",
+    "sub": "Around the Sun · Earth days",
+    "v": 225,
+    "u": "days"
+   },
+   "b": {
+    "icon": "venus-spin",
+    "lab": "One spin",
+    "name": "Venus",
+    "sub": "On its axis · Earth days",
+    "v": 243,
+    "u": "days"
+   },
+   "q": "How long does <b>one spin</b> take? <b>Higher</b> or <b>lower</b>?",
+   "fact": "Venus spins slower than it travels around the Sun."
+  }
+ ],
+ "voice": {
+  "hook": "Venus breaks the rules. Two questions. Beat the clock!",
+  "q0": "Mercury's days can hit 800 degrees Fahrenheit. Venus is farther from the Sun. Higher, or lower?",
+  "r0": "Higher! Venus averages about 847 degrees. Its thick atmosphere traps the heat.",
+  "q1": "Venus takes 225 Earth days to circle the Sun. How long to spin once? Higher, or lower?",
+  "r1": "Higher! 243 Earth days. Venus spins slower than it orbits.",
+  "outro": "How many did you get? Follow Liftoff for more!"
+ },
+ "ytTitle": "Venus Breaks the Rules 🪐 Higher or Lower? #shorts",
+ "caption": "Venus breaks the rules 🪐 Higher or lower? Comment your score 👇\n\nFacts: NASA Space Place\n\n#space #NASA #Venus #spacetrivia #higherorlower #astronomy",
+ "facts": [
+  "Mercury: daytime temperatures can reach about 800°F (NASA Space Place, Weather on Other Planets)",
+  "Venus: average temperature about 847°F; its thick carbon dioxide atmosphere traps heat (NASA Space Place)",
+  "Venus: one orbit of the Sun takes 225 Earth days; one spin on its axis takes 243 Earth days (NASA Space Place, All About Venus)"
+ ]
+}

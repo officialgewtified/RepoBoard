@@ -24,5 +24,5 @@
 </ol><p class="note" style="margin:0 16px 16px">Everything comes straight from the official box scores. If something ever looks off, skip that day rather than post it.</p></details>
 </main><div class="toast" id="toast"></div>
 <script src="../videos.js?v=1"></script>
-<script>VP.start({repo:"officialgewtified/RepoBoard",match:/^(clip|preview|weekly)-/,key:"crossover",empty:"The next video shows up here after tonight's games.",kind:t=>/^weekly/.test(t)?{label:"Long-form · YouTube",short:"Long-form",cls:"l",wide:true}:/^preview/.test(t)?{label:"Tonight's games",short:"Tonight",cls:"q"}:{label:"Daily recap",short:"Recap"}});</script>
+<script>VP.start({repo:"officialgewtified/RepoBoard",match:/^(clip|preview|weekly|hol)-/,key:"crossover",empty:"The next video shows up here after tonight's games.",kind:t=>/^hol/.test(t)?{label:"Higher or lower",short:"Quiz",cls:"q"}:/^weekly/.test(t)?{label:"Long-form · YouTube",short:"Long-form",cls:"l",wide:true}:/^preview/.test(t)?{label:"Tonight's games",short:"Tonight",cls:"q"}:{label:"Daily recap",short:"Recap"}});</script>
 </body></html>

@@ -1,0 +1,110 @@
+name: Higher or lower videos
+# Renders a Higher or Lower quiz for Crossover and Liftoff from a hand-checked episode file
+# (clips/hol/<name>.json and space/hol/<name>.json), with each channel's usual narrator, and puts both on the videos pages.
+on:
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: "Episode name, e.g. 2026-11-01 (blank = the newest file)"
+        required: false
+permissions:
+  contents: write
+concurrency:
+  group: hol
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ch: crossover
+            dir: clips/hol
+            tag: hol
+            voice: af_heart
+            ref: af_heart
+            speed: "1.12"
+            exag: "0.7"
+            tempo: "1.07"
+          - ch: liftoff
+            dir: space/hol
+            tag: space-hol
+            voice: af_bella
+            ref: af_bella
+            speed: "1.1"
+            exag: "0.65"
+            tempo: "1.06"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Which episode
+        id: ep
+        run: |
+          EP="${{ inputs.episode }}"
+          [ -z "$EP" ] && EP=$(ls ${{ matrix.dir }}/*.json 2>/dev/null | sort | tail -1 | xargs -r basename | sed 's/\.json$//')
+          if [ -z "$EP" ] || [ ! -f "${{ matrix.dir }}/$EP.json" ]; then echo "No ${{ matrix.ch }} episode to make"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          mkdir -p out && cp "${{ matrix.dir }}/$EP.json" out/data.json
+          echo "EP=$EP" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        if: steps.ep.outputs.skip != '1'
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        if: steps.ep.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        if: steps.ep.outputs.skip != '1'
+        with:
+          path: |
+            clips/.models
+            ~/.cache/huggingface
+          key: voices-kokoro-chatterbox-v1
+      - name: Browser and ffmpeg
+        if: steps.ep.outputs.skip != '1'
+        timeout-minutes: 12
+        working-directory: clips
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
+          which ffmpeg
+      - name: Voiceover
+        if: steps.ep.outputs.skip != '1'
+        # the channel's own narrator: Chatterbox cloned from a Kokoro read; Kokoro reads it if that fails; no voice at all if both fail
+        continue-on-error: true
+        timeout-minutes: 60
+        working-directory: clips
+        run: |
+          mkdir -p .models
+          [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          pip install -q kokoro-onnx soundfile
+          python ref.py
+          pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
+          python tts_cb.py ../out/data.json ../out/voice ref.wav || python tts.py ../out/data.json ../out/voice
+        env:
+          REF_VOICE: ${{ matrix.ref }}
+          VOICE: ${{ matrix.voice }}
+          SPEED: ${{ matrix.speed }}
+          EXAGGERATION: ${{ matrix.exag }}
+          CFG: "0.5"
+          TEMPO: ${{ matrix.tempo }}
+      - name: Render
+        if: steps.ep.outputs.skip != '1'
+        run: |
+          F="out/${{ matrix.ch }}-higher-or-lower-$EP"
+          node clips/render.js out/data.json "$F.mp4" 30
+          node -e "process.stdout.write(require('./out/data.json').caption||'')" > out/caption.txt
+          node -e "process.stdout.write((require('./out/data.json').facts||[]).join('\n'))" > out/fact-sheet.txt
+      - name: Publish
+        if: steps.ep.outputs.skip != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ matrix.tag }}-$EP"; F="out/${{ matrix.ch }}-higher-or-lower-$EP"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          THUMB=$(ls "$F-thumbnail.jpg" 2>/dev/null || true); FS=$([ -s out/fact-sheet.txt ] && echo out/fact-sheet.txt || true)
+          gh release create "$TAG" "$F.mp4" $THUMB $FS out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
