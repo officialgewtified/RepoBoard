@@ -70,16 +70,60 @@ def trim(a, sr):
         return a
     return a[max(0, loud[0] - int(.03 * sr)):min(len(a), loud[-1] + int(.08 * sr))]
 
+# every sentence is listened back to (voiceqa.py) and re-recorded if it comes out wrong: up to TAKES tries with
+# Chatterbox, then Kokoro reads that sentence (Chatterbox is cloned from a Kokoro voice, so it's the same narrator)
+TAKES = int(os.environ.get("TAKES", "4"))
+try:
+    import voiceqa; voiceqa.model(); QA = True
+except Exception as e:
+    print("voice check unavailable, sentences won't be listened back to:", e, flush=True); QA = False
+_tmp = os.path.join(out, "_take.wav")
+
+def listen(a, sr, s):
+    if not QA: return True, 0, []
+    sf.write(_tmp, a, sr)
+    ok, score, probs, heard = voiceqa.check_line(_tmp, s, len(a) / sr)
+    if not ok: print(f"   x take rejected: {'; '.join(probs)}  | heard: {heard[:80]}", flush=True)
+    return ok, score, probs
+
+def kokoro_take(s, sr):
+    import tts
+    a, ksr, _ = tts.speak(s, os.environ.get("VOICE", "af_heart"), float(os.environ.get("SPEED", "1.1")))
+    if ksr != sr:
+        a = np.interp(np.linspace(0, len(a) - 1, int(len(a) * sr / ksr)), np.arange(len(a)), a).astype(np.float32)
+    return trim(a, sr)
+
+def take(s, sr):
+    """the best of up to TAKES Chatterbox reads of one sentence -> (audio, takes used, engine, problems left)"""
+    best = None
+    for n in range(1, TAKES + 1):
+        if n > 1: torch.manual_seed(1000 * n + len(s))
+        wav = model.generate(fix(s), audio_prompt_path=ref, exaggeration=EXAG, cfg_weight=CFG)
+        a = trim(wav.squeeze(0).cpu().numpy().astype(np.float32), sr)
+        ok, score, probs = listen(a, sr, s)
+        if ok: return a, n, "chatterbox", []
+        if best is None or score > best[1]: best = (a, score, probs)
+    try:
+        a = kokoro_take(s, sr); ok, score, probs = listen(a, sr, s)
+        if ok or score > best[1]:
+            print(f"   -> Kokoro read this sentence: {s[:60]}", flush=True)
+            return a, TAKES, "kokoro", probs
+    except Exception as e:
+        print("   Kokoro fallback failed:", e, flush=True)
+    return best[0], TAKES, "chatterbox", best[2]
+
 D = json.load(open(data_path))
-D["dur"], D["cues"] = {}, {}
+D["dur"], D["cues"], D["voiceQA"] = {}, {}, {}
 GAP = 0.16
 TEMPO = float(os.environ.get("TEMPO", "1.07")) if shutil.which("ffmpeg") else 1.0
 for sid, text in D["voice"].items():
     sents = [s for s in re.split(r"(?<=[.!?])\s+", prep(text).strip()) if s]
     parts, cues, t, sr = [], [], 0.0, model.sr
+    qa = {"takes": 0, "problems": []}
     for i, s in enumerate(sents):
-        wav = model.generate(fix(s), audio_prompt_path=ref, exaggeration=EXAG, cfg_weight=CFG)
-        a = trim(wav.squeeze(0).cpu().numpy().astype(np.float32), sr)
+        a, n, eng, probs = take(s, sr)
+        qa["takes"] = max(qa["takes"], n); qa["problems"] += probs
+        qa.setdefault("engines", []).append(eng)
         cues.append(round(t, 3)); parts.append(a); t += len(a) / sr
         if i < len(sents) - 1:
             parts.append(np.zeros(int(GAP * sr), dtype=np.float32)); t += GAP
@@ -90,9 +134,12 @@ for sid, text in D["voice"].items():
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", f, "-filter:a", f"atempo={TEMPO}", f + ".tmp.wav"], check=True)
         os.replace(f + ".tmp.wav", f); w, sr2 = sf.read(f); cues = [round(c / TEMPO, 3) for c in cues]; sr = sr2
     D["dur"][sid], D["cues"][sid] = round(len(w) / sr, 3), cues
+    E = set(qa.pop("engines", []) or ["chatterbox"]); qa["engine"] = E.pop() if len(E) == 1 else "mixed"
+    D["voiceQA"][sid] = qa
     print(f"{sid}: {D['dur'][sid]:.1f}s  {text[:70]}", flush=True)
 D["voiceDir"] = os.path.abspath(out)
 D["voiceEngine"] = "chatterbox"
 D["voiceTempo"] = TEMPO
+if os.path.exists(_tmp): os.remove(_tmp)
 json.dump(D, open(data_path, "w"), indent=1)
 print("total voice", round(sum(D["dur"].values()), 1), "s")

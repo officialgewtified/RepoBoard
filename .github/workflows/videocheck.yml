@@ -1,0 +1,42 @@
+name: Check published videos
+# Runs the same pre-publish check (clips/check.py) on videos that are already on the videos pages:
+# does the narration match the script, is anything garbled, missing, silent or clipped.
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Release tags to check, separated by spaces (e.g. hol-2026-11-01 space-2026-11-01)"
+        required: true
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: clips
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: whisper-small-en-v1
+      - name: Tools
+        run: |
+          pip install -q faster-whisper
+          which ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null)
+      - name: Check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bad=0
+          for T in ${{ inputs.tags }}; do
+            mkdir -p "v/$T"; gh release download "$T" -R "${{ github.repository }}" -p "*.mp4" -p "data.json" -p "quick-*.json" -D "v/$T" --clobber || { echo "can't download $T"; bad=1; continue; }
+            J=$(ls v/$T/data.json v/$T/quick-*.json 2>/dev/null | head -1)
+            python clips/check.py "$(ls v/$T/*.mp4 | head -1)" "$J" "v/$T/report.json" || bad=1
+            echo "## $T" >> "$GITHUB_STEP_SUMMARY"; python -c "import json;r=json.load(open('v/$T/report.json'));print(('PASS' if r['ok'] else 'FAIL')+'\n'+'\n'.join(['- '+x for x in r['notes']+r['fails']]))" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          done
+          exit $bad

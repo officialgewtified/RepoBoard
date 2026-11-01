@@ -56,7 +56,7 @@ jobs:
           path: |
             clips/.models
             ~/.cache/huggingface
-          key: voices-kokoro-chatterbox-v1
+          key: voices-kokoro-chatterbox-whisper-v2
       - name: Browser and ffmpeg
         if: inputs.dry != 'yes'
         timeout-minutes: 12
@@ -82,7 +82,7 @@ jobs:
           mkdir -p .models
           [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
           [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
-          pip install -q kokoro-onnx soundfile
+          pip install -q kokoro-onnx soundfile faster-whisper
           python ref.py
           pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
           python tts_cb.py ../space/out/data.json ../space/out/voice ref.wav || python tts.py ../space/out/data.json ../space/out/voice
@@ -99,6 +99,12 @@ jobs:
           node ../clips/render.js out/data.json "out/liftoff-week-$DAY.mp4" 24
           node -e "const d=require('./out/data.json'),fs=require('fs');const f='out/liftoff-week-$DAY.chapters.txt';const ch=fs.existsSync(f)?fs.readFileSync(f,'utf8').trim():'';process.stdout.write(d.description.replace('CHAPTERS_HERE',ch))" > out/description.txt
           cat out/description.txt
+      - name: Check before publishing
+        # listens to the finished video: narration matches the script, nothing garbled, silent or clipped; a failure stops the publish
+        if: inputs.dry != 'yes'
+        run: |
+          pip install -q faster-whisper
+          python ../clips/check.py "out/liftoff-week-$DAY.mp4" out/data.json
       - name: Publish
         if: inputs.dry != 'yes'
         env:
