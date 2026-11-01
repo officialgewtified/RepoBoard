@@ -6,7 +6,7 @@ words are compared with the script. Used two ways:
   check.py checks the finished video before it's published.
 
 What counts as a bad read: words missing or garbled, extra babble, a long pause in the middle, dead air or noise before
-or after the words, or a pace far too fast or too slow for a person."""
+or after the words, a pace far too fast or too slow for a person, or a pitch far from her normal voice (shrill/shouted)."""
 import difflib, os, re
 
 ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split()
@@ -85,8 +85,21 @@ def transcribe(path):
         ws += [(w.start, w.end, w.word) for w in (s.words or [])]
     return " ".join(text).strip(), ws
 
-def check_line(path, expected, dur):
-    """one recorded sentence -> (ok, score, problems). score: higher is better, used to keep the best of several takes"""
+def pitch(path):
+    """the voice's typical pitch in Hz (median over voiced 40 ms frames), or None"""
+    import numpy as np
+    x, sr, n, out = load16k(path), 16000, 640, []
+    for i in range(0, len(x) - n, 320):
+        f = x[i:i + n] - x[i:i + n].mean()
+        if np.sqrt((f ** 2).mean()) < .015: continue
+        ac = np.correlate(f, f, "full")[n - 1:]; lo, hi = sr // 400, sr // 75
+        k = lo + int(np.argmax(ac[lo:hi]))
+        if ac[k] > .5 * ac[0]: out.append(sr / k)
+    return float(np.median(out)) if len(out) >= 5 else None
+
+def check_line(path, expected, dur, ref_f0=None):
+    """one recorded sentence -> (ok, score, problems). score: higher is better, used to keep the best of several takes.
+    ref_f0: her normal pitch (from the reference read); a take far above it sounds shrill or shouted, far below, croaky"""
     heard, ws = transcribe(path)
     c = compare(expected, heard)
     n = max(1, len(norm(expected)))
@@ -105,5 +118,9 @@ def check_line(path, expected, dur):
     if rate > 5.2: problems.append(f"too fast ({rate:.1f} words/s)")
     if n >= 3 and rate < 1.4: problems.append(f"too slow ({rate:.1f} words/s)")
     if n <= 2 and dur > 2.2: problems.append(f"{dur:.1f}s for a {n}-word line")
+    if ref_f0:
+        f = pitch(path)
+        if f and f > ref_f0 * 1.32: problems.append(f"pitch {f:.0f} Hz, way above her normal {ref_f0:.0f} Hz (shrill or shouting)")
+        if f and f < ref_f0 * .72: problems.append(f"pitch {f:.0f} Hz, way below her normal {ref_f0:.0f} Hz")
     score = c["recall"] - .5 * c["extra"] - .25 * len(problems)
     return not problems, score, problems, heard

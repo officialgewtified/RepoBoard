@@ -75,15 +75,16 @@ def trim(a, sr):
 TAKES = int(os.environ.get("TAKES", "4"))
 try:
     import voiceqa; voiceqa.model(); QA = True
+    REF_F0 = voiceqa.pitch(ref); print("her normal pitch:", REF_F0 and round(REF_F0), "Hz", flush=True)
 except Exception as e:
-    print("voice check unavailable, sentences won't be listened back to:", e, flush=True); QA = False
+    print("voice check unavailable, sentences won't be listened back to:", e, flush=True); QA = False; REF_F0 = None
 _tmp = os.path.join(out, "_take.wav")
 
 def listen(a, sr, s):
     if not QA: return True, 0, []
     sf.write(_tmp, a, sr)
     try:
-        ok, score, probs, heard = voiceqa.check_line(_tmp, s, len(a) / sr)
+        ok, score, probs, heard = voiceqa.check_line(_tmp, s, len(a) / sr, REF_F0)
     except Exception as e:   # the check itself broke: keep the take (check.py still listens to the finished video)
         print("   voice check failed to run:", e, flush=True); return True, 0, []
     if not ok: print(f"   x take rejected: {'; '.join(probs)}  | heard: {heard[:80]}", flush=True)
@@ -96,16 +97,26 @@ def kokoro_take(s, sr):
         a = np.interp(np.linspace(0, len(a) - 1, int(len(a) * sr / ksr)), np.arange(len(a)), a).astype(np.float32)
     return trim(a, sr)
 
+# re-recording costs time and every run has a time limit: once this much time has gone into retakes, later sentences
+# get one take (still listened to, and check.py still gates the finished video)
+BUDGET, _spent = float(os.environ.get("RETAKE_BUDGET", "900")), [0.0]
+
 def take(s, sr):
     """the best of up to TAKES Chatterbox reads of one sentence -> (audio, takes used, engine, problems left)"""
+    import time
     best = None
     for n in range(1, TAKES + 1):
+        if n > 1 and _spent[0] > BUDGET:
+            print("   retake time used up for this run; keeping the best take", flush=True); break
+        t0 = time.time()
         if n > 1: torch.manual_seed(1000 * n + len(s))
         wav = model.generate(fix(s), audio_prompt_path=ref, exaggeration=EXAG, cfg_weight=CFG)
         a = trim(wav.squeeze(0).cpu().numpy().astype(np.float32), sr)
         ok, score, probs = listen(a, sr, s)
+        if n > 1: _spent[0] += time.time() - t0
         if ok: return a, n, "chatterbox", []
         if best is None or score > best[1]: best = (a, score, probs)
+    if _spent[0] > BUDGET: return best[0], n, "chatterbox", best[2]
     try:
         a = kokoro_take(s, sr); ok, score, probs = listen(a, sr, s)
         if ok or score > best[1]:

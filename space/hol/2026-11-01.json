@@ -51,12 +51,12 @@
   }
  ],
  "voice": {
-  "hook": "Higher or lower, space edition! Two rounds on Venus. Beat the clock!",
-  "q0": "Mercury's days can hit 800 degrees Fahrenheit. Venus is farther from the Sun. Higher, or lower?",
-  "r0": "Higher! Venus averages about 847 degrees. Its thick atmosphere traps the heat.",
-  "q1": "Venus takes 225 Earth days to circle the Sun. How long does one spin take? Higher, or lower?",
-  "r1": "Higher! 243 Earth days. Venus spins slower than it orbits.",
-  "outro": "How many did you get? Follow Liftoff for more!"
+  "hook": "It's Higher or Lower, space edition, with two rounds on Venus. Try to beat the clock.",
+  "q0": "Mercury's days can hit 800 degrees Fahrenheit. Venus is farther from the Sun, so is its average temperature higher, or lower?",
+  "r0": "It's higher. Venus averages about 847 degrees, because its thick atmosphere traps the heat.",
+  "q1": "Venus takes 225 Earth days to circle the Sun. Is one spin on its axis higher, or lower?",
+  "r1": "It's higher, at 243 Earth days. Venus spins slower than it travels around the Sun.",
+  "outro": "How many did you get? Follow Liftoff for more."
  },
  "ytTitle": "Venus Breaks the Rules 🪐 Higher or Lower? #shorts",
  "caption": "Venus breaks the rules 🪐 Higher or lower? Comment your score 👇\n\nFacts: NASA Space Place\n\n#space #NASA #Venus #spacetrivia #higherorlower #astronomy",

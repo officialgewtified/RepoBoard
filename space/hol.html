@@ -238,15 +238,16 @@ function build(data){D=data;SC=[];SFX=[];RD=[];
  const R=rnd(42);let st="";STARS=[];for(let i=0;i<170;i++){const x=R()*1080,y=R()*1920,r=R()<.08?2.2:R()*1.3+.4;STARS.push(R()*6.28);st+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(1)}" fill="#fff"/>`}
  document.getElementById("stars").innerHTML=st;document.getElementById("stars").setAttribute("viewBox","0 0 1080 1920");
  const n=D.rounds.length,vd=id=>D.dur&&D.dur[id]!=null?D.dur[id]:null;
- const hookLen=vd("hook")!=null?Math.max(2.6,vd("hook")+.15+.4):NOV.hook,outLen=vd("outro")!=null?Math.max(2.8,vd("outro")+.35+.4):NOV.outro;
- const qLen=i=>vd("q"+i)!=null?Math.max(1.6,.4+vd("q"+i)+.25):.6+NOV.q,rLen=i=>vd("r"+i)!=null?Math.max(2.8,.2+vd("r"+i)+.5):NOV.r;
+ const hookLen=vd("hook")!=null?Math.max(2.6,vd("hook")+.45+.4):NOV.hook,outLen=vd("outro")!=null?Math.max(2.8,vd("outro")+.35+.4):NOV.outro;
+ // her lines start a beat after the sound effects, so nothing plays over her words
+ const qLen=i=>vd("q"+i)!=null?Math.max(1.6,.55+vd("q"+i)+.25):.6+NOV.q,rLen=i=>vd("r"+i)!=null?Math.max(2.8,.6+vd("r"+i)+.5):NOV.r;
  let h="",t=0;
- SC.push({id:"hook",kind:"hook",t0:0,t1:hookLen,va:.15});
+ SC.push({id:"hook",kind:"hook",t0:0,t1:hookLen,va:.45});
  h+=`<div class="sc" id="hook"><div class="ret">${reticle()}</div><div class="pl0">${planet(D.hookPlanet||"venus","hk")}</div><div class="low"><div class="kick"><i></i>${esc(D.kicker||"Space edition")}</div>
   <div class="hg u">Higher${UP}</div><div class="hg d">or lower${DN}</div><div class="sub">${esc(D.hookSub||n+" rounds · beat the clock")}</div></div></div>`;
  t=hookLen;
  D.rounds.forEach((Q,i)=>{const t0=t,cs=t0+qLen(i),rv=cs+CD,t1=rv+rLen(i),hi=Q.b.v>Q.a.v;
-  RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,kind:"round",t0,t1,va:t0+.4,i},{id:"r"+i,kind:"voice",t0:rv,t1,va:rv+.2});
+  RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,kind:"round",t0,t1,va:t0+.55,i},{id:"r"+i,kind:"voice",t0:rv,t1,va:rv+.6});
   const side=(x,c,k)=>`<div class="pn ${c}"><div class="pl">${planet(x.icon,"p"+i+c)}${k?`<div class="cdr">${CDR}<b>3</b></div>`:""}</div><div class="pv"><div class="nm2">${esc(x.name)}</div><div class="lb2">${esc(x.lab)}</div>
    <div class="val">${k?`<div class="v qk">?</div><div class="v vb" data-v="${x.v}" style="opacity:0">${vhtml(x)}</div>`:`<div class="v va">${vhtml(x)}</div>`}</div></div></div>`;
   const dv=Math.abs(Q.b.v-Q.a.v);
@@ -265,10 +266,9 @@ function build(data){D=data;SC=[];SFX=[];RD=[];
  document.querySelectorAll(".qz").forEach(e=>{let fs=50;while(e.scrollHeight>e.clientHeight+1&&fs>30){fs-=2;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".vdc").forEach(e=>{let fs=96;while(e.scrollWidth>e.clientWidth+1&&fs>50){fs-=4;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".val .v").forEach(e=>{let fs=150;while(e.getBoundingClientRect().width>560&&fs>70){fs-=6;e.style.fontSize=fs+"px"}});
- SFX.push({t:.05,k:"impact"},{t:.3,k:"impact"},{t:.75,k:"pop"},{t:1.05,k:"pop"});
- for(const r of RD){SFX.push({t:r.t0,k:"whoosh"},{t:r.t0+.15,k:"impact"},{t:r.t0+.5,k:"beep"},{t:r.t0+.85,k:"compute"},{t:r.t0+1.05,k:"pop"},{t:r.t0+1.15,k:"pop"});
-  for(let k=0;k<3;k++)SFX.push({t:r.cs+k*CD/3,k:"tick"});SFX.push({t:r.rv-.85,k:"riser"},{t:r.rv,k:"impact"},{t:r.rv+.2,k:"stamp"},{t:r.rv+.45,k:"beep"});
-  const q=D.rounds[r.i];if(q.fact){const at0=r.rv+.7;for(let k=0;k<Math.ceil(q.fact.length/34/1.4);k++)SFX.push({t:at0+k*1.4,k:"typing"})}}
+ SFX.push({t:.05,k:"impact"},{t:.3,k:"impact"});
+ for(const r of RD){SFX.push({t:r.t0,k:"whoosh"},{t:r.t0+.15,k:"impact"});
+  for(let k=0;k<3;k++)SFX.push({t:r.cs+k*CD/3,k:"tick"});SFX.push({t:r.rv-.85,k:"riser"},{t:r.rv,k:"impact"},{t:r.rv+.2,k:"stamp"})}
  const o=SC[SC.length-1];SFX.push({t:o.t0,k:"whoosh"},{t:o.t0+.5,k:"pop"});
  SFX.push({t:t+.1,k:"sting"},{t:t+1.2,k:"rumble"},{t:t+1.3,k:"whoosh"});
  return TOTAL}

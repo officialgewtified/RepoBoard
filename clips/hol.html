@@ -118,19 +118,20 @@ function build(data){D=data;SC=[];SCR=[];RD=[];SFX=[];
  document.getElementById("dt").textContent="Higher or lower · "+D.date;document.getElementById("src").textContent=D.source||"";
  const n=D.rounds.length,vd=id=>D.dur&&D.dur[id]!=null?D.dur[id]:null;
  // lengths first, then stretch the thinking time so the video always runs past a minute (TikTok pays on 1:00+)
- const hookLen=vd("hook")!=null?Math.max(2.6,vd("hook")+.45):NOV.hook,outLen=vd("outro")!=null?Math.max(3.6,vd("outro")+.3+.6):NOV.outro;
- const qLen=i=>vd("q"+i)!=null?.35+vd("q"+i)+.3:.6+NOV.q,rLen=i=>vd("r"+i)!=null?Math.max(2.2,.2+vd("r"+i)+.55):NOV.r;
+ const hookLen=vd("hook")!=null?Math.max(2.6,vd("hook")+.35+.4):NOV.hook,outLen=vd("outro")!=null?Math.max(3.6,vd("outro")+.3+.6):NOV.outro;
+ // her lines start a beat after the sound effects, so nothing plays over her words
+ const qLen=i=>vd("q"+i)!=null?.6+vd("q"+i)+.3:.6+NOV.q,rLen=i=>vd("r"+i)!=null?Math.max(2.2,.6+vd("r"+i)+.5):NOV.r;
  let base=hookLen+outLen+TAIL;for(let i=0;i<n;i++)base+=qLen(i)+CD+rLen(i);
  const extra=Math.max(0,(D.min??62)-base)/n;
  let h="",t=0;
- SC.push({id:"hook",t0:0,t1:hookLen,va:.1});SCR.push({id:"hook",kind:"hook",t0:0,t1:hookLen});
+ SC.push({id:"hook",t0:0,t1:hookLen,va:.35});SCR.push({id:"hook",kind:"hook",t0:0,t1:hookLen});
  h+=`<div class="sc" id="hook" style="--tc:${D.hookColor||"#18181b"}"><div class="full"></div>${bg()}<div class="in hk">${tag(esc(D.kicker||"NBA + NFL legends"))}
   <div style="margin-top:60px"><div class="hw">Higher${ARROW.up.replace("<svg","<svg style=\"color:#D7FF3A\"")}</div></div><div style="margin-top:14px"><div class="hw v">or lower${ARROW.dn.replace("<svg","<svg style=\"color:#fff\"")}</div></div>
   <div style="margin-top:56px"><div class="bar"><span><b>${n} rounds</b> · ${esc(D.hookLine||"guess before the clock hits zero")}</span></div></div>
   <div style="margin-top:22px">${tag("Keep score","w")}</div></div></div>`;
  t=hookLen;
  D.rounds.forEach((R,i)=>{const t0=t,cs=t0+qLen(i)+extra,rv=cs+CD,t1=rv+rLen(i),hi=R.b.v>R.a.v,dv=Math.abs(R.b.v-R.a.v);
-  RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,t0,t1:rv,va:t0+.35},{id:"r"+i,t0:rv,t1,va:rv+.2});SCR.push({id:"r_"+i,kind:"round",t0,t1,i});
+  RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,t0,t1:rv,va:t0+.6},{id:"r"+i,t0:rv,t1,va:rv+.6});SCR.push({id:"r_"+i,kind:"round",t0,t1,i});
   h+=`<div class="sc" id="r_${i}" style="--ac:${R.a.c};--bc:${R.b.c}"><div class="ha"></div><div class="hb"></div>${bg()}<div class="seam"></div>
    <div class="in hdr">${tag(esc(R.lg+" · "+R.stat))}</div><div class="rk">${i+1}/${n}</div>
    <div class="in pa"><div class="who">${esc(R.a.name)}</div><div class="num na">${esc(R.a.s||com(R.a.v))}</div><div class="lab"><div class="bar"><span>${esc(R.stat)}</span></div></div></div>
@@ -155,9 +156,9 @@ function build(data){D=data;SC=[];SCR=[];RD=[];SFX=[];
  document.querySelectorAll(".qb .bar,.diff .bar").forEach(e=>{let fs=36;while(e.getBoundingClientRect().width>860&&fs>22){fs-=1;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".hw").forEach(e=>{let fs=300;while(e.getBoundingClientRect().width>860&&fs>150){fs-=10;e.style.fontSize=fs+"px"}});
  // sound: impact on the hook, a whoosh on every wipe, an impact as A's number lands, ticks on the clock, a riser into the reveal
- SFX.push({t:.05,k:"impact"},{t:.9,k:"pop"},{t:1.4,k:"pop"});
- for(const r of RD){SFX.push({t:Math.max(.05,r.t0-.2),k:"whoosh"},{t:r.t0+.32,k:"impact"},{t:r.t0+.9,k:"pop"});
-  for(let k=0;k<CD;k++)SFX.push({t:r.cs+k,k:"tick"});SFX.push({t:r.rv-.85,k:"riser"},{t:r.rv,k:"impact"},{t:r.rv+.45,k:"stamp"},{t:r.rv+.75,k:"beep"})}
+ SFX.push({t:.05,k:"impact"});
+ for(const r of RD){SFX.push({t:Math.max(.05,r.t0-.2),k:"whoosh"},{t:r.t0+.3,k:"impact"});
+  for(let k=0;k<CD;k++)SFX.push({t:r.cs+k,k:"tick"});SFX.push({t:r.rv-.85,k:"riser"},{t:r.rv,k:"impact"},{t:r.rv+.4,k:"stamp"})}
  const o=SCR[SCR.length-1];SFX.push({t:o.t0-.2,k:"whoosh"},{t:o.t0+.2,k:"impact"},{t:o.t0+1.0,k:"pop"},{t:o.t0+1.75,k:"beep"});
  SFX.push({t:t+.05,k:"whoosh"},{t:t+.35,k:"impact"},{t:t+.5,k:"sting"});
  return TOTAL}
