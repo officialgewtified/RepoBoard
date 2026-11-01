@@ -360,8 +360,9 @@ async function build(day, outDir, brand) {
   const voice = {}; for (const s of S) voice[s.id] = V[s.id];
 
   const sum = [`${N} Launches`, aN2 != null && `${aN2} Asteroid Flybys`, deep.title].filter(Boolean);
-  const tBase = `This Week in Space: ${H[4] ? H[4] + ", " + sum.slice(0, 2).join(" & ") : sum.join(", ").replace(/, ([^,]*)$/, " & $1")} 🚀`;
-  const ytTitle = (tBase + " | " + range).length <= 100 ? tBase + " | " + range : tBase.slice(0, 100);
+  // short enough to read in full on the YouTube home screen (about 55 characters): the week's headline, then the series
+  const head = H[4] ? H[4].replace(/^(An?|The) (?=Asteroid|G\d)/, "") : `${N} Launches & ${aN2 || 0} Asteroid Flybys`;
+  const ytTitle = [`${head} 🚀 This Week in Space`, `${head} | This Week in Space`, head].find(t => t.length <= 55) || head.slice(0, 55);
   const desc = [V.hook.replace(/ Welcome to.*$/, ""), "", `This Week in Space for ${range}: every launch, the asteroid flybys, what the Sun did, what's in the night sky, and a deep dive on ${deep.title.toLowerCase()}.`, "",
     "CHAPTERS_HERE", "",
     `🚀 Launches: ${N} in the past 7 days${N ? ` (${okN} successful)` : ""}; ${next.length} scheduled for the next 7`,

@@ -320,12 +320,15 @@ function assemble(wk, season, games, std, nba, brand, next) {
     `That's Week ${wk}! Drop your player of the week in the comments, subscribe to ${brand} for daily stats, and we'll see you next week!`);
 
   const range = `${md(games[0].date)} – ${md(games[games.length - 1].date)}`;
-  const title = `NFL Week ${wk} Recap: ${hp.n.split(" ").slice(-1)[0]}'s ${h[1]} ${cap(h[2]).replace(/ (\w)/g, (m, x) => " " + x.toUpperCase())}, Every Score & Week ${wk + 1} Preview`;
+  // short enough to read in full on the YouTube home screen (about 55 characters)
+  const SHORTL = { "touchdown passes": "TD Passes", "rushing touchdowns": "Rushing TDs", "receiving touchdowns": "Receiving TDs", interceptions: "INTs" };
+  const lab = SHORTL[h[2]] || cap(h[2]).replace(/ (\w)/g, (m, x) => " " + x.toUpperCase()), base = `NFL Week ${wk}: ${hp.n.split(" ").slice(-1)[0]}'s ${h[1]} ${lab}`;
+  const title = [`${base} & Every Score`, base, `NFL Week ${wk} Recap: Every Score & Top Stats`].find(t => t.length <= 55);
   const desc = [`${hp.n}: ${h[1]} ${h[2]} 🔥 Every score from NFL Week ${wk} (${range}), the games everyone is talking about, the stat leaders, defense, fantasy top 5, the player of the week, the best records, the NBA's best games${next.length ? `, and the Week ${wk + 1} matchups to watch` : ""}.`, "",
     "CHAPTERS", "{{chapters}}", "", "Who's your player of the week? Tell us in the comments 👇", "New stat recaps every day. Subscribe for next week's recap!", "",
     `#NFL #NFLWeek${wk} #FantasyFootball #NFLHighlights #${hp.n.replace(/[^A-Za-z0-9]/g, "")} #Crossover`].join("\n");
   return { mode: "weekly", template: "weekly.html", w: 1920, h: 1080, brand, day: games[games.length - 1].date.slice(0, 10), week: wk, season, range,
-    title: `NFL Week ${wk} Recap`, ytTitle: title.length <= 100 ? title : `NFL Week ${wk} Recap: Every Score, Top Performers & Week ${wk + 1} Preview`, description: desc, source: "Stats: ESPN box scores", scenes, voice };
+    title: `NFL Week ${wk} Recap`, ytTitle: title, description: desc, source: "Stats: ESPN box scores", scenes, voice };
 }
 
 module.exports = { assemble };
