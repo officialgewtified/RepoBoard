@@ -82,7 +82,10 @@ _tmp = os.path.join(out, "_take.wav")
 def listen(a, sr, s):
     if not QA: return True, 0, []
     sf.write(_tmp, a, sr)
-    ok, score, probs, heard = voiceqa.check_line(_tmp, s, len(a) / sr)
+    try:
+        ok, score, probs, heard = voiceqa.check_line(_tmp, s, len(a) / sr)
+    except Exception as e:   # the check itself broke: keep the take (check.py still listens to the finished video)
+        print("   voice check failed to run:", e, flush=True); return True, 0, []
     if not ok: print(f"   x take rejected: {'; '.join(probs)}  | heard: {heard[:80]}", flush=True)
     return ok, score, probs
 

@@ -67,9 +67,17 @@ def model():
                               cpu_threads=os.cpu_count() or 4)
     return _model
 
+def load16k(path):
+    """any audio or video file -> 16 kHz mono float32 samples, decoded by ffmpeg (faster-whisper's own decoder breaks
+    on some PyAV versions)"""
+    import numpy as np, subprocess
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-vn", "-ac", "1", "-ar", "16000", "-f", "f32le", "-"],
+                         capture_output=True, check=True).stdout
+    return np.frombuffer(raw, dtype=np.float32).copy()
+
 def transcribe(path):
     """-> (text, [(start, end, word), ...])"""
-    segs, _ = model().transcribe(path, language="en", beam_size=5, word_timestamps=True, vad_filter=False,
+    segs, _ = model().transcribe(load16k(path), language="en", beam_size=5, word_timestamps=True, vad_filter=False,
                                  condition_on_previous_text=False, temperature=0)
     text, ws = [], []
     for s in segs:
