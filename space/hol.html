@@ -117,36 +117,56 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #thumb .u{align-self:stretch;margin-top:20px;text-align:center;font:800 58px/1.1 "Unbounded";color:var(--sol);text-transform:uppercase;white-space:nowrap;text-shadow:0 0 30px rgba(255,181,71,.45)}
 #thumb .ft{position:absolute;left:150px;right:150px;bottom:100px;display:flex;justify-content:space-between;align-items:center;font:700 28px/1 "JBM";letter-spacing:.2em;color:var(--dim);text-transform:uppercase;border-top:2px solid var(--line);padding-top:20px}
 
-/* HIGHER OR LOWER, Liftoff edition: two readout panels, a countdown ring, the verdict locks in where the VS was,
-   and a DID YOU KNOW typed at the bottom. Everything else (stars, HUD, brackets, rocket ending) is the daily report's. */
-.sc .pn{position:absolute;left:0;right:0;height:380px;display:grid;grid-template-columns:230px 1fr;gap:30px;align-items:center;background:var(--glass);border:2px solid var(--line);padding:24px 30px}
-.pn::before,.pn::after{content:"";position:absolute;width:22px;height:22px;border:3px solid var(--ion)}
-.pn::before{left:-3px;top:-3px;border-right:0;border-bottom:0}.pn::after{right:-3px;bottom:-3px;border-left:0;border-top:0}
-.pn.a{top:90px}.pn.b{top:590px}
-.pl{width:230px;height:230px}.pl svg{width:100%;height:100%;overflow:visible}
-.pv{min-width:0;position:relative;height:100%;display:flex;flex-direction:column;justify-content:center}
-.pv .nm2{font:800 54px/1.05 "Unbounded";text-transform:uppercase;white-space:nowrap;margin-top:12px}
-.pv .sb{font:700 24px/1.2 "JBM";letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-top:10px;white-space:nowrap}
+/* HIGHER OR LOWER, Liftoff edition. Read top to bottom like the game: the title, the number you know, the question with
+   two giant buttons, then the mystery number. Green = higher, red = lower, amber = unknown. Stars, HUD and the rocket
+   ending are the daily report's. */
+.ttl{position:absolute;left:0;right:0;top:0;text-align:center;font:900 96px/1 "Unbounded";letter-spacing:-.01em;white-space:nowrap;text-transform:uppercase;text-shadow:0 0 40px rgba(79,243,255,.35),0 6px 0 rgba(0,0,0,.4)}
+.ttl svg{width:.6em;height:.6em;vertical-align:.03em;margin:0 .08em}
+.ttl .u{color:var(--aur)}.ttl .d{color:var(--red)}
+.rnd{position:absolute;left:0;right:0;top:116px;text-align:center;font:800 26px/1 "JBM";letter-spacing:.24em;color:var(--ion);text-transform:uppercase}
+.rnd i{display:inline-block;width:46px;height:3px;background:var(--ion);vertical-align:8px;margin:0 18px;box-shadow:0 0 10px var(--ion)}
+.sc .pn{position:absolute;left:0;right:0;height:330px;display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:center;background:var(--glass);border:3px solid var(--line);padding:20px 28px}
+.pn::before,.pn::after{content:"";position:absolute;width:24px;height:24px;border:4px solid var(--ion)}
+.pn::before{left:-4px;top:-4px;border-right:0;border-bottom:0}.pn::after{right:-4px;bottom:-4px;border-left:0;border-top:0}
+.pn.a{top:160px}.pn.b{top:820px;border-color:rgba(255,181,71,.6);border-style:dashed}
+.pn.b::before,.pn.b::after{border-color:var(--sol)}
+.pn.b.win-u{border-color:var(--aur);border-style:solid;box-shadow:0 0 50px rgba(92,255,168,.25)}.pn.b.win-u::before,.pn.b.win-u::after{border-color:var(--aur)}
+.pn.b.win-d{border-color:var(--red);border-style:solid;box-shadow:0 0 50px rgba(255,90,90,.25)}.pn.b.win-d::before,.pn.b.win-d::after{border-color:var(--red)}
+.pl{width:220px;height:220px}.pl svg{width:100%;height:100%;overflow:visible}
+.pv{min-width:0;position:relative}
+.pv .nm2{font:900 62px/1 "Unbounded";text-transform:uppercase;white-space:nowrap}
+.pv .lb2{font:800 26px/1.2 "JBM";letter-spacing:.12em;color:var(--ion);text-transform:uppercase;margin-top:12px;white-space:nowrap}
+.pn.b .lb2{color:var(--sol)}
 .val{position:relative;height:150px;margin-top:14px}
-.val .v{position:absolute;left:0;top:0;font:900 140px/1 "Unbounded";letter-spacing:-.03em;white-space:nowrap;text-shadow:0 0 40px rgba(79,243,255,.45),0 8px 0 rgba(0,0,0,.35);transform-origin:0 60%}
-.val .v small{font-size:.36em;font-weight:700;color:var(--ion);margin-left:12px;letter-spacing:0;text-shadow:none}
-.val .qk{color:var(--sol);text-shadow:0 0 40px rgba(255,181,71,.6)}
-.cdr{position:absolute;left:-10px;top:-24px;width:200px;height:200px;opacity:0}
+.val .v{position:absolute;left:0;top:0;font:900 150px/1 "Unbounded";letter-spacing:-.03em;white-space:nowrap;text-shadow:0 0 40px rgba(79,243,255,.45),0 8px 0 rgba(0,0,0,.35);transform-origin:0 60%}
+.val .v small{font-size:.36em;font-weight:800;color:var(--ion);margin-left:12px;letter-spacing:0;text-shadow:none}
+.val .qk{color:var(--sol);text-shadow:0 0 50px rgba(255,181,71,.7)}
+.pl{position:relative}.cdr{position:absolute;left:-5px;top:-5px;width:230px;height:230px;opacity:0}
 .cdr svg{position:absolute;inset:0;width:100%;height:100%}
-.cdr b{position:absolute;inset:0;display:grid;place-items:center;font:900 100px/1 "Unbounded";color:var(--sol);text-shadow:0 0 30px rgba(255,181,71,.6)}
-.vsr{position:absolute;left:50%;top:470px;width:120px;height:120px;margin-left:-60px;border-radius:50%;border:3px solid var(--ion);background:rgba(4,8,20,.85);display:grid;place-items:center;font:800 34px/1 "JBM";letter-spacing:.08em;color:var(--ion);box-shadow:0 0 30px rgba(79,243,255,.35);z-index:2}
-.vdt{position:absolute;left:50%;top:530px;display:inline-flex;align-items:center;gap:16px;padding:18px 30px;border:3px solid var(--aur);background:rgba(4,20,14,.92);color:var(--aur);font:800 52px/1 "Unbounded";letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;box-shadow:0 0 40px rgba(92,255,168,.45);opacity:0;z-index:3}
-.vdt small{font:700 24px/1 "JBM";letter-spacing:.12em;color:var(--ink)}
-.ql{position:absolute;left:0;right:0;top:1000px;font:700 30px/1.3 "JBM";letter-spacing:.04em;color:var(--ink);white-space:nowrap}
-.ql b{color:var(--sol);font-weight:800}
-.ql::before{content:"> ";color:var(--ion)}
-.lbs{position:absolute;left:0;right:0;top:1070px;display:flex;gap:24px}
-.lb{flex:1;height:112px;border:3px solid var(--ion);display:flex;align-items:center;justify-content:center;gap:18px;font:800 44px/1 "Unbounded";letter-spacing:.04em;color:var(--ion);background:rgba(4,8,20,.65);text-transform:uppercase}
-.lb svg{width:38px;height:38px}
-.lb.on{background:var(--ion);color:#03040A;box-shadow:0 0 44px rgba(79,243,255,.6)}
-#hook .pl0{position:absolute;left:50%;top:330px;width:400px;height:400px;margin:-200px 0 0 -200px}
+.cdr b{position:absolute;inset:0;display:grid;place-items:center;font:900 116px/1 "Unbounded";color:var(--sol);text-shadow:0 0 30px rgba(255,181,71,.6)}
+/* the question, big, between the two numbers */
+.qz{position:absolute;left:0;right:0;top:520px;height:130px;display:flex;align-items:center;justify-content:center;text-align:center;font:800 50px/1.14 "Archivo";font-stretch:108%;color:#fff;text-shadow:0 4px 18px rgba(0,0,0,.7)}
+.qz b{color:var(--sol);font-weight:900}
+.vdc{position:absolute;left:0;right:0;top:520px;height:130px;display:flex;align-items:center;justify-content:center;gap:22px;font:900 96px/1 "Unbounded";text-transform:uppercase;white-space:nowrap;opacity:0}
+.vdc svg{width:.7em;height:.7em}
+.vdc small{font:800 40px/1 "JBM";letter-spacing:.04em;color:#fff;opacity:.9}
+.vdc.u{color:var(--aur);text-shadow:0 0 50px rgba(92,255,168,.6)}.vdc.d{color:var(--red);text-shadow:0 0 50px rgba(255,90,90,.6)}
+.lbs{position:absolute;left:0;right:0;top:668px;display:flex;gap:24px}
+.lb{flex:1;height:126px;border:5px solid;display:flex;align-items:center;justify-content:center;gap:18px;font:900 56px/1 "Unbounded";letter-spacing:.02em;background:rgba(4,8,20,.75);text-transform:uppercase}
+.lb svg{width:48px;height:48px}
+.lb.up{border-color:var(--aur);color:var(--aur);box-shadow:0 0 30px rgba(92,255,168,.25)}
+.lb.dn{border-color:var(--red);color:var(--red);box-shadow:0 0 30px rgba(255,90,90,.25)}
+.lb.up.on{background:var(--aur);color:#03040A;box-shadow:0 0 70px rgba(92,255,168,.8)}
+.lb.dn.on{background:var(--red);color:#fff;box-shadow:0 0 70px rgba(255,90,90,.8)}
+/* hook: the game's name, huge */
+#hook .ret{top:300px}
+#hook .pl0{position:absolute;left:50%;top:300px;width:330px;height:330px;margin:-165px 0 0 -165px}
 #hook .pl0 svg{width:100%;height:100%;overflow:visible}
-#hook .big{font-size:200px}
+#hook .low{bottom:auto;top:600px}
+#hook .hg{font:900 170px/.95 "Unbounded";text-transform:uppercase;white-space:nowrap;margin-top:22px;text-shadow:0 0 50px rgba(79,243,255,.45),0 10px 0 rgba(0,0,0,.35);transform-origin:0 60%}
+#hook .hg svg{width:.6em;height:.6em;vertical-align:.04em;margin-left:.1em}
+#hook .hg.u svg{color:var(--aur)}#hook .hg.d svg{color:var(--red)}
+#thumb .bigt.l2{margin-top:0}
 </style></head><body>
 <svg id="stars"></svg>
 <div id="vt"></div><div id="scan"></div>
@@ -206,44 +226,49 @@ function planet(kind,id){const ven=kind.startsWith("venus");
   <circle r="86" fill="url(#${id}g)" style="filter:drop-shadow(0 0 30px ${ven?"rgba(255,181,71,.45)":"rgba(234,242,255,.25)"})"/><g clip-path="url(#${id}c)">${det}</g>
   <circle r="86" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/>${spin}</svg>`}
 const UP=`<svg viewBox="0 0 24 24"><path d="M12 3 L22 17 H2Z" fill="currentColor"/></svg>`,DN=`<svg viewBox="0 0 24 24"><path d="M12 21 L22 7 H2Z" fill="currentColor"/></svg>`;
-const CDR=`<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="86" fill="rgba(4,8,20,.7)" stroke="rgba(255,181,71,.25)" stroke-width="10"/><circle class="rg" cx="100" cy="100" r="86" fill="none" stroke="#FFB547" stroke-width="10" stroke-linecap="round" stroke-dasharray="540.4" stroke-dashoffset="0" transform="rotate(-90 100 100)" style="filter:drop-shadow(0 0 8px #FFB547)"/></svg>`;
-let RD=[];const CD=2.1,NOV={hook:2.2,q:1.7,r:2.6,outro:2.8};
+const CDR=`<svg viewBox="0 0 230 230"><circle cx="115" cy="115" r="98" fill="rgba(4,8,20,.8)" stroke="rgba(255,181,71,.25)" stroke-width="12"/><circle class="rg" cx="115" cy="115" r="98" fill="none" stroke="#FFB547" stroke-width="12" stroke-linecap="round" stroke-dasharray="615.8" stroke-dashoffset="0" transform="rotate(-90 115 115)" style="filter:drop-shadow(0 0 10px #FFB547)"/></svg>`;
+const TTL=`<span>Higher</span><span class="u">${UP}</span> <span>or lower</span><span class="d">${DN}</span>`;
+let RD=[];const CD=3,NOV={hook:2.6,q:2.6,r:2.8,outro:2.8};
 function vhtml(x){return `${esc(x.s||com(x.v))}<small>${esc(x.u||"")}</small>`}
 function build(data){D=data;SC=[];SFX=[];RD=[];
  document.documentElement.style.background="radial-gradient(70% 45% at 50% 38%,#16305a 0%,#081227 55%,#03040A 100%)";
  document.getElementById("bn").textContent=String(D.brand).toUpperCase();document.getElementById("wm").textContent=String(D.brand).toUpperCase();
- document.getElementById("hd").textContent="HIGHER OR LOWER // "+D.date;document.getElementById("hs").textContent=D.hs||"QUIZ · NASA FACTS";document.getElementById("src").textContent=D.source||"";
+ document.getElementById("hd").textContent="SPACE QUIZ // "+D.date;document.getElementById("hs").textContent=D.hs||"FACTS · NASA";document.getElementById("src").textContent=D.source||"";
  document.getElementById("mk").innerHTML=MARK("h");document.getElementById("logo").innerHTML=MARK("l");
  const R=rnd(42);let st="";STARS=[];for(let i=0;i<170;i++){const x=R()*1080,y=R()*1920,r=R()<.08?2.2:R()*1.3+.4;STARS.push(R()*6.28);st+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(1)}" fill="#fff"/>`}
  document.getElementById("stars").innerHTML=st;document.getElementById("stars").setAttribute("viewBox","0 0 1080 1920");
  const n=D.rounds.length,vd=id=>D.dur&&D.dur[id]!=null?D.dur[id]:null;
  const hookLen=vd("hook")!=null?Math.max(2.6,vd("hook")+.15+.4):NOV.hook,outLen=vd("outro")!=null?Math.max(2.8,vd("outro")+.35+.4):NOV.outro;
- const qLen=i=>vd("q"+i)!=null?.35+vd("q"+i)+.25:.5+NOV.q,rLen=i=>vd("r"+i)!=null?Math.max(2.6,.2+vd("r"+i)+.5):NOV.r;
+ const qLen=i=>vd("q"+i)!=null?Math.max(1.6,.4+vd("q"+i)+.25):.6+NOV.q,rLen=i=>vd("r"+i)!=null?Math.max(2.8,.2+vd("r"+i)+.5):NOV.r;
  let h="",t=0;
  SC.push({id:"hook",kind:"hook",t0:0,t1:hookLen,va:.15});
- h+=`<div class="sc" id="hook"><div class="ret">${reticle()}</div><div class="pl0">${planet(D.hookPlanet||"venus","hk")}</div><div class="low"><div class="kick"><i></i>${esc(D.kicker||"Higher or lower")}</div><div class="big">${esc(D.hookBig)}</div><div class="unit">${esc(D.hookUnit)}</div><div class="sub">${esc(D.hookSub||n+" questions · beat the clock")}</div></div></div>`;
+ h+=`<div class="sc" id="hook"><div class="ret">${reticle()}</div><div class="pl0">${planet(D.hookPlanet||"venus","hk")}</div><div class="low"><div class="kick"><i></i>${esc(D.kicker||"Space edition")}</div>
+  <div class="hg u">Higher${UP}</div><div class="hg d">or lower${DN}</div><div class="sub">${esc(D.hookSub||n+" rounds · beat the clock")}</div></div></div>`;
  t=hookLen;
  D.rounds.forEach((Q,i)=>{const t0=t,cs=t0+qLen(i),rv=cs+CD,t1=rv+rLen(i),hi=Q.b.v>Q.a.v;
-  RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,kind:"round",t0,t1,va:t0+.35,i},{id:"r"+i,kind:"voice",t0:rv,t1,va:rv+.2});
-  const side=(x,c,k)=>`<div class="pn ${c}"><div class="pl">${planet(x.icon,"p"+i+c)}</div><div class="pv"><div class="plab">${esc(x.lab)}</div><div class="nm2">${esc(x.name)}</div>${x.sub?`<div class="sb">${esc(x.sub)}</div>`:""}
-   <div class="val">${k?`<div class="v qk">?</div><div class="v vb" data-v="${x.v}" style="opacity:0">${vhtml(x)}</div><div class="cdr">${CDR}<b>3</b></div>`:`<div class="v va">${vhtml(x)}</div>`}</div></div></div>`;
-  h+=`<div class="sc" id="q${i}"><div class="kick"><i></i>Round ${i+1}/${n} · ${esc(Q.topic)}</div>${side(Q.a,"a",0)}<div class="vsr">VS</div>${side(Q.b,"b",1)}
-   <div class="vdt">${hi?UP:DN}${hi?"Higher":"Lower"}<small>${hi?"+":"−"}${esc(com(Math.abs(Q.b.v-Q.a.v)))}</small></div>
-   <div class="ql">${Q.q}</div><div class="lbs"><div class="lb up">${UP}Higher</div><div class="lb dn">${DN}Lower</div></div>
+  RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,kind:"round",t0,t1,va:t0+.4,i},{id:"r"+i,kind:"voice",t0:rv,t1,va:rv+.2});
+  const side=(x,c,k)=>`<div class="pn ${c}"><div class="pl">${planet(x.icon,"p"+i+c)}${k?`<div class="cdr">${CDR}<b>3</b></div>`:""}</div><div class="pv"><div class="nm2">${esc(x.name)}</div><div class="lb2">${esc(x.lab)}</div>
+   <div class="val">${k?`<div class="v qk">?</div><div class="v vb" data-v="${x.v}" style="opacity:0">${vhtml(x)}</div>`:`<div class="v va">${vhtml(x)}</div>`}</div></div></div>`;
+  const dv=Math.abs(Q.b.v-Q.a.v);
+  h+=`<div class="sc" id="q${i}"><div class="ttl">${TTL}</div><div class="rnd"><i></i>Round ${i+1} of ${n} · ${esc(Q.topic)}<i></i></div>
+   ${side(Q.a,"a",0)}<div class="qz"><div>${Q.q}</div></div><div class="vdc ${hi?"u":"d"}">${hi?UP:DN}${hi?"Higher!":"Lower!"}<small>${hi?"+":"−"}${esc(com(dv))}${esc(Q.b.u||"")}</small></div>
+   <div class="lbs"><div class="lb up">${UP}Higher</div><div class="lb dn">${DN}Lower</div></div>${side(Q.b,"b",1)}
    ${Q.fact?`<div class="ty" data-txt="${esc(Q.fact)}"><span class="gh"><b>&gt; DID YOU KNOW: </b>${esc(Q.fact)}</span><span class="tp"></span></div>`:""}</div>`;
   t=t1});
  SC.push({id:"outro",kind:"outro",t0:t,t1:t+outLen,va:t+.35});
  h+=`<div class="sc" id="outro"><div class="mid"><div class="kick" style="margin:0 auto"><i></i>How many did you get?</div><div class="t1" style="margin-top:30px">Follow<br>${esc(D.brand)}</div><div class="follow"><span id="fl">Follow</span><div class="ring"></div></div></div></div>`;
  t+=outLen;
  document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
- document.querySelectorAll(".t1,.nm2").forEach(e=>fit(e,30));document.querySelectorAll("#hook .big").forEach(e=>fit(e,90));
- document.querySelectorAll(".ql").forEach(e=>{let fs=30;while(e.scrollWidth>e.clientWidth+1&&fs>20){fs-=1;e.style.fontSize=fs+"px"}});
- document.querySelectorAll(".val .v").forEach(e=>{let fs=140;while(e.getBoundingClientRect().width>590&&fs>70){fs-=6;e.style.fontSize=fs+"px"}});
- document.querySelectorAll(".vdt").forEach(e=>{e.dataset.w=e.offsetWidth});
- SFX.push({t:.05,k:"impact"},{t:.3,k:"impact"},{t:.5,k:"pop"});
- for(const r of RD){SFX.push({t:r.t0,k:"whoosh"},{t:r.t0+.35,k:"beep"},{t:r.t0+.6,k:"compute"},{t:r.t0+.75,k:"beep"},{t:r.t0+1.1,k:"pop"});
-  for(let k=0;k<3;k++)SFX.push({t:r.cs+k*CD/3,k:"tick"});SFX.push({t:r.rv-.8,k:"riser"},{t:r.rv,k:"impact"},{t:r.rv+.35,k:"beep"});
-  const q=D.rounds[r.i];if(q.fact){const at0=r.rv+.55;for(let k=0;k<Math.ceil(q.fact.length/34/1.4);k++)SFX.push({t:at0+k*1.4,k:"typing"})}}
+ document.querySelectorAll(".t1,.nm2").forEach(e=>fit(e,30));
+ document.querySelectorAll(".ttl").forEach(e=>{let fs=96;while(e.scrollWidth>e.clientWidth+1&&fs>50){fs-=2;e.style.fontSize=fs+"px"}});
+ document.querySelectorAll("#hook .hg").forEach(e=>{let fs=170;while(e.scrollWidth>e.clientWidth+1&&fs>70){fs-=4;e.style.fontSize=fs+"px"}});
+ document.querySelectorAll(".qz").forEach(e=>{let fs=50;while(e.scrollHeight>e.clientHeight+1&&fs>30){fs-=2;e.style.fontSize=fs+"px"}});
+ document.querySelectorAll(".vdc").forEach(e=>{let fs=96;while(e.scrollWidth>e.clientWidth+1&&fs>50){fs-=4;e.style.fontSize=fs+"px"}});
+ document.querySelectorAll(".val .v").forEach(e=>{let fs=150;while(e.getBoundingClientRect().width>560&&fs>70){fs-=6;e.style.fontSize=fs+"px"}});
+ SFX.push({t:.05,k:"impact"},{t:.3,k:"impact"},{t:.75,k:"pop"},{t:1.05,k:"pop"});
+ for(const r of RD){SFX.push({t:r.t0,k:"whoosh"},{t:r.t0+.15,k:"impact"},{t:r.t0+.5,k:"beep"},{t:r.t0+.85,k:"compute"},{t:r.t0+1.05,k:"pop"},{t:r.t0+1.15,k:"pop"});
+  for(let k=0;k<3;k++)SFX.push({t:r.cs+k*CD/3,k:"tick"});SFX.push({t:r.rv-.85,k:"riser"},{t:r.rv,k:"impact"},{t:r.rv+.2,k:"stamp"},{t:r.rv+.45,k:"beep"});
+  const q=D.rounds[r.i];if(q.fact){const at0=r.rv+.7;for(let k=0;k<Math.ceil(q.fact.length/34/1.4);k++)SFX.push({t:at0+k*1.4,k:"typing"})}}
  const o=SC[SC.length-1];SFX.push({t:o.t0,k:"whoosh"},{t:o.t0+.5,k:"pop"});
  SFX.push({t:t+.1,k:"sting"},{t:t+1.2,k:"rumble"},{t:t+1.3,k:"whoosh"});
  return TOTAL}
@@ -257,27 +282,30 @@ function render(t){
   if(s.kind==="hook"){el.querySelector(".r1").setAttribute("transform",`rotate(${(lt*12).toFixed(1)} 310 310)`);el.querySelector(".r2").setAttribute("transform",`rotate(${(-lt*30).toFixed(1)} 310 310)`);
    const rt=el.querySelector(".ret");rt.style.transform=`scale(${(1.6-.6*ease(lt/.8)).toFixed(3)})`;rt.style.opacity=ease(lt/.5);
    const pl=el.querySelector(".pl0");pl.style.transform=`scale(${(.5+.5*pop((lt-.05)/.6)).toFixed(3)}) rotate(${(lt*4).toFixed(2)}deg)`;pl.style.opacity=clamp(lt/.2).toFixed(3);
-   const bg=el.querySelector(".big"),y=pop((lt-.1)/.5);bg.style.transform=`scale(${(.6+.4*y).toFixed(3)})`;bg.style.transformOrigin="0 50%";rev(".kick,.unit,.sub",.25,.18)}
-  if(s.kind==="round"){const r=RD[s.i],cs=r.cs-s.t0,rv=r.rv-s.t0,cdn=lt>=cs&&lt<rv,rv2=lt>=rv;
-   rev(".kick",0);
-   el.querySelectorAll(".pn").forEach((p,j)=>{const at=.15+j*.3,y=pop((lt-at)/.5);p.style.opacity=clamp((lt-at)/.15).toFixed(3);p.style.transform=`translateX(${((1-y)*(j?80:-80)).toFixed(1)}px)`});
+   el.querySelectorAll(".hg").forEach((x,i)=>{const y=pop((lt-.1-i*.3)/.45);x.style.opacity=clamp((lt-.08-i*.3)/.08).toFixed(3);x.style.transform=`scale(${(1.7-.7*y).toFixed(3)})`});
+   rev(".kick",.02);rev(".sub",.9)}
+  if(s.kind==="round"){const r=RD[s.i],cs=r.cs-s.t0,rv=r.rv-s.t0,cdn=lt>=cs&&lt<rv,rv2=lt>=rv,Q=D.rounds[s.i];
+   const tl=el.querySelector(".ttl"),ty0=pop(lt/.4);tl.style.opacity=clamp(lt/.1).toFixed(3);tl.style.transform=`scale(${(1.25-.25*ty0).toFixed(3)})`;
+   rev(".rnd",.15);
+   el.querySelectorAll(".pn").forEach((p,j)=>{const at=j?.55:.25,y=pop((lt-at)/.5);p.style.opacity=clamp((lt-at)/.15).toFixed(3);p.style.transform=`translateX(${((1-y)*(j?90:-90)).toFixed(1)}px)`});
    el.querySelectorAll(".pl svg").forEach((x,j)=>{x.style.transform=`rotate(${(lt*(j?-3:3)).toFixed(2)}deg)`});
    el.querySelectorAll(".orb").forEach(o=>o.setAttribute("stroke-dashoffset",(-lt*40).toFixed(0)));
    el.querySelectorAll(".vmv").forEach(c=>{const a2=lt*1.4+.6,x=104*Math.cos(a2),y=36*Math.sin(a2),rr=-18*Math.PI/180;c.setAttribute("cx",(x*Math.cos(rr)-y*Math.sin(rr)).toFixed(1));c.setAttribute("cy",(x*Math.sin(rr)+y*Math.cos(rr)).toFixed(1))});
    el.querySelectorAll(".spn").forEach(g2=>g2.setAttribute("transform",`rotate(${(lt*40%360).toFixed(1)})`));
-   const va=el.querySelector(".va"),vy=pop((lt-.35)/.45);va.style.transform=`scale(${(1.5-.5*vy).toFixed(3)})`;va.style.opacity=clamp((lt-.33)/.08).toFixed(3);
-   const vs=el.querySelector(".vsr"),z=pop((lt-.4)/.4)*(1-ease((lt-rv)/.2));vs.style.transform=`scale(${Math.max(0,z).toFixed(3)})`;
-   const qk=el.querySelector(".qk"),qy=pop((lt-.7)/.4);qk.style.opacity=lt>=cs?0:clamp((lt-.68)/.08).toFixed(3);qk.style.transform=`scale(${((.4+.6*qy)*(1+.05*Math.sin(lt*6))).toFixed(3)})`;
+   const va=el.querySelector(".va"),vy=pop((lt-.5)/.45);va.style.transform=`scale(${(1.5-.5*vy).toFixed(3)})`;va.style.opacity=clamp((lt-.48)/.08).toFixed(3);
+   // the question rises in; at the reveal it gives way to the verdict
+   const qz=el.querySelector(".qz"),qy=ease((lt-.75)/.4);qz.style.opacity=(clamp((lt-.75)/.15)*(rv2?1-clamp((lt-rv)/.15):1)).toFixed(3);qz.style.transform=`translateY(${((1-qy)*30).toFixed(1)}px)`;
+   const vdc=el.querySelector(".vdc");if(rv2){const k=lt-rv,y=pop((k-.1)/.4);vdc.style.opacity=clamp((k-.1)/.06).toFixed(3);vdc.style.transform=`scale(${(1.8-.8*y).toFixed(3)})`}else vdc.style.opacity=0;
+   const qk=el.querySelector(".qk"),qky=pop((lt-.85)/.4);qk.style.opacity=rv2?0:clamp((lt-.83)/.08).toFixed(3);el.querySelector(".pn.b .pl svg").style.opacity=cdn?.15:1;qk.style.transform=`scale(${((.4+.6*qky)*(1+.06*Math.sin(lt*6))).toFixed(3)})`;
    const cd=el.querySelector(".cdr");cd.style.opacity=cdn?1:0;
-   if(cdn){const k=(lt-cs)/(CD/3),sec=Math.floor(k),f=k-sec;cd.querySelector("b").textContent=String(3-sec);cd.querySelector(".rg").setAttribute("stroke-dashoffset",(540.4*f).toFixed(1));cd.style.transform=`scale(${(1+.12*(1-ease(f/.3))).toFixed(3)})`}
-   const vb=el.querySelector(".vb");if(rv2){const k=lt-rv,c=ease(k/.7);vb.style.opacity=1;const Q=D.rounds[s.i].b;vb.innerHTML=k<.7?`${com(Q.v*c)}<small>${esc(Q.u||"")}</small>`:vhtml(Q);vb.style.transform=`scale(${(1.4-.4*pop(k/.4)).toFixed(3)})`}else vb.style.opacity=0;
-   const ql=el.querySelector(".ql");ql.style.opacity=(clamp((lt-.8)/.15)*(rv2?1-clamp((lt-rv)/.2)*.6:1)).toFixed(3);
-   el.querySelectorAll(".lb").forEach((b2,j)=>{const by=pop((lt-.95-j*.1)/.4),win=(j===0)===r.hi;let sc=Math.max(0,.5+.5*by),op=clamp((lt-.95-j*.1)/.08);
-    if(cdn)sc*=1+.03*Math.sin((lt-cs)*Math.PI*3+j*Math.PI);
-    if(rv2){const k=lt-rv;b2.classList.toggle("on",win);if(win)sc*=1+.1*(1-ease(k/.35));else op=1-.7*clamp(k/.2)}else b2.classList.remove("on");
+   if(cdn){const k=(lt-cs)/(CD/3),sec=Math.floor(k),f=k-sec;cd.querySelector("b").textContent=String(3-sec);cd.querySelector(".rg").setAttribute("stroke-dashoffset",(615.8*f).toFixed(1));cd.style.transform=`scale(${(1+.14*(1-ease(f/.3))).toFixed(3)})`}
+   const vb=el.querySelector(".vb");if(rv2){const k=lt-rv,c=ease(k/.7);vb.style.opacity=1;vb.innerHTML=k<.7?`${com(Q.b.v*c)}<small>${esc(Q.b.u||"")}</small>`:vhtml(Q.b);vb.style.transform=`scale(${(1.4-.4*pop(k/.4)).toFixed(3)})`}else vb.style.opacity=0;
+   const pb=el.querySelector(".pn.b");pb.classList.toggle("win-u",rv2&&r.hi);pb.classList.toggle("win-d",rv2&&!r.hi);
+   el.querySelectorAll(".lb").forEach((b2,j)=>{const at=1.0+j*.12,by=pop((lt-at)/.4),win=(j===0)===r.hi;let sc=Math.max(0,.5+.5*by),op=clamp((lt-at)/.08);
+    if(cdn)sc*=1+.04*Math.sin((lt-cs)*Math.PI*2+j*Math.PI);
+    if(rv2){const k=lt-rv;b2.classList.toggle("on",win);if(win)sc*=1+.12*(1-ease(k/.35));else op=1-.75*clamp(k/.2)}else b2.classList.remove("on");
     b2.style.opacity=op.toFixed(3);b2.style.transform=`scale(${sc.toFixed(3)})`});
-   const vd=el.querySelector(".vdt");if(rv2){const k=lt-rv,y=pop((k-.25)/.4);vd.style.opacity=clamp((k-.25)/.06).toFixed(3);vd.style.transform=`translate(-50%,-50%) scale(${(1.8-.8*y).toFixed(3)})`}else vd.style.opacity=0;
-   el.querySelectorAll(".ty").forEach(r2=>{const at=rv+.55,CPS=34,n2=Math.floor(Math.max(0,lt-at)*CPS),tx=r2.dataset.txt,on2=lt>at-.3,tp=r2.querySelector(".tp");r2.style.opacity=on2?clamp((lt-at+.3)/.25).toFixed(3):0;
+   el.querySelectorAll(".ty").forEach(r2=>{const at=rv+.7,CPS=34,n2=Math.floor(Math.max(0,lt-at)*CPS),tx=r2.dataset.txt,on2=lt>at-.3,tp=r2.querySelector(".tp");r2.style.opacity=on2?clamp((lt-at+.3)/.25).toFixed(3):0;
     const html=on2?`<b>&gt; DID YOU KNOW: </b>${esc(tx.slice(0,n2))}<span class="cr" style="opacity:${n2<tx.length||Math.floor(lt*2.5)%2?1:0}"></span>`:"";if(tp.innerHTML!==html)tp.innerHTML=html})}
   if(s.kind==="outro"){rev(".kick,.t1",.1,.12);const v=el.querySelector(".follow"),r=el.querySelector(".ring"),tp=lt-1.3;v.style.transform=`scale(${tp<0?pop((lt-.5)/.5):tp<.12?1-.06*(tp/.12):.94+.06*pop((tp-.12)/.4)})`;
    if(tp>0){const y=ease(tp/.7);r.style.opacity=(1-y).toFixed(3);r.style.transform=`scale(${(1+y*5).toFixed(3)})`}
@@ -299,15 +327,14 @@ function render(t){
  rk.querySelector(".fl").setAttribute("transform",`translate(100 138) scale(1 ${(fs*(1+.18*Math.sin(t*40))).toFixed(3)}) translate(-100 -138)`);
  document.getElementById("wordm").style.opacity=wd.toFixed(3);document.getElementById("flash").style.opacity=(fl*.8).toFixed(3);
  for(const q of ["#hud","#tick","#prog","#src"])document.querySelector(q).style.opacity=(1-Math.max(lo,bk)).toFixed(3)}
-window.thumb=()=>{const Q=D.rounds[0],T=document.getElementById("thumb");
+window.thumb=()=>{const T=document.getElementById("thumb");
  T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1080 1920">${document.getElementById("stars").innerHTML}</svg>
   <i class="cb a"></i><i class="cb b"></i><i class="cb c"></i><i class="cb d"></i>
   <div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
-  <div class="ret">${coverReticle()}<div class="art"><div style="width:600px;height:600px">${planet(D.hookPlanet||"venus","tv")}</div></div><div class="lk l"><i></i>Higher or lower</div><div class="lk r"><span>${esc(D.thumbSub||"")}</span></div></div>
-  <div class="lo"><div class="k">${esc(D.thumbKick||"Higher or lower?")}</div><div class="bigt">${esc(D.hookBig)}</div><div class="u">${esc(D.hookUnit)}</div></div>
-  <div class="ft"><span>Higher or lower</span><span>${esc(D.date)}</span></div>`;
- T.style.display="block";T.querySelector(".art svg").style.width="600px";T.querySelector(".art svg").style.height="600px";fit(T.querySelector(".bigt"),90);fit(T.querySelector(".u"),30);
- const ks=T.querySelector(".k");let f=40;while(ks.offsetWidth>960&&f>24){f-=2;ks.style.fontSize=f+"px"}
+  <div class="ret">${coverReticle()}<div class="art"><div style="width:600px;height:600px">${planet(D.hookPlanet||"venus","tv")}</div></div><div class="lk l"><i></i>${esc(D.kicker||"Space edition")}</div><div class="lk r"><span>${esc(D.thumbSub||"")}</span></div></div>
+  <div class="lo"><div class="bigt" style="color:var(--aur);text-shadow:0 0 50px rgba(92,255,168,.6)">HIGHER ▲</div><div class="bigt l2" style="color:var(--red);text-shadow:0 0 50px rgba(255,90,90,.6)">OR LOWER?</div></div>
+  <div class="ft"><span>Space quiz</span><span>${esc(D.date)}</span></div>`;
+ T.style.display="block";T.querySelector(".art svg").style.width="600px";T.querySelector(".art svg").style.height="600px";T.querySelectorAll(".bigt").forEach(e=>fit(e,90));
  const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
 window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;

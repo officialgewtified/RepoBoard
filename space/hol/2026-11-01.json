@@ -4,14 +4,11 @@
  "brand": "Liftoff",
  "day": "2026-11-01",
  "date": "Nov 1",
- "kicker": "Higher or lower",
- "hookBig": "VENUS",
- "hookUnit": "breaks the rules",
- "hookSub": "2 questions · beat the clock",
+ "kicker": "Space edition · Venus",
+ "hookSub": "2 rounds · beat the clock",
  "hookPlanet": "venus",
- "thumbKick": "Higher or lower?",
- "thumbSub": "2 questions · beat the clock",
- "hs": "QUIZ · NASA FACTS",
+ "thumbSub": "2 rounds · beat the clock",
+ "hs": "FACTS · NASA",
  "source": "Source: NASA Space Place",
  "rounds": [
   {
@@ -20,7 +17,6 @@
     "icon": "mercury",
     "lab": "Daytime high",
     "name": "Mercury",
-    "sub": "Closest planet to the Sun",
     "v": 800,
     "u": "°F"
    },
@@ -28,40 +24,37 @@
     "icon": "venus",
     "lab": "Average temp",
     "name": "Venus",
-    "sub": "Farther from the Sun",
     "v": 847,
     "u": "°F"
    },
-   "q": "Venus is <b>farther</b> from the Sun. <b>Higher</b> or <b>lower</b>?",
+   "q": "Venus is <b>farther</b> from the Sun. Higher or lower than <b>800°F</b>?",
    "fact": "Its thick carbon dioxide air traps heat like a greenhouse."
   },
   {
-   "topic": "Time",
+   "topic": "Days",
    "a": {
     "icon": "venus-orbit",
-    "lab": "One orbit",
+    "lab": "One orbit · Earth days",
     "name": "Venus",
-    "sub": "Around the Sun · Earth days",
     "v": 225,
     "u": "days"
    },
    "b": {
     "icon": "venus-spin",
-    "lab": "One spin",
+    "lab": "One spin · Earth days",
     "name": "Venus",
-    "sub": "On its axis · Earth days",
     "v": 243,
     "u": "days"
    },
-   "q": "How long does <b>one spin</b> take? <b>Higher</b> or <b>lower</b>?",
+   "q": "One spin of Venus: higher or lower than <b>225 days</b>?",
    "fact": "Venus spins slower than it travels around the Sun."
   }
  ],
  "voice": {
-  "hook": "Venus breaks the rules. Two questions. Beat the clock!",
+  "hook": "Higher or lower, space edition! Two rounds on Venus. Beat the clock!",
   "q0": "Mercury's days can hit 800 degrees Fahrenheit. Venus is farther from the Sun. Higher, or lower?",
   "r0": "Higher! Venus averages about 847 degrees. Its thick atmosphere traps the heat.",
-  "q1": "Venus takes 225 Earth days to circle the Sun. How long to spin once? Higher, or lower?",
+  "q1": "Venus takes 225 Earth days to circle the Sun. How long does one spin take? Higher, or lower?",
   "r1": "Higher! 243 Earth days. Venus spins slower than it orbits.",
   "outro": "How many did you get? Follow Liftoff for more!"
  },

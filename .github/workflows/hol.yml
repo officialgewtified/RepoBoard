@@ -7,6 +7,11 @@ on:
       episode:
         description: "Episode name, e.g. 2026-11-01 (blank = the newest file)"
         required: false
+      channel:
+        description: "Which channel to make"
+        type: choice
+        options: [both, crossover, liftoff]
+        default: both
 permissions:
   contents: write
 concurrency:
@@ -41,6 +46,8 @@ jobs:
       - name: Which episode
         id: ep
         run: |
+          CH="${{ inputs.channel }}"
+          if [ -n "$CH" ] && [ "$CH" != both ] && [ "$CH" != "${{ matrix.ch }}" ]; then echo "Only making $CH"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
           EP="${{ inputs.episode }}"
           [ -z "$EP" ] && EP=$(ls ${{ matrix.dir }}/*.json 2>/dev/null | sort | tail -1 | xargs -r basename | sed 's/\.json$//')
           if [ -z "$EP" ] || [ ! -f "${{ matrix.dir }}/$EP.json" ]; then echo "No ${{ matrix.ch }} episode to make"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
