@@ -167,6 +167,37 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #hook .hg svg{width:.6em;height:.6em;vertical-align:.04em;margin-left:.1em}
 #hook .hg.u svg{color:var(--aur)}#hook .hg.d svg{color:var(--red)}
 #thumb .bigt.l2{margin-top:0}
+/* MULTIPLE CHOICE rounds (true or false, which planet, guess the planet): the question in a readout panel, answer tiles
+   with the planets drawn, the countdown under them; at the reveal the right tile glows green and every value shows */
+.qp{position:absolute;left:0;right:0;top:160px;height:300px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:var(--glass);border:3px solid var(--line);padding:24px 34px}
+.qp::before,.qp::after{content:"";position:absolute;width:24px;height:24px;border:4px solid var(--ion)}
+.qp::before{left:-4px;top:-4px;border-right:0;border-bottom:0}.qp::after{right:-4px;bottom:-4px;border-left:0;border-top:0}
+.qp .qt{font:800 74px/1.1 "Archivo";font-stretch:108%;color:#fff}
+.qp .qt b{color:var(--sol);font-weight:900}
+.qp.cl{justify-content:center;align-items:stretch;text-align:left;gap:20px;height:440px}
+.qp.cl~.mos{top:625px}.qp.cl~.mos .mo{height:240px}.qp.cl~.mos .mo .ic{width:130px;height:130px}
+.qp.cl~.cdm{top:1150px;width:190px;height:190px;margin-left:-95px}.qp.cl~.vdm{top:1150px}
+.qp .clu{font:700 44px/1.2 "Archivo";font-stretch:105%;color:#fff;opacity:0}
+.qp .clu b{display:block;font:800 24px/1 "JBM";letter-spacing:.14em;margin-bottom:4px}
+.qp .clu b{color:var(--sol);font-weight:800;margin-right:14px}
+.mos{position:absolute;left:0;right:0;top:490px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.mo{position:relative;height:300px;background:rgba(4,8,20,.78);border:3px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.mo .ic{width:170px;height:170px}.mo .ic svg{width:100%;height:100%;overflow:visible}
+.mo .nm3{font:900 54px/1 "Unbounded";text-transform:uppercase;white-space:nowrap}
+.mo .ov{font:800 32px/1 "JBM";color:var(--aur);opacity:0;height:0;overflow:visible}
+.mo .ab{position:absolute;left:14px;top:12px;font:800 26px/1 "JBM";color:var(--ion)}
+.mo.on{border-color:var(--aur);background:rgba(10,60,40,.85);box-shadow:0 0 60px rgba(92,255,168,.55)}
+.mos.tf{top:520px}.mos.tf .mo{height:360px}.mos.tf .mo .nm3{font-size:80px}
+.mos.tf .mo.y{border-color:var(--aur);color:var(--aur)}.mos.tf .mo.n{border-color:var(--red);color:var(--red)}
+.mos.tf .mo .ic{width:120px;height:120px}
+.mos.tf .mo.y.on{background:var(--aur);color:#03040A}.mos.tf .mo.n.on{background:var(--red);color:#fff;box-shadow:0 0 60px rgba(255,90,90,.6)}
+.cdm{position:absolute;left:50%;top:1140px;width:210px;height:210px;margin-left:-105px;opacity:0}
+.mos.tf~.cdm{top:930px;width:230px;height:230px;margin-left:-115px}
+.cdm svg{position:absolute;inset:0;width:100%;height:100%}
+.cdm b{position:absolute;inset:0;display:grid;place-items:center;font:900 116px/1 "Unbounded";color:var(--sol);text-shadow:0 0 30px rgba(255,181,71,.6)}
+.mos.tf~.vdm{top:950px}
+.vdm{position:absolute;left:0;right:0;top:1146px;text-align:center;font:900 92px/1 "Unbounded";text-transform:uppercase;white-space:nowrap;color:var(--aur);text-shadow:0 0 50px rgba(92,255,168,.6);opacity:0}
+.vdm.no{color:var(--red);text-shadow:0 0 50px rgba(255,90,90,.6)}
 </style></head><body>
 <svg id="stars"></svg>
 <div id="vt"></div><div id="scan"></div>
@@ -210,24 +241,43 @@ function coverReticle(){let t="";for(let a=0;a<360;a+=5){const big=a%30===0,r1=4
   <path d="${arc(-70,-20,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/><path d="${arc(110,160,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/>
   ${[0,180,270].map(tri).join("")}</svg>`}
 
-// the planets, drawn (no photos to license): Mercury grey and cratered, Venus pale gold under cloud bands
-function planet(kind,id){const ven=kind.startsWith("venus");
- const g=ven?`<radialGradient id="${id}g" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#FFF3CF"/><stop offset=".45" stop-color="#E9BB6E"/><stop offset="1" stop-color="#7A4A1C"/></radialGradient>`
-  :`<radialGradient id="${id}g" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#EEEAE4"/><stop offset=".5" stop-color="#A39D95"/><stop offset="1" stop-color="#3F3C39"/></radialGradient>`;
- const det=ven?[[-40,.18,"#fff8e0"],[-8,.14,"#c98a3c"],[22,.16,"#fff3d1"],[52,.12,"#b8782f"]].map(([y,o,c])=>`<path d="M-100 ${y} C-40 ${y-16} 40 ${y+16} 100 ${y-6}" stroke="${c}" stroke-width="22" fill="none" opacity="${o}"/>`).join("")
-  :[[-34,-30,16],[30,-10,11],[-6,36,13],[44,40,8],[-50,20,7],[10,-56,9]].map(([x,y,r])=>`<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.85}" fill="rgba(40,38,36,.35)" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>`).join("");
- // one orbit: the Sun in the middle, Venus small on its path around it
- if(kind==="venus-orbit")return `<svg viewBox="-115 -115 230 230"><defs>${g}<radialGradient id="${id}s"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".5" stop-color="#FFB547"/><stop offset="1" stop-color="#FF7A1E"/></radialGradient></defs>
+// the planets, drawn (no photos to license), each in its own colours: the Moon and Mercury grey and cratered, Venus
+// gold under cloud bands, Earth blue and green, Mars rust with a polar cap, Jupiter banded with its red spot, Saturn with
+// its rings, Uranus pale cyan, Neptune deep blue
+const PAL={mercury:["#EEEAE4","#A39D95","#3F3C39"],moon:["#F4F2EE","#B9B5AE","#4E4B47"],venus:["#FFF3CF","#E9BB6E","#7A4A1C"],earth:["#9FD8FF","#2F7BD6","#0B2A66"],
+ mars:["#F6B48C","#C9531E","#5A1E0A"],jupiter:["#FBE6C8","#D2A273","#7A4F2E"],saturn:["#FFF0C9","#E3C27F","#8A6B32"],uranus:["#E2FBFC","#8FDCE4","#2C7F8C"],neptune:["#9EC0FF","#3D63DB","#13286E"]};
+function planet(kind,id){const base=kind.replace(/-.*/,""),ven=base==="venus",c=PAL[base]||PAL.mercury;
+ const g=`<radialGradient id="${id}g" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".48" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient>`;
+ const band=(L)=>L.map(([y,o,col,w=22])=>`<path d="M-100 ${y} C-40 ${y-14} 40 ${y+14} 100 ${y-6}" stroke="${col}" stroke-width="${w}" fill="none" opacity="${o}"/>`).join("");
+ const crat=(L,o=.35)=>L.map(([x,y,r])=>`<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.85}" fill="rgba(40,38,36,${o})" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>`).join("");
+ const det={venus:band([[-40,.18,"#fff8e0"],[-8,.14,"#c98a3c"],[22,.16,"#fff3d1"],[52,.12,"#b8782f"]]),
+  mercury:crat([[-34,-30,16],[30,-10,11],[-6,36,13],[44,40,8],[-50,20,7],[10,-56,9]]),
+  moon:crat([[-30,-26,20],[26,-34,12],[8,18,24],[-46,30,10],[46,30,9]],.28),
+  earth:`<path d="M-62 -40 C-40 -64 -6 -56 -10 -30 C-14 -6 -44 0 -40 26 C-38 44 -64 40 -74 14 C-82 -8 -78 -28 -62 -40Z M14 -20 C34 -40 70 -30 66 -2 C62 24 40 20 34 44 C28 64 4 60 8 34 C12 14 -2 -6 14 -20Z" fill="#3FA34D" opacity=".9"/><path d="M-90 -62 C-40 -70 30 -76 90 -58 M-70 54 C-20 64 40 62 84 48" stroke="#fff" stroke-width="9" fill="none" opacity=".55" stroke-linecap="round"/>`,
+  mars:`<ellipse cx="0" cy="-80" rx="40" ry="12" fill="#FFF6EE" opacity=".9"/>${band([[-6,.25,"#8A2D0E",30],[34,.18,"#E7884F",18]])}${crat([[30,10,10],[-28,-14,8]],.22)}`,
+  jupiter:`${band([[-56,.5,"#B98457",16],[-28,.45,"#FFF3DD",18],[-4,.55,"#A86C42",20],[24,.4,"#F6DDBA",16],[50,.5,"#9C6440",14],[72,.35,"#E8CDA6",12]])}<ellipse cx="34" cy="20" rx="20" ry="11" fill="#C2502E" opacity=".9"/>`,
+  saturn:band([[-40,.35,"#C9A55E",14],[-10,.3,"#FFF6DA",18],[20,.35,"#B8924E",14],[48,.25,"#F3DFAE",12]]),
+  uranus:band([[-30,.12,"#ffffff",30],[30,.1,"#2C7F8C",24]]),
+  neptune:`${band([[-34,.18,"#C9DAFF",10],[26,.2,"#0E1F57",16]])}<ellipse cx="-24" cy="6" rx="18" ry="10" fill="#0B1A4D" opacity=".7"/>`}[base]||"";
+ const ringBack=base==="saturn"?`<ellipse rx="140" ry="34" fill="none" stroke="#E9D3A0" stroke-width="16" opacity=".75" transform="rotate(-16)"/><ellipse rx="118" ry="26" fill="none" stroke="#B89A5E" stroke-width="7" opacity=".7" transform="rotate(-16)"/>`
+  :base==="uranus"?`<ellipse rx="22" ry="120" fill="none" stroke="#BFEFF3" stroke-width="3" opacity=".6" transform="rotate(-8)"/>`:"";
+ const ringFront=base==="saturn"?`<path d="M-140 0 A140 34 0 0 0 140 0" fill="none" stroke="#E9D3A0" stroke-width="16" opacity=".9" transform="rotate(-16)"/>`:"";
+ // one orbit: the Sun in the middle, the planet small on its path around it
+ if(kind.endsWith("-orbit"))return `<svg viewBox="-115 -115 230 230"><defs>${g}<radialGradient id="${id}s"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".5" stop-color="#FFB547"/><stop offset="1" stop-color="#FF7A1E"/></radialGradient></defs>
   <circle r="46" fill="rgba(255,181,71,.18)"/><circle r="30" fill="url(#${id}s)" style="filter:drop-shadow(0 0 18px #FFB547)"/>
   <ellipse class="orb" rx="104" ry="36" fill="none" stroke="#4FF3FF" stroke-width="3" stroke-dasharray="10 8" transform="rotate(-18)"/>
   <circle class="vmv" r="19" fill="url(#${id}g)" style="filter:drop-shadow(0 0 10px rgba(255,181,71,.6))"/></svg>`;
- const spin=kind==="venus-spin"?`<g class="spn"><path d="M-70 -78 A104 104 0 0 1 78 -70" fill="none" stroke="#4FF3FF" stroke-width="6" stroke-linecap="round"/><path d="M78 -70 L60 -82 M78 -70 L74 -50" stroke="#4FF3FF" stroke-width="6" stroke-linecap="round"/></g>`:"";
- return `<svg viewBox="-115 -115 230 230"><defs>${g}<clipPath id="${id}c"><circle r="86"/></clipPath></defs>
-  <circle r="86" fill="url(#${id}g)" style="filter:drop-shadow(0 0 30px ${ven?"rgba(255,181,71,.45)":"rgba(234,242,255,.25)"})"/><g clip-path="url(#${id}c)">${det}</g>
-  <circle r="86" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/>${spin}</svg>`}
+ const spin=kind.endsWith("-spin")?`<g class="spn"><path d="M-70 -78 A104 104 0 0 1 78 -70" fill="none" stroke="#4FF3FF" stroke-width="6" stroke-linecap="round"/><path d="M78 -70 L60 -82 M78 -70 L74 -50" stroke="#4FF3FF" stroke-width="6" stroke-linecap="round"/></g>`:"";
+ const glow={venus:"rgba(255,181,71,.45)",earth:"rgba(79,160,255,.45)",mars:"rgba(255,110,60,.4)",jupiter:"rgba(255,200,140,.35)",saturn:"rgba(255,220,150,.35)",uranus:"rgba(143,220,228,.45)",neptune:"rgba(80,120,255,.5)"}[base]||"rgba(234,242,255,.25)";
+ return `<svg viewBox="-115 -115 230 230"><defs>${g}<clipPath id="${id}c"><circle r="86"/></clipPath></defs>${ringBack}
+  <circle r="86" fill="url(#${id}g)" style="filter:drop-shadow(0 0 30px ${glow})"/><g clip-path="url(#${id}c)">${det}</g>
+  <circle r="86" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/>${ringFront}${spin}</svg>`}
 const UP=`<svg viewBox="0 0 24 24"><path d="M12 3 L22 17 H2Z" fill="currentColor"/></svg>`,DN=`<svg viewBox="0 0 24 24"><path d="M12 21 L22 7 H2Z" fill="currentColor"/></svg>`;
 const CDR=`<svg viewBox="0 0 230 230"><circle cx="115" cy="115" r="98" fill="rgba(4,8,20,.8)" stroke="rgba(255,181,71,.25)" stroke-width="12"/><circle class="rg" cx="115" cy="115" r="98" fill="none" stroke="#FFB547" stroke-width="12" stroke-linecap="round" stroke-dasharray="615.8" stroke-dashoffset="0" transform="rotate(-90 115 115)" style="filter:drop-shadow(0 0 10px #FFB547)"/></svg>`;
-const TTL=`<span>Higher</span><span class="u">${UP}</span> <span>or lower</span><span class="d">${DN}</span>`;
+const YES=`<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,NO=`<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
+const IC={up:UP,dn:DN,yes:YES,no:NO};
+// the game's name: on the title bar of every round, and huge on the hook
+const TTLf=()=>{const W=D.hookWords||["Higher","or lower"],I=D.hookIcons||["up","dn"];return `<span>${esc(W[0])}</span>${I[0]?`<span class="u">${IC[I[0]]}</span>`:""} <span>${esc(W[1])}</span>${I[1]?`<span class="d">${IC[I[1]]}</span>`:""}`};
 let RD=[];const CD=3,NOV={hook:2.6,q:2.6,r:2.8,outro:2.8};
 function vhtml(x){return `${esc(x.s||com(x.v))}<small>${esc(x.u||"")}</small>`}
 function build(data){D=data;SC=[];SFX=[];RD=[];
@@ -244,15 +294,23 @@ function build(data){D=data;SC=[];SFX=[];RD=[];
  let h="",t=0;
  SC.push({id:"hook",kind:"hook",t0:0,t1:hookLen,va:.45});
  h+=`<div class="sc" id="hook"><div class="ret">${reticle()}</div><div class="pl0">${planet(D.hookPlanet||"venus","hk")}</div><div class="low"><div class="kick"><i></i>${esc(D.kicker||"Space edition")}</div>
-  <div class="hg u">Higher${UP}</div><div class="hg d">or lower${DN}</div><div class="sub">${esc(D.hookSub||n+" rounds · beat the clock")}</div></div></div>`;
+  ${(()=>{const W=D.hookWords||["Higher","or lower"],I=D.hookIcons||["up","dn"];return `<div class="hg u">${esc(W[0])}${I[0]?IC[I[0]]:""}</div><div class="hg d">${esc(W[1])}${I[1]?IC[I[1]]:""}</div>`})()}<div class="sub">${esc(D.hookSub||n+" rounds · beat the clock")}</div></div></div>`;
  t=hookLen;
- D.rounds.forEach((Q,i)=>{const t0=t,cs=t0+qLen(i),rv=cs+CD,t1=rv+rLen(i),hi=Q.b.v>Q.a.v;
+ D.rounds.forEach((Q,i)=>{if(Q.type==="mc"){const t0=t,cs=t0+qLen(i),rv=cs+CD,t1=rv+rLen(i),tf=Q.tf;
+   RD.push({i,t0,cs,rv,t1,mc:1});SC.push({id:"q"+i,kind:"mc",t0,t1,va:t0+.55,i},{id:"r"+i,kind:"voice",t0:rv,t1,va:rv+.6});
+   const tiles=Q.opts.map((o,j)=>`<div class="mo ${tf?(j?"n":"y"):""}">${tf?"":`<span class="ab">${"ABCD"[j]}</span>`}<div class="ic">${tf?(j?NO:YES):planet(o.icon,"m"+i+j)}</div><div class="nm3">${esc(o.t)}</div>${o.v!=null?`<div class="ov">${esc(o.v)}</div>`:""}</div>`).join("");
+   h+=`<div class="sc" id="q${i}"><div class="ttl">${TTLf()}</div><div class="rnd"><i></i>Round ${i+1} of ${n} · ${esc(Q.topic)}<i></i></div>
+    ${Q.clues?`<div class="qp cl">${Q.clues.map((c,k)=>`<div class="clu"><b>CLUE ${k+1}</b>${esc(c)}</div>`).join("")}</div>`:`<div class="qp"><div class="qt">${Q.q}</div></div>`}
+    <div class="mos ${tf?"tf":""}">${tiles}</div><div class="cdm">${CDR}<b>3</b></div><div class="vdm ${tf&&Q.ans===1?"no":""}">${esc(Q.verdict)}</div>
+    ${Q.fact?`<div class="ty" data-txt="${esc(Q.fact)}"><span class="gh"><b>&gt; DID YOU KNOW: </b>${esc(Q.fact)}</span><span class="tp"></span></div>`:""}</div>`;
+   t=t1;return}
+  const t0=t,cs=t0+qLen(i),rv=cs+CD,t1=rv+rLen(i),hi=Q.b.v>Q.a.v;
   RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,kind:"round",t0,t1,va:t0+.55,i},{id:"r"+i,kind:"voice",t0:rv,t1,va:rv+.6});
   const side=(x,c,k)=>`<div class="pn ${c}"><div class="pl">${planet(x.icon,"p"+i+c)}${k?`<div class="cdr">${CDR}<b>3</b></div>`:""}</div><div class="pv"><div class="nm2">${esc(x.name)}</div><div class="lb2">${esc(x.lab)}</div>
    <div class="val">${k?`<div class="v qk">?</div><div class="v vb" data-v="${x.v}" style="opacity:0">${vhtml(x)}</div>`:`<div class="v va">${vhtml(x)}</div>`}</div></div></div>`;
   const dv=Math.abs(Q.b.v-Q.a.v);
-  h+=`<div class="sc" id="q${i}"><div class="ttl">${TTL}</div><div class="rnd"><i></i>Round ${i+1} of ${n} · ${esc(Q.topic)}<i></i></div>
-   ${side(Q.a,"a",0)}<div class="qz"><div>${Q.q}</div></div><div class="vdc ${hi?"u":"d"}">${hi?UP:DN}${hi?"Higher!":"Lower!"}<small>${hi?"+":"−"}${esc(com(dv))}${esc(Q.b.u||"")}</small></div>
+  h+=`<div class="sc" id="q${i}"><div class="ttl">${TTLf()}</div><div class="rnd"><i></i>Round ${i+1} of ${n} · ${esc(Q.topic)}<i></i></div>
+   ${side(Q.a,"a",0)}<div class="qz"><div>${Q.q}</div></div><div class="vdc ${hi?"u":"d"}">${hi?UP:DN}${hi?"Higher!":"Lower!"}<small>${hi?"+":"−"}${esc(Number.isInteger(+dv.toFixed(6))?com(dv):dv.toFixed(1))}${Q.b.u&&Q.b.u!=="°F"?" ":""}${esc(Q.b.u||"")}</small></div>
    <div class="lbs"><div class="lb up">${UP}Higher</div><div class="lb dn">${DN}Lower</div></div>${side(Q.b,"b",1)}
    ${Q.fact?`<div class="ty" data-txt="${esc(Q.fact)}"><span class="gh"><b>&gt; DID YOU KNOW: </b>${esc(Q.fact)}</span><span class="tp"></span></div>`:""}</div>`;
   t=t1});
@@ -263,6 +321,10 @@ function build(data){D=data;SC=[];SFX=[];RD=[];
  document.querySelectorAll(".t1,.nm2").forEach(e=>fit(e,30));
  document.querySelectorAll(".ttl").forEach(e=>{let fs=96;while(e.scrollWidth>e.clientWidth+1&&fs>50){fs-=2;e.style.fontSize=fs+"px"}});
  document.querySelectorAll("#hook .hg").forEach(e=>{let fs=170;while(e.scrollWidth>e.clientWidth+1&&fs>70){fs-=4;e.style.fontSize=fs+"px"}});
+ document.querySelectorAll(".qp .qt").forEach(e=>{const p=e.parentNode;let fs=54;while(e.scrollHeight>p.clientHeight-40&&fs>32){fs-=2;e.style.fontSize=fs+"px"}});
+ // (the panel's corner marks poke 4 px outside it, so a little overflow is just them)
+ document.querySelectorAll(".qp.cl").forEach(p=>{let fs=46;const L=[...p.querySelectorAll(".clu")],need=()=>L.reduce((h,e)=>h+e.offsetHeight,0)+20*(L.length-1)+48;while(need()>p.clientHeight&&fs>26){fs-=2;L.forEach(e=>e.style.fontSize=fs+"px")}});
+ document.querySelectorAll(".mo .nm3,.vdm").forEach(e=>fit(e,24));
  document.querySelectorAll(".qz").forEach(e=>{let fs=50;while(e.scrollHeight>e.clientHeight+1&&fs>30){fs-=2;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".vdc").forEach(e=>{let fs=96;while(e.scrollWidth>e.clientWidth+1&&fs>50){fs-=4;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".val .v").forEach(e=>{let fs=150;while(e.getBoundingClientRect().width>560&&fs>70){fs-=6;e.style.fontSize=fs+"px"}});
@@ -307,6 +369,23 @@ function render(t){
     b2.style.opacity=op.toFixed(3);b2.style.transform=`scale(${sc.toFixed(3)})`});
    el.querySelectorAll(".ty").forEach(r2=>{const at=rv+.7,CPS=34,n2=Math.floor(Math.max(0,lt-at)*CPS),tx=r2.dataset.txt,on2=lt>at-.3,tp=r2.querySelector(".tp");r2.style.opacity=on2?clamp((lt-at+.3)/.25).toFixed(3):0;
     const html=on2?`<b>&gt; DID YOU KNOW: </b>${esc(tx.slice(0,n2))}<span class="cr" style="opacity:${n2<tx.length||Math.floor(lt*2.5)%2?1:0}"></span>`:"";if(tp.innerHTML!==html)tp.innerHTML=html})}
+  if(s.kind==="mc"){const r=RD[s.i],Q=D.rounds[s.i],cs=r.cs-s.t0,rv=r.rv-s.t0,cdn=lt>=cs&&lt<rv,rv2=lt>=rv;
+   const tl=el.querySelector(".ttl"),ty0=pop(lt/.4);tl.style.opacity=clamp(lt/.1).toFixed(3);tl.style.transform=`scale(${(1.25-.25*ty0).toFixed(3)})`;
+   rev(".rnd",.15);rev(".qp",.3);
+   // clues land as she reads each one (her sentence starts), or every 1.4 s without a voice
+   const cu=D.cues&&D.cues["q"+s.i];el.querySelectorAll(".clu").forEach((c,k)=>{const at=cu&&cu[k]!=null?.55+cu[k]-.1:.6+k*1.4,y=ease((lt-at)/.35);c.style.opacity=clamp((lt-at)/.12).toFixed(3);c.style.transform=`translateX(${((1-y)*-60).toFixed(1)}px)`});
+   const first=Q.clues?(cu&&cu[Q.clues.length]!=null?.55+cu[Q.clues.length]-.3:.6+Q.clues.length*1.4):.9;
+   el.querySelectorAll(".mo").forEach((o,j)=>{const at=first+j*.12,y=pop((lt-at)/.45);let op=clamp((lt-at)/.1),sc=.6+.4*y;
+    if(cdn)sc*=1+.025*Math.sin((lt-cs)*Math.PI*2+j);
+    const win=j===Q.ans,ov=o.querySelector(".ov");
+    if(rv2){const k=lt-rv;o.classList.toggle("on",win);if(win)sc*=1+.08*(1-ease(k/.35));else op=1-.65*clamp(k/.2);if(ov)ov.style.opacity=clamp((k-.2)/.15).toFixed(3)}else{o.classList.remove("on");if(ov)ov.style.opacity=0}
+    o.style.opacity=op.toFixed(3);o.style.transform=`scale(${sc.toFixed(3)})`});
+   el.querySelectorAll(".mo .ic svg").forEach((x,j)=>{x.style.transform=`rotate(${(lt*(j%2?-3:3)).toFixed(2)}deg)`});
+   const cd=el.querySelector(".cdm");cd.style.opacity=cdn?1:0;
+   if(cdn){const k=(lt-cs)/(CD/3),sec=Math.floor(k),f=k-sec;cd.querySelector("b").textContent=String(3-sec);cd.querySelector(".rg").setAttribute("stroke-dashoffset",(615.8*f).toFixed(1));cd.style.transform=`scale(${(1+.14*(1-ease(f/.3))).toFixed(3)})`}
+   const vd=el.querySelector(".vdm");if(rv2){const k=lt-rv,y=pop((k-.1)/.4);vd.style.opacity=clamp((k-.1)/.06).toFixed(3);vd.style.transform=`scale(${(1.8-.8*y).toFixed(3)})`}else vd.style.opacity=0;
+   el.querySelectorAll(".ty").forEach(r2=>{const at=rv+.7,CPS=34,n2=Math.floor(Math.max(0,lt-at)*CPS),tx=r2.dataset.txt,on2=lt>at-.3,tp=r2.querySelector(".tp");r2.style.opacity=on2?clamp((lt-at+.3)/.25).toFixed(3):0;
+    const html=on2?`<b>&gt; DID YOU KNOW: </b>${esc(tx.slice(0,n2))}<span class="cr" style="opacity:${n2<tx.length||Math.floor(lt*2.5)%2?1:0}"></span>`:"";if(tp.innerHTML!==html)tp.innerHTML=html})}
   if(s.kind==="outro"){rev(".kick,.t1",.1,.12);const v=el.querySelector(".follow"),r=el.querySelector(".ring"),tp=lt-1.3;v.style.transform=`scale(${tp<0?pop((lt-.5)/.5):tp<.12?1-.06*(tp/.12):.94+.06*pop((tp-.12)/.4)})`;
    if(tp>0){const y=ease(tp/.7);r.style.opacity=(1-y).toFixed(3);r.style.transform=`scale(${(1+y*5).toFixed(3)})`}
    document.getElementById("fl").textContent=tp>.12?"Following ✓":"Follow";v.style.background=tp>.12?"var(--ion)":"transparent";v.style.color=tp>.12?"#03040A":"var(--ion)"}}
@@ -332,7 +411,7 @@ window.thumb=()=>{const T=document.getElementById("thumb");
   <i class="cb a"></i><i class="cb b"></i><i class="cb c"></i><i class="cb d"></i>
   <div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
   <div class="ret">${coverReticle()}<div class="art"><div style="width:600px;height:600px">${planet(D.hookPlanet||"venus","tv")}</div></div><div class="lk l"><i></i>${esc(D.kicker||"Space edition")}</div><div class="lk r"><span>${esc(D.thumbSub||"")}</span></div></div>
-  <div class="lo"><div class="bigt" style="color:var(--aur);text-shadow:0 0 50px rgba(92,255,168,.6)">HIGHER ▲</div><div class="bigt l2" style="color:var(--red);text-shadow:0 0 50px rgba(255,90,90,.6)">OR LOWER?</div></div>
+  <div class="lo">${(()=>{const W=D.thumbWords||D.hookWords||["Higher ▲","or lower?"];return `<div class="bigt" style="color:var(--aur);text-shadow:0 0 50px rgba(92,255,168,.6)">${esc(W[0])}</div><div class="bigt l2" style="color:${D.thumbColor2||"var(--red)"};text-shadow:0 0 50px rgba(255,90,90,.45)">${esc(W[1])}</div>`})()}</div>
   <div class="ft"><span>Space quiz</span><span>${esc(D.date)}</span></div>`;
  T.style.display="block";T.querySelector(".art svg").style.width="600px";T.querySelector(".art svg").style.height="600px";T.querySelectorAll(".bigt").forEach(e=>fit(e,90));
  const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};

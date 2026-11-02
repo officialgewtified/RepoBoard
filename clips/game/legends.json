@@ -1,0 +1,651 @@
+{
+ "_about": "Retired players only (career totals can't change). Regular season, NBA-only for basketball. Checked 2026-11-02 against Wikipedia's career-leader lists, NBC Sports, The Analyst and ESPN (two sources agree on each). Colors are only for the screen.",
+ "stats": [
+  {
+   "key": "pts",
+   "lg": "NBA",
+   "label": "Career points",
+   "noun": "career points",
+   "verb": "score",
+   "past": "scored",
+   "players": [
+    {
+     "name": "Kareem Abdul-Jabbar",
+     "v": 38387,
+     "c": "#552583",
+     "short": "Kareem"
+    },
+    {
+     "name": "Karl Malone",
+     "v": 36928,
+     "c": "#3E2680",
+     "short": "Malone"
+    },
+    {
+     "name": "Kobe Bryant",
+     "v": 33643,
+     "c": "#552583",
+     "short": "Kobe"
+    },
+    {
+     "name": "Michael Jordan",
+     "v": 32292,
+     "c": "#CE1141",
+     "short": "Jordan"
+    },
+    {
+     "name": "Dirk Nowitzki",
+     "v": 31560,
+     "c": "#00538C",
+     "short": "Dirk"
+    },
+    {
+     "name": "Wilt Chamberlain",
+     "v": 31419,
+     "c": "#006BB6",
+     "short": "Wilt"
+    },
+    {
+     "name": "Shaquille O'Neal",
+     "v": 28596,
+     "c": "#552583",
+     "short": "Shaq"
+    },
+    {
+     "name": "Carmelo Anthony",
+     "v": 28289,
+     "c": "#F58426",
+     "short": "Carmelo"
+    },
+    {
+     "name": "Moses Malone",
+     "v": 27409,
+     "c": "#006BB6",
+     "short": "Moses"
+    },
+    {
+     "name": "Hakeem Olajuwon",
+     "v": 26946,
+     "c": "#CE1141",
+     "short": "Hakeem"
+    },
+    {
+     "name": "Oscar Robertson",
+     "v": 26710,
+     "c": "#00471B",
+     "short": "Oscar"
+    },
+    {
+     "name": "Dominique Wilkins",
+     "v": 26668,
+     "c": "#E03A3E",
+     "short": "Dominique"
+    },
+    {
+     "name": "Tim Duncan",
+     "v": 26496,
+     "c": "#4A4F55",
+     "short": "Duncan"
+    },
+    {
+     "name": "Paul Pierce",
+     "v": 26397,
+     "c": "#007A33",
+     "short": "Pierce"
+    },
+    {
+     "name": "Kevin Garnett",
+     "v": 26071,
+     "c": "#236192",
+     "short": "Garnett"
+    },
+    {
+     "name": "Vince Carter",
+     "v": 25728,
+     "c": "#CE1141",
+     "short": "Vince"
+    },
+    {
+     "name": "Reggie Miller",
+     "v": 25279,
+     "c": "#002D62",
+     "short": "Reggie"
+    },
+    {
+     "name": "Jerry West",
+     "v": 25192,
+     "c": "#552583",
+     "short": "West"
+    },
+    {
+     "name": "Patrick Ewing",
+     "v": 24815,
+     "c": "#006BB6",
+     "short": "Ewing"
+    },
+    {
+     "name": "Ray Allen",
+     "v": 24505,
+     "c": "#007A33",
+     "short": "Ray Allen"
+    },
+    {
+     "name": "Allen Iverson",
+     "v": 24368,
+     "c": "#006BB6",
+     "short": "Iverson"
+    },
+    {
+     "name": "Charles Barkley",
+     "v": 23757,
+     "c": "#E56020",
+     "short": "Barkley"
+    },
+    {
+     "name": "Larry Bird",
+     "v": 21791,
+     "c": "#007A33",
+     "short": "Bird"
+    }
+   ]
+  },
+  {
+   "key": "reb",
+   "lg": "NBA",
+   "label": "Career rebounds",
+   "noun": "career rebounds",
+   "verb": "grab",
+   "past": "grabbed",
+   "players": [
+    {
+     "name": "Wilt Chamberlain",
+     "v": 23924,
+     "c": "#006BB6",
+     "short": "Wilt"
+    },
+    {
+     "name": "Bill Russell",
+     "v": 21620,
+     "c": "#007A33",
+     "short": "Russell"
+    },
+    {
+     "name": "Kareem Abdul-Jabbar",
+     "v": 17440,
+     "c": "#552583",
+     "short": "Kareem"
+    },
+    {
+     "name": "Elvin Hayes",
+     "v": 16279,
+     "c": "#002B5C",
+     "short": "Hayes"
+    },
+    {
+     "name": "Moses Malone",
+     "v": 16212,
+     "c": "#006BB6",
+     "short": "Moses"
+    },
+    {
+     "name": "Tim Duncan",
+     "v": 15091,
+     "c": "#4A4F55",
+     "short": "Duncan"
+    },
+    {
+     "name": "Karl Malone",
+     "v": 14968,
+     "c": "#3E2680",
+     "short": "Malone"
+    },
+    {
+     "name": "Robert Parish",
+     "v": 14715,
+     "c": "#007A33",
+     "short": "Parish"
+    },
+    {
+     "name": "Kevin Garnett",
+     "v": 14662,
+     "c": "#236192",
+     "short": "Garnett"
+    },
+    {
+     "name": "Hakeem Olajuwon",
+     "v": 13748,
+     "c": "#CE1141",
+     "short": "Hakeem"
+    },
+    {
+     "name": "Shaquille O'Neal",
+     "v": 13099,
+     "c": "#552583",
+     "short": "Shaq"
+    },
+    {
+     "name": "Charles Barkley",
+     "v": 12546,
+     "c": "#E56020",
+     "short": "Barkley"
+    },
+    {
+     "name": "Dennis Rodman",
+     "v": 11954,
+     "c": "#C8102E",
+     "short": "Rodman"
+    },
+    {
+     "name": "Patrick Ewing",
+     "v": 11607,
+     "c": "#006BB6",
+     "short": "Ewing"
+    }
+   ]
+  },
+  {
+   "key": "ast",
+   "lg": "NBA",
+   "label": "Career assists",
+   "noun": "career assists",
+   "verb": "dish out",
+   "past": "dished out",
+   "players": [
+    {
+     "name": "John Stockton",
+     "v": 15806,
+     "c": "#3E2680",
+     "short": "Stockton"
+    },
+    {
+     "name": "Jason Kidd",
+     "v": 12091,
+     "c": "#00538C",
+     "short": "Kidd"
+    },
+    {
+     "name": "Steve Nash",
+     "v": 10335,
+     "c": "#E56020",
+     "short": "Nash"
+    },
+    {
+     "name": "Mark Jackson",
+     "v": 10334,
+     "c": "#006BB6",
+     "short": "Mark Jackson"
+    },
+    {
+     "name": "Magic Johnson",
+     "v": 10141,
+     "c": "#552583",
+     "short": "Magic"
+    },
+    {
+     "name": "Oscar Robertson",
+     "v": 9887,
+     "c": "#00471B",
+     "short": "Oscar"
+    },
+    {
+     "name": "Isiah Thomas",
+     "v": 9061,
+     "c": "#C8102E",
+     "short": "Isiah"
+    },
+    {
+     "name": "Gary Payton",
+     "v": 8966,
+     "c": "#00653A",
+     "short": "Payton"
+    },
+    {
+     "name": "Andre Miller",
+     "v": 8524,
+     "c": "#0E2240",
+     "short": "Andre Miller"
+    },
+    {
+     "name": "Tim Hardaway",
+     "v": 7095,
+     "c": "#1D428A",
+     "short": "Hardaway"
+    },
+    {
+     "name": "Tony Parker",
+     "v": 7036,
+     "c": "#4A4F55",
+     "short": "Parker"
+    }
+   ]
+  },
+  {
+   "key": "rush",
+   "lg": "NFL",
+   "label": "Career rushing yards",
+   "noun": "career rushing yards",
+   "verb": "run for",
+   "past": "ran for",
+   "players": [
+    {
+     "name": "Emmitt Smith",
+     "v": 18355,
+     "c": "#003594",
+     "short": "Emmitt"
+    },
+    {
+     "name": "Walter Payton",
+     "v": 16726,
+     "c": "#C83803",
+     "short": "Payton"
+    },
+    {
+     "name": "Frank Gore",
+     "v": 16000,
+     "c": "#AA0000",
+     "short": "Gore"
+    },
+    {
+     "name": "Barry Sanders",
+     "v": 15269,
+     "c": "#0076B6",
+     "short": "Barry"
+    },
+    {
+     "name": "Adrian Peterson",
+     "v": 14918,
+     "c": "#4F2683",
+     "short": "Peterson"
+    },
+    {
+     "name": "Curtis Martin",
+     "v": 14101,
+     "c": "#125740",
+     "short": "Martin"
+    },
+    {
+     "name": "LaDainian Tomlinson",
+     "v": 13684,
+     "c": "#0080C6",
+     "short": "Tomlinson"
+    },
+    {
+     "name": "Jerome Bettis",
+     "v": 13662,
+     "c": "#2B2B2B",
+     "short": "Bettis"
+    },
+    {
+     "name": "Eric Dickerson",
+     "v": 13259,
+     "c": "#003594",
+     "short": "Dickerson"
+    },
+    {
+     "name": "Tony Dorsett",
+     "v": 12739,
+     "c": "#003594",
+     "short": "Dorsett"
+    },
+    {
+     "name": "Jim Brown",
+     "v": 12312,
+     "c": "#FF3C00",
+     "short": "Jim Brown"
+    },
+    {
+     "name": "Marshall Faulk",
+     "v": 12279,
+     "c": "#003594",
+     "short": "Faulk"
+    }
+   ]
+  },
+  {
+   "key": "rec",
+   "lg": "NFL",
+   "label": "Career receiving yards",
+   "noun": "career receiving yards",
+   "verb": "catch for",
+   "past": "caught for",
+   "players": [
+    {
+     "name": "Jerry Rice",
+     "v": 22895,
+     "c": "#AA0000",
+     "short": "Rice"
+    },
+    {
+     "name": "Larry Fitzgerald",
+     "v": 17492,
+     "c": "#97233F",
+     "short": "Fitzgerald"
+    },
+    {
+     "name": "Terrell Owens",
+     "v": 15934,
+     "c": "#AA0000",
+     "short": "Owens"
+    },
+    {
+     "name": "Randy Moss",
+     "v": 15292,
+     "c": "#4F2683",
+     "short": "Moss"
+    },
+    {
+     "name": "Isaac Bruce",
+     "v": 15208,
+     "c": "#003594",
+     "short": "Bruce"
+    },
+    {
+     "name": "Tony Gonzalez",
+     "v": 15127,
+     "c": "#E31837",
+     "short": "Gonzalez"
+    },
+    {
+     "name": "Tim Brown",
+     "v": 14934,
+     "c": "#2B2B2B",
+     "short": "Tim Brown"
+    },
+    {
+     "name": "Steve Smith Sr.",
+     "v": 14731,
+     "c": "#0085CA",
+     "short": "Steve Smith"
+    },
+    {
+     "name": "Marvin Harrison",
+     "v": 14580,
+     "c": "#002C5F",
+     "short": "Harrison"
+    },
+    {
+     "name": "Reggie Wayne",
+     "v": 14345,
+     "c": "#002C5F",
+     "short": "Wayne"
+    },
+    {
+     "name": "Andre Johnson",
+     "v": 14185,
+     "c": "#03202F",
+     "short": "Andre Johnson"
+    },
+    {
+     "name": "Cris Carter",
+     "v": 13899,
+     "c": "#4F2683",
+     "short": "Carter"
+    },
+    {
+     "name": "Calvin Johnson",
+     "v": 11619,
+     "c": "#0076B6",
+     "short": "Megatron"
+    }
+   ]
+  },
+  {
+   "key": "ptd",
+   "lg": "NFL",
+   "label": "Career TD passes",
+   "noun": "career touchdown passes",
+   "verb": "throw",
+   "past": "threw",
+   "players": [
+    {
+     "name": "Tom Brady",
+     "v": 649,
+     "c": "#002244",
+     "short": "Brady"
+    },
+    {
+     "name": "Drew Brees",
+     "v": 571,
+     "c": "#8C7A4B",
+     "short": "Brees"
+    },
+    {
+     "name": "Peyton Manning",
+     "v": 539,
+     "c": "#002C5F",
+     "short": "Peyton"
+    },
+    {
+     "name": "Brett Favre",
+     "v": 508,
+     "c": "#203731",
+     "short": "Favre"
+    },
+    {
+     "name": "Dan Marino",
+     "v": 420,
+     "c": "#008E97",
+     "short": "Marino"
+    },
+    {
+     "name": "Ben Roethlisberger",
+     "v": 418,
+     "c": "#2B2B2B",
+     "short": "Big Ben"
+    },
+    {
+     "name": "Eli Manning",
+     "v": 366,
+     "c": "#0B2265",
+     "short": "Eli"
+    },
+    {
+     "name": "Fran Tarkenton",
+     "v": 342,
+     "c": "#4F2683",
+     "short": "Tarkenton"
+    },
+    {
+     "name": "John Elway",
+     "v": 300,
+     "c": "#FB4F14",
+     "short": "Elway"
+    },
+    {
+     "name": "Warren Moon",
+     "v": 291,
+     "c": "#4B92DB",
+     "short": "Moon"
+    },
+    {
+     "name": "Johnny Unitas",
+     "v": 290,
+     "c": "#002C5F",
+     "short": "Unitas"
+    },
+    {
+     "name": "Joe Montana",
+     "v": 273,
+     "c": "#AA0000",
+     "short": "Montana"
+    }
+   ]
+  },
+  {
+   "key": "pyd",
+   "lg": "NFL",
+   "label": "Career passing yards",
+   "noun": "career passing yards",
+   "verb": "throw for",
+   "past": "threw for",
+   "players": [
+    {
+     "name": "Tom Brady",
+     "v": 89214,
+     "c": "#002244",
+     "short": "Brady"
+    },
+    {
+     "name": "Drew Brees",
+     "v": 80358,
+     "c": "#8C7A4B",
+     "short": "Brees"
+    },
+    {
+     "name": "Peyton Manning",
+     "v": 71940,
+     "c": "#002C5F",
+     "short": "Peyton"
+    },
+    {
+     "name": "Brett Favre",
+     "v": 71838,
+     "c": "#203731",
+     "short": "Favre"
+    },
+    {
+     "name": "Ben Roethlisberger",
+     "v": 64088,
+     "c": "#2B2B2B",
+     "short": "Big Ben"
+    },
+    {
+     "name": "Dan Marino",
+     "v": 61361,
+     "c": "#008E97",
+     "short": "Marino"
+    },
+    {
+     "name": "Eli Manning",
+     "v": 57023,
+     "c": "#0B2265",
+     "short": "Eli"
+    },
+    {
+     "name": "John Elway",
+     "v": 51475,
+     "c": "#FB4F14",
+     "short": "Elway"
+    },
+    {
+     "name": "Warren Moon",
+     "v": 49325,
+     "c": "#4B92DB",
+     "short": "Moon"
+    },
+    {
+     "name": "Fran Tarkenton",
+     "v": 47003,
+     "c": "#4F2683",
+     "short": "Tarkenton"
+    },
+    {
+     "name": "Joe Montana",
+     "v": 40551,
+     "c": "#AA0000",
+     "short": "Montana"
+    }
+   ]
+  }
+ ]
+}

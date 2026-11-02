@@ -93,6 +93,31 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #thumb .m div>*{transform:skewX(10deg)}
 #thumb .m b{font:900 96px/1 "Big Shoulders";text-transform:uppercase;white-space:nowrap}
 #thumb .m em{font:900 110px/1 "Big Shoulders";font-style:normal;color:var(--volt)}
+/* MULTIPLE CHOICE rounds (true or false, who has more, odd one out): the question big at the top, stacked answer
+   bars with a team-colour stripe, the clock under them; at the reveal the right answer goes volt and every value shows */
+.mq{top:318px;height:330px;display:flex;align-items:center}
+.mq div{font:900 96px/.98 "Big Shoulders";text-transform:uppercase;color:#fff;text-shadow:5px 5px 0 rgba(0,0,0,.3)}
+.mq b{color:var(--volt)}
+.ops{top:690px;display:flex;flex-direction:column;gap:22px}
+.op{position:relative;height:138px;background:#000;transform:skewX(-8deg);display:flex;align-items:center;box-shadow:0 14px 26px rgba(0,0,0,.28)}
+.op>*{transform:skewX(8deg)}
+.op i{position:absolute;left:0;top:0;bottom:0;width:20px;transform:none}
+.op .lt{flex:none;width:78px;height:78px;margin-left:40px;background:var(--volt);color:#000;display:grid;place-items:center;font:900 54px/1 "Big Shoulders"}
+.op .nm{flex:1;min-width:0;margin-left:26px;font:900 74px/1 "Big Shoulders";text-transform:uppercase;white-space:nowrap;overflow:hidden;color:#fff}
+.op .vv{flex:none;margin-right:30px;font:900 64px/1 "Big Shoulders";color:var(--volt);opacity:0}
+.op.on{background:var(--volt)}.op.on .nm,.op.on .vv{color:#000}.op.on .lt{background:#000;color:var(--volt)}
+.ops.tf .op{height:190px}.ops.tf .op .nm{font-size:130px}.ops.tf .op .lt{width:100px;height:100px}
+.ops.tf .op .lt svg{width:60px;height:60px}
+.cd2{position:absolute;left:50%;top:1330px;width:230px;height:230px;margin-left:-115px;opacity:0}
+.cd2 svg{position:absolute;inset:0;width:100%;height:100%}
+.cd2 b{position:absolute;inset:0;display:grid;place-items:center;font:900 170px/1 "Big Shoulders";color:var(--volt);text-shadow:6px 6px 0 rgba(0,0,0,.35)}
+.ops.tf~.cd2{top:1150px}
+.st2{position:absolute;left:540px;top:1400px;background:#fff;color:#000;font:900 92px/.95 "Big Shoulders";text-transform:uppercase;padding:18px 34px 14px;box-shadow:10px 10px 0 var(--volt);white-space:nowrap;opacity:0;z-index:4}
+.ops.tf~.st2{top:1220px}
+.df2{top:1500px;opacity:0}.df2 .bar{font-size:34px;padding:18px 26px;white-space:normal;max-width:860px;line-height:1.25}
+.ops.tf~.df2{top:1320px}
+/* the hook's two big words (HIGHER / OR LOWER, TRUE / OR FALSE ...) */
+.hw .ic{display:inline-block;width:.62em;height:.62em;vertical-align:.04em;margin-left:20px}
 </style></head><body>
 <div id="stage"></div>
 <div id="bug"><div class="wm"><span>CROSSOVER</span></div><div class="dt" id="dt"></div></div>
@@ -110,12 +135,14 @@ function fit(el,min,step=4){let fs=parseFloat(getComputedStyle(el).fontSize);whi
 const tag=(t,c="")=>`<div class="tag ${c}"><span>${t}</span></div>`;
 const bg=()=>`<div class="dots"></div><div class="stripes"></div><div class="shade"></div>`;
 const ARROW={up:`<svg viewBox="0 0 24 24"><path d="M12 3 L22 17 H2Z" fill="currentColor"/></svg>`,dn:`<svg viewBox="0 0 24 24"><path d="M12 21 L22 7 H2Z" fill="currentColor"/></svg>`};
+const ICON={yes:`<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,no:`<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`};
+const LG={NBA:"#c2410c",NFL:"#065f46"};
 const RING=`<svg viewBox="0 0 260 260"><circle cx="130" cy="130" r="112" fill="rgba(0,0,0,.55)" stroke="rgba(255,255,255,.25)" stroke-width="14"/><circle class="rg" cx="130" cy="130" r="112" fill="none" stroke="#D7FF3A" stroke-width="14" stroke-linecap="round" stroke-dasharray="703.7" stroke-dashoffset="0" transform="rotate(-90 130 130)"/></svg>`;
 let D=null,SC=[],SCR=[],RD=[],TOTAL=30,SFX=[];const TAIL=2.6,CD=3;
 // no narration (a local render): fixed reading times instead of the voice's lengths
 const NOV={hook:3.2,q:3.1,r:2.6,outro:3.6};
 function build(data){D=data;SC=[];SCR=[];RD=[];SFX=[];
- document.getElementById("dt").textContent="Higher or lower · "+D.date;document.getElementById("src").textContent=D.source||"";
+ document.getElementById("dt").textContent=(D.gameName||"Higher or lower")+" · "+D.date;document.getElementById("src").textContent=D.source||"";
  const n=D.rounds.length,vd=id=>D.dur&&D.dur[id]!=null?D.dur[id]:null;
  // lengths first, then stretch the thinking time so the video always runs past a minute (TikTok pays on 1:00+)
  const hookLen=vd("hook")!=null?Math.max(2.6,vd("hook")+.35+.4):NOV.hook,outLen=vd("outro")!=null?Math.max(3.6,vd("outro")+.3+.6):NOV.outro;
@@ -126,11 +153,22 @@ function build(data){D=data;SC=[];SCR=[];RD=[];SFX=[];
  let h="",t=0;
  SC.push({id:"hook",t0:0,t1:hookLen,va:.35});SCR.push({id:"hook",kind:"hook",t0:0,t1:hookLen});
  h+=`<div class="sc" id="hook" style="--tc:${D.hookColor||"#18181b"}"><div class="full"></div>${bg()}<div class="in hk">${tag(esc(D.kicker||"NBA + NFL legends"))}
-  <div style="margin-top:60px"><div class="hw">Higher${ARROW.up.replace("<svg","<svg style=\"color:#D7FF3A\"")}</div></div><div style="margin-top:14px"><div class="hw v">or lower${ARROW.dn.replace("<svg","<svg style=\"color:#fff\"")}</div></div>
+  ${(()=>{const W=D.hookWords||["Higher","or lower"],I=D.hookIcons||["up","dn"],ic=(k,c)=>k?`<span class="ic" style="color:${c}">${(ARROW[k]||ICON[k]||"").replace("<svg","<svg style=\"width:100%;height:100%\"")}</span>`:"";
+   return `<div style="margin-top:60px"><div class="hw">${esc(W[0])}${ic(I[0],"#D7FF3A")}</div></div><div style="margin-top:14px"><div class="hw v">${esc(W[1])}${ic(I[1],"#fff")}</div></div>`})()}
   <div style="margin-top:56px"><div class="bar"><span><b>${n} rounds</b> · ${esc(D.hookLine||"guess before the clock hits zero")}</span></div></div>
   <div style="margin-top:22px">${tag("Keep score","w")}</div></div></div>`;
  t=hookLen;
- D.rounds.forEach((R,i)=>{const t0=t,cs=t0+qLen(i)+extra,rv=cs+CD,t1=rv+rLen(i),hi=R.b.v>R.a.v,dv=Math.abs(R.b.v-R.a.v);
+ D.rounds.forEach((R,i)=>{if(R.type==="mc"){const t0=t,cs=t0+qLen(i)+extra,rv=cs+CD,t1=rv+rLen(i),tf=R.tf;
+   RD.push({i,t0,cs,rv,t1,mc:1});SC.push({id:"q"+i,t0,t1:rv,va:t0+.6},{id:"r"+i,t0:rv,t1,va:rv+.6});SCR.push({id:"r_"+i,kind:"mc",t0,t1,i});
+   h+=`<div class="sc" id="r_${i}" style="--tc:${LG[R.lg]||"#18181b"}"><div class="full"></div>${bg()}
+    <div class="in hdr">${tag(esc(R.lg+" · "+R.stat))}</div><div class="rk">${i+1}/${n}</div>
+    <div class="in mq"><div>${R.q}</div></div>
+    <div class="in ops ${tf?"tf":""}">${R.opts.map((o,j)=>`<div class="op" data-j="${j}"><i style="background:${o.c||(tf?(j?"#FF5A5A":"#5CFF8A"):"#fff")}"></i><span class="lt">${tf?ICON[j?"no":"yes"]:"ABCD"[j]}</span><span class="nm">${esc(o.t)}</span><span class="vv">${esc(o.v??"")}</span></div>`).join("")}</div>
+    <div class="cd2">${RING}<b>3</b></div>
+    <div class="st2">${esc(R.verdict)}</div>
+    <div class="in df2"><div class="bar"><span>${R.fact||""}</span></div></div></div>`;
+   t=t1;return}
+  const t0=t,cs=t0+qLen(i)+extra,rv=cs+CD,t1=rv+rLen(i),hi=R.b.v>R.a.v,dv=Math.abs(R.b.v-R.a.v);
   RD.push({i,t0,cs,rv,t1,hi});SC.push({id:"q"+i,t0,t1:rv,va:t0+.6},{id:"r"+i,t0:rv,t1,va:rv+.6});SCR.push({id:"r_"+i,kind:"round",t0,t1,i});
   h+=`<div class="sc" id="r_${i}" style="--ac:${R.a.c};--bc:${R.b.c}"><div class="ha"></div><div class="hb"></div>${bg()}<div class="seam"></div>
    <div class="in hdr">${tag(esc(R.lg+" · "+R.stat))}</div><div class="rk">${i+1}/${n}</div>
@@ -151,6 +189,8 @@ function build(data){D=data;SC=[];SCR=[];RD=[];SFX=[];
  document.getElementById("stage").innerHTML=h;TOTAL=t+TAIL;
  document.getElementById("segs").innerHTML=SCR.map(()=>`<i><b></b></i>`).join("");
  document.querySelectorAll(".who").forEach(e=>fit(e,60));
+ document.querySelectorAll(".mq").forEach(e=>{const q=e.firstElementChild;let fs=96;while((q.scrollHeight>e.clientHeight+2||q.scrollWidth>e.clientWidth+2)&&fs>52){fs-=4;q.style.fontSize=fs+"px"}});
+ document.querySelectorAll(".op .nm").forEach(e=>fit(e,40));document.querySelectorAll(".st2").forEach(e=>{let fs=92;while(e.offsetWidth>880&&fs>50){fs-=4;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".hdr").forEach(e=>{const tg=e.querySelector(".tag");let fs=34;while(tg.offsetWidth>700&&fs>22){fs-=2;tg.style.fontSize=fs+"px"}});
  document.querySelectorAll(".na,.vb").forEach(e=>{let fs=290;while(e.getBoundingClientRect().width>830&&fs>150){fs-=10;e.style.fontSize=fs+"px"}});
  document.querySelectorAll(".qb .bar,.diff .bar").forEach(e=>{let fs=36;while(e.getBoundingClientRect().width>860&&fs>22){fs-=1;e.style.fontSize=fs+"px"}});
@@ -194,6 +234,18 @@ function render(t){
     if(rev){const k=lt-rv;if(win){b.classList.add("on");sc*=1+.12*(1-ease(k/.35))}else{b.classList.remove("on");op=1-.65*clamp(k/.2)}}else b.classList.remove("on");
     b.style.opacity=op.toFixed(3);b.style.transform=`skewX(-10deg) scale(${sc.toFixed(3)})`});
    const st=el.querySelector(".stamp");if(rev){const k=lt-rv,sy=pop((k-.45)/.4);st.style.opacity=clamp((k-.45)/.06).toFixed(3);st.style.transform=`translate(-50%,-50%) rotate(-6deg) scale(${(2-sy).toFixed(3)})`}else st.style.opacity=0}
+  if(s.kind==="mc"){const r=RD[s.i],R=D.rounds[s.i],cs=r.cs-s.t0,rv=r.rv-s.t0,cdn=lt>=cs&&lt<rv,rev=lt>=rv;
+   slide(el.querySelector(".hdr .tag"),lt,.15,-140);slide(el.querySelector(".rk"),lt,.2,140);
+   const q=el.querySelector(".mq div"),qy=pop((lt-.2)/.45);q.style.opacity=clamp((lt-.18)/.08).toFixed(3);q.style.transform=`scale(${(1.25-.25*qy).toFixed(3)})`;q.style.transformOrigin="0 50%";
+   el.querySelectorAll(".op").forEach((o,j)=>{const at=.55+j*.14,y=ease((lt-at)/.35);let op=clamp((lt-at)/.08),sc=1;
+    if(cdn)sc=1+.025*Math.sin((lt-cs)*Math.PI*2+j);
+    const win=j===R.ans,vv=o.querySelector(".vv");
+    if(rev){const k=lt-rv;o.classList.toggle("on",win);if(win)sc=1+.08*(1-ease(k/.35));else op=1-.6*clamp(k/.2);vv.style.opacity=clamp((k-.15-(win?0:.1))/.15).toFixed(3)}else{o.classList.remove("on");vv.style.opacity=0}
+    o.style.opacity=op.toFixed(3);o.style.translate=`${((1-y)*(j%2?700:-700)).toFixed(1)}px 0`;o.style.transform=`skewX(-8deg) scale(${sc.toFixed(3)})`});
+   const cd=el.querySelector(".cd2");cd.style.opacity=cdn?1:0;
+   if(cdn){const k=lt-cs,sec=Math.floor(k),f=k-sec;cd.querySelector("b").textContent=String(CD-sec);cd.querySelector(".rg").setAttribute("stroke-dashoffset",(703.7*f).toFixed(1));cd.style.transform=`scale(${(1+.12*(1-ease(f/.25))).toFixed(3)})`}
+   const st=el.querySelector(".st2");if(rev){const k=lt-rv,sy=pop((k-.4)/.4);st.style.opacity=clamp((k-.4)/.06).toFixed(3);st.style.transform=`translate(-50%,-50%) rotate(-5deg) scale(${(2-sy).toFixed(3)})`}else st.style.opacity=0;
+   const df=el.querySelector(".df2");df.style.opacity=rev?clamp((lt-rv-.8)/.12).toFixed(3):0;df.style.translate=rev?`${((1-ease((lt-rv-.8)/.35))*-160).toFixed(1)}px 0`:"0 0"}
   if(s.kind==="outro"){slide(el.querySelector(".tag"),lt,.25,-140);slide(el.querySelector(".bar"),lt,.6,-140);
    el.querySelectorAll(".fo span").forEach((x,i)=>{const y=pop((lt-.12-i*.18)/.42);x.style.opacity=clamp((lt-.12-i*.18)/.06);x.style.transform=`scale(${(1.9-.9*y).toFixed(3)})`});
    const b=el.querySelector(".fbtn"),y=pop((lt-.95)/.4),press=lt>1.62&&lt<1.82?.92:1;b.style.opacity=clamp((lt-.95)/.06);b.style.transform=`scale(${(Math.max(0,y)*press).toFixed(3)})`;b.classList.toggle("on",lt>1.72);
@@ -211,6 +263,13 @@ function render(t){
  L.style.opacity=lo;s1.style.transform=`rotate(-38deg) translateX(${(k1*2200).toFixed(0)}px) scale(${sc.toFixed(3)})`;s2.style.transform=`rotate(38deg) translateX(${(-k1*2200).toFixed(0)}px) scale(${sc.toFixed(3)})`;wd.style.opacity=wo;
  for(const q of ["#bug","#segs","#src"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
 window.thumb=()=>{const R=D.rounds[0],T=document.getElementById("thumb");
+ if(R.type==="mc"){const W=D.hookWords||["Quiz",""];
+  T.innerHTML=`<div class="sc" style="opacity:1;--tc:${LG[R.lg]||"#18181b"}"><div class="full"></div>${bg()}
+   <div class="top"><div class="wm"><span>CROSSOVER</span></div><div class="when">${esc(D.thumbTag||"NBA + NFL legends")}</div></div>
+   <div class="cv"><div class="t">${esc(W[0])}</div><div class="t v">${esc(W[1])}</div>
+    <div class="m">${R.tf?`<div style="display:block"><b style="display:block;white-space:normal;font-size:84px;line-height:.95">${R.q.replace(/<[^>]+>/g,"")}?</b></div>`:R.opts.slice(0,4).map(o=>`<div><b>${esc(o.t)}</b><em>?</em></div>`).join("")}</div></div></div>`;
+  T.style.display="block";T.querySelectorAll(".t").forEach(e=>{let fs=330;while(e.getBoundingClientRect().width>960&&fs>150){fs-=10;e.style.fontSize=fs+"px"}});
+  if(!R.tf)T.querySelectorAll(".m b").forEach(e=>{let fs=96;while(e.getBoundingClientRect().width>760&&fs>50){fs-=4;e.style.fontSize=fs+"px"}});return true}
  T.innerHTML=`<div class="sc" style="opacity:1;--ac:${R.a.c};--bc:${R.b.c}"><div class="ha"></div><div class="hb"></div>${bg()}<div class="seam"></div>
   <div class="top"><div class="wm"><span>CROSSOVER</span></div><div class="when">${esc(D.thumbTag||"NBA + NFL legends")}</div></div>
   <div class="cv"><div class="t">Higher</div><div class="t v">or lower?</div>

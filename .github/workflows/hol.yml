@@ -1,11 +1,15 @@
-name: Higher or lower videos
-# Renders a Higher or Lower quiz for Crossover and Liftoff from a hand-checked episode file
-# (clips/hol/<name>.json and space/hol/<name>.json), with each channel's usual narrator, and puts both on the videos pages.
+name: Mini game videos
+# Every morning, a mini game for Crossover and for Liftoff: the game rotates by day (clips/minigame.js), every number comes
+# from a checked fact table, each channel's usual narrator reads it, the video is listened to before it's published, and
+# both land on the videos pages. A hand-made episode (clips/hol/<name>.json, space/hol/<name>.json) can be run by name.
 on:
+  schedule:
+    # 08:13 UTC is 3:13am Eastern (4:13 in summer): ready well before 5:30
+    - cron: "13 8 * * *"
   workflow_dispatch:
     inputs:
       episode:
-        description: "Episode name, e.g. 2026-11-01 (blank = the newest file)"
+        description: "Day to make, YYYY-MM-DD (blank = today); a hand-made episode file with that name is used if there is one"
         required: false
       channel:
         description: "Which channel to make"
@@ -49,10 +53,10 @@ jobs:
         run: |
           CH="${{ inputs.channel }}"
           if [ -n "$CH" ] && [ "$CH" != both ] && [ "$CH" != "${{ matrix.ch }}" ]; then echo "Only making $CH"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
-          EP="${{ inputs.episode }}"
-          [ -z "$EP" ] && EP=$(ls ${{ matrix.dir }}/*.json 2>/dev/null | sort | tail -1 | xargs -r basename | sed 's/\.json$//')
-          if [ -z "$EP" ] || [ ! -f "${{ matrix.dir }}/$EP.json" ]; then echo "No ${{ matrix.ch }} episode to make"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
-          mkdir -p out && cp "${{ matrix.dir }}/$EP.json" out/data.json
+          EP="${{ inputs.episode }}"; [ -z "$EP" ] && EP=$(TZ=America/New_York date +%F)
+          mkdir -p out
+          if [ -f "${{ matrix.dir }}/$EP.json" ]; then cp "${{ matrix.dir }}/$EP.json" out/data.json; echo "Hand-made episode $EP"
+          else node clips/minigame.js ${{ matrix.ch }} out/data.json "$EP"; fi
           echo "EP=$EP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         if: steps.ep.outputs.skip != '1'

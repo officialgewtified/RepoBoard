@@ -1,0 +1,113 @@
+{
+ "_about": "NASA Planetary Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet), US units table, checked 2026-11-02. Day length only for bodies whose day isn't confused with one spin (not Mercury, Venus or the Moon). Moon counts only where they can't change (0, 1, 2).",
+ "source": "NASA Planetary Fact Sheet",
+ "bodies": [
+  {
+   "id": "mercury",
+   "name": "Mercury",
+   "diam": 3032,
+   "grav": 12.1,
+   "dist": 36.0,
+   "orbit": 88.0,
+   "temp": 333,
+   "rings": false,
+   "moons": 0,
+   "order": 1
+  },
+  {
+   "id": "venus",
+   "name": "Venus",
+   "diam": 7521,
+   "grav": 29.1,
+   "dist": 67.2,
+   "orbit": 224.7,
+   "temp": 867,
+   "rings": false,
+   "moons": 0,
+   "order": 2
+  },
+  {
+   "id": "earth",
+   "name": "Earth",
+   "diam": 7926,
+   "grav": 32.1,
+   "dist": 93.0,
+   "orbit": 365.2,
+   "temp": 59,
+   "day": 24.0,
+   "rings": false,
+   "moons": 1,
+   "order": 3
+  },
+  {
+   "id": "mars",
+   "name": "Mars",
+   "diam": 4221,
+   "grav": 12.1,
+   "dist": 141.6,
+   "orbit": 687.0,
+   "temp": -85,
+   "day": 24.7,
+   "rings": false,
+   "moons": 2,
+   "order": 4
+  },
+  {
+   "id": "jupiter",
+   "name": "Jupiter",
+   "diam": 88846,
+   "grav": 75.9,
+   "dist": 483.7,
+   "orbit": 4331,
+   "temp": -166,
+   "day": 9.9,
+   "rings": true,
+   "order": 5
+  },
+  {
+   "id": "saturn",
+   "name": "Saturn",
+   "diam": 74897,
+   "grav": 29.4,
+   "dist": 889.8,
+   "orbit": 10747,
+   "temp": -220,
+   "day": 10.7,
+   "rings": true,
+   "order": 6
+  },
+  {
+   "id": "uranus",
+   "name": "Uranus",
+   "diam": 31763,
+   "grav": 28.5,
+   "dist": 1781.5,
+   "orbit": 30589,
+   "temp": -320,
+   "day": 17.2,
+   "rings": true,
+   "order": 7
+  },
+  {
+   "id": "neptune",
+   "name": "Neptune",
+   "diam": 30775,
+   "grav": 36.0,
+   "dist": 2805.5,
+   "orbit": 59800,
+   "temp": -330,
+   "day": 16.1,
+   "rings": true,
+   "order": 8
+  },
+  {
+   "id": "moon",
+   "name": "the Moon",
+   "short": "Moon",
+   "diam": 2159,
+   "grav": 5.3,
+   "temp": -4,
+   "moon": true
+  }
+ ]
+}
