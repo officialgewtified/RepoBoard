@@ -51,6 +51,24 @@ if voice and "audio" in kinds:
         if whole["recall"] < .9: fails.append(f"narration only {whole['recall']:.0%} recognizable")
         if whole["extra"] > .25: fails.append("extra babble in the narration")
         # each line on its own: find the stretch of the transcript that best matches it, and it has to be clearly there
+        # each line on its own, cut from the finished mix where render.js placed it: is it clearly there, music and all?
+        vm = re.sub(r"\.mp4$", "", video) + ".voicemap.json"
+        if os.path.exists(vm):
+            fails[:] = [f for f in fails if not f.startswith("narration only") and not f.startswith("extra babble")]
+            tot = hit = 0
+            for e in json.load(open(vm)):
+                v = voice.get(e["id"])
+                if not v: continue
+                seg = os.path.join(tempfile.mkdtemp(), "l.wav")
+                subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{max(0, e['at'] - .1):.3f}", "-t", f"{e['dur'] + .35:.3f}", "-i", video, "-vn", "-ac", "1", "-ar", "16000", seg], check=True)
+                h, _ = voiceqa.transcribe(seg); c = voiceqa.compare(v, h); n = len(voiceqa.norm(v))
+                tot += n; hit += c["recall"] * n
+                if c["recall"] < .8 or c["extra"] > .35:
+                    fails.append(f"line '{e['id']}' {c['recall']:.0%} heard{', extra words' if c['extra'] > .35 else ''}: said \"{v[:70]}\" | heard \"{h[:70]}\"")
+            whole = {"recall": hit / max(1, tot), "extra": 0}
+            notes[:] = [x for x in notes if not x.startswith("narration heard")] + [f"narration heard line by line: {whole['recall']:.0%} of the script"]
+            if whole["recall"] < .9: fails.append(f"narration only {whole['recall']:.0%} recognizable, line by line")
+            lines = []
         hw = voiceqa.norm(heard)
         for k, v in lines:
             e = voiceqa.norm(v)

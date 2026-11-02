@@ -76,6 +76,8 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
     const VFX = (P < 1 ? `,asetrate=${Math.round(48000 * P)},aresample=48000,atempo=${(1 / P).toFixed(4)}` : "") + (process.env.VOICE_EQ || ",highpass=f=70,equalizer=f=3000:t=q:w=1:g=2");
     const ins = [];
     if (voice) SC.forEach(s => { const f = path.join(data.voiceDir, s.id + ".wav"); if (fs.existsSync(f)) ins.push([f, s.va, "v"]); });
+    // where each narration line sits in the finished video (check.py listens to each one in place before publishing)
+    if (voice) fs.writeFileSync(base + ".voicemap.json", JSON.stringify(SC.filter(s => fs.existsSync(path.join(data.voiceDir, s.id + ".wav"))).map(s => ({ id: s.id, at: +s.va.toFixed(3), dur: (data.dur || {})[s.id] || 0 }))));
     SFX.forEach(e => { if (SYN[e.k] && e.t < total) ins.push([path.join(tmp, e.k + ".wav"), e.t, "s"]); });
     const args = ["-y", "-loglevel", "error", "-i", silent];
     ins.forEach(([f]) => args.push("-i", f));
