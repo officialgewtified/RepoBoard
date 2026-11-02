@@ -290,7 +290,8 @@ async function build(today, outDir, brand) {
   facts.push("Footage: NASA Image and Video Library (images.nasa.gov). Data: NASA JPL, NOAA SWPC, The Space Devs, USNO.");
   const title = `${L.title} | Sky Report ${dateLabel}`.slice(0, 100);
   const base = { template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA" };
-  const quick = Object.keys(S).filter(k => QH[k] && k !== L.k).sort((a, b) => score[b] - score[a]).slice(0, 2).map((k, i) => {
+  // (a quiet northern-lights night isn't worth its own video: "can you see them tonight? ...no")
+  const quick = Object.keys(S).filter(k => QH[k] && k !== L.k && !(k === "aur" && S.aur.k < 4)).sort((a, b) => score[b] - score[a]).slice(0, 2).map((k, i) => {
     const [line, big] = QH[k], tag = { ast: "#asteroid", aur: "#northernlights", sun: "#sun", lau: "#rocketlaunch", moon: "#moon" }[k];
     return { ...base, mode: "space-quick", quick: true, min: 0, part: i + 1, scenes: [{ kind: "hook", id: "hook", topic: k, bg: BG[k], ...big }, S[k], { kind: "outro", id: "outro", bg: "earth" }],
       voice: { hook: line, [k]: QV[k], outro: `Follow ${brand} for more!` },
