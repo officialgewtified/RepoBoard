@@ -51,7 +51,7 @@ function crossover(game, day, used, R) {
       rounds.push({ lg: S.lg, stat: S.label, a: { name: A.name, short: sh(A), v: A.v, c: A.c }, b: { name: B.name, short: sh(B), v: B.v, c: B.c },
         q: `Did <b>${sh(B)}</b> ${S.verb} <b>more</b> or <b>less</b>?`, ...(top ? { fact: `<b>${com(B.v)}</b> · the most ever` } : {}) });
       voice["q" + i] = `${A.name} ${S.past} ${com(A.v)} ${S.noun}. Did ${B.name} ${S.verb} more, or less?`;
-      voice["r" + i] = `It's ${hi ? "higher" : "lower"}. ${sh(B)} finished with ${com(B.v)}.${top ? " That's the most ever." : ""}`;
+      voice["r" + i] = `It's ${hi ? "higher" : "lower"}, ${sh(B)} finished with ${com(B.v)}${top ? ", the most ever" : ""}.`;
       facts.push(`${A.name} ${com(A.v)} vs ${B.name} ${com(B.v)} ${S.noun}`); seen.add(A.name); seen.add(B.name); U.push(k);
     } else if (game === "tf") {
       const truth = R() < .5, kind = R() < .55 ? "cmp" : "thr";
@@ -61,8 +61,8 @@ function crossover(game, day, used, R) {
         const k = `tf:${S.key}:${[A.name, B.name].sort().join("|")}`; if (!fresh(k)) continue;
         rounds.push({ type: "mc", tf: true, lg: S.lg, stat: S.label, q: `<b>${sh(A)}</b> ${S.past} more ${S.noun} than <b>${sh(B)}</b>`,
           opts: [{ t: "True" }, { t: "False" }], ans: truth ? 0 : 1, verdict: truth ? "True!" : "False!", fact: `<b>${sh(A)} ${com(A.v)}</b> · ${sh(B)} ${com(B.v)}` });
-        voice["q" + i] = `${A.name} ${S.past} more ${S.noun} than ${B.name}. True, or false?`;
-        voice["r" + i] = `That's ${truth ? "true" : "false"}. ${sh(A)} finished with ${com(A.v)}, and ${sh(B)} with ${com(B.v)}.`;
+        voice["q" + i] = `${A.name} ${S.past} more ${S.noun} than ${B.name}, true or false?`;
+        voice["r" + i] = `That's ${truth ? "true" : "false"}, ${sh(A)} finished with ${com(A.v)}, and ${sh(B)} with ${com(B.v)}.`;
         facts.push(`${A.name} ${com(A.v)} vs ${B.name} ${com(B.v)} ${S.noun}`); seen.add(A.name); seen.add(B.name); U.push(k);
       } else {
         if (!P.length) continue;
@@ -71,8 +71,8 @@ function crossover(game, day, used, R) {
         const k = `tf:${S.key}:${p.name}:${T}`; if (!fresh(k)) continue;
         rounds.push({ type: "mc", tf: true, lg: S.lg, stat: S.label, q: `<b>${sh(p)}</b> ${S.past} more than <b>${com(T)}</b> ${S.noun}`,
           opts: [{ t: "True" }, { t: "False" }], ans: truth ? 0 : 1, verdict: truth ? "True!" : "False!", fact: `<b>${p.name}: ${com(p.v)}</b> ${S.noun}` });
-        voice["q" + i] = `${p.name} ${S.past} more than ${com(T)} ${S.noun}. True, or false?`;
-        voice["r" + i] = `That's ${truth ? "true" : "false"}. ${sh(p)} finished with ${com(p.v)}.`;
+        voice["q" + i] = `${p.name} ${S.past} more than ${com(T)} ${S.noun}, true or false?`;
+        voice["r" + i] = `That's ${truth ? "true" : "false"}, ${sh(p)} finished with ${com(p.v)}.`;
         facts.push(`${p.name} ${com(p.v)} ${S.noun}`); seen.add(p.name); U.push(k);
       }
     } else if (game === "mc") {
@@ -82,7 +82,7 @@ function crossover(game, day, used, R) {
       const best = four.reduce((a, b) => b.v > a.v ? b : a);
       rounds.push({ type: "mc", lg: S.lg, stat: S.label, q: `Who has the most <b>${S.noun}</b>?`, opts: four.map(p => ({ t: p.name, c: p.c, v: com(p.v) })),
         ans: four.indexOf(best), verdict: sh(best) + "!", fact: `<b>${best.name}: ${com(best.v)}</b> ${S.noun}` });
-      voice["q" + i] = `Who has the most ${S.noun}? ${list(four.map(p => p.name))}?`;
+      voice["q" + i] = `Who has the most ${S.noun}: ${list(four.map(p => p.name))}?`;
       voice["r" + i] = `It's ${best.name}, with ${com(best.v)}.`;
       facts.push(four.map(p => `${p.name} ${com(p.v)}`).join(", ") + ` ${S.noun}`); four.forEach(p => seen.add(p.name)); U.push(k);
     } else if (game === "odd") {
@@ -93,18 +93,18 @@ function crossover(game, day, used, R) {
       const odd = pick(under), four = shuffle([...over, odd]), k = `odd:${S.key}:${T}:${odd.name}`; if (!fresh(k)) continue;
       rounds.push({ type: "mc", lg: S.lg, stat: S.label, q: `Three of them ${S.past} over <b>${com(T)}</b> ${S.noun}. Who didn't?`, opts: four.map(p => ({ t: p.name, c: p.c, v: com(p.v) })),
         ans: four.indexOf(odd), verdict: sh(odd) + "!", fact: `<b>${odd.name}: ${com(odd.v)}</b> · under ${com(T)}` });
-      voice["q" + i] = `Three of these four ${S.past} over ${com(T)} ${S.noun}: ${list(four.map(p => p.name), "and")}. Which one didn't?`;
-      voice["r" + i] = `It's ${odd.name}. He finished with ${com(odd.v)}.`;
+      voice["q" + i] = `Which of these four didn't ${S.verb} over ${com(T)} ${S.noun}: ${list(four.map(p => p.name))}?`;
+      voice["r" + i] = `It's ${odd.name}, who finished with ${com(odd.v)}.`;
       facts.push(four.map(p => `${p.name} ${com(p.v)}`).join(", ") + ` ${S.noun} (line: ${com(T)})`); four.forEach(p => seen.add(p.name)); U.push(k);
     }
     if (rounds.length > n0) statsUsed.add(S.key);
   }
   if (rounds.length < want) throw new Error(`only made ${rounds.length} of ${want} ${game} rounds`);
-  const G = { hol: ["Higher or lower", ["Higher", "or lower"], ["up", "dn"], "Six legends and six guesses. Is it higher or lower? Keep score!"],
-    tf: ["True or false", ["True", "or false"], ["yes", "no"], "Four legend stats. Is it true, or false? Keep score!"],
-    mc: ["Who has more", ["Who has", "more?"], [], "Who has more? Four questions on NBA and NFL legends. Keep score!"],
-    odd: ["Odd one out", ["Odd one", "out"], [], "It's Odd One Out. Find the legend who doesn't belong. Keep score!"] }[game];
-  voice.hook = G[3]; voice.outro = "How many did you get? Comment your score, and follow for more!";
+  const G = { hol: ["Higher or lower", ["Higher", "or lower"], ["up", "dn"], "Here are six legends and six guesses, so keep score as you go: is it higher, or lower?"],
+    tf: ["True or false", ["True", "or false"], ["yes", "no"], "Here are four legend stats, so keep score as you go: is it true, or false?"],
+    mc: ["Who has more", ["Who has", "more?"], [], "Here are four questions on NBA and NFL legends, so keep score as you go: who has more?"],
+    odd: ["Odd one out", ["Odd one", "out"], [], "It's Odd One Out, so find the legend who doesn't belong, and keep score as you go."] }[game];
+  voice.hook = G[3]; voice.outro = "Comment how many you got, and follow for more!";
   const r0 = rounds[0], title = game === "hol" ? `Higher or Lower: ${r0.a.name} vs ${r0.b.name} 🏀🏈` : { tf: "True or False: NBA & NFL Legends 🏀🏈", mc: "Who Has More? NBA & NFL Legends Quiz 🏀🏈", odd: "Odd One Out: Can You Spot It? 🏀🏈" }[game];
   return { template: "hol.html", min: 62, gameName: G[0], hookWords: G[1], hookIcons: G[2], kicker: "NBA + NFL legends", thumbTag: "NBA + NFL legends",
     hookLine: "guess before the clock hits zero", source: "Regular-season career totals", rounds, voice, used: U,
@@ -117,15 +117,17 @@ function liftoff(game, day, used, R) {
   const B = JSON.parse(fs.readFileSync(path.join(HERE, "../space/game/planets.json"), "utf8")).bodies, PL = B.filter(b => !b.moon);
   const pick = a => a[Math.floor(R() * a.length)], shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const nm = b => b.name, cap = s => s.charAt(0).toUpperCase() + s.slice(1), dn = b => b.short || b.name;   // dn: on screen ("Moon")
+  const lc = s => /^(A|The) /.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+  const deg = b => `${b.temp < 0 ? "minus " + com(-b.temp) : com(b.temp)} degrees Fahrenheit`;
   const wt = b => Math.round(100 * b.grav / 32.1), yrs = b => b.orbit / 365.25;
   const orbitS = b => b.orbit > 700 ? { v: +yrs(b).toFixed(1), s: yrs(b).toFixed(1), u: "years", say: `about ${yrs(b).toFixed(1).replace(/\.0$/, "")} Earth years` } : { v: b.orbit, s: com(b.orbit), u: "days", say: `about ${com(b.orbit)} Earth days` };
   // each stat: who it applies to, the label, the value shown, and how she says it
   const ST = {
-    diam: { topic: "Size", lab: "Width", who: B, v: b => b.diam, u: "mi", say: b => `about ${com(b.diam)} miles wide`, more: "bigger", most: "the biggest", least: "the smallest" },
-    temp: { topic: "Temperature", lab: "Average temp", who: B, v: b => b.temp, u: "°F", say: b => `about ${b.temp < 0 ? "minus " + com(-b.temp) : com(b.temp)} degrees Fahrenheit on average`, more: "hotter", most: "the hottest", least: "the coldest" },
-    dist: { topic: "Distance", lab: "From the Sun", who: PL, v: b => b.dist, s: b => b.dist >= 100 ? com(b.dist) : b.dist.toFixed(1), u: "million mi", say: b => `about ${com(b.dist)} million miles from the Sun`, more: "farther from the Sun", most: "the farthest from the Sun", least: "the closest to the Sun" },
-    wt: { topic: "Gravity", lab: "100 lb on Earth weighs", who: B.filter(b => b.id !== "earth"), v: wt, u: "lb", say: b => `a 100 pound person would weigh about ${wt(b)} pounds on ${nm(b)}`, more: "heavier", most: "where you'd weigh the most", least: "where you'd weigh the least" },
-    day: { topic: "Day length", lab: "One day", who: B.filter(b => b.day), v: b => b.day, s: b => b.day.toFixed(1), u: "hours", say: b => `a day on ${nm(b)} lasts about ${b.day.toFixed(1).replace(/\.0$/, "")} hours`, more: "longer", most: "the longest day", least: "the shortest day" }
+    diam: { at: b => `at about ${com(b.diam)} miles wide`, topic: "Size", lab: "Width", who: B, v: b => b.diam, u: "mi", say: b => `about ${com(b.diam)} miles wide`, more: "bigger", most: "the biggest", least: "the smallest" },
+    temp: { at: b => `at about ${deg(b)} on average`, topic: "Temperature", lab: "Average temp", who: B, v: b => b.temp, u: "°F", say: b => `about ${b.temp < 0 ? "minus " + com(-b.temp) : com(b.temp)} degrees Fahrenheit on average`, more: "hotter", most: "the hottest", least: "the coldest" },
+    dist: { at: b => `at about ${com(b.dist)} million miles from the Sun`, topic: "Distance", lab: "From the Sun", who: PL, v: b => b.dist, s: b => b.dist >= 100 ? com(b.dist) : b.dist.toFixed(1), u: "million mi", say: b => `about ${com(b.dist)} million miles from the Sun`, more: "farther from the Sun", most: "the farthest from the Sun", least: "the closest to the Sun" },
+    wt: { at: b => `where a 100 pound person would weigh about ${wt(b)} pounds`, topic: "Gravity", lab: "100 lb on Earth weighs", who: B.filter(b => b.id !== "earth"), v: wt, u: "lb", say: b => `a 100 pound person would weigh about ${wt(b)} pounds on ${nm(b)}`, more: "heavier", most: "where you'd weigh the most", least: "where you'd weigh the least" },
+    day: { at: b => `where a day lasts about ${b.day.toFixed(1).replace(/\.0$/, "")} hours`, topic: "Day length", lab: "One day", who: B.filter(b => b.day), v: b => b.day, s: b => b.day.toFixed(1), u: "hours", say: b => `a day on ${nm(b)} lasts about ${b.day.toFixed(1).replace(/\.0$/, "")} hours`, more: "longer", most: "the longest day", least: "the shortest day" }
   };
   const U = [], rounds = [], voice = {}, facts = [], seen = new Set(), keys = new Set();
   let tries = 0;
@@ -141,8 +143,8 @@ function liftoff(game, day, used, R) {
       const k = `hol:${key}:${[a.id, b.id].sort().join("|")}`; if (!fresh(k)) continue; keys.add(key);
       const hi = S.v(b) > S.v(a), side = x => ({ icon: x.id, lab: S.lab, name: dn(x), v: S.v(x), u: S.u, ...(S.s ? { s: S.s(x) } : {}) });
       rounds.push({ topic: S.topic, a: side(a), b: side(b), q: `<b>${dn(b)}</b>: higher or lower than <b>${S.s ? S.s(a) : com(S.v(a))}${S.u === "°F" ? "°F" : " " + S.u}</b>?` });
-      voice["q" + i] = `${cap(key === "wt" || key === "day" ? S.say(a) : nm(a) + " is " + S.say(a))}. What about ${nm(b)}? Higher, or lower?`;
-      voice["r" + i] = `It's ${hi ? "higher" : "lower"}. ${cap(key === "wt" || key === "day" ? S.say(b) : nm(b) + " is " + S.say(b))}.`;
+      voice["q" + i] = `${cap(key === "wt" || key === "day" ? S.say(a) : nm(a) + " is " + S.say(a))}, so is ${nm(b)} higher, or lower?`;
+      voice["r" + i] = `It's ${hi ? "higher" : "lower"}, ${lc(key === "wt" || key === "day" ? S.say(b) : nm(b) + " is " + S.say(b))}.`;
       facts.push(`${a.name}: ${S.lab} ${S.s ? S.s(a) : com(S.v(a))} ${S.u}; ${b.name}: ${S.s ? S.s(b) : com(S.v(b))} ${S.u}`); seen.add(a.id); seen.add(b.id); U.push(k); hookPlanet = hookPlanet || b.id;
     } else if (game === "tf") {
       const truth = R() < .5, kind = pick(["cmp", "cmp", "rings", "moons", "year", "wt"]);
@@ -175,8 +177,8 @@ function liftoff(game, day, used, R) {
       }
       if (!fresh(k)) { facts.pop(); continue; }
       rounds.push({ type: "mc", tf: true, topic: "True or false", q: text.replace(new RegExp(`\\b(${x.map(z => dn(z)).join("|")})\\b`, "g"), "<b>$1</b>"), opts: [{ t: "True" }, { t: "False" }], ans: truth ? 0 : 1, verdict: truth ? "True!" : "False!", fact });
-      voice["q" + i] = `${say} True, or false?`;
-      voice["r" + i] = `That's ${truth ? "true" : "false"}. ${rsay}`;
+      voice["q" + i] = `${say.replace(/\.$/, "")}, true or false?`;
+      voice["r" + i] = `That's ${truth ? "true" : "false"}, ${lc(rsay)}`;
       x.forEach(z => seen.add(z.id)); U.push(k); kinds.add(kind); hookPlanet = hookPlanet || x[0].id;
     } else if (game === "mc") {
       const key = pick(["diam", "temp", "temp", "dist", "wt", "day"]), S = ST[key], dir = R() < .6 ? "most" : "least";
@@ -187,8 +189,8 @@ function liftoff(game, day, used, R) {
       const q = key === "wt" ? `Where would you weigh ${dir === "most" ? "the most" : "the least"}?` : key === "day" ? `Which has ${S[dir]}?` : `Which is ${S[dir]}?`;
       rounds.push({ type: "mc", topic: S.topic, q, opts: four.map(z => ({ t: dn(z), icon: z.id, v: `${S.s ? S.s(z) : com(S.v(z))}${S.u === "°F" ? "°F" : " " + S.u}` })), ans: four.indexOf(best),
         verdict: dn(best) + "!", fact: cap(key === "wt" || key === "day" ? S.say(best) : nm(best) + " is " + S.say(best)) + "." });
-      voice["q" + i] = `${q} ${list(four.map(nm))}?`;
-      voice["r" + i] = `It's ${nm(best)}. ${cap(key === "wt" || key === "day" ? S.say(best) : nm(best) + " is " + S.say(best))}.`;
+      voice["q" + i] = `${q.replace(/\?$/, "")}: ${list(four.map(nm))}?`;
+      voice["r" + i] = `It's ${nm(best)}, ${S.at(best)}.`;
       facts.push(four.map(z => `${z.name} ${S.v(z)}`).join(", ") + ` (${S.lab}, ${S.u})`); U.push(k); hookPlanet = hookPlanet || best.id;
     } else if (game === "guess") {
       const left = PL.filter(z => !seen.has(z.id) && z.id !== "earth"); if (!left.length) break;
@@ -212,11 +214,11 @@ function liftoff(game, day, used, R) {
   }
   if (rounds.length < want) throw new Error(`only made ${rounds.length} of ${want} ${game} rounds`);
   for (const r of rounds) if (r.fact) r.fact = r.fact.replace(/<[^>]+>/g, "");   // the "did you know" line is typed out as plain text
-  const G = { hol: [["Higher", "or lower"], ["up", "dn"], ["Higher ▲", "or lower?"], "It's Higher or Lower, space edition. Try to beat the clock.", "Higher or Lower: Planet Edition 🪐"],
-    tf: [["True", "or false"], ["yes", "no"], ["True", "or false?"], "It's True or False, space edition. Try to beat the clock.", "True or False: Space Edition 🪐"],
-    mc: [["Which", "planet?"], [], ["Which", "planet?"], "Which planet is it? Try to beat the clock.", "Which Planet? Space Quiz 🪐"],
-    guess: [["Guess the", "planet"], [], ["Guess the", "planet"], `Can you guess the planet from three clues? Try to beat the clock.`, "Guess the Planet in 3 Clues 🪐"] }[game];
-  voice.hook = G[3]; voice.outro = "How many did you get? Follow Liftoff for more.";
+  const G = { hol: [["Higher", "or lower"], ["up", "dn"], ["Higher ▲", "or lower?"], "It's Higher or Lower, space edition, so try to beat the clock.", "Higher or Lower: Planet Edition 🪐"],
+    tf: [["True", "or false"], ["yes", "no"], ["True", "or false?"], "It's True or False, space edition, so try to beat the clock.", "True or False: Space Edition 🪐"],
+    mc: [["Which", "planet?"], [], ["Which", "planet?"], "Can you pick the right planet before the clock runs out?", "Which Planet? Space Quiz 🪐"],
+    guess: [["Guess the", "planet"], [], ["Guess the", "planet"], `Can you guess the planet from three clues before the clock runs out?`, "Guess the Planet in 3 Clues 🪐"] }[game];
+  voice.hook = G[3]; voice.outro = "Comment how many you got, and follow Liftoff for more.";
   return { template: "../space/hol.html", music: "../space/music", brand: "Liftoff", hookWords: G[0], hookIcons: G[1], thumbWords: G[2], thumbColor2: game === "tf" ? "var(--red)" : "var(--sol)",
     kicker: "Space edition", hookSub: `${rounds.length} rounds · beat the clock`, thumbSub: `${rounds.length} rounds · beat the clock`, hookPlanet: hookPlanet || "saturn", hs: "FACTS · NASA",
     source: "Source: NASA Planetary Fact Sheet", rounds, voice, used: U,

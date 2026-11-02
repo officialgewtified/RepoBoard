@@ -6,7 +6,8 @@ words are compared with the script. Used two ways:
   check.py checks the finished video before it's published.
 
 What counts as a bad read: words missing or garbled, extra babble, a long pause in the middle, dead air or noise before
-or after the words, a pace far too fast or too slow for a person, or a pitch far from her normal voice (shrill/shouted)."""
+or after the words, a gap that sounds like she cut out, a pace far too fast or too slow for a person, or a pitch far
+from her normal voice (shrill/shouted)."""
 import difflib, os, re
 
 ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split()
@@ -97,21 +98,41 @@ def pitch(path):
         if ac[k] > .5 * ac[0]: out.append(sr / k)
     return float(np.median(out)) if len(out) >= 5 else None
 
+def sentence_starts(sents, ws, dur):
+    """where each sentence starts inside one recording of several, from the recognizer's word times (matched to the
+    script word by word); a sentence it can't place is put where its share of the text says"""
+    E, S = [], []
+    for j, s in enumerate(sents):
+        t = norm(s); E += t; S += [j] * len(t)
+    H, W = [], []
+    for i, (_, _, w) in enumerate(ws or []):
+        t = norm(w); H += t; W += [i] * len(t)
+    m = {}
+    for b in difflib.SequenceMatcher(None, E, H, autojunk=False).get_matching_blocks():
+        for k in range(b.size): m[b.a + k] = b.b + k
+    lens, tot, out, at = [len(norm(s)) for s in sents], max(1, sum(len(s) for s in sents)), [], 0
+    for j, s in enumerate(sents):
+        t = next((ws[W[m[k]]][0] for k in range(at, at + lens[j]) if k in m), None)
+        if t is None: t = dur * sum(len(x) for x in sents[:j]) / tot
+        out.append(0.0 if j == 0 else max(out[-1] + .2, t - .06)); at += lens[j]
+    return [round(x, 3) for x in out]
+
 def check_line(path, expected, dur, ref_f0=None):
-    """one recorded sentence -> (ok, score, problems). score: higher is better, used to keep the best of several takes.
+    """one recording (a sentence or a few) -> (ok, score, problems, heard, word times). score: higher is better, used
+    to keep the best of several takes.
     ref_f0: her normal pitch (from the reference read); a take far above it sounds shrill or shouted, far below, croaky"""
     heard, ws = transcribe(path)
     c = compare(expected, heard)
     n = max(1, len(norm(expected)))
     problems = []
-    if c["recall"] < .8: problems.append(f"words missing or garbled ({', '.join(c['missing'][:6])})")
-    if c["extra"] > .3: problems.append("extra words or babble")
+    if c["recall"] < .9: problems.append(f"words missing or garbled ({', '.join(c['missing'][:6])})")
+    if c["extra"] > .2: problems.append("extra words or babble")
     if ws:
         lead, tail = ws[0][0], dur - ws[-1][1]
         gaps = [b[0] - a[1] for a, b in zip(ws, ws[1:])]
         if lead > .6: problems.append(f"{lead:.1f}s of dead air or noise before the words")
         if tail > .8: problems.append(f"{tail:.1f}s of noise or dead air after the words")
-        if gaps and max(gaps) > 1.0: problems.append(f"a {max(gaps):.1f}s pause mid-sentence")
+        if gaps and max(gaps) > .75: problems.append(f"a {max(gaps):.1f}s gap mid-line (sounds like she cut out)")
     elif n:
         problems.append("nothing recognizable")
     rate = n / max(.1, dur)
@@ -123,4 +144,4 @@ def check_line(path, expected, dur, ref_f0=None):
         if f and f > ref_f0 * 1.32: problems.append(f"pitch {f:.0f} Hz, way above her normal {ref_f0:.0f} Hz (shrill or shouting)")
         if f and f < ref_f0 * .72: problems.append(f"pitch {f:.0f} Hz, way below her normal {ref_f0:.0f} Hz")
     score = c["recall"] - .5 * c["extra"] - .25 * len(problems)
-    return not problems, score, problems, heard
+    return not problems, score, problems, heard, ws

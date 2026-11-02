@@ -64,11 +64,17 @@ def fix(t):
     return re.sub(r"(?<=[A-Za-z])-(?=[A-Z])", " ", t)
 
 def trim(a, sr):
-    """cut leading/trailing near-silence"""
-    loud = np.where(np.abs(a) > 0.01)[0]
+    """cut leading/trailing silence, gently: the threshold is relative to the take's own loudness and generous margins
+    are kept, so soft starts and ends ("th", "s") aren't clipped off; a short fade avoids clicks at the cut"""
+    pk = float(np.max(np.abs(a))) if len(a) else 0.0
+    loud = np.where(np.abs(a) > max(0.003, pk * 0.012))[0]
     if not len(loud):
         return a
-    return a[max(0, loud[0] - int(.03 * sr)):min(len(a), loud[-1] + int(.08 * sr))]
+    a = a[max(0, loud[0] - int(.07 * sr)):min(len(a), loud[-1] + int(.2 * sr))].copy()
+    f = min(int(.012 * sr), len(a) // 4)
+    if f > 0:
+        a[:f] *= np.linspace(0, 1, f, dtype=np.float32); a[-f:] *= np.linspace(1, 0, f, dtype=np.float32)
+    return a
 
 # every sentence is listened back to (voiceqa.py) and re-recorded if it comes out wrong: up to TAKES tries with
 # Chatterbox, then Kokoro reads that sentence (Chatterbox is cloned from a Kokoro voice, so it's the same narrator)
@@ -81,14 +87,14 @@ except Exception as e:
 _tmp = os.path.join(out, "_take.wav")
 
 def listen(a, sr, s):
-    if not QA: return True, 0, []
+    if not QA: return True, 0, [], None
     sf.write(_tmp, a, sr)
     try:
-        ok, score, probs, heard = voiceqa.check_line(_tmp, s, len(a) / sr, REF_F0)
+        ok, score, probs, heard, ws = voiceqa.check_line(_tmp, s, len(a) / sr, REF_F0)
     except Exception as e:   # the check itself broke: keep the take (check.py still listens to the finished video)
-        print("   voice check failed to run:", e, flush=True); return True, 0, []
-    if not ok: print(f"   x take rejected: {'; '.join(probs)}  | heard: {heard[:80]}", flush=True)
-    return ok, score, probs
+        print("   voice check failed to run:", e, flush=True); return True, 0, [], None
+    if not ok: print(f"   x take rejected: {'; '.join(probs)}  | heard: {heard[:90]}", flush=True)
+    return ok, score, probs, ws
 
 def kokoro_take(s, sr):
     import tts
@@ -102,7 +108,7 @@ def kokoro_take(s, sr):
 BUDGET, _spent = float(os.environ.get("RETAKE_BUDGET", "900")), [0.0]
 
 def take(s, sr):
-    """the best of up to TAKES Chatterbox reads of one sentence -> (audio, takes used, engine, problems left)"""
+    """the best of up to TAKES Chatterbox reads of one passage -> (audio, takes used, engine, problems left, word times)"""
     import time
     best = None
     for n in range(1, TAKES + 1):
@@ -112,34 +118,47 @@ def take(s, sr):
         if n > 1: torch.manual_seed(1000 * n + len(s))
         wav = model.generate(fix(s), audio_prompt_path=ref, exaggeration=EXAG, cfg_weight=CFG)
         a = trim(wav.squeeze(0).cpu().numpy().astype(np.float32), sr)
-        ok, score, probs = listen(a, sr, s)
+        ok, score, probs, ws = listen(a, sr, s)
         if n > 1: _spent[0] += time.time() - t0
-        if ok: return a, n, "chatterbox", []
-        if best is None or score > best[1]: best = (a, score, probs)
-    if _spent[0] > BUDGET: return best[0], n, "chatterbox", best[2]
+        if ok: return a, n, "chatterbox", [], ws
+        if best is None or score > best[1]: best = (a, score, probs, ws)
+    if _spent[0] > BUDGET: return best[0], n, "chatterbox", best[2], best[3]
     try:
-        a = kokoro_take(s, sr); ok, score, probs = listen(a, sr, s)
+        a = kokoro_take(s, sr); ok, score, probs, ws = listen(a, sr, s)
         if ok or score > best[1]:
-            print(f"   -> Kokoro read this sentence: {s[:60]}", flush=True)
-            return a, TAKES, "kokoro", probs
+            print(f"   -> Kokoro read this: {s[:60]}", flush=True)
+            return a, TAKES, "kokoro", probs, ws
     except Exception as e:
         print("   Kokoro fallback failed:", e, flush=True)
-    return best[0], TAKES, "chatterbox", best[2]
+    return best[0], TAKES, "chatterbox", best[2], best[3]
 
 D = json.load(open(data_path))
 D["dur"], D["cues"], D["voiceQA"] = {}, {}, {}
 GAP = 0.16
 TEMPO = float(os.environ.get("TEMPO", "1.07")) if shutil.which("ffmpeg") else 1.0
+# she reads a whole line in one go when it's short enough (CHUNK characters), so it flows like one breath instead of
+# sentences glued together; longer lines go in runs of whole sentences. Where each sentence starts (cues, for the
+# on-screen timing) comes from the recognizer's word times.
+CHUNK = int(os.environ.get("CHUNK", "230"))
+def runs(sents):
+    out, cur = [], []
+    for s in sents:
+        if cur and len(" ".join(cur + [s])) > CHUNK: out.append(cur); cur = []
+        cur.append(s)
+    return out + ([cur] if cur else [])
+
 for sid, text in D["voice"].items():
     sents = [s for s in re.split(r"(?<=[.!?])\s+", prep(text).strip()) if s]
     parts, cues, t, sr = [], [], 0.0, model.sr
     qa = {"takes": 0, "problems": []}
-    for i, s in enumerate(sents):
-        a, n, eng, probs = take(s, sr)
+    groups = runs(sents)
+    for i, g in enumerate(groups):
+        a, n, eng, probs, ws = take(" ".join(g), sr)
         qa["takes"] = max(qa["takes"], n); qa["problems"] += probs
         qa.setdefault("engines", []).append(eng)
-        cues.append(round(t, 3)); parts.append(a); t += len(a) / sr
-        if i < len(sents) - 1:
+        st = voiceqa.sentence_starts(g, ws, len(a) / sr) if QA and ws else [len(" ".join(g[:j])) / max(1, len(" ".join(g))) * len(a) / sr for j in range(len(g))]
+        cues += [round(t + x, 3) for x in st]; parts.append(a); t += len(a) / sr
+        if i < len(groups) - 1:
             parts.append(np.zeros(int(GAP * sr), dtype=np.float32)); t += GAP
     w = np.concatenate(parts)
     f = os.path.join(out, sid + ".wav")

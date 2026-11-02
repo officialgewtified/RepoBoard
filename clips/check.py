@@ -48,7 +48,7 @@ if voice and "audio" in kinds:
         lines = [(k, v) for k, v in voice.items() if k in D["dur"]]
         whole = voiceqa.compare(" ".join(v for _, v in lines), heard)
         notes.append(f"narration heard: {whole['recall']:.0%} of the script")
-        if whole["recall"] < .85: fails.append(f"narration only {whole['recall']:.0%} recognizable")
+        if whole["recall"] < .9: fails.append(f"narration only {whole['recall']:.0%} recognizable")
         if whole["extra"] > .25: fails.append("extra babble in the narration")
         # each line on its own: find the stretch of the transcript that best matches it, and it has to be clearly there
         hw = voiceqa.norm(heard)
@@ -57,7 +57,7 @@ if voice and "audio" in kinds:
             if not e: continue
             L = len(e) + 4
             best = max((voiceqa.compare(" ".join(e), " ".join(hw[i:i + L]))["recall"] for i in range(0, max(1, len(hw) - len(e) + 1))), default=0)
-            if best < .7:
+            if best < .8:
                 fails.append(f"line '{k}' garbled or missing ({best:.0%} heard): {v[:60]}")
         qa = D.get("voiceQA") or {}
         redo = {k: v for k, v in qa.items() if v.get("takes", 1) > 1 or v.get("engine", "chatterbox") != "chatterbox"}
