@@ -9,10 +9,11 @@
 :root{--bg:#09090B;--card:#16171b;--raise:#232327;--line:#2c2c31;--ink:#f4f4f5;--mute:#a1a1aa;--dim:#71717a;--acc:#D7FF3A;--accInk:#09090B;--up:#4ade80;--h1font:900 40px "Big Shoulders"}
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f5f2;--card:#fff;--raise:#f1efea;--line:#e4e2dc;--ink:#18181b;--mute:#52525b;--dim:#71717a;--acc:#e8701a;--accInk:#fff;--up:#16a34a}}
 </style>
-<link rel="stylesheet" href="../videos.css?v=1">
+<link rel="stylesheet" href="../videos.css?v=2">
 </head><body><main>
 <header class="hd"><img src="apple-touch-icon.png?v=2" alt=""><div><h1>Crossover</h1><p>Sports stat videos · made automatically</p></div><div class="up" id="up"></div></header>
 <div id="stats"></div>
+<div id="reply"></div>
 <div id="latest"><p class="empty">Loading today's videos…</p></div>
 <div id="older"></div>
 <details class="howto"><summary>How to post (about a minute)</summary><ol>
@@ -23,6 +24,8 @@
 <li>Tap <b>Mark posted</b> so you know what's done. Mornings (7 to 9am ET) catch people checking last night's scores.</li>
 </ol><p class="note" style="margin:0 16px 16px">Everything comes straight from the official box scores. If something ever looks off, skip that day rather than post it.</p></details>
 </main><div class="toast" id="toast"></div>
-<script src="../videos.js?v=1"></script>
+<script src="../videos.js?v=2"></script>
 <script>VP.start({repo:"officialgewtified/RepoBoard",match:/^(clip|preview|weekly|hol)-/,key:"crossover",empty:"The next video shows up here after tonight's games.",kind:t=>/^hol/.test(t)?{label:"Mini game",short:"Game",cls:"q"}:/^weekly/.test(t)?{label:"Long-form · YouTube",short:"Long-form",cls:"l",wide:true}:/^preview/.test(t)?{label:"Tonight's games",short:"Tonight",cls:"q"}:{label:"Daily recap",short:"Recap"}});</script>
+<script src="../replies.js?v=1"></script>
+<script>REPLY.mount({channel:"crossover"});</script>
 </body></html>

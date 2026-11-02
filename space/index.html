@@ -9,10 +9,11 @@
 :root{--bg:#04050b;--card:#0b1020;--raise:#121a30;--line:#1c2742;--ink:#eaf2ff;--mute:#9aa7c2;--dim:#6b7894;--acc:#4ff3ff;--accInk:#03040a;--up:#5cffa8;--h1font:800 30px "Unbounded"}
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f3f6fb;--card:#fff;--raise:#eef2f9;--line:#dbe3f0;--ink:#0b1020;--mute:#4a5670;--dim:#6b7894;--acc:#0a8fa3;--accInk:#fff;--up:#0f9f6e}}
 </style>
-<link rel="stylesheet" href="../videos.css?v=1">
+<link rel="stylesheet" href="../videos.css?v=2">
 </head><body><main>
 <header class="hd"><img src="apple-touch-icon.png" alt=""><div><h1>Liftoff</h1><p>@liftoffnews · daily space report</p></div><div class="up" id="up"></div></header>
 <div id="stats"></div>
+<div id="reply"></div>
 <div id="latest"><p class="empty">Loading today's videos…</p></div>
 <div id="older"></div>
 <details class="howto"><summary>How to post (about a minute)</summary><ol>
@@ -22,6 +23,8 @@
 <li>Post to TikTok and YouTube Shorts, then tap <b>Mark posted</b>. Quick hits work any time; the full report does best in the morning or early evening.</li>
 </ol><p class="note" style="margin:0 16px 16px">Data: NASA JPL, NOAA SWPC, The Space Devs, USNO. Footage: NASA (credited in every caption; never use NASA logos as the channel's branding).</p></details>
 </main><div class="toast" id="toast"></div>
-<script src="../videos.js?v=1"></script>
+<script src="../videos.js?v=2"></script>
 <script>VP.start({repo:"officialgewtified/RepoBoard",match:/^space-/,key:"liftoff",empty:"The first video shows up here after the next morning run.",kind:t=>/hol/.test(t)?{label:"Mini game",short:"Game",cls:"q"}:/quick/.test(t)?{label:"Quick hit",short:"Quick",cls:"q"}:/weekly/.test(t)?{label:"Long-form · YouTube",short:"Long-form",cls:"l",wide:true}:{label:"Full report",short:"Report"}});</script>
+<script src="../replies.js?v=1"></script>
+<script>REPLY.mount({channel:"liftoff"});</script>
 </body></html>

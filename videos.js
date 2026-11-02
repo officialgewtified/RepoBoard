@@ -98,11 +98,12 @@
     if (b.dataset.act === "tags") copy(tagsFor(r), "YouTube tags");
     if (b.dataset.act === "posted") { const p = store.get("posted-" + CFG.key); p[r.tag_name] ? delete p[r.tag_name] : (p[r.tag_name] = Date.now()); store.set("posted-" + CFG.key, p); render(); }
   });
-  window.VP = { start: async cfg => {
+  window.VP = { rel: () => REL, start: async cfg => {
     CFG = cfg;
     fetch("../stats/latest.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => { STATS = j && j.channels && j.channels[cfg.key] ? Object.assign({ updated: j.updated }, j.channels[cfg.key]) : null; stats(); if (REL.length) render(); }).catch(() => stats());
     try { const r = await fetch(`https://api.github.com/repos/${cfg.repo}/releases?per_page=60`); if (!r.ok) throw new Error(r.status);
-      REL = (await r.json()).filter(x => cfg.match.test(x.tag_name) && mp4(x)).sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at)); render(); }
+      REL = (await r.json()).filter(x => cfg.match.test(x.tag_name) && mp4(x)).sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at)); render();
+      window.dispatchEvent(new CustomEvent("vp:rel", { detail: REL })); }
     catch (e) { document.getElementById("latest").innerHTML = `<p class="empty">Couldn't reach GitHub just now. Pull down to refresh.</p>`; }
   } };
 })();
