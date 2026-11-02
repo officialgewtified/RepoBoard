@@ -234,7 +234,7 @@ async function build(today, outDir, brand) {
     V.lau = `Launch schedule! ${LA.map(one).join(" ")} Launch times can slip, so check before you watch.`;
     score.lau = LA.some(l => l.crew) ? 7 : LA.some(l => !l.star) ? 3 : 2;
     { const l = LA[0], w = l.dayOnly ? "on " + ET(l.net, { weekday: "long" }) : when(l.net, today), it = S.lau.items[0];
-      QH.lau = [`${l.prov} is launching ${l.star ? "more Starlink satellites" : l.crew ? "astronauts" : "a " + l.rocket} ${w}!`, { big: l.dayOnly ? it.day.split(" ")[0].replace(",", "") : it.time.replace(" ET", ""), unit: l.dayOnly ? "Launch day" : "Eastern · " + it.day.replace(",", ""), kicker: "Launch alert", sub: `${l.rocket} · ${l.loc}` }];
+      QH.lau = [`${l.prov} is launching ${l.star ? "more Starlink satellites" : l.crew ? "astronauts" : (/^[aeiou]/i.test(l.rocket) ? "an " : "a ") + l.rocket} ${w}!`, { big: l.dayOnly ? it.day.split(" ")[0].replace(",", "") : it.time.replace(" ET", ""), unit: l.dayOnly ? "Launch day" : "Eastern · " + it.day.replace(",", ""), kicker: "Launch alert", sub: `${l.rocket} · ${l.loc}` }];
       QV.lau = `${one(l, 0)} Launch times can slip, so check before you watch.`; }
     const cr = LA.find(l => l.crew); if (cr) hooks.push([7, "lau", `Astronauts are launching ${when(cr.net, today)}!`, { big: "LIFTOFF", unit: cr.rocket, kicker: "Crew launch", sub: S.lau.items[LA.indexOf(cr)].day }]);
   }
@@ -260,9 +260,11 @@ async function build(today, outDir, brand) {
   for (const k of Object.keys(S)) S[k].fact = factFor(k, today);
   sane(S);
   if (!Object.keys(S).length) return null;
-  for (let i = hooks.length - 1; i >= 0; i--) if (!S[hooks[i][1]]) hooks.splice(i, 1);
-  hooks.sort((a, b) => b[0] - a[0]);
-  const H = hooks[0] || [1, "moon", "Here's what's happening in the sky this week!", { big: S.moon.illum + "%", unit: "Moon lit tonight", kicker: "Sky report", sub: "" }];
+  // the lead story (hook, title and cover): big news always leads, but on an ordinary day the stories take turns,
+  // so the report doesn't open on the same asteroid every morning (see pickLead)
+  const L = pickLead(leadOptions(S, QH, today), await recentLeads(today));
+  const H = [L.value, L.k, L.line, L.big];
+  console.log("lead:", L.k, `(news ${L.value}, after rotation ${L.final.toFixed(1)})`, "|", L.title);
   const order = Object.keys(S).sort((a, b) => (b === H[1]) - (a === H[1]) || score[b] - score[a]).slice(0, 3);   // the three biggest stories keep it under a minute
   const BG = { ast: "asteroid", aur: "aurora", sun: "sun", lau: "launch", moon: "moon" };
   for (const k of Object.keys(S)) S[k].bg = BG[k];
@@ -286,9 +288,9 @@ async function build(today, outDir, brand) {
   if (S.moon) facts.push(`MOON: ${S.moon.phase}, ${S.moon.illum}% lit tonight; next full moon ${new Date(S.moon.nextFull).toUTCString()} (${S.moon.fullName})${S.moon.checked ? ", matches the US Naval Observatory" : ", USNO check unavailable"}`,
     "  check: https://aa.usno.navy.mil/data/MoonPhases", "");
   facts.push("Footage: NASA Image and Video Library (images.nasa.gov). Data: NASA JPL, NOAA SWPC, The Space Devs, USNO.");
-  const title = ytTitle(H, S, dateLabel);
+  const title = `${L.title} | Sky Report ${dateLabel}`.slice(0, 100);
   const base = { template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA" };
-  const quick = Object.keys(S).filter(k => QH[k]).sort((a, b) => score[b] - score[a]).slice(0, 2).map((k, i) => {
+  const quick = Object.keys(S).filter(k => QH[k] && k !== L.k).sort((a, b) => score[b] - score[a]).slice(0, 2).map((k, i) => {
     const [line, big] = QH[k], tag = { ast: "#asteroid", aur: "#northernlights", sun: "#sun", lau: "#rocketlaunch", moon: "#moon" }[k];
     return { ...base, mode: "space-quick", quick: true, min: 0, part: i + 1, scenes: [{ kind: "hook", id: "hook", topic: k, bg: BG[k], ...big }, S[k], { kind: "outro", id: "outro", bg: "earth" }],
       voice: { hook: line, [k]: QV[k], outro: `Follow ${brand} for more!` },
@@ -299,6 +301,57 @@ async function build(today, outDir, brand) {
     music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA", ytTitle: title, caption: caption(H, S, voice, brand, dateLabel) };
 }
 
+// every story's pitch as the lead: how big the news is (value), the hook line, the hook's big number, and a short title
+// that names today's specifics (so titles differ day to day)
+function leadOptions(S, QH, today) {
+  const O = [], day = d => { const w = when(d, today); return w === "tonight" || w === "today" ? cap(w) : /^tomorrow/.test(w) ? "Tomorrow" : /^on \w+day/.test(w) ? ET(d, { weekday: "long" }) : ""; };
+  const tc = s => s.replace(/^(a|an|the) /i, "").replace(/\b\w/g, c => c.toUpperCase());
+  if (S.ast) { const a = S.ast, [line, big] = QH.ast;
+    if (a.closer) O.push({ k: "ast", value: 10, line, big, title: "Asteroid Passes Closer Than the Moon ☄️", des: a.des });
+    else O.push({ k: "ast", value: a.ft >= 490 && a.ld < 10 ? 5 : 3, line, big, title: `${tc(a.ref.name)}-Sized Asteroid Flies Past Earth ☄️`, des: a.des }); }
+  if (S.aur) { const k = S.aur.k, [line, big] = QH.aur;
+    if (k >= 5) O.push({ k: "aur", value: k >= 7 ? 11 : 8, line, big, title: `Northern Lights Could Reach ${tc(S.aur.short)} Tonight 🌌` });
+    else if (k === 4) O.push({ k: "aur", value: 3, line: "The northern lights are active tonight! Here's where to look.", big: { ...big, kicker: "Aurora watch" }, title: "Northern Lights Active Tonight 🌌" }); }
+  if (S.sun) { const f = flux(S.sun.c24), [line, big] = QH.sun;
+    O.push(f >= 1e-4 ? { k: "sun", value: 9, line, big, title: `The Sun Just Fired an ${S.sun.c24} Flare ☀️` }
+      : f >= 1e-5 ? { k: "sun", value: 5, line, big, title: `The Sun Fired an ${S.sun.c24} Solar Flare ☀️` }
+      : { k: "sun", value: 2, line: "Here's what the Sun looks like right now!", big, title: `The Sun Right Now: ${S.sun.c24 ? "Biggest Flare " + S.sun.c24 : "All Quiet"} ☀️` }); }
+  if (S.lau) { const it = S.lau.items, cr = it.find(l => l.crew), l = cr || it.find(x => !x.star) || it[0], [line, big] = QH.lau, d = day(l.net);
+    if (cr) O.push({ k: "lau", value: 7, line: `Astronauts are launching ${when(cr.net, today)}!`, big: { big: "LIFTOFF", unit: cr.rocket, kicker: "Crew launch", sub: cr.day }, title: `Astronauts Launch ${d || "This Week"} 🚀` });
+    else if (l.star) O.push({ k: "lau", value: 2, line, big, title: `SpaceX Launches More Starlink Satellites ${d} 🚀`.replace("  ", " ") });
+    else O.push({ k: "lau", value: 3, line: l === it[0] ? line : `${l.prov} is launching ${/^[aeiou]/i.test(l.rocket) ? "an" : "a"} ${l.rocket} ${when(l.net, today)}!`,
+      big: l === it[0] ? big : { big: l.dayOnly ? l.day.split(" ")[0].replace(",", "") : l.time.replace(" ET", ""), unit: l.dayOnly ? "Launch day" : "Eastern · " + l.day.replace(",", ""), kicker: "Launch alert", sub: `${l.rocket} · ${l.loc}` },
+      title: `${l.prov} Launches ${l.rocket} ${d} 🚀`.replace("  ", " ") }); }
+  if (S.moon) { const m = S.moon;
+    if (m.fullTonight) O.push({ k: "moon", value: 6, line: QH.moon[0], big: QH.moon[1], title: `Full ${m.tonightName} Moon Tonight 🌕` });
+    else if (m.dTo >= 1 && m.dTo <= 3) O.push({ k: "moon", value: 4, line: `The full ${m.fullName} Moon is ${m.dTo === 1 ? "tomorrow night" : "just " + w2(m.dTo) + " days away"}!`,
+      big: { big: m.illum + "%", unit: "Moon lit tonight", kicker: "Full moon soon", sub: `Full ${m.fullName} Moon · ${m.full}` }, title: `Full ${m.fullName} Moon ${m.dTo === 1 ? "Tomorrow Night" : "in " + m.dTo + " Days"} 🌕` });
+    else O.push({ k: "moon", value: 2, line: `Tonight's Moon is ${m.illum} percent lit. Here's what's coming up!`, big: QH.moon[1], title: `Tonight's Moon Is ${m.illum}% Lit 🌙` }); }
+  return O;
+}
+// which story leads: news value minus how recently that story led (yesterday -6, two days ago -4 ...), and an asteroid
+// that was already featured lately loses its newness. Ties go to the story that's waited longest.
+const AGO = [0, 6, 4, 2.5, 1.5, .75, .3];
+function pickLead(O, hist) {
+  const last = k => { const h = hist.find(x => x.topic === k); return h ? h.ago : 99; };
+  // big news (7+: an aurora storm, an X flare, a crew launch, a closer-than-the-Moon asteroid) only loses half as much
+  for (const o of O) { o.final = o.value - (AGO[last(o.k)] || 0) * (o.value >= 7 ? .5 : 1);
+    if (o.k === "ast" && hist.some(x => x.ago <= 3 && x.ast === o.des)) o.final -= 3; }
+  const pref = ["sun", "lau", "moon", "ast", "aur"];
+  return O.sort((a, b) => b.final - a.final || last(b.k) - last(a.k) || pref.indexOf(a.k) - pref.indexOf(b.k))[0];
+}
+// the last six days' reports, from their published data.json: which story led and which asteroid was featured
+async function recentLeads(today) {
+  const repo = process.env.GITHUB_REPOSITORY || "officialgewtified/RepoBoard", out = [];
+  await Promise.all([1, 2, 3, 4, 5, 6].map(async ago => {
+    const day = new Date(Date.parse(today + "T12:00:00Z") - ago * 864e5).toISOString().slice(0, 10);
+    try { const r = await fetch(`https://github.com/${repo}/releases/download/space-${day}/data.json`, { ...UA, signal: AbortSignal.timeout(15000) }); if (!r.ok) return;
+      const D = await r.json(), h = (D.scenes || []).find(x => x.kind === "hook"), a = (D.scenes || []).find(x => x.kind === "ast");
+      out.push({ ago, topic: h && h.topic, ast: a && a.des }); } catch (e) {} }));
+  out.sort((a, b) => a.ago - b.ago);
+  console.log("recent leads:", out.map(x => `${x.ago}d ago ${x.topic}${x.ast ? " (" + x.ast + ")" : ""}`).join(", ") || "none found");
+  return out;
+}
 function ytTitle(H, S, d) {
   const t = { ast: S.ast && S.ast.closer ? "Asteroid Passes Closer Than the Moon ☄️" : S.ast ? `${S.ast.count} Asteroids Fly Past Earth in the Next 10 Days ☄️` : "",
     aur: "Northern Lights Alert Tonight 🌌", sun: "The Sun Just Fired an X-Class Flare ☀️", lau: "Astronauts Launching This Week 🚀", moon: S.moon && (S.moon.fullTonight ? `Full ${S.moon.tonightName} Moon Tonight 🌕` : `Tonight's Moon: ${S.moon.illum}% Lit 🌙`) }[H[1]] || "Tonight's Sky Report 🔭";
@@ -316,7 +369,7 @@ function caption(H, S, voice, brand, d) {
   return L.join("\n");
 }
 
-module.exports = { build, moon, usno, sayDes, get, save, ET, etDay, fmtTime, comma, r1, cap, w2, when, refFor, ft, AU_MI, LD, place, PROV, flux, FACTS };
+module.exports = { build, leadOptions, pickLead, recentLeads, moon, usno, sayDes, get, save, ET, etDay, fmtTime, comma, r1, cap, w2, when, refFor, ft, AU_MI, LD, place, PROV, flux, FACTS };
 if (require.main === module) (async () => {
   const out = process.argv[2], today = process.argv[3] || etDay(Date.now());
   const D = await build(today, path.dirname(path.resolve(out)), process.env.BRAND || "Liftoff");
