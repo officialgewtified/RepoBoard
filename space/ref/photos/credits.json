@@ -1,0 +1,90 @@
+{
+ "earth": {
+  "title": "File:The Earth seen from Apollo 17.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg",
+  "license": "Public domain",
+  "artist": "\nNASA/Apollo 17 crew; taken by either Harrison Schmitt or Ron Evans",
+  "credit": "https://web.archive.org/web/20160112123725/http://grin.hq.nasa.gov/ABSTRACTS/GPN-2000-001138.html (image link); see also",
+  "px": 1887
+ },
+ "moon": {
+  "title": "File:Moon nearside LRO color mosaic.png",
+  "page": "https://commons.wikimedia.org/wiki/File:Moon_nearside_LRO_color_mosaic.png",
+  "license": "Public domain",
+  "artist": "NASA/GSFC/Arizona State University",
+  "credit": "wms.lroc.asu.edu (see also http://lroc.sese.asu.edu/posts/801)",
+  "px": 1887
+ },
+ "mars": {
+  "title": "File:Mars globe.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Mars_globe.jpg",
+  "license": "Public domain",
+  "artist": "NASA/USGS",
+  "credit": "http://nssdc.gsfc.nasa.gov/planetary/image/mars.jpg",
+  "px": 1886
+ },
+ "jupiter": {
+  "title": "File:Jupiter OPAL 2024.png",
+  "page": "https://commons.wikimedia.org/wiki/File:Jupiter_OPAL_2024.png",
+  "license": "Public domain",
+  "artist": "NASA/STSCI (S.T.A.R.S)",
+  "credit": "https://hubblesite.org/contents/media/images/2024/009/01HPMN3ZGXFN1E0M1W5Y8AVCAM?news=true",
+  "px": 1553
+ },
+ "saturn": {
+  "title": "File:Saturn during Equinox.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Saturn_during_Equinox.jpg",
+  "license": "Public domain",
+  "artist": "NASA / JPL / Space Science Institute",
+  "credit": "http://www.ciclops.org/view/5155/Saturn-Four-Years-On http://www.nasa.gov/images/content/365640main_PIA11141_full.jpg ht",
+  "px": 1886
+ },
+ "uranus": {
+  "title": "File:Uranus as seen by NASA's Voyager 2 (remastered).png",
+  "page": "https://commons.wikimedia.org/wiki/File:Uranus_as_seen_by_NASA%27s_Voyager_2_(remastered).png",
+  "license": "Public domain",
+  "artist": "NASA",
+  "credit": "http://photojournal.jpl.nasa.gov/catalog/PIA18182",
+  "px": 1398
+ },
+ "neptune": {
+  "title": "File:Neptune 1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Neptune_1.jpg",
+  "license": "Public domain",
+  "artist": "NASA/JPL",
+  "credit": "https://solarsystem.nasa.gov/resources/611/neptune-full-disk-view/https://photojournal.jpl.nasa.gov/catalog/PIA01492",
+  "px": 1814
+ },
+ "mercury": {
+  "title": "File:Mercury Globe-MESSENGER mosaic centered at 0degN-0degE.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Mercury_Globe-MESSENGER_mosaic_centered_at_0degN-0degE.jpg",
+  "license": "Public domain",
+  "artist": "NASA/JHUAPL",
+  "credit": "NASA [1]",
+  "px": 1887
+ },
+ "bennu": {
+  "title": "File:Bennu mosaic OSIRIS-REx (square).png",
+  "page": "https://commons.wikimedia.org/wiki/File:Bennu_mosaic_OSIRIS-REx_(square).png",
+  "license": "Public domain",
+  "artist": "NASA/Goddard/University of Arizona",
+  "credit": "File:Bennu mosaic OSIRIS-REx.jpg from https://www.nasa.gov/press-release/nasa-spacecraft-provides-insight-into-asteroid-",
+  "px": 1886
+ },
+ "launch": {
+  "title": "File:Artemis I Launch (NHQ202211160009).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Artemis_I_Launch_(NHQ202211160009).jpg",
+  "license": "Public domain",
+  "artist": "Joel Kowsky",
+  "credit": "https://www.flickr.com/photos/nasahqphoto/52503728550/in/photostream/",
+  "px": 1849
+ },
+ "aurora": {
+  "title": "File:Space Station in the Aurora (53734855078).png",
+  "page": "https://commons.wikimedia.org/wiki/File:Space_Station_in_the_Aurora_(53734855078).png",
+  "license": "Public domain",
+  "artist": "Bill",
+  "credit": "Space Station in the Aurora",
+  "px": 1707
+ }
+}
