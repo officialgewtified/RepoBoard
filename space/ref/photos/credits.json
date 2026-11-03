@@ -21,7 +21,7 @@
   "license": "Public domain",
   "artist": "NASA/USGS",
   "credit": "http://nssdc.gsfc.nasa.gov/planetary/image/mars.jpg",
-  "px": 1886
+  "px": 1887
  },
  "jupiter": {
   "title": "File:Jupiter OPAL 2024.png",
@@ -53,7 +53,7 @@
   "license": "Public domain",
   "artist": "NASA/JPL",
   "credit": "https://solarsystem.nasa.gov/resources/611/neptune-full-disk-view/https://photojournal.jpl.nasa.gov/catalog/PIA01492",
-  "px": 1814
+  "px": 1792
  },
  "mercury": {
   "title": "File:Mercury Globe-MESSENGER mosaic centered at 0degN-0degE.jpg",
