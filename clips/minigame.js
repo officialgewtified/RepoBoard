@@ -176,7 +176,7 @@ function liftoff(game, day, used, R) {
         fact = `<b>100 lb on Earth = about ${wt(a)} lb</b> on ${dn(a)}`; rsay = `${cap(ST.wt.say(a))}.`; facts.push(`${a.name} gravity ${a.grav} ft/s2 vs Earth 32.1 ft/s2 (100 lb -> ${wt(a)} lb)`);
       }
       if (!fresh(k)) { facts.pop(); continue; }
-      rounds.push({ type: "mc", tf: true, topic: "True or false", q: text.replace(new RegExp(`\\b(${x.map(z => dn(z)).join("|")})\\b`, "g"), "<b>$1</b>"), opts: [{ t: "True" }, { t: "False" }], ans: truth ? 0 : 1, verdict: truth ? "True!" : "False!", fact });
+      rounds.push({ type: "mc", tf: true, ids: x.map(z => z.id), topic: "True or false", q: text.replace(new RegExp(`\\b(${x.map(z => dn(z)).join("|")})\\b`, "g"), "<b>$1</b>"), opts: [{ t: "True" }, { t: "False" }], ans: truth ? 0 : 1, verdict: truth ? "True!" : "False!", fact });
       voice["q" + i] = `${say.replace(/\.$/, "")}, true or false?`;
       voice["r" + i] = `That's ${truth ? "true" : "false"}, ${lc(rsay)}`;
       x.forEach(z => seen.add(z.id)); U.push(k); kinds.add(kind); hookPlanet = hookPlanet || x[0].id;

@@ -111,6 +111,21 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 #thumb .u{font:800 64px/1.05 "Unbounded";color:var(--sol);text-transform:uppercase;margin-top:16px;text-shadow:0 0 30px rgba(255,181,71,.45);white-space:nowrap}
 #thumb .also{font:800 30px/1.3 "JBM";letter-spacing:.12em;color:var(--ink);text-transform:uppercase;margin-top:26px;white-space:nowrap}
 #thumb .ft{position:absolute;left:150px;right:150px;bottom:62px;display:flex;justify-content:space-between;font:700 24px/1 "JBM";letter-spacing:.22em;color:var(--dim);text-transform:uppercase;border-top:2px solid var(--line);padding-top:16px}
+
+/* MEGA cover (long-form): a real photo subject huge on the right, fat outlined headline on the left, a red tag, a red
+   arrow, a yellow number chip. Rays behind. Every picture is a real NASA photo at 1080 px or more (ref/photos). */
+#thumb.mega{background:radial-gradient(70% 90% at 68% 50%,#3a1a6e 0%,#140a2e 45%,#05030c 100%)}
+#thumb.mega .rays{position:absolute;width:3000px;height:3000px;margin:-1500px 0 0 -1500px;background:repeating-conic-gradient(from 0deg,rgba(255,200,80,.17) 0 6deg,transparent 6deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 0%,transparent 58%)}
+#thumb.mega .ab{position:absolute}
+#thumb.mega .hl{position:absolute;left:60px;top:250px;transform:rotate(-3deg);transform-origin:0 0}
+#thumb.mega .hl div{white-space:nowrap;font:900 230px/.86 "Archivo";font-stretch:110%;text-transform:uppercase;color:#fff;paint-order:stroke fill;-webkit-text-stroke:24px #000;text-shadow:0 18px 0 #000}
+#thumb.mega .hl div.y{color:#FFE14D}
+#thumb.mega .hl div span{display:inline-block}
+#thumb.mega .tag{position:absolute;left:66px;top:140px;background:#FF2D2D;color:#fff;font:900 58px/1 "Archivo";font-stretch:112%;text-transform:uppercase;padding:18px 28px 16px;border-radius:14px;transform:rotate(-6deg);box-shadow:0 12px 0 #000,0 0 50px rgba(255,45,45,.6);border:6px solid #000;white-space:nowrap}
+#thumb.mega .chip{position:absolute;left:76px;bottom:64px;background:#000;color:#FFE14D;font:900 64px/1 "Archivo";font-stretch:112%;text-transform:uppercase;padding:16px 26px;border-radius:14px;transform:rotate(-3deg);border:6px solid #FFE14D;white-space:nowrap;box-shadow:0 0 40px rgba(255,225,77,.5)}
+#thumb.mega .lg{position:absolute;left:70px;top:52px;display:flex;align-items:center;gap:14px;font:900 44px/1 "Unbounded";letter-spacing:.08em;color:#fff}
+#thumb.mega .lg svg{width:62px;height:62px}
+#thumb.mega .fade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,3,12,.95) 0%,rgba(5,3,12,.75) 38%,rgba(5,3,12,0) 62%)}
 </style></head><body>
 <svg id="stars" viewBox="0 0 1920 1080"></svg><div id="scan"></div>
 <div class="br a"></div><div class="br b"></div><div class="br c"></div><div class="br d"></div>
@@ -315,8 +330,27 @@ function render(t){
  document.getElementById("wordm").style.opacity=wd.toFixed(3);document.getElementById("flash").style.opacity=(fl*.8).toFixed(3);
  for(const q of ["#hud","#tick","#prog","#src"])document.querySelector(q).style.opacity=(1-Math.max(lo,bk)).toFixed(3)}
 
-// the YouTube thumbnail: the week's subject locked in the reticle, the headline number, two more numbers, the dates
-window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),lp=D.scenes.find(s=>s.kind==="lpast"),as=D.scenes.find(s=>s.kind==="ast"),su=D.scenes.find(s=>s.kind==="sun");
+// the YouTube thumbnail (MEGA): the week's lead as a real photo, huge, with a fat headline that says it in three words
+const PH=n=>`ref/photos/${n}`;
+const ARROW=`<svg viewBox="0 0 300 300" width="300" height="300"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M30 40 C 120 30, 210 80, 240 200 M190 190 L245 255 L280 170" stroke="#000" stroke-width="44"/><path d="M30 40 C 120 30, 210 80, 240 200 M190 190 L245 255 L280 170" stroke="#FF2D2D" stroke-width="26"/></g></svg>`;
+const TRAIL=(x,y,len,th,deg)=>`<div class="ab" style="left:${x}px;top:${y}px;width:${len}px;height:${th}px;margin-top:-${th/2}px;transform-origin:0 50%;transform:rotate(${deg}deg);background:linear-gradient(90deg,rgba(255,240,180,.95),rgba(255,150,40,.85) 25%,rgba(255,60,0,.45) 60%,transparent);filter:blur(16px);border-radius:0 50% 50% 0/0 50% 50% 0"></div>`;
+function megaLines(H,lp){
+ if(H.topic==="ast")return {L:["Closer","than the","Moon!"],chip:`${H.big} miles away`};
+ if(H.topic==="sun")return /^X/.test(H.big)?{L:["X-class","solar","flare!"],chip:`${H.big} flare`}:/^G/.test(H.big)?{L:[`${H.big} storm`,"hit","Earth!"],chip:"Geomagnetic storm"}:{L:["The Sun","this","week"],chip:H.unit};
+ if(H.big==="CREW")return {L:["Astronauts",/ahead/i.test(H.kicker)?"launch":"launched","this week!"],chip:H.unit};
+ return {L:[`${H.big} rocket`,"launches","this week"],chip:lp&&lp.fail?`${lp.ok} up · ${lp.fail} failed`:"Every launch inside"};
+}
+function megaScene(H){const su=D.scenes.find(s=>s.kind==="sun");
+ if(H.topic==="ast"){const ex=1640,ey=1010,er=520,mx=1250,my=210,R=Math.hypot(ex-mx,ey-my);
+  return `<div class="rays" style="left:1250px;top:560px"></div><svg class="ab" style="left:0;top:0" width="1920" height="1080"><circle cx="${ex}" cy="${ey}" r="${R}" fill="none" stroke="#FFE14D" stroke-width="7" stroke-dasharray="26 20" opacity=".9"/></svg>
+   ${TRAIL(1230,560,1100,180,-122)}<img class="ab" src="${PH("earth.png")}" style="left:${ex-er}px;top:${ey-er}px;width:${er*2}px;filter:drop-shadow(0 0 60px rgba(79,160,255,.9))">
+   <img class="ab" src="${PH("moon.png")}" style="left:${mx-120}px;top:${my-120}px;width:240px;filter:drop-shadow(0 0 30px rgba(234,242,255,.6))">
+   <img class="ab" src="${PH("bennu.png")}" style="left:1085px;top:415px;width:290px;filter:contrast(1.25) brightness(1.15) drop-shadow(0 0 40px rgba(255,140,40,.95)) drop-shadow(0 0 110px rgba(255,80,0,.6))">
+   <div class="ab" style="left:900px;top:470px;transform:rotate(-10deg) scale(.95)">${ARROW}</div>`}
+ if(H.topic==="sun"&&su&&su.img)return `<div class="rays" style="left:1420px;top:540px"></div><div class="ab" style="left:900px;top:20px;width:1040px;height:1040px;border-radius:50%;overflow:hidden;box-shadow:0 0 140px 50px rgba(255,140,30,.75),0 0 320px 140px rgba(255,80,0,.45)"><img src="${esc(su.img)}" style="width:113%;height:113%;margin:-6.5%;filter:saturate(1.5) contrast(1.2) brightness(1.1)"></div>
+`;
+ return `<img class="ab" src="${PH("launch.jpg")}" style="right:0;top:0;height:1080px;width:1300px;object-fit:cover;object-position:50% 0%;filter:saturate(1.2) contrast(1.1)"><div class="fade"></div>`}
+window.thumbOld=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),lp=D.scenes.find(s=>s.kind==="lpast"),as=D.scenes.find(s=>s.kind==="ast"),su=D.scenes.find(s=>s.kind==="sun");
  const also=[lp&&H.unit!=="Launches this week"&&`${lp.n} launches`,as&&`${as.nP} asteroid flybys`,su&&`${su.C+su.M+su.X} solar flares`].filter(Boolean).slice(0,2).join(" · ");
  T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1920 1080">${document.getElementById("stars").innerHTML}</svg>
   <i class="cb a"></i><i class="cb b"></i><i class="cb c"></i><i class="cb d"></i>
@@ -326,6 +360,15 @@ window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElemen
   <div class="ft"><span>Launches · asteroids · the Sun · night sky</span><span>${esc(D.range||D.date)}</span></div>`;
  T.style.display="block";const r=T.querySelector(".r");for(const sel of [".bigt",".u",".also"]){const e=T.querySelector(sel);if(!e)continue;let f=parseFloat(getComputedStyle(e).fontSize);while(e.scrollWidth>r.clientWidth&&f>20){f-=4;e.style.fontSize=f+"px"}}
  const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
-window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','700 30px "Archivo"'].map(f=>document.fonts.load(f)));
+window.thumb=async()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),lp=D.scenes.find(s=>s.kind==="lpast"),{L,chip}=megaLines(H,lp);
+ T.className="mega";T.innerHTML=`${megaScene(H)}<div class="tag">This week</div>
+  <div class="hl">${L.map((l,i)=>`<div class="${i?"y":""}"><span>${esc(l)}</span></div>`).join("")}</div>
+  <div class="chip">${esc(chip)}</div><div class="lg"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>`;
+ T.style.display="block";
+ T.querySelectorAll(".hl div").forEach(d=>{const sp=d.firstElementChild;let f=230;while(sp.offsetWidth>900&&f>80){f-=6;d.style.fontSize=f+"px"}});
+ const c=T.querySelector(".chip");let f=64;while(c.offsetWidth>860&&f>30){f-=2;c.style.fontSize=f+"px"}
+ // the photos have to be loaded before the screenshot
+ await Promise.all([...T.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));return true};
+window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','700 30px "Archivo"','900 100px "Archivo"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;
 </script></body></html>
