@@ -183,19 +183,66 @@ body{font-family:"Archivo",sans-serif;color:var(--paper);-webkit-font-smoothing:
 #thumb .wkb small{display:block;font:900 44px/1 "Archivo";font-stretch:118%;letter-spacing:.2em}
 #thumb .wkb b{display:block;font:900 300px/.82 "Big Shoulders"}
 #thumb .pr{background:var(--volt);color:#000;font:900 58px/1 "Big Shoulders";letter-spacing:.04em;text-transform:uppercase;padding:16px 28px 11px;transform:skewX(-12deg);white-space:nowrap;box-shadow:12px 12px 0 #000}
+
+/* ===== the CROSSOVER look (same as the shorts): every screen in the team's colour, halftone and speed stripes,
+   volt tags, black stat boxes, giant condensed type with hard shadows, an X wipe between screens ===== */
+:root{--volt:#D7FF3A}
+html,body{background:#09090B}
+#sky{display:none}
+.top{left:70px;right:70px;top:46px;z-index:5}
+.top .wm{background:#fff;color:#000;font:900 46px/1 "Big Shoulders";letter-spacing:.06em;padding:10px 20px 8px;transform:skewX(-12deg)}
+.top .dt{background:#000;color:var(--volt);border-radius:0;font:900 22px/1 "Archivo";font-stretch:118%;letter-spacing:.12em;padding:14px 20px;transform:skewX(-12deg)}
+.nav{left:70px;right:70px;bottom:36px;height:6px;border-radius:0;background:rgba(255,255,255,.25);z-index:5}
+.nav i{top:0;height:6px;width:auto;left:0!important;border-radius:0;background:#fff;transform:none}
+.sc{left:0;right:0;top:0;bottom:0}
+.hero{border-radius:0;border:0;padding:140px 136px 74px;background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 72%,#000) 0%,color-mix(in srgb,var(--tc) 55%,#000) 45%,color-mix(in srgb,var(--tc) 30%,#000) 100%)}
+.hero>.ht{position:absolute;inset:-20%;z-index:-2;background:radial-gradient(circle,rgba(0,0,0,.3) 1.6px,transparent 2px) 0 0/18px 18px;transform:rotate(18deg);opacity:.6}
+.hero>.sp{position:absolute;left:-30%;right:-30%;top:-10%;height:120%;z-index:-2;background:repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 26px,transparent 26px 120px)}
+.hero>.sh{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 65%,rgba(0,0,0,.55) 100%)}
+.wmk{color:transparent;background:none;-webkit-text-stroke:3px rgba(255,255,255,.1);font-size:600px}
+.k,.k.go{display:inline-block;align-self:flex-start;background:var(--volt);color:#000;font:900 25px/1 "Archivo";font-stretch:118%;letter-spacing:.08em;padding:12px 20px 11px;transform:skewX(-12deg)}
+.h2{font:900 104px/.88 "Big Shoulders";letter-spacing:.01em;color:#fff;text-shadow:7px 7px 0 rgba(0,0,0,.35)}
+.pill{border-radius:0;background:#000;color:#fff;font:800 24px/1 "Archivo";transform:skewX(-12deg);padding:14px 22px}
+.pill i{border-radius:0;background:var(--c,var(--volt))}
+.star,.row,.ft,.nm4,.mr2,.tile,.st2,.hon div,.nb .st div{border-radius:0;background:rgba(0,0,0,.74);border:0;border-left:8px solid var(--volt)}
+.ft.on{background:#000;box-shadow:0 0 0 5px var(--volt)}
+.mr2:first-child{border:0;border-left:8px solid var(--volt);background:#000}
+.row .bar{background:linear-gradient(90deg,rgba(215,255,58,.3),rgba(215,255,58,.06))}
+.row .rk,.mr2 .rk{color:var(--volt)}.row:first-child .rk{color:var(--volt)}
+.star b i,.row .nm b i,.mr2 b i,.hon b i,.ft .tr i{border-radius:0}
+.disc{box-shadow:10px 10px 0 rgba(0,0,0,.45),inset 0 0 0 4px rgba(255,255,255,.2)}
+.score,.hk .big,.nm4 b,.nb .big b,.row .v,.pw .fp b,.mr2 .v,.tile .t span{text-shadow:8px 8px 0 rgba(0,0,0,.35)}
+.score s,.ft .tr b,.ft .tr s,.lsb tr:not(.w) td.t{color:rgba(255,255,255,.42)}
+.score em,.lsb th,.side .t span,.row .nm span,.mr2 small,.hon small,.nm4 small,.st2 small,.nb .ctx,.mu .tm small,.ld .who span,.star span{color:rgba(255,255,255,.75)}
+.hk .lab{display:inline-block;background:#000;color:var(--volt);font:900 64px/1 "Big Shoulders";letter-spacing:.05em;padding:12px 26px 8px;transform:skewX(-12deg)}
+.hk .big{font-size:470px}
+.hk .nm,.pw .nmw,.nb .nmw,.ld .who b,.side .t b,.mu .tm b{font-family:"Big Shoulders";font-weight:900;letter-spacing:.01em}
+.pw .fp b{color:var(--volt)}
+.crown{border-radius:0;background:var(--volt);color:#000}
+.view{border-radius:0;background:var(--volt);color:#000}
+.mu .at{color:var(--volt);text-shadow:6px 6px 0 #000}
+.frame{color:#fff}
+#wipe{position:absolute;inset:0;z-index:7;pointer-events:none}
+#wipe i{position:absolute;left:-60%;width:220%;height:520px;top:50%;margin-top:-260px;opacity:0}
+#wipe .a{background:var(--volt)}#wipe .b{background:#fff}
+#logo{left:0;top:0;right:0;bottom:0;transform:none;background:#09090B;overflow:hidden}
+#logo .s1,#logo .s2{position:absolute;left:50%;top:44%;width:4400px;height:140px;margin:-70px 0 0 -2200px}
+#logo .s1{background:var(--volt)}#logo .s2{background:#fff}
+#sig b{color:#fff}#sig small{color:var(--volt)}
 </style></head><body>
 <div id="sky"></div>
 <div class="top"><span class="wm" id="wm"></span><span class="dt" id="dt"></span></div>
 <div id="stage"></div>
 <div class="nav"><i id="dot"></i></div>
-<div id="logo"><span>X</span><i></i></div>
+<div id="wipe"><i class="a"></i><i class="b"></i></div>
+<div id="logo"><i class="s1"></i><i class="s2"></i></div>
 <div id="sig"><b>CROSSOVER</b><small>Best stats · every day</small></div>
 <div id="thumb"></div>
 <script src="viz.js"></script>
 <script>
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-clamp(x),3);
 const pop=x=>{x=clamp(x);if(x>=1)return 1;const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
-let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.4,TAIL=2.6,MIN=492;
+let D=null,SC=[],TOTAL=30,SFX=[];const INTRO=.75,TAIL=2.6,MIN=492;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function shade(hex,f){const h=String(hex||"#71717a").replace("#","");if(h.length<6)return "#3f3f46";return "#"+[0,2,4].map(i=>Math.round(parseInt(h.slice(i,i+2),16)*(1-f)).toString(16).padStart(2,"0")).join("")}
 const vz=(v,c,tm,cls="vzw")=>`<div class="${cls}">${VIZ.html(v,c,tm)}</div>`;
@@ -204,8 +251,11 @@ function fit(el,min){let fs=parseFloat(getComputedStyle(el).fontSize);while(el.s
 function build(data){D=data;SC=[];SFX=[];
  document.getElementById("wm").textContent=D.brand;document.getElementById("dt").textContent=`${D.title} · ${D.range}`;
  let h="",t=INTRO;
+ const tcOf=s=>{const W=x=>x&&(x.bg||x.color);if(s.kind==="hook")return s.bg||s.color;if(s.kind==="game")return W(s.winner===s.away.ab?s.away:s.home);
+   if(s.kind==="board"||s.kind==="leader")return s.rows&&s.rows[0]&&s.rows[0].color;if(s.kind==="pow"||s.kind==="nbap")return s.color;if(s.kind==="matchup")return W(s.home);return "#26262c"};
  const add=(s,dur,html)=>{const v=D.dur&&D.dur[s.id],off=s.kind==="hook"?.1:.35;if(v!=null)dur=Math.max(3,v+off+.6);
-  SC.push({id:s.id,kind:s.kind,chapter:s.chapter,t0:t,t1:t+dur,va:t+off});t+=dur;h+=`<div class="sc" id="${s.id}">${html}</div>`};
+  SC.push({id:s.id,kind:s.kind,chapter:s.chapter,t0:t,t1:t+dur,va:t+off});t+=dur;
+  h+=`<div class="sc" id="${s.id}" style="--tc:${tcOf(s)||"#26262c"}">${html.replace('<div class="hero">','<div class="hero"><i class="ht"></i><i class="sp"></i><i class="sh"></i>')}</div>`};
  for(const s of D.scenes){
   if(s.kind==="hook")add(s,5,`<div class="hero"><div class="wmk">Week ${D.week}</div><div class="hk"><div><div class="k go">${esc(D.title)}</div><div class="big">${esc(s.big)}</div><div class="lab">${esc(s.label)}</div></div>
    <div class="who">${s.viz?vz(s.viz,s.color,s.tm):disc(s.tm,s.color,300)}<div class="nm">${esc(s.who)}</div><span class="pill"><i></i>${esc(s.line)}</span></div></div></div>`);
@@ -260,7 +310,7 @@ function build(data){D=data;SC=[];SFX=[];
  document.querySelectorAll(".h2").forEach(e=>{e.style.whiteSpace="nowrap";fit(e,40)});
  document.querySelectorAll(".side .t b").forEach(e=>fit(e,30));document.querySelectorAll(".star b,.row .nm b,.hk .nm,.mr2 b,.hon b,.ld .who b,.pw .nmw,.nb .nmw,.mu .tm b").forEach(e=>fit(e,18));
  for(const s of SC)if(s.kind==="finals"||s.kind==="slate")SFX.push({t:s.t0+.4,k:"pop"});else if(s.kind==="pow")SFX.push({t:s.t0+.5,k:"stamp"});
- for(const s of SC)SFX.push({t:s.t0,k:"whoosh"});SFX.push({t:t+.1,k:"sting"});
+ for(const s of SC)if(s.kind!=="hook")SFX.push({t:Math.max(.05,s.t0-.2),k:"whoosh"});SFX.push({t:.05,k:"impact"},{t:INTRO-.3,k:"whoosh"},{t:t+.05,k:"whoosh"},{t:t+.35,k:"impact"},{t:t+.5,k:"sting"});
  {const hk=SC.find(x=>x.kind==="hook");if(hk)SFX.push({t:hk.t0+.3,k:"impact"});
   for(const s of SC){const c=D.cues&&D.cues[s.id];
    if(s.kind==="finals"&&c)c.slice(1).forEach(x=>SFX.push({t:s.va+x-.1,k:"tick"}));
@@ -274,7 +324,7 @@ function render(t){
  for(let j=0;j<SC.length;j++){const s=SC[j],el=document.getElementById(s.id),on=t>=s.t0-.01&&t<s.t1+.45;
   if(!on){el.style.opacity=0;continue}
   const lt=t-s.t0,a=s.kind==="hook"?ease((lt+.08)/.3):ease(lt/.5),b=ease((s.t1+.45-t)/.45);
-  el.style.opacity=Math.min(a,b).toFixed(3);el.style.transform=`translateX(${((1-a)*240-(1-b)*240).toFixed(1)}px) scale(${(.95+.05*Math.min(a,b)).toFixed(4)})`;
+  el.style.opacity=(t>=s.t0-.05?1:0);el.style.zIndex=t>=s.t0?2:1;el.style.transform="none";
   el.querySelectorAll(".disc").forEach((d,q)=>{const f=Math.sin((t+j+q*1.7)*1.3);d.style.transform=`translateY(${(f*8).toFixed(1)}px) rotate(${(-4+f*2).toFixed(2)}deg) scale(${(.8+.2*pop((lt-.1-q*.08)/.5)).toFixed(3)})`});
   VIZ.anim(el,lt,s.kind==="hook"?.3:.6);
   if(s.kind==="finals"){const cue=D.cues&&D.cues[s.id];el.querySelectorAll(".ft").forEach((x,i)=>{const y=pop((lt-.3-i*.05)/.4);x.style.opacity=clamp((lt-.3-i*.05)/.12).toFixed(3);
@@ -288,15 +338,22 @@ function render(t){
    const bar=x.querySelector(".bar");bar.style.width=(+bar.dataset.w*ease((lt-at-.1)/.8)).toFixed(1)+"%"});
   const sc=el.querySelector(".score");if(sc){const y=pop((lt-.3)/.5);sc.style.transform=`scale(${(.7+.3*y).toFixed(3)})`}
   const big=el.querySelector(".hk .big");if(big)big.style.transform=`scale(${(.9+.1*ease(lt/.5)).toFixed(3)})`;
+  const sp=el.querySelector(".hero>.sp");if(sp)sp.style.transform=`translateX(${(-(lt*60)%120).toFixed(1)}px)`;
   const w=el.querySelector(".wmk");if(w)w.style.transform=`translate(calc(-50% + ${((1-ease(lt/1.2))*120-lt*4).toFixed(1)}px),-50%)`;
   if(s.kind==="outro"){const v=el.querySelector(".view"),r=el.querySelector(".ring"),tp=lt-1.6;v.style.transform=`scale(${tp<0?pop((lt-.5)/.5):tp<.12?1-.06*(tp/.12):.94+.06*pop((tp-.12)/.4)})`;
    if(tp>0){const y=ease(tp/.7);r.style.opacity=(1-y).toFixed(3);r.style.transform=`scale(${(1+y*5).toFixed(3)})`}
-   document.getElementById("fl").textContent=tp>.12?"Subscribed ✓":"Subscribe";v.style.background=tp>.12?"var(--go)":"var(--paper)"}}
- document.getElementById("dot").style.left=(clamp(t/TOTAL)*100).toFixed(2)+"%";
- let lo=0,ls=1;if(t<INTRO+.1){if(t<.08){lo=1}else{const x=ease((t-.08)/.36);ls=1+x*7;lo=1-x}}
- const end=TOTAL-TAIL;let sg=0,dp=1;if(t>end+.1){const k=t-end-.1;lo=clamp(k/.1);ls=1+.55*(1-pop(k/.42));dp=pop((k-.3)/.35);sg=Math.min(ease((k-.45)/.35),ease((TOTAL-.08-t)/.5))}
- const L=document.getElementById("logo");L.style.opacity=lo.toFixed(3);L.style.transform=`translate(-50%,-50%) scale(${ls.toFixed(3)})`;
- document.querySelector("#logo i").style.transform=`scale(${Math.max(0,dp).toFixed(3)})`;document.getElementById("sig").style.opacity=sg.toFixed(3);
+   document.getElementById("fl").textContent=tp>.12?"Subscribed ✓":"Subscribe";v.style.background=tp>.12?"#fff":"var(--volt)"}}
+ document.getElementById("dot").style.width=(clamp(t/TOTAL)*100).toFixed(2)+"%";
+ let wv=null;for(const x of SC){const d=t-(x.t0-.22);if(x.kind!=="hook"&&d>=0&&d<.5){wv=d/.5;break}}
+ const WP=document.getElementById("wipe").children,eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+ if(wv!=null){const x=eio(wv);WP[0].style.transform=`rotate(-28deg) translateX(${(-2600+5200*x).toFixed(0)}px)`;WP[1].style.transform=`rotate(28deg) translateX(${(2600-5200*clamp(x*1.08)).toFixed(0)}px)`;WP[0].style.opacity=WP[1].style.opacity=1}
+ else WP[0].style.opacity=WP[1].style.opacity=0;
+ // the X: splits apart at the start, slams back together at the end
+ const L=document.getElementById("logo"),s1=L.querySelector(".s1"),s2=L.querySelector(".s2"),end=TOTAL-TAIL;let lo=0,k1=0,sg=0;
+ if(t<INTRO){lo=t>INTRO-.12?clamp((INTRO-t)/.12):1;k1=eio((t-.2)/(INTRO-.2))}
+ else if(t>end){const k=t-end;lo=clamp(k/.12);k1=-(1-ease(k/.35));sg=Math.min(ease((k-.45)/.35),ease((TOTAL-.08-t)/.5))}
+ L.style.opacity=lo.toFixed(3);s1.style.transform=`rotate(-38deg) translateX(${(k1*2600).toFixed(0)}px)`;s2.style.transform=`rotate(38deg) translateX(${(-k1*2600).toFixed(0)}px)`;
+ document.getElementById("sig").style.opacity=sg.toFixed(3);
  for(const q of [".top",".nav"])document.querySelector(q).style.opacity=(1-lo).toFixed(3)}
 // the YouTube thumbnail: the Crossover poster. The week's biggest stat and who did it on the left, the week (or the stat
 // graphic) and the promise on the right
