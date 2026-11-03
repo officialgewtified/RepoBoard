@@ -1,0 +1,44 @@
+name: Liftoff cover photos (one-off)
+# scout: find real NASA/ESA photos (public domain, CC0, CC BY) big enough for 1080+ px covers and post contact sheets.
+# pick: save the chosen ones into space/ref/photos (cut out of the sky) and commit them.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [scout, pick]
+        default: scout
+      picks:
+        description: 'For pick: JSON, subject -> candidate number or exact Commons file title, e.g. {"jupiter": 2, "earth": "File:The Earth seen from Apollo 17.jpg"}'
+        required: false
+permissions:
+  contents: write
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q pillow
+      - name: Get the scout's candidate list (pick mode)
+        if: inputs.mode == 'pick'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: mkdir -p out/photos && gh release download scout-space -p candidates.json -D out/photos || true
+      - run: python tools/space_photos.py ${{ inputs.mode }} '${{ inputs.picks }}'
+      - name: Post the contact sheets
+        if: inputs.mode == 'scout'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete scout-space --yes --cleanup-tag 2>/dev/null || true
+          gh release create scout-space out/photos/sheet-*.jpg out/photos/candidates.json --title "Scout: Liftoff cover photos" --notes "Real photo candidates for the covers" --prerelease --latest=false
+      - name: Commit the chosen photos
+        if: inputs.mode == 'pick'
+        run: |
+          git config user.name "board-bot"; git config user.email "board-bot@users.noreply.github.com"
+          git add space/ref/photos && git commit -m "Liftoff cover photos: real NASA images" || exit 0
+          for i in 1 2 3; do git pull --rebase origin ${{ github.ref_name }} && git push && exit 0; sleep 10; done
