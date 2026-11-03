@@ -9,7 +9,7 @@ on:
         options: [scout, pick]
         default: scout
       picks:
-        description: 'For pick: JSON, subject -> candidate number or exact Commons file title, e.g. {"jupiter": 2, "earth": "File:The Earth seen from Apollo 17.jpg"}'
+        description: 'pick: JSON, subject -> candidate number or exact Commons file title. scout: optional {"only": [...], "extra": {subject: [searches]}}'
         required: false
 permissions:
   contents: write
@@ -28,7 +28,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: mkdir -p out/photos && gh release download scout-space -p candidates.json -D out/photos || true
-      - run: python tools/space_photos.py ${{ inputs.mode }} '${{ inputs.picks }}'
+      - name: Find or save the photos
+        env:
+          PICKS: ${{ inputs.picks }}
+        run: python tools/space_photos.py ${{ inputs.mode }} "$PICKS"
       - name: Post the contact sheets
         if: inputs.mode == 'scout'
         env:
