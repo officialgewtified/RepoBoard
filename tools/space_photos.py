@@ -1,7 +1,8 @@
 """Real photos for the Liftoff covers: NASA/ESA public-domain (or CC0 / CC BY) images from Wikimedia Commons.
 Only images big enough that the cropped subject is still at least 1080 px (MIN_SIDE) are kept.
 
-  python tools/space_photos.py scout      -> out/photos/: candidates for every subject, auto-cropped, plus sheet-<subject>.jpg
+  python tools/space_photos.py scout ['{"only": ["venus"], "extra": {"venus": ["more searches"]}}']
+                                         -> out/photos/: candidates for every subject, auto-cropped, plus sheet-<subject>.jpg
                                               contact sheets and candidates.json (title, license, author, size)
   python tools/space_photos.py pick '{"jupiter": 3, ...}'
                                            -> re-downloads the chosen candidates at full size, crops, and writes
@@ -50,28 +51,55 @@ def search(q, want):
                     "orig": ii.get("url"), "thumb": ii.get("thumburl"), "w": ii.get("width", 0), "h": ii.get("height", 0)})
     return out
 
-def cut_body(im):
-    """the round subject on black sky -> square RGBA, transparent around it; None if it doesn't look like one"""
-    g = ImageOps.grayscale(im).filter(ImageFilter.GaussianBlur(2))
-    lim = max(18, int(sorted(g.getdata())[int(g.width * g.height * .5)] * 1.6) + 10)   # brighter than most of the sky
-    k = max(5, (min(im.size) // 300) | 1)   # erase stars and specks before measuring the subject
-    m = g.point(lambda v: 255 if v > lim else 0).filter(ImageFilter.MinFilter(k)).filter(ImageFilter.MaxFilter(k))
-    bb = m.getbbox()
-    if not bb: return None
-    x0, y0, x1, y1 = bb; w, h = x1 - x0, y1 - y0
-    if w < im.width * .25 and h < im.height * .25: return None
-    side = int(max(w, h) * 1.06); cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+def cut_body(im, hull=True):
+    """the round subject on black sky -> square RGBA, transparent only where it's really sky; None if there's no subject.
+    The sky level comes from the frame's border (not the median: a planet can fill most of the frame). The subject is the
+    biggest bright shape (plus anything big attached, like rings); dark areas INSIDE it (oceans, lunar seas, the night
+    side) stay solid, and an enclosed hole is only cleared if it's as dark as the sky (the gap between Saturn and its rings)."""
+    import numpy as np
+    from scipy import ndimage as nd
+    a = np.asarray(ImageOps.grayscale(im).filter(ImageFilter.GaussianBlur(1.5)), dtype=np.float32)
+    b = max(4, min(a.shape) // 100)
+    border = np.concatenate([a[:b].ravel(), a[-b:].ravel(), a[:, :b].ravel(), a[:, -b:].ravel()])
+    sky = float(np.percentile(border, 90)); lim = max(sky * 1.5 + 14, 24)
+    k = max(3, min(a.shape) // 400)
+    m = nd.binary_opening(a > lim, iterations=k)                    # stars and specks gone
+    lab, n = nd.label(m)
+    if not n: return None
+    sizes = nd.sum(m, lab, range(1, n + 1)); big = sizes.max()
+    keep = np.isin(lab, [i + 1 for i, z in enumerate(sizes) if z >= big * .02])
+    if hull:   # a planet, moon or asteroid is solid out to its outline, even where its surface is as dark as space
+        from scipy.spatial import ConvexHull
+        main = lab == (int(np.argmax(sizes)) + 1); edge_px = main & ~nd.binary_erosion(main)
+        pts = np.column_stack(np.nonzero(edge_px))[:, ::-1]
+        if len(pts) > 2000: pts = pts[np.random.default_rng(0).choice(len(pts), 2000, replace=False)]
+        hv = pts[ConvexHull(pts).vertices]; hm = Image.new("L", im.size, 0); ImageDraw.Draw(hm).polygon([tuple(map(float, v)) for v in hv], fill=255)
+        keep = keep | (np.asarray(hm) > 0)
+    full = nd.binary_fill_holes(keep); holes, nh = nd.label(full & ~keep)
+    for h in range(1, nh + 1):                                       # a hole as dark as the sky is sky; anything else is surface
+        hm = holes == h
+        if a[hm].mean() <= sky + 6 and hm.sum() > big * .002: full[hm] = False
+    ys, xs = np.nonzero(full)
+    if not len(xs): return None
+    x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
+    if (x1 - x0) < im.width * .2 and (y1 - y0) < im.height * .2: return None
+    # soft edge: solid inside, a smooth ramp over the limb so it isn't jagged, nothing beyond
+    ramp = np.clip((a - sky) / max(1, lim - sky), 0, 1)
+    edge = nd.binary_dilation(full, iterations=3) & ~nd.binary_erosion(full, iterations=2)
+    alpha = np.where(full & ~edge, 1.0, np.where(edge, np.maximum(ramp, nd.binary_erosion(full, iterations=1) * 1.0), 0.0))
+    al = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1))
+    side = int(max(x1 - x0, y1 - y0) * 1.06); cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
     box = (cx - side // 2, cy - side // 2, cx - side // 2 + side, cy - side // 2 + side)
-    sq = Image.new("RGB", (side, side), (0, 0, 0)); sq.paste(im.crop(box), (0, 0))
-    alpha = ImageOps.grayscale(sq).point(lambda v: 0 if v < lim * .45 else 255 if v > lim else int((v - lim * .45) / (lim * .55) * 255)).filter(ImageFilter.GaussianBlur(1.5))
-    # keep the inside of the disc solid even where it's dark (night side, shadows): fill the subject's outline
-    solid = alpha.point(lambda v: 255 if v > 40 else 0).filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.MinFilter(9))
-    out = sq.convert("RGBA"); out.putalpha(Image.composite(Image.new("L", sq.size, 255), alpha, solid.filter(ImageFilter.GaussianBlur(2)).point(lambda v: 255 if v > 200 else 0)))
+    rgba = im.convert("RGBA"); rgba.putalpha(al)
+    out = Image.new("RGBA", (side, side), (0, 0, 0, 0)); out.paste(rgba.crop(box), (0, 0))
+    out.info["disc"] = max(x1 - x0, y1 - y0)
     return out
 
-def scout():
+def scout(only=None, extra=None):
     os.makedirs("out/photos", exist_ok=True); allc = {}
     for sub, (kind, qs) in S.items():
+        if only and sub not in only: continue
+        qs = qs + (extra or {}).get(sub, [])
         seen, cands = set(), []
         for q in qs:
             for c in search(q, 2400):
@@ -79,14 +107,14 @@ def scout():
                 seen.add(c["title"])
                 if min(c["w"], c["h"]) < (1600 if kind == "body" else 1080) or (kind == "bg" and c["w"] < 1920): continue
                 cands.append(c)
-        cands = cands[:8]; tiles = []
+        cands = cands[:12]; tiles = []
         for i, c in enumerate(cands):
             try:
                 im = Image.open(io.BytesIO(get(c["thumb"] or c["orig"]))).convert("RGB")
                 if kind == "body":
-                    cut = cut_body(im)
+                    cut = cut_body(im, sub != "saturn")
                     if cut is None: c["skip"] = "no round subject found"; continue
-                    c["cut_px"] = cut.width * (c["w"] / im.width)   # the subject's size at full resolution
+                    c["cut_px"] = cut.info["disc"] * (c["w"] / im.width)   # the subject's size at full resolution
                     if c["cut_px"] < MIN_SIDE: c["skip"] = f"subject only {int(c['cut_px'])} px"; continue
                     prev = Image.new("RGB", cut.size, (30, 10, 60)); prev.paste(cut, (0, 0), cut)
                 else: prev = im
@@ -115,7 +143,11 @@ def pick(picks):
         src = c["orig"] if max(c["w"], c["h"]) <= 4200 else (search(c["title"].replace("File:", ""), 4000) or [c])[0].get("thumb") or c["orig"]
         im = Image.open(io.BytesIO(get(src))).convert("RGB")
         if kind == "body":
-            cut = cut_body(im); cut.thumbnail((2000, 2000), Image.LANCZOS); cut.save(f"space/ref/photos/{sub}.png", optimize=True); px = cut.width
+            cut = cut_body(im, sub != "saturn")
+            if cut is None: print("no subject found in", c["title"]); continue
+            disc = cut.info["disc"]; cut.thumbnail((2000, 2000), Image.LANCZOS); px = int(disc * cut.width / max(1, int(disc * 1.06)))
+            if px < MIN_SIDE: print("too small:", sub, px, "px"); continue
+            cut.save(f"space/ref/photos/{sub}.png", optimize=True)
         else:
             im.thumbnail((2560, 2560), Image.LANCZOS); im.save(f"space/ref/photos/{sub}.jpg", quality=90); px = min(im.size)
         credits[sub] = {"title": c["title"], "page": c["page"], "license": c["license"], "artist": c["artist"], "credit": c.get("credit", ""), "px": px}
@@ -123,5 +155,7 @@ def pick(picks):
     json.dump(credits, open("space/ref/photos/credits.json", "w"), indent=1)
 
 if __name__ == "__main__":
-    if sys.argv[1] == "scout": scout()
+    if sys.argv[1] == "scout":
+        arg = json.loads(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].strip() else {}
+        scout(arg.get("only"), arg.get("extra"))
     else: pick(json.loads(sys.argv[2]))
