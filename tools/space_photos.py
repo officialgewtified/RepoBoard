@@ -51,7 +51,9 @@ def search(q, want):
                     "orig": ii.get("url"), "thumb": ii.get("thumburl"), "w": ii.get("width", 0), "h": ii.get("height", 0)})
     return out
 
-def cut_body(im, hull=True):
+SHAPE = {"saturn": "free", "bennu": "hull"}   # everything else is a sphere: cut along a fitted circle
+
+def cut_body(im, shape="round"):
     """the round subject on black sky -> square RGBA, transparent only where it's really sky; None if there's no subject.
     The sky level comes from the frame's border (not the median: a planet can fill most of the frame). The subject is the
     biggest bright shape (plus anything big attached, like rings); dark areas INSIDE it (oceans, lunar seas, the night
@@ -68,13 +70,29 @@ def cut_body(im, hull=True):
     if not n: return None
     sizes = nd.sum(m, lab, range(1, n + 1)); big = sizes.max()
     keep = np.isin(lab, [i + 1 for i, z in enumerate(sizes) if z >= big * .02])
-    if hull:   # a planet, moon or asteroid is solid out to its outline, even where its surface is as dark as space
+    disc = None
+    if shape in ("round", "hull"):   # a planet, moon or asteroid is solid out to its outline, even where its surface is as dark as space
         from scipy.spatial import ConvexHull
-        main = lab == (int(np.argmax(sizes)) + 1); edge_px = main & ~nd.binary_erosion(main)
-        pts = np.column_stack(np.nonzero(edge_px))[:, ::-1]
-        if len(pts) > 2000: pts = pts[np.random.default_rng(0).choice(len(pts), 2000, replace=False)]
-        hv = pts[ConvexHull(pts).vertices]; hm = Image.new("L", im.size, 0); ImageDraw.Draw(hm).polygon([tuple(map(float, v)) for v in hv], fill=255)
-        keep = keep | (np.asarray(hm) > 0)
+        edge_px = keep & ~nd.binary_erosion(keep)
+        pts = np.column_stack(np.nonzero(edge_px))[:, ::-1].astype(np.float64)
+        if len(pts) > 4000: pts = pts[np.random.default_rng(0).choice(len(pts), 4000, replace=False)]
+        hv = pts[ConvexHull(pts).vertices]
+        if shape == "round":   # least-squares circle through the outline (the lit limb dominates; a dark limb doesn't flatten it)
+            A = np.column_stack([2 * hv[:, 0], 2 * hv[:, 1], np.ones(len(hv))]); bb = (hv ** 2).sum(1)
+            (cx0, cy0, c0), *_ = np.linalg.lstsq(A, bb, rcond=None); r0 = float(np.sqrt(c0 + cx0 ** 2 + cy0 ** 2))
+            ext = max(np.ptp(hv[:, 0]), np.ptp(hv[:, 1])) / 2
+            if ext * .9 <= r0 <= ext * 1.35: disc = (cx0, cy0, r0)
+        if disc is None:
+            hm = Image.new("L", im.size, 0); ImageDraw.Draw(hm).polygon([tuple(map(float, v)) for v in hv], fill=255)
+            keep = keep | (np.asarray(hm) > 0)
+    if disc is not None:
+        cx0, cy0, r0 = disc; yy, xx = np.mgrid[0:a.shape[0], 0:a.shape[1]]
+        alpha = np.clip(r0 - np.hypot(xx - cx0, yy - cy0) + .5, 0, 1)
+        al = Image.fromarray((alpha * 255).astype(np.uint8))
+        side = int(2 * r0 * 1.06); box = (int(cx0 - side / 2), int(cy0 - side / 2), int(cx0 - side / 2) + side, int(cy0 - side / 2) + side)
+        rgba = im.convert("RGBA"); rgba.putalpha(al)
+        out = Image.new("RGBA", (side, side), (0, 0, 0, 0)); out.paste(rgba.crop(box), (0, 0)); out.info["disc"] = int(2 * r0)
+        return out
     full = nd.binary_fill_holes(keep); holes, nh = nd.label(full & ~keep)
     for h in range(1, nh + 1):                                       # a hole as dark as the sky is sky; anything else is surface
         hm = holes == h
@@ -112,7 +130,7 @@ def scout(only=None, extra=None):
             try:
                 im = Image.open(io.BytesIO(get(c["thumb"] or c["orig"]))).convert("RGB")
                 if kind == "body":
-                    cut = cut_body(im, sub != "saturn")
+                    cut = cut_body(im, SHAPE.get(sub, "round"))
                     if cut is None: c["skip"] = "no round subject found"; continue
                     c["cut_px"] = cut.info["disc"] * (c["w"] / im.width)   # the subject's size at full resolution
                     if c["cut_px"] < MIN_SIDE: c["skip"] = f"subject only {int(c['cut_px'])} px"; continue
@@ -143,7 +161,7 @@ def pick(picks):
         src = c["orig"] if max(c["w"], c["h"]) <= 4200 else (search(c["title"].replace("File:", ""), 4000) or [c])[0].get("thumb") or c["orig"]
         im = Image.open(io.BytesIO(get(src))).convert("RGB")
         if kind == "body":
-            cut = cut_body(im, sub != "saturn")
+            cut = cut_body(im, SHAPE.get(sub, "round"))
             if cut is None: print("no subject found in", c["title"]); continue
             disc = cut.info["disc"]; cut.thumbnail((2000, 2000), Image.LANCZOS); px = int(disc * cut.width / max(1, int(disc * 1.06)))
             if px < MIN_SIDE: print("too small:", sub, px, "px"); continue
