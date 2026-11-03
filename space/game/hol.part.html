@@ -262,16 +262,20 @@ function neonWords(){const g=neonGame(),r=D.rounds[0]||{};
  if(g==="guess")return {L:["Guess the","planet!"],chip:`3 clues · ${D.rounds.length} rounds`,bang:"?"};
  const w=plain(r.q).split(/\s+/);let best=1,bd=1e9;for(let k=1;k<w.length;k++){const d=Math.abs(w.slice(0,k).join(" ").length-w.slice(k).join(" ").length);if(d<bd){bd=d;best=k}}
  return {L:[w.slice(0,best).join(" "),w.slice(best).join(" ")],chip:D.thumbSub||`${D.rounds.length} rounds · beat the clock`,bang:"?!"}}
+// the bodies we have a real photo of (1080 px+ in space/ref/photos); anything else is left off the cover
+const HAS=new Set(["mercury","earth","moon","mars","jupiter","saturn","uranus","neptune"]);
 function neonScene(){const g=neonGame(),r=D.rounds[0]||{},cx=540,cy=820;
- if(g==="hol")return SHOT(r.b.icon,330,640,560)+SHOT(r.a.icon,750,1010,560)+`<div class="vs">VS</div>`;
- const ids=g==="tf"?(r.ids&&r.ids.length?r.ids:[D.hookPlanet||"saturn"]):(r.opts||[]).map(o=>o.icon);
+ let ids=(g==="hol"?[r.b&&r.b.icon,r.a&&r.a.icon]:g==="tf"?(r.ids||[]):(r.opts||[]).map(o=>o.icon)).filter(id=>HAS.has(id));
+ if(!ids.length)ids=[HAS.has(D.hookPlanet)?D.hookPlanet:"saturn"];
  if(ids.length===1)return SHOT(ids[0],cx,cy,860);
- if(ids.length===2)return SHOT(ids[0],330,640,560)+SHOT(ids[1],750,1010,560);
- const P=[[-245,-225],[245,-225],[-245,245],[245,245]];return ids.slice(0,4).map((id,i)=>SHOT(id,cx+P[i][0],cy+P[i][1],440,g==="guess")).join("")}
-window.thumb=async()=>{const T=document.getElementById("thumb"),{L,chip,bang}=neonWords();
- T.className="neon";T.innerHTML=`<div class="burst"></div><div class="glow"></div>${neonScene()}<div class="vig"></div>
+ if(ids.length===2)return SHOT(ids[0],330,640,560)+SHOT(ids[1],750,1010,560)+(g==="hol"?`<div class="vs">VS</div>`:"");
+ const P=ids.length===3?[[-245,-225],[245,-225],[0,250]]:[[-245,-225],[245,-225],[-245,245],[245,245]];
+ return ids.slice(0,4).map((id,i)=>SHOT(id,cx+P[i][0],cy+P[i][1],440,g==="guess")).join("")}
+window.thumb=async()=>{const T=document.getElementById("thumb"),{L,chip,bang}=neonWords(),scene=neonScene();
+ T.dataset.n=(scene.match(/<img /g)||[]).length;   // with 3-4 planets the sticker would cover an answer, so it's left off
+ T.className="neon";T.innerHTML=`<div class="burst"></div><div class="glow"></div>${scene}<div class="vig"></div>
   <div class="lg"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
-  <div class="chip">${esc(chip)}</div><div class="bang">${BANG}<b>${esc(bang)}</b></div>
+  <div class="chip">${esc(chip)}</div>${T.dataset.n>2?"":`<div class="bang">${BANG}<b>${esc(bang)}</b></div>`}
   <div class="t">${L.map((l,i)=>`<div class="ln ${i?"c":""}"><span><b class="nu">${esc(l)}</b><b class="nf">${esc(l)}</b></span></div>`).join("")}</div>`;
  T.style.display="block";
  T.querySelectorAll(".ln").forEach(d=>{const sp=d.firstElementChild;let f=180;while(sp.offsetWidth>1000&&f>60){f-=6;d.style.fontSize=f+"px"}});
