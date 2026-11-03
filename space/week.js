@@ -205,7 +205,7 @@ async function build(day, outDir, brand) {
   const past = (await safe(() => launchesBetween("previous", from, now), "past launches") || []).filter(l => /Success|Failure|Partial/.test(l.status));
   const next = (await safe(() => launchesBetween("upcoming", now, to), "upcoming launches") || []).filter(l => /Go|TBC|TBD/.test(l.status));
   const [aP, aN, SU] = await Promise.all([safe(() => cad(addDays(day, -7), day), "asteroids past"), safe(() => cad(day, addDays(day, 7)), "asteroids next"), safe(() => sunWeek(day), "sun")]);
-  const sunImg = await save("https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg", path.join(imgDir, "sun.jpg"));
+  const sunImg = await save("https://sdo.gsfc.nasa.gov/assets/img/latest/latest_2048_0193.jpg", path.join(imgDir, "sun.jpg"));
   const MO = A ? await usnoCheck(day, moonWeek(day)) : null, PLN = A ? planets(day) : null, MEET = A ? meetups(day) : [], MET = A ? meteors(day) : null;
   const { deep, facts: FX, sky: SKYM } = pickFor(day);
   const S = [], V = {}, F = [`LIFTOFF "This Week in Space" fact sheet for ${day}. Every number in the episode and where to check it.`, ""];

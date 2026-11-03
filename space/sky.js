@@ -168,7 +168,7 @@ async function build(today, outDir, brand) {
   const safe = async (f, name) => { try { return await f(); } catch (e) { console.error(name + ":", e.message); return null; } };
   const [A, AU, SU, LA] = await Promise.all([safe(asteroids, "asteroids"), safe(() => aurora(today), "aurora"), safe(sun, "sun"), safe(launches, "launches")]);
   const MO = await usno(today, moon(new Date(today + "T23:30:00Z")));
-  const sunImg = await save("https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg", path.join(imgDir, "sun.jpg"));
+  const sunImg = await save("https://sdo.gsfc.nasa.gov/assets/img/latest/latest_2048_0193.jpg", path.join(imgDir, "sun.jpg"));
   const aurImg = await save("https://services.swpc.noaa.gov/images/animations/ovation/north/latest.jpg", path.join(imgDir, "aurora.jpg"));
   const S = {}, V = {}, score = {}, hooks = [], QH = {}, QV = {};   // QH/QV: each story's own hook and short read, for the quick hits
 
@@ -288,18 +288,18 @@ async function build(today, outDir, brand) {
   if (S.moon) facts.push(`MOON: ${S.moon.phase}, ${S.moon.illum}% lit tonight; next full moon ${new Date(S.moon.nextFull).toUTCString()} (${S.moon.fullName})${S.moon.checked ? ", matches the US Naval Observatory" : ", USNO check unavailable"}`,
     "  check: https://aa.usno.navy.mil/data/MoonPhases", "");
   facts.push("Footage: NASA Image and Video Library (images.nasa.gov). Data: NASA JPL, NOAA SWPC, The Space Devs, USNO.");
-  const title = `${L.title} | Sky Report ${dateLabel}`.slice(0, 100);
+  const title = `${L.title} | Sky Report ${dateLabel}`.slice(0, 100), CV = coverFor(L.k, S, today);
   const base = { template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA" };
   // (a quiet northern-lights night isn't worth its own video: "can you see them tonight? ...no")
   const quick = Object.keys(S).filter(k => QH[k] && k !== L.k && !(k === "aur" && S.aur.k < 4)).sort((a, b) => score[b] - score[a]).slice(0, 2).map((k, i) => {
     const [line, big] = QH[k], tag = { ast: "#asteroid", aur: "#northernlights", sun: "#sun", lau: "#rocketlaunch", moon: "#moon" }[k];
-    return { ...base, mode: "space-quick", quick: true, min: 0, part: i + 1, scenes: [{ kind: "hook", id: "hook", topic: k, bg: BG[k], ...big }, S[k], { kind: "outro", id: "outro", bg: "earth" }],
+    return { ...base, ...coverFor(k, S, today), mode: "space-quick", quick: true, min: 0, part: i + 1, scenes: [{ kind: "hook", id: "hook", topic: k, bg: BG[k], ...big }, S[k], { kind: "outro", id: "outro", bg: "earth" }],
       voice: { hook: line, [k]: QV[k], outro: `Follow ${brand} for more!` },
       ytTitle: `${line.replace(/[!.?]+$/, "")} ${{ ast: "☄️", aur: "🌌", sun: "☀️", lau: "🚀", moon: "🌕" }[k]}`.slice(0, 100),
       caption: [line, "", `Follow ${brand} for the space report every day ✅`, "", "Data: NASA JPL, NOAA SWPC, The Space Devs. Footage: NASA.", "", `#space ${tag} #astronomy #spacenews #nightsky #fyp`].join("\n") };
   });
   return { mode: "space", quick, template: "../space/space.html", w: 1080, h: 1920, brand, day: today, genAt: Date.now(), date: dateLabel.toUpperCase(), scenes, voice,
-    music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA", ytTitle: title, caption: caption(H, S, voice, brand, dateLabel) };
+    music: "../space/music", facts, source: "Data: NASA JPL · NOAA SWPC · The Space Devs · Footage: NASA", ytTitle: title, caption: caption(H, S, voice, brand, dateLabel), ...CV };
 }
 
 // every story's pitch as the lead: how big the news is (value), the hook line, the hook's big number, and a short title
@@ -329,6 +329,21 @@ function leadOptions(S, QH, today) {
       big: { big: m.illum + "%", unit: "Moon lit tonight", kicker: "Full moon soon", sub: `Full ${m.fullName} Moon · ${m.full}` }, title: `Full ${m.fullName} Moon ${m.dTo === 1 ? "Tomorrow Night" : "in " + m.dTo + " Days"} 🌕` });
     else O.push({ k: "moon", value: 2, line: `Tonight's Moon is ${m.illum} percent lit. Here's what's coming up!`, big: QH.moon[1], title: `Tonight's Moon Is ${m.illum}% Lit 🌙` }); }
   return O;
+}
+// the cover's words for a story: two short lines (big), a small tag line, and alert = genuinely big news
+const SIZEW = { car: "Car-sized", bus: "Bus-sized", whale: "Whale-sized", plane: "Jumbo jet-sized", field: "Football field-sized", tower: "Eiffel Tower-sized", tower2: "Skyscraper-sized" };
+function coverFor(k, S, today) {
+  const dw = (d, dayOnly) => { const w = when(d, today), days = Math.round((Date.parse(etDay(d) + "T12:00:00Z") - Date.parse(today + "T12:00:00Z")) / 864e5);
+    if (days > 6) return ET(d, { month: "short", day: "numeric" });
+    if (dayOnly) return days <= 0 ? "today" : days === 1 ? "tomorrow" : ET(d, { weekday: "long" });
+    return /^(tonight|late tonight)$/.test(w) ? "tonight" : w === "today" ? "today" : /^tomorrow/.test(w) ? "tomorrow" : ET(d, { weekday: "long" }); };
+  if (k === "ast") { const a = S.ast; return a.closer ? { cover: ["Closer than", "the Moon!"], tag: `${a.when} · ${comma(a.miles)} miles away`, alert: true }
+    : { cover: [SIZEW[a.ref.icon] || "Giant", "asteroid!"], tag: `${a.when} · ${comma(a.miles)} miles away`, alert: false }; }
+  if (k === "aur") { const a = S.aur; return { cover: a.k >= 5 ? ["Northern lights", "alert!"] : a.k === 4 ? ["Northern lights", "tonight"] : ["Northern lights", "forecast"], tag: a.short ? `Kp ${a.kp} · ${a.short}` : `Kp ${a.kp} · NOAA forecast`, alert: a.k >= 5 }; }
+  if (k === "sun") { const f = flux(S.sun.c24); return { cover: f >= 1e-5 ? [`${S.sun.c24} solar`, f >= 1e-4 ? "flare!" : "flare"] : ["The Sun", "today"], tag: "Real NASA image", alert: f >= 1e-4 }; }
+  if (k === "lau") { const it = S.lau.items, cr = it.find(l => l.crew), l = cr || it.find(x => !x.star) || it[0];
+    return { cover: cr ? ["Astronauts", `launch ${dw(l.net, l.dayOnly)}!`] : l.star ? ["Starlink", `launch ${dw(l.net, l.dayOnly)}`] : [l.rocket, `launches ${dw(l.net, l.dayOnly)}`], tag: `${l.prov} · ${l.loc}`, alert: !!cr }; }
+  const m = S.moon; return { cover: m.fullTonight ? [`Full ${m.tonightName}`, "Moon tonight"] : m.dTo >= 1 && m.dTo <= 3 ? ["Full moon", m.dTo === 1 ? "tomorrow!" : `in ${m.dTo} days`] : ["Tonight's", "Moon"], tag: `${m.illum}% lit tonight`, alert: false };
 }
 // which story leads: news value minus how recently that story led (yesterday -6, two days ago -4 ...), and an asteroid
 // that was already featured lately loses its newness. Ties go to the story that's waited longest.

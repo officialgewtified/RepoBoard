@@ -44,8 +44,8 @@ jobs:
           code=$?
           if [ $code -eq 3 ]; then echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
           if [ "${{ inputs.dry }}" = "yes" ] && [ $code -eq 0 ]; then
-            { echo "## Test run for $DAY (nothing made or published)"; node -e "const d=require('./out/data.json');console.log('**Report:** '+d.ytTitle+'\n\nHook: '+d.voice.hook+'\n\nStories: '+d.scenes.map(s=>s.kind).join(', '))";
-              for i in 1 2; do [ -f out/quick-$i.json ] && node -e "console.log('\n**Quick hit $i:** '+require('./out/quick-$i.json').ytTitle)"; done; } >> "$GITHUB_STEP_SUMMARY"
+            { echo "## Test run for $DAY (nothing made or published)"; node -e "const d=require('./out/data.json');console.log('**Report:** '+d.ytTitle+'\n\nHook: '+d.voice.hook+'\n\nStories: '+d.scenes.map(s=>s.kind).join(', ')+'\n\nCover: '+(d.cover||[]).join(' / ')+' · '+d.tag+(d.alert?' · ALERT':''))";
+              for i in 1 2; do [ -f out/quick-$i.json ] && node -e "const q=require('./out/quick-$i.json');console.log('\n**Quick hit $i:** '+q.ytTitle+'\n\nCover: '+(q.cover||[]).join(' / ')+' · '+q.tag+(q.alert?' · ALERT':''))"; done; } >> "$GITHUB_STEP_SUMMARY"
             echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
           exit $code
       - uses: actions/setup-python@v5

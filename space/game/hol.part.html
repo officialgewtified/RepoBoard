@@ -1,4 +1,23 @@
 <!--CSS-->
+/* the NEON cover (mini games): a colour burst, real planet photos, and a huge glossy two-line headline */
+#thumb.neon{background:#12002a}
+#thumb.neon .ab{position:absolute}
+#thumb.neon .burst{position:absolute;left:540px;top:820px;width:3200px;height:3200px;margin:-1600px 0 0 -1600px;background:repeating-conic-gradient(from 7deg,#ff2bd6 0 9deg,#7a1cff 9deg 18deg,#00e5ff 18deg 27deg,#3b0a8f 27deg 36deg);opacity:.6}
+#thumb.neon .glow{position:absolute;left:540px;top:820px;width:1400px;height:1400px;margin:-700px 0 0 -700px;background:radial-gradient(circle,rgba(255,255,255,.6),rgba(255,43,214,.25) 35%,transparent 62%)}
+#thumb.neon .vig{position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 42%,transparent 40%,rgba(10,0,30,.8) 100%)}
+#thumb.neon .lg{position:absolute;left:0;right:0;top:66px;display:flex;justify-content:center;align-items:center;gap:14px;font:900 44px/1 "Unbounded";letter-spacing:.08em;color:#fff;text-shadow:0 5px 0 #1a0033}
+#thumb.neon .lg svg{width:62px;height:62px}
+#thumb.neon .chip{position:absolute;left:50%;top:180px;transform:translateX(-50%) rotate(-3deg);max-width:960px;width:max-content;background:#00e5ff;color:#12002a;font:900 50px/1.08 "Unbounded";padding:22px 38px;border-radius:60px;box-shadow:0 0 0 9px #12002a,0 0 60px #00e5ff;text-transform:uppercase;text-align:center}
+#thumb.neon .bang{position:absolute;right:26px;top:360px;width:300px;height:300px;transform:rotate(14deg)}
+#thumb.neon .bang b{position:absolute;inset:0;display:grid;place-items:center;font:900 116px/1 "Unbounded";color:#1a0033;transform:rotate(-6deg)}
+#thumb.neon .vs{position:absolute;left:540px;top:820px;width:230px;height:230px;margin:-115px 0 0 -115px;border-radius:50%;background:#FFE14D;border:10px solid #1a0033;display:grid;place-items:center;font:900 96px/1 "Unbounded";color:#1a0033;box-shadow:0 0 60px rgba(255,225,77,.8);transform:rotate(-8deg)}
+#thumb.neon .qm{position:absolute;display:grid;place-items:center;font:900 220px/1 "Unbounded";color:#fff;text-shadow:0 0 40px #ff2bd6,0 10px 0 #1a0033}
+#thumb.neon .t{position:absolute;left:0;right:0;bottom:170px;text-align:center}
+#thumb.neon .ln{font:900 180px/1.04 "Unbounded";text-transform:uppercase;white-space:nowrap}
+#thumb.neon .ln span{display:inline-block;position:relative}
+#thumb.neon .ln .nu{color:#1a0033;-webkit-text-stroke:22px #1a0033;text-shadow:0 14px 0 #1a0033}
+#thumb.neon .ln .nf{position:absolute;left:0;top:0;background:linear-gradient(180deg,#ffffff 0%,#fff6a8 35%,#ffb21e 62%,#ff4f2e 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 30px rgba(255,43,214,.8))}
+#thumb.neon .ln.c .nf{background:linear-gradient(180deg,#f2ffff 0%,#8ff8ff 40%,#00b3ff 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 30px rgba(0,229,255,.9))}
 /* HIGHER OR LOWER, Liftoff edition. Read top to bottom like the game: the title, the number you know, the question with
    two giant buttons, then the mystery number. Green = higher, red = lower, amber = unknown. Stars, HUD and the rocket
    ending are the daily report's. */
@@ -231,7 +250,34 @@ function render(t){
    document.getElementById("fl").textContent=tp>.12?"Following ✓":"Follow";v.style.background=tp>.12?"var(--ion)":"transparent";v.style.color=tp>.12?"#03040A":"var(--ion)"}}
  document.getElementById("prog").style.width=(clamp(t/TOTAL)*940).toFixed(1)+"px";
 <!--ENDJS-->
-window.thumb=()=>{const T=document.getElementById("thumb");
+// the NEON cover: round one's planets as real photos (ref/photos), with the game's name as a huge two-line headline
+const GLOW={mercury:"rgba(200,190,180,.7)",venus:"rgba(255,210,140,.8)",earth:"rgba(79,160,255,.9)",moon:"rgba(234,242,255,.6)",mars:"rgba(255,110,60,.85)",jupiter:"rgba(255,190,130,.8)",saturn:"rgba(255,220,150,.8)",uranus:"rgba(120,240,255,.85)",neptune:"rgba(70,120,255,.9)"};
+const SHOT=(id,x,y,S,dark)=>`<img class="ab" src="ref/photos/${id}.png" style="left:${x-S/2}px;top:${y-S/2}px;width:${S}px;height:${S}px;filter:${dark?"brightness(.3) saturate(.6) ":"saturate(1.12) contrast(1.08) "}drop-shadow(0 0 ${Math.round(S*.08)}px ${GLOW[id]||"rgba(255,255,255,.6)"})">`+(dark?`<div class="qm" style="left:${x-S/2}px;top:${y-S/2}px;width:${S}px;height:${S}px;font-size:${Math.round(S*.5)}px">?</div>`:"");
+const BANG=`<svg viewBox="-150 -150 300 300" width="300" height="300"><path d="${Array.from({length:24},(_,i)=>{const a=i/24*Math.PI*2,r=i%2?95:148;return (i?"L":"M")+(r*Math.cos(a)).toFixed(1)+" "+(r*Math.sin(a)).toFixed(1)}).join(" ")}Z" fill="#FFE14D" stroke="#1a0033" stroke-width="12" stroke-linejoin="round"/></svg>`;
+const plain=h=>String(h||"").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&");
+function neonGame(){const r=D.rounds[0]||{};return !r.type?"hol":r.tf?"tf":r.clues?"guess":"mc"}
+function neonWords(){const g=neonGame(),r=D.rounds[0]||{};
+ if(g==="hol")return {L:["Higher or","lower?"],chip:`${plain(r.b&&r.b.name)} vs ${plain(r.a&&r.a.name)}`,bang:"?!"};
+ if(g==="tf")return {L:["True or","false?"],chip:plain(r.q),bang:"?!"};
+ if(g==="guess")return {L:["Guess the","planet!"],chip:`3 clues · ${D.rounds.length} rounds`,bang:"?"};
+ const w=plain(r.q).split(/\s+/);let best=1,bd=1e9;for(let k=1;k<w.length;k++){const d=Math.abs(w.slice(0,k).join(" ").length-w.slice(k).join(" ").length);if(d<bd){bd=d;best=k}}
+ return {L:[w.slice(0,best).join(" "),w.slice(best).join(" ")],chip:D.thumbSub||`${D.rounds.length} rounds · beat the clock`,bang:"?!"}}
+function neonScene(){const g=neonGame(),r=D.rounds[0]||{},cx=540,cy=820;
+ if(g==="hol")return SHOT(r.b.icon,330,640,560)+SHOT(r.a.icon,750,1010,560)+`<div class="vs">VS</div>`;
+ const ids=g==="tf"?(r.ids&&r.ids.length?r.ids:[D.hookPlanet||"saturn"]):(r.opts||[]).map(o=>o.icon);
+ if(ids.length===1)return SHOT(ids[0],cx,cy,860);
+ if(ids.length===2)return SHOT(ids[0],330,640,560)+SHOT(ids[1],750,1010,560);
+ const P=[[-245,-225],[245,-225],[-245,245],[245,245]];return ids.slice(0,4).map((id,i)=>SHOT(id,cx+P[i][0],cy+P[i][1],440,g==="guess")).join("")}
+window.thumb=async()=>{const T=document.getElementById("thumb"),{L,chip,bang}=neonWords();
+ T.className="neon";T.innerHTML=`<div class="burst"></div><div class="glow"></div>${neonScene()}<div class="vig"></div>
+  <div class="lg"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
+  <div class="chip">${esc(chip)}</div><div class="bang">${BANG}<b>${esc(bang)}</b></div>
+  <div class="t">${L.map((l,i)=>`<div class="ln ${i?"c":""}"><span><b class="nu">${esc(l)}</b><b class="nf">${esc(l)}</b></span></div>`).join("")}</div>`;
+ T.style.display="block";
+ T.querySelectorAll(".ln").forEach(d=>{const sp=d.firstElementChild;let f=180;while(sp.offsetWidth>1000&&f>60){f-=6;d.style.fontSize=f+"px"}});
+ const c=T.querySelector(".chip");let f=50;while(c.offsetHeight>f*1.08*1.5+44&&f>40){f-=2;c.style.fontSize=f+"px"}while(c.offsetHeight>f*1.08*2.5+44&&f>26){f-=2;c.style.fontSize=f+"px"}
+ await Promise.all([...T.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));return true};
+window.thumbOld=()=>{const T=document.getElementById("thumb");
  T.innerHTML=`<div class="neb"></div><svg style="position:absolute;inset:0" viewBox="0 0 1080 1920">${document.getElementById("stars").innerHTML}</svg>
   <i class="cb a"></i><i class="cb b"></i><i class="cb c"></i><i class="cb d"></i>
   <div class="tl"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>

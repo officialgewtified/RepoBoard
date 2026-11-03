@@ -5,6 +5,7 @@
 @font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-400.woff2) format("woff2");font-weight:400}
 @font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-700.woff2) format("woff2");font-weight:700}
 @font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-800.woff2) format("woff2");font-weight:800}
+@font-face{font-family:"Bebas";src:url(../fonts/bebas-neue.woff) format("woff")}
 @font-face{font-family:"Archivo";src:url(../fonts/archivo-x.woff) format("woff");font-weight:400 900;font-stretch:62% 125%}
 /* Liftoff. Mission-control look: deep space black, ion cyan, solar amber, aurora green. Transparent page: NASA footage plays underneath. */
 :root{--void:#03040A;--ink:#EAF2FF;--dim:#A9B6CF;--ion:#4FF3FF;--sol:#FFB547;--aur:#5CFFA8;--mag:#FF4FD8;--red:#FF5A5A;--glass:rgba(4,8,20,.66);--line:rgba(79,243,255,.32)}
@@ -98,6 +99,24 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 /* cover image: mission control has a target. The subject sits inside a tracking reticle, a mono readout tag above the
    number, a HUD rule at the bottom. Everything centred, glowing and thin-lined: nothing like Crossover's flat poster. */
 #thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden;background:radial-gradient(62% 40% at 50% 36%,#12305a 0%,#07102a 50%,#020309 100%)}
+/* the ALERT cover: a real photo of the story's subject, hazard stripes, and a huge two-line headline */
+#thumb.alert{background:radial-gradient(70% 50% at 50% 40%,#2a0606 0%,#0a0202 60%,#050505 100%)}
+#thumb.alert .ab{position:absolute}
+#thumb.alert .bgp{position:absolute;left:0;top:0;width:1080px;height:1500px;object-fit:cover;filter:saturate(1.3) contrast(1.12)}
+#thumb.alert .bgf{position:absolute;left:0;right:0;top:700px;height:820px;background:linear-gradient(180deg,rgba(5,5,5,0) 0%,rgba(5,5,5,.85) 60%,#050505 100%)}
+#thumb.alert .haz{position:absolute;left:-40px;right:-40px;height:64px;background:repeating-linear-gradient(-45deg,#FFD400 0 46px,#111 46px 92px)}
+#thumb.alert .haz.t1{top:0}#thumb.alert .haz.b1{bottom:0}
+#thumb.alert .scan{position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px)}
+#thumb.alert .bar{position:absolute;left:50%;top:120px;transform:translateX(-50%);background:#FF1F1F;color:#fff;font:400 96px/1 "Bebas";letter-spacing:.08em;padding:16px 40px 6px;box-shadow:0 0 70px rgba(255,31,31,.7),0 10px 0 #000;white-space:nowrap}
+#thumb.alert .bar.calm{background:#00E5FF;color:#04121a;box-shadow:0 0 60px rgba(0,229,255,.55),0 10px 0 #000}
+#thumb.alert .lg{position:absolute;right:50px;top:282px;display:flex;align-items:center;gap:12px;font:900 34px/1 "Unbounded";letter-spacing:.08em;color:#fff;text-shadow:0 4px 0 #000}
+#thumb.alert .lg svg{width:54px;height:54px}
+#thumb.alert .t{position:absolute;left:40px;right:40px;bottom:120px}
+#thumb.alert .t small{display:block;margin-bottom:20px;font:800 42px/1.1 "JBM";letter-spacing:.1em;color:#FFD400;text-transform:uppercase;white-space:nowrap;text-shadow:0 4px 0 #000}
+#thumb.alert .ln{font:400 300px/.84 "Bebas";color:#fff;text-transform:uppercase;white-space:nowrap;text-shadow:0 10px 0 #000,0 0 40px rgba(0,0,0,.8)}
+#thumb.alert .ln span{display:inline-block}
+#thumb.alert .ln.r span{background:#FF1F1F;padding:0 22px;box-shadow:14px 14px 0 #FFD400}
+#thumb.alert .rim{filter:drop-shadow(-8px 0 0 rgba(255,20,60,.8)) drop-shadow(8px 0 0 rgba(0,240,255,.8))}
 #thumb .neb{position:absolute;inset:0;background:radial-gradient(42% 26% at 18% 22%,rgba(255,79,216,.28),transparent 70%),radial-gradient(46% 30% at 86% 58%,rgba(79,243,255,.2),transparent 70%),radial-gradient(60% 22% at 50% 96%,rgba(255,181,71,.16),transparent 70%)}
 #thumb .cb{position:absolute;width:96px;height:96px;border:5px solid var(--ion);opacity:.85}
 #thumb .cb.a{left:44px;top:44px;border-right:0;border-bottom:0}#thumb .cb.b{right:44px;top:44px;border-left:0;border-bottom:0}
@@ -320,7 +339,31 @@ function coverReticle(){let t="";for(let a=0;a<360;a+=5){const big=a%30===0,r1=4
  return `<svg viewBox="-480 -480 960 960"><circle r="440" fill="none" stroke="#4FF3FF" stroke-width="3" opacity=".6"/><circle r="380" fill="none" stroke="#4FF3FF" stroke-width="2" stroke-dasharray="3 13" opacity=".55"/>${t}
   <path d="${arc(-70,-20,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/><path d="${arc(110,160,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/>
   ${[0,180,270].map(tri).join("")}</svg>`}
-window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),sc=D.scenes.find(s=>s.kind===H.topic)||{};
+const PH=n=>`ref/photos/${n}`;
+// the Moon photo, lit to tonight's phase (the dark side keeps a faint earthshine so the whole disc still reads)
+function moonPhoto(frac,S){const r=S/2/1.06,c=S/2,k=Math.cos(frac*2*Math.PI),sw=frac<.5?1:0,ex=Math.abs(k)*r,
+  lit=`M${c} ${c-r} A${r} ${r} 0 0 ${sw} ${c} ${c+r} A${ex} ${r} 0 0 ${k<0?sw:1-sw} ${c} ${c-r}Z`;
+ return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}"><defs><filter id="mpb" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="${(S*.012).toFixed(1)}"/></filter><mask id="mpm"><path d="${lit}" fill="#fff" filter="url(#mpb)"/></mask></defs>
+  <image href="${PH("moon.png")}" width="${S}" height="${S}" opacity=".13"/><image href="${PH("moon.png")}" width="${S}" height="${S}" mask="url(#mpm)"/></svg>`}
+function alertScene(H,sc){
+ if(H.topic==="sun"&&sc.img)return `<div class="ab" style="left:90px;top:300px;width:900px;height:900px;border-radius:50%;overflow:hidden;box-shadow:0 0 140px 50px rgba(255,140,30,.75),0 0 320px 140px rgba(255,80,0,.4)"><img src="${esc(sc.img)}" style="width:113%;height:113%;margin:-6.5%;filter:saturate(1.5) contrast(1.2) brightness(1.1)"></div>`;
+ if(H.topic==="ast"){const S=820,x=560,y=760;
+  return `<div class="ab" style="left:${x}px;top:${y}px;width:1500px;height:${S*.6}px;margin-top:-${S*.3}px;transform-origin:0 50%;transform:rotate(-40deg);background:linear-gradient(90deg,rgba(255,240,180,.95),rgba(255,150,40,.85) 25%,rgba(255,60,0,.45) 60%,transparent);filter:blur(22px);border-radius:0 50% 50% 0/0 50% 50% 0"></div>
+   <img class="ab rim" src="${PH("bennu.png")}" style="left:${x-S/2}px;top:${y-S/2}px;width:${S}px;height:${S}px;filter:contrast(1.25) brightness(1.12) drop-shadow(0 0 60px rgba(255,140,40,.9)) drop-shadow(0 0 140px rgba(255,80,0,.55))">`}
+ if(H.topic==="moon")return `<div class="ab rim" style="left:90px;top:360px;filter:drop-shadow(0 0 70px rgba(234,242,255,.45))">${moonPhoto(sc.frac||.5,900)}</div>`;
+ const bg=H.topic==="aur"?"aurora.jpg":"launch.jpg";
+ return `<img class="bgp" src="${PH(bg)}" style="object-position:50% ${bg==="launch.jpg"?"0%":"50%"}"><div class="bgf"></div>`}
+window.thumb=async()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),sc=D.scenes.find(s=>s.kind===H.topic)||{};
+ const L=Array.isArray(D.cover)&&D.cover.length?D.cover:[H.kicker,H.big],tag=D.tag||H.sub||"";
+ T.className="alert";T.innerHTML=`${alertScene(H,sc)}<div class="scan"></div><div class="haz t1"></div><div class="haz b1"></div>
+  <div class="bar${D.alert?"":" calm"}">${D.alert?"⚠ Space alert":"Today in space"}</div><div class="lg"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${esc(String(D.brand).toUpperCase())}</div>
+  <div class="t">${tag?`<small>${esc(tag)}</small>`:""}${L.map((l,i)=>`<div class="ln ${i?"":"r"}"><span>${esc(l)}</span></div>`).join("")}</div>`;
+ T.style.display="block";
+ T.querySelectorAll(".ln").forEach(d=>{const sp=d.firstElementChild;let f=300;while(sp.offsetWidth>(d.classList.contains("r")?960:1000)&&f>90){f-=6;d.style.fontSize=f+"px"}});
+ const sm=T.querySelector(".t small");if(sm){let f=42;while(sm.scrollWidth>1000&&f>24){f-=2;sm.style.fontSize=f+"px"}}
+ await Promise.all([...T.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+ await new Promise(r=>setTimeout(r,150));return true};
+window.thumbOld=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElementById("thumb"),sc=D.scenes.find(s=>s.kind===H.topic)||{};
  const art=H.topic==="sun"&&sc.img?`<img src="${esc(sc.img)}">`:H.topic==="aur"&&sc.img?`<img src="${esc(sc.img)}" style="box-shadow:0 0 120px rgba(92,255,168,.6)">`:H.topic==="moon"?`<div style="width:640px">${moonSvg(sc.frac||.5,640)}</div>`
   :H.topic==="lau"?rocketArt()
   :`<img src="ref/asteroid.png" style="width:640px;filter:drop-shadow(0 0 60px rgba(255,181,71,.45))">`;
@@ -335,6 +378,6 @@ window.thumb=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getElemen
  const ks=T.querySelector(".k");let f=40;while(ks.offsetWidth>960&&f>24){f-=2;ks.style.fontSize=f+"px"}
  const lr=T.querySelector(".lk.r span");if(lr){let g=28;while(lr.offsetWidth>820&&g>18){g-=1;lr.parentNode.style.fontSize=g+"px"}}
  const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
-window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"'].map(f=>document.fonts.load(f)));
+window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','400 100px "Bebas"'].map(f=>document.fonts.load(f)));
 window.build=build;window.render=render;
 </script></body></html>
