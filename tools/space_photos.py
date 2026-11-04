@@ -17,6 +17,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 UA = {"User-Agent": "LiftoffBot/1.0 (https://github.com/officialgewtified/RepoBoard)"}
 OK = re.compile(r"public domain|^pd|cc0|cc[- ]by[- ]\d|cc[- ]by \d", re.I)
 MIN_SIDE = 1080
+MINS = {"venus": 800}   # no real photo of Venus 1080+ exists (bigger "globes" are renderings); the user OK'd the real 832 px one
 # subject -> (kind, searches). body = cut out a round thing; bg = full-frame photo used as a background
 S = {
  "mercury": ("body", ["Mercury MESSENGER true color", "Mercury globe MESSENGER mosaic", "Mercury planet true colour"]),
@@ -32,7 +33,25 @@ S = {
  "launch": ("bg", ["Artemis I launch Space Launch System", "Falcon 9 launch night Kennedy", "rocket launch Kennedy Space Center NASA"]),
  "aurora": ("bg", ["aurora International Space Station NASA", "aurora borealis Alaska NASA", "aurora australis ISS"]),
  "earthlimb": ("bg", ["Earth limb sunrise International Space Station", "Earth from ISS night city lights", "sunrise over Earth ISS"]),
+ # size references for asteroids (cut out of their background with rembg)
+ "bus": ("obj", ["school bus side view", "yellow school bus side", "school bus profile parked"]),
+ "car": ("obj", ["sedan side view", "car side profile", "compact car side view white background"]),
+ "plane": ("obj", ["Boeing 747 side view", "Boeing 747-400 in flight", "Boeing 747-8 takeoff"]),
+ "tower": ("obj", ["Eiffel Tower", "Eiffel Tower from Trocadero", "Tour Eiffel blue sky"]),
+ "tower2": ("obj", ["Empire State Building", "Empire State Building blue sky", "Empire State Building from Fifth Avenue"]),
+ "whale": ("obj", ["blue whale NOAA", "Balaenoptera musculus surfacing", "blue whale side view"]),
+ "field": ("bg", ["American football field aerial", "football field aerial view", "football stadium field from above"]),
 }
+_SESS = None
+def cut_obj(im):
+    """a thing on a background (bus, plane, tower, whale) -> RGBA cut tight around it, using rembg's segmentation model"""
+    global _SESS
+    from rembg import remove, new_session
+    _SESS = _SESS or new_session("isnet-general-use")
+    out = remove(im, session=_SESS)
+    bb = out.getchannel("A").point(lambda v: 255 if v > 24 else 0).getbbox()
+    if not bb: return None
+    out = out.crop(bb); out.info["disc"] = max(out.size); return out
 
 def get(u): return urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=120).read()
 
@@ -123,7 +142,7 @@ def scout(only=None, extra=None):
             for c in search(q, 2400):
                 if c["title"] in seen: continue
                 seen.add(c["title"])
-                if min(c["w"], c["h"]) < (1600 if kind == "body" else 1080) or (kind == "bg" and c["w"] < 1920): continue
+                if min(c["w"], c["h"]) < (1600 if kind == "body" and sub not in MINS else MINS.get(sub, 1080)) or (kind == "bg" and c["w"] < 1920) or (kind == "obj" and max(c["w"], c["h"]) < 1600): continue
                 cands.append(c)
         cands = cands[:12]; tiles = []
         for i, c in enumerate(cands):
@@ -133,6 +152,12 @@ def scout(only=None, extra=None):
                     cut = cut_body(im, SHAPE.get(sub, "round"))
                     if cut is None: c["skip"] = "no round subject found"; continue
                     c["cut_px"] = cut.info["disc"] * (c["w"] / im.width)   # the subject's size at full resolution
+                    if c["cut_px"] < MINS.get(sub, MIN_SIDE): c["skip"] = f"subject only {int(c['cut_px'])} px"; continue
+                    prev = Image.new("RGB", cut.size, (30, 10, 60)); prev.paste(cut, (0, 0), cut)
+                elif kind == "obj":
+                    cut = cut_obj(im)
+                    if cut is None: c["skip"] = "nothing cut out"; continue
+                    c["cut_px"] = cut.info["disc"] * (c["w"] / im.width)
                     if c["cut_px"] < MIN_SIDE: c["skip"] = f"subject only {int(c['cut_px'])} px"; continue
                     prev = Image.new("RGB", cut.size, (30, 10, 60)); prev.paste(cut, (0, 0), cut)
                 else: prev = im
@@ -164,6 +189,12 @@ def pick(picks):
             cut = cut_body(im, SHAPE.get(sub, "round"))
             if cut is None: print("no subject found in", c["title"]); continue
             disc = cut.info["disc"]; cut.thumbnail((2000, 2000), Image.LANCZOS); px = int(disc * cut.width / max(1, int(disc * 1.06)))
+            if px < MINS.get(sub, MIN_SIDE): print("too small:", sub, px, "px"); continue
+            cut.save(f"space/ref/photos/{sub}.png", optimize=True)
+        elif kind == "obj":
+            cut = cut_obj(im)
+            if cut is None: print("nothing cut out of", c["title"]); continue
+            cut.thumbnail((2000, 2000), Image.LANCZOS); px = max(cut.size)
             if px < MIN_SIDE: print("too small:", sub, px, "px"); continue
             cut.save(f"space/ref/photos/{sub}.png", optimize=True)
         else:

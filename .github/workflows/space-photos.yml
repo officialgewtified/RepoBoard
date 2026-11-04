@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -q pillow numpy scipy
+      - run: pip install -q pillow numpy scipy "rembg[cpu]"
       - name: Get the scout's candidate list (pick mode)
         if: inputs.mode == 'pick'
         env:
