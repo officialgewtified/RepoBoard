@@ -44,8 +44,8 @@ const factFor = (k, day) => { const L = FACTS[k]; let h = 7; for (const c of day
 
 // ---------- asteroids
 const AU_MI = 92955807, LD = 0.00256955529;
-const REFS = [["a car", 4.5, "car"], ["a school bus", 12, "bus"], ["a blue whale", 30, "whale"], ["a Boeing 747", 70, "plane"], ["a football field", 110, "field"],
-  ["the Eiffel Tower", 330, "tower"], ["the Empire State Building", 443, "tower2"]];
+const REFS = [["a car", 4.5, "car"], ["a school bus", 12, "bus"], ["the Space Shuttle", 37, "shuttle"], ["a Boeing 747", 70, "plane"], ["a football field", 110, "field"],
+  ["the Eiffel Tower", 330, "tower"]];   // every reference has a real photo in ref/photos (no clean free photo of the Empire State Building exists)
 function refFor(m) { let best = REFS[0]; for (const r of REFS) if (Math.abs(Math.log(m / r[1])) < Math.abs(Math.log(m / best[1]))) best = r; return { name: best[0], m: best[1], icon: best[2] }; }
 const ft = m => m * 3.281;
 async function asteroids() {
@@ -331,7 +331,7 @@ function leadOptions(S, QH, today) {
   return O;
 }
 // the cover's words for a story: two short lines (big), a small tag line, and alert = genuinely big news
-const SIZEW = { car: "Car-sized", bus: "Bus-sized", whale: "Whale-sized", plane: "Jumbo jet-sized", field: "Football field-sized", tower: "Eiffel Tower-sized", tower2: "Skyscraper-sized" };
+const SIZEW = { car: "Car-sized", bus: "Bus-sized", shuttle: "Space Shuttle-sized", plane: "Jumbo jet-sized", field: "Football field-sized", tower: "Eiffel Tower-sized", tower2: "Skyscraper-sized" };
 function coverFor(k, S, today) {
   const dw = (d, dayOnly) => { const w = when(d, today), days = Math.round((Date.parse(etDay(d) + "T12:00:00Z") - Date.parse(today + "T12:00:00Z")) / 864e5);
     if (days > 6) return ET(d, { month: "short", day: "numeric" });

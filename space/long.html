@@ -160,11 +160,11 @@ function rock(seed,r){const R=rnd(seed),n=18;let p="";for(let i=0;i<n;i++){const
  let cr="";for(let i=0;i<5;i++){const a=R()*6.28,d=R()*r*.55,c2=r*(.08+.12*R());cr+=`<circle cx="${(d*Math.cos(a)).toFixed(1)}" cy="${(d*Math.sin(a)).toFixed(1)}" r="${c2.toFixed(1)}" fill="rgba(0,0,0,.28)"/>`}
  return `<path d="${p}Z" fill="url(#rk)"/>${cr}`}
 let MID=0;
-function moonSvg(frac,size){const r=size/2-8,c=size/2,ph=frac*2*Math.PI,k=Math.cos(ph),wax=frac<.5,id="m"+(++MID);
- const sw=wax?1:0,ex=Math.abs(k)*r,lit=`M${c} ${c-r} A${r} ${r} 0 0 ${sw} ${c} ${c+r} A${ex} ${r} 0 0 ${k<0?sw:1-sw} ${c} ${c-r}Z`;
- return `<svg class="svg" viewBox="0 0 ${size} ${size}"><defs><radialGradient id="${id}g" cx="40%" cy="35%"><stop offset="0" stop-color="#f2efe8"/><stop offset=".7" stop-color="#bdb8ae"/><stop offset="1" stop-color="#8d887f"/></radialGradient>
-  <clipPath id="${id}c"><path d="${lit}"/></clipPath></defs><circle cx="${c}" cy="${c}" r="${r}" fill="#141821"/>
-  <g clip-path="url(#${id}c)"><circle cx="${c}" cy="${c}" r="${r}" fill="url(#${id}g)"/>${[[.38,.36,.16],[.6,.3,.11],[.55,.55,.14],[.35,.62,.09],[.68,.66,.07],[.46,.78,.06]].map(([x,y,s])=>`<ellipse cx="${size*x}" cy="${size*y}" rx="${size*s}" ry="${size*s*.8}" fill="rgba(80,80,90,.32)"/>`).join("")}</g>
+// the Moon: NASA's real LRO photo, lit to the phase (faint earthshine on the dark side so the whole disc reads)
+function moonSvg(frac,size){const r=size/2-8,c=size/2,k=Math.cos(frac*2*Math.PI),sw=frac<.5?1:0,ex=Math.abs(k)*r,id="m"+(++MID),W=2*r*1.06,x=c-W/2,
+ lit=`M${c} ${c-r} A${r} ${r} 0 0 ${sw} ${c} ${c+r} A${ex} ${r} 0 0 ${k<0?sw:1-sw} ${c} ${c-r}Z`,img=o=>`<image href="ref/photos/moon.png" x="${x}" y="${x}" width="${W}" height="${W}" ${o}/>`;
+ return `<svg class="svg" viewBox="0 0 ${size} ${size}"><defs><filter id="${id}b" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="${(r*.02).toFixed(2)}"/></filter><mask id="${id}m"><path d="${lit}" fill="#fff" filter="url(#${id}b)"/></mask></defs>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="#0b0d14"/>${img('opacity=".14"')}${img(`mask="url(#${id}m)"`)}
   <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="rgba(234,242,255,.15)" stroke-width="2"/></svg>`}
 function rocketArt(h,id){return `<svg viewBox="40 0 120 300" style="height:${h}px;transform:rotate(14deg);filter:drop-shadow(0 0 50px rgba(255,181,71,.55))">
  <defs><linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".25" stop-color="#FFB547"/><stop offset=".7" stop-color="#FF4F2E" stop-opacity=".55"/><stop offset="1" stop-color="#FF4F2E" stop-opacity="0"/></linearGradient>
@@ -178,11 +178,13 @@ function reticle(){let t="";for(let a=0;a<360;a+=5){const big=a%30===0,r1=440,r2
  const tri=a=>{const c=Math.cos(a*Math.PI/180),s=Math.sin(a*Math.PI/180),q=(r,o)=>[(r*c-o*s).toFixed(1),(r*s+o*c).toFixed(1)];return `<path d="M${q(452,0)} L${q(478,-14)} L${q(478,14)}Z" fill="#4FF3FF"/>`};
  return `<svg viewBox="-480 -480 960 960"><g class="rr1"><circle r="440" fill="none" stroke="#4FF3FF" stroke-width="3" opacity=".6"/>${t}</g><g class="rr2"><circle r="380" fill="none" stroke="#4FF3FF" stroke-width="2" stroke-dasharray="3 13" opacity=".55"/></g>
   <path d="${arc(-70,-20,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/><path d="${arc(110,160,462)}" fill="none" stroke="#FFB547" stroke-width="9" stroke-linecap="round"/>${[0,180,270].map(tri).join("")}</svg>`}
-const ROCK=w=>`<img class="spin" src="ref/asteroid.png" style="width:${w}px;filter:drop-shadow(0 0 50px rgba(255,181,71,.45))">`;   // NASA's photo of asteroid Bennu
+const ROCK=w=>`<img class="spin" src="ref/photos/bennu.png" style="width:${w}px;filter:drop-shadow(0 0 50px rgba(255,181,71,.45))">`;   // NASA's photo of asteroid Bennu (OSIRIS-REx)
+// a launch: a real NASA launch photo in a round frame (the rocket itself isn't identifiable, so it fits any launch)
+const LAUNCH=w=>`<img src="ref/photos/launch.jpg" style="width:${w}px;height:${w}px;border-radius:50%;object-fit:cover;object-position:60% 18%;box-shadow:0 0 90px rgba(255,181,71,.5)">`;
 // the art for a topic: rocket, asteroid, the Sun (SDO image), the Moon
 function artFor(topic,size,id){const s=D.scenes.find(x=>x.kind==="sun"),m=D.scenes.find(x=>x.kind==="moon");
  if(topic==="sun"&&s&&s.img)return `<img src="${esc(s.img)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;box-shadow:0 0 120px rgba(255,181,71,.6)">`;
- if(topic==="ast")return ROCK(size);if(topic==="moon"&&m)return `<div style="width:${size}px">${moonSvg(m.frac,size)}</div>`;return rocketArt(size,id)}
+ if(topic==="ast")return ROCK(size);if(topic==="moon"&&m)return `<div style="width:${size}px">${moonSvg(m.frac,size)}</div>`;return LAUNCH(size)}
 
 // ---- the scenes
 function build(data){D=data;SC=[];SFX=[];MID=0;
@@ -228,8 +230,8 @@ function build(data){D=data;SC=[];SFX=[];MID=0;
    add(s,14,`<div class="kick s"><i></i>Asteroid watch</div><div class="t1">Flybys this week</div><div class="meta">NASA JPL · within 20 Moon distances · gray: past 7 days · amber: next 7 days</div>
     <div class="panel" style="margin-top:22px;padding:14px 18px"><svg class="svg" viewBox="0 0 ${W} ${H2}"><defs><radialGradient id="eg" cx="35%" cy="30%"><stop offset="0" stop-color="#8fd3ff"/><stop offset=".55" stop-color="#1f6fd1"/><stop offset="1" stop-color="#0a2550"/></radialGradient></defs>
      <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="rgba(79,243,255,.5)" stroke-width="2"/>${[5,10,15,20].map(v=>`<line x1="${X(v)}" y1="${y0-8}" x2="${X(v)}" y2="${y0+8}" stroke="#4FF3FF" stroke-width="2"/><text x="${X(v)}" y="${y0+30}" text-anchor="middle" font-family="JBM" font-weight="700" font-size="15" fill="#4FF3FF">${v} LD</text>`).join("")}
-     <circle cx="${x0}" cy="${y0}" r="34" fill="url(#eg)"/><text x="${x0}" y="${y0+58}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="15" fill="#A9B6CF">EARTH</text>
-     <circle cx="${X(1)}" cy="${y0}" r="11" fill="#c9c6bf"/><text x="${X(1)}" y="${y0-20}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="15" fill="#c9c6bf">MOON</text>
+     <image href="ref/photos/earth.png" x="${x0-36}" y="${y0-36}" width="72" height="72" style="filter:drop-shadow(0 0 12px rgba(79,160,255,.6))"/><text x="${x0}" y="${y0+58}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="15" fill="#A9B6CF">EARTH</text>
+     <image href="ref/photos/moon.png" x="${X(1)-12}" y="${y0-12}" width="24" height="24"/><text x="${X(1)}" y="${y0-20}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="15" fill="#c9c6bf">MOON</text>
      ${P.map(dot).join("")}${Q.map((p,i)=>dot(p,i+P.length)).join("")}</svg></div>
     <div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-top:18px"><div class="tile"><b data-v="${s.nP}">${s.nP}</b><span>Flybys · past 7 days</span></div><div class="tile"><b data-v="${s.nQ}">${s.nQ}</b><span>Flybys · next 7 days</span></div>
      <div class="tile"><b>${s.big?"≈"+com(s.big.ft)+" FT":"—"}</b><span>${s.big?"Biggest · "+esc(s.big.des)+" · "+esc(s.big.ref.name.replace(/^(a|the) /,"")):"Biggest"}</span></div></div>`)}
@@ -369,6 +371,7 @@ window.thumb=async()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getE
  const c=T.querySelector(".chip");let f=64;while(c.offsetWidth>860&&f>30){f-=2;c.style.fontSize=f+"px"}
  // the photos have to be loaded before the screenshot
  await Promise.all([...T.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));return true};
-window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','700 30px "Archivo"','900 100px "Archivo"'].map(f=>document.fonts.load(f)));
+const PRELOAD=()=>Promise.all(["moon.png","earth.png","bennu.png","launch.jpg"].map(n=>{const i=new Image();i.src="ref/photos/"+n;return i.decode().catch(()=>0)}));
+window.ready=()=>Promise.all([PRELOAD(),...['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','700 30px "Archivo"','900 100px "Archivo"'].map(f=>document.fonts.load(f))]);
 window.build=build;window.render=render;
 </script></body></html>

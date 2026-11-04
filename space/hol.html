@@ -301,32 +301,13 @@ function alertScene(H,sc){
 // its rings, Uranus pale cyan, Neptune deep blue
 const PAL={mercury:["#EEEAE4","#A39D95","#3F3C39"],moon:["#F4F2EE","#B9B5AE","#4E4B47"],venus:["#FFF3CF","#E9BB6E","#7A4A1C"],earth:["#9FD8FF","#2F7BD6","#0B2A66"],
  mars:["#F6B48C","#C9531E","#5A1E0A"],jupiter:["#FBE6C8","#D2A273","#7A4F2E"],saturn:["#FFF0C9","#E3C27F","#8A6B32"],uranus:["#E2FBFC","#8FDCE4","#2C7F8C"],neptune:["#9EC0FF","#3D63DB","#13286E"]};
-function planet(kind,id){const base=kind.replace(/-.*/,""),ven=base==="venus",c=PAL[base]||PAL.mercury;
- const g=`<radialGradient id="${id}g" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".48" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient>`;
- const band=(L)=>L.map(([y,o,col,w=22])=>`<path d="M-100 ${y} C-40 ${y-14} 40 ${y+14} 100 ${y-6}" stroke="${col}" stroke-width="${w}" fill="none" opacity="${o}"/>`).join("");
- const crat=(L,o=.35)=>L.map(([x,y,r])=>`<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.85}" fill="rgba(40,38,36,${o})" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>`).join("");
- const det={venus:band([[-40,.18,"#fff8e0"],[-8,.14,"#c98a3c"],[22,.16,"#fff3d1"],[52,.12,"#b8782f"]]),
-  mercury:crat([[-34,-30,16],[30,-10,11],[-6,36,13],[44,40,8],[-50,20,7],[10,-56,9]]),
-  moon:crat([[-30,-26,20],[26,-34,12],[8,18,24],[-46,30,10],[46,30,9]],.28),
-  earth:`<path d="M-62 -40 C-40 -64 -6 -56 -10 -30 C-14 -6 -44 0 -40 26 C-38 44 -64 40 -74 14 C-82 -8 -78 -28 -62 -40Z M14 -20 C34 -40 70 -30 66 -2 C62 24 40 20 34 44 C28 64 4 60 8 34 C12 14 -2 -6 14 -20Z" fill="#3FA34D" opacity=".9"/><path d="M-90 -62 C-40 -70 30 -76 90 -58 M-70 54 C-20 64 40 62 84 48" stroke="#fff" stroke-width="9" fill="none" opacity=".55" stroke-linecap="round"/>`,
-  mars:`<ellipse cx="0" cy="-80" rx="40" ry="12" fill="#FFF6EE" opacity=".9"/>${band([[-6,.25,"#8A2D0E",30],[34,.18,"#E7884F",18]])}${crat([[30,10,10],[-28,-14,8]],.22)}`,
-  jupiter:`${band([[-56,.5,"#B98457",16],[-28,.45,"#FFF3DD",18],[-4,.55,"#A86C42",20],[24,.4,"#F6DDBA",16],[50,.5,"#9C6440",14],[72,.35,"#E8CDA6",12]])}<ellipse cx="34" cy="20" rx="20" ry="11" fill="#C2502E" opacity=".9"/>`,
-  saturn:band([[-40,.35,"#C9A55E",14],[-10,.3,"#FFF6DA",18],[20,.35,"#B8924E",14],[48,.25,"#F3DFAE",12]]),
-  uranus:band([[-30,.12,"#ffffff",30],[30,.1,"#2C7F8C",24]]),
-  neptune:`${band([[-34,.18,"#C9DAFF",10],[26,.2,"#0E1F57",16]])}<ellipse cx="-24" cy="6" rx="18" ry="10" fill="#0B1A4D" opacity=".7"/>`}[base]||"";
- const ringBack=base==="saturn"?`<ellipse rx="140" ry="34" fill="none" stroke="#E9D3A0" stroke-width="16" opacity=".75" transform="rotate(-16)"/><ellipse rx="118" ry="26" fill="none" stroke="#B89A5E" stroke-width="7" opacity=".7" transform="rotate(-16)"/>`
-  :base==="uranus"?`<ellipse rx="22" ry="120" fill="none" stroke="#BFEFF3" stroke-width="3" opacity=".6" transform="rotate(-8)"/>`:"";
- const ringFront=base==="saturn"?`<path d="M-140 0 A140 34 0 0 0 140 0" fill="none" stroke="#E9D3A0" stroke-width="16" opacity=".9" transform="rotate(-16)"/>`:"";
- // one orbit: the Sun in the middle, the planet small on its path around it
- if(kind.endsWith("-orbit"))return `<svg viewBox="-115 -115 230 230"><defs>${g}<radialGradient id="${id}s"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".5" stop-color="#FFB547"/><stop offset="1" stop-color="#FF7A1E"/></radialGradient></defs>
-  <circle r="46" fill="rgba(255,181,71,.18)"/><circle r="30" fill="url(#${id}s)" style="filter:drop-shadow(0 0 18px #FFB547)"/>
-  <ellipse class="orb" rx="104" ry="36" fill="none" stroke="#4FF3FF" stroke-width="3" stroke-dasharray="10 8" transform="rotate(-18)"/>
-  <circle class="vmv" r="19" fill="url(#${id}g)" style="filter:drop-shadow(0 0 10px rgba(255,181,71,.6))"/></svg>`;
- const spin=kind.endsWith("-spin")?`<g class="spn"><path d="M-70 -78 A104 104 0 0 1 78 -70" fill="none" stroke="#4FF3FF" stroke-width="6" stroke-linecap="round"/><path d="M78 -70 L60 -82 M78 -70 L74 -50" stroke="#4FF3FF" stroke-width="6" stroke-linecap="round"/></g>`:"";
- const glow={venus:"rgba(255,181,71,.45)",earth:"rgba(79,160,255,.45)",mars:"rgba(255,110,60,.4)",jupiter:"rgba(255,200,140,.35)",saturn:"rgba(255,220,150,.35)",uranus:"rgba(143,220,228,.45)",neptune:"rgba(80,120,255,.5)"}[base]||"rgba(234,242,255,.25)";
- return `<svg viewBox="-115 -115 230 230"><defs>${g}<clipPath id="${id}c"><circle r="86"/></clipPath></defs>${ringBack}
-  <circle r="86" fill="url(#${id}g)" style="filter:drop-shadow(0 0 30px ${glow})"/><g clip-path="url(#${id}c)">${det}</g>
-  <circle r="86" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/>${ringFront}${spin}</svg>`}
+// every planet is a real spacecraft/telescope photo (space/ref/photos, cut out of the black sky). The disc sits where the
+// old drawing's did: radius 86 in a 230 box (the photos have 6% margin; Saturn's photo is as wide as its rings).
+const PHOTO=b=>`ref/photos/${b}.png`;
+function planet(kind,id){const b=kind.replace(/-.*/,""),W=b==="saturn"?310:182;
+ return `<svg viewBox="-115 -115 230 230"><image href="${PHOTO(b)}" x="${-W/2}" y="${-W/2}" width="${W}" height="${W}" preserveAspectRatio="xMidYMid meet"/></svg>`}
+// the photos are decoded before the first frame, so no frame shows a planet still loading
+const PRE=Promise.all(["mercury","venus","earth","moon","mars","jupiter","saturn","uranus","neptune"].map(b=>{const i=new Image();i.src=PHOTO(b);return i.decode().catch(()=>0)}));
 const UP=`<svg viewBox="0 0 24 24"><path d="M12 3 L22 17 H2Z" fill="currentColor"/></svg>`,DN=`<svg viewBox="0 0 24 24"><path d="M12 21 L22 7 H2Z" fill="currentColor"/></svg>`;
 const CDR=`<svg viewBox="0 0 230 230"><circle cx="115" cy="115" r="98" fill="rgba(4,8,20,.8)" stroke="rgba(255,181,71,.25)" stroke-width="12"/><circle class="rg" cx="115" cy="115" r="98" fill="none" stroke="#FFB547" stroke-width="12" stroke-linecap="round" stroke-dasharray="615.8" stroke-dashoffset="0" transform="rotate(-90 115 115)" style="filter:drop-shadow(0 0 10px #FFB547)"/></svg>`;
 const YES=`<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,NO=`<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
@@ -473,8 +454,8 @@ function neonWords(){const g=neonGame(),r=D.rounds[0]||{};
  if(g==="guess")return {L:["Guess the","planet!"],chip:`3 clues · ${D.rounds.length} rounds`,bang:"?"};
  const w=plain(r.q).split(/\s+/);let best=1,bd=1e9;for(let k=1;k<w.length;k++){const d=Math.abs(w.slice(0,k).join(" ").length-w.slice(k).join(" ").length);if(d<bd){bd=d;best=k}}
  return {L:[w.slice(0,best).join(" "),w.slice(best).join(" ")],chip:D.thumbSub||`${D.rounds.length} rounds · beat the clock`,bang:"?!"}}
-// the bodies we have a real photo of (1080 px+ in space/ref/photos); anything else is left off the cover
-const HAS=new Set(["mercury","earth","moon","mars","jupiter","saturn","uranus","neptune"]);
+// the bodies we have a real photo of (space/ref/photos: 1080 px+, Venus 832 px, its best real one); anything else is left off the cover
+const HAS=new Set(["mercury","venus","earth","moon","mars","jupiter","saturn","uranus","neptune"]);
 function neonScene(){const g=neonGame(),r=D.rounds[0]||{},cx=540,cy=870;
  let ids=(g==="hol"?[r.b&&r.b.icon,r.a&&r.a.icon]:g==="tf"?(r.ids||[]):(r.opts||[]).map(o=>o.icon)).filter(id=>HAS.has(id));
  if(!ids.length)ids=[HAS.has(D.hookPlanet)?D.hookPlanet:"saturn"];
@@ -501,6 +482,6 @@ window.thumbOld=()=>{const T=document.getElementById("thumb");
   <div class="ft"><span>Space quiz</span><span>${esc(D.date)}</span></div>`;
  T.style.display="block";T.querySelector(".art svg").style.width="600px";T.querySelector(".art svg").style.height="600px";T.querySelectorAll(".bigt").forEach(e=>fit(e,90));
  const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
-window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','400 100px "Bebas"'].map(f=>document.fonts.load(f)));
-window.build=build;window.render=render;
+window.ready=()=>Promise.all([typeof PRELOAD==="function"?PRELOAD():0,...['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','400 100px "Bebas"'].map(f=>document.fonts.load(f))]);
+window.ready=(r=>()=>Promise.all([r(),typeof PRE!=="undefined"?PRE:0]))(window.ready);window.build=build;window.render=render;
 </script></body></html>

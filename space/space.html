@@ -174,24 +174,16 @@ function rock(seed,r){const R=rnd(seed),n=18;let p="";for(let i=0;i<n;i++){const
  let cr="";for(let i=0;i<5;i++){const a=R()*6.28,d=R()*r*.55,cr2=r*(.08+.12*R());cr+=`<circle cx="${(d*Math.cos(a)).toFixed(1)}" cy="${(d*Math.sin(a)).toFixed(1)}" r="${cr2.toFixed(1)}" fill="rgba(0,0,0,.28)"/>`}
  return `<path d="${p}Z" fill="url(#rk)"/>${cr}`}
 // silhouettes, drawn in metres (width x height) so they sit at true scale next to the asteroid
-const SIL={car:[4.5,1.5,w=>`<path d="M0 -0.35 L0.3 -0.35 L1 -0.75 L2.9 -0.8 L3.6 -0.35 L4.5 -0.3 L4.5 -0.05 L0 -0.05Z M0.7 0 a0.35 0.35 0 1 0 0.01 0 M3.5 0 a0.35 0.35 0 1 0 0.01 0" transform="scale(1 1.8)"/>`],
- bus:[12,3.2,()=>`<rect x="0" y="-3.2" width="12" height="2.8" rx="0.3"/><circle cx="2.3" cy="-0.4" r="0.55"/><circle cx="9.6" cy="-0.4" r="0.55"/>`],
- whale:[30,5,()=>`<path d="M0 -2.2 C3 -5 14 -5.2 22 -3 L27 -4.8 L30 -5 L27.5 -2.5 L30 -0.2 L27 -0.6 L22 -1.6 C14 0.2 4 0.3 0 -2.2Z"/>`],
- plane:[70,19,()=>`<path d="M0 -6 C2 -9 6 -10 12 -10 L58 -10 L66 -19 L70 -19 L68 -9 L70 -6 L64 -5 L12 -5 C5 -5 1 -5 0 -6Z M28 -7 L44 -2 L48 -2 L40 -8Z"/>`],
- field:[110,6,()=>`<rect x="0" y="-3" width="110" height="3"/><rect x="0" y="-3" width="10" height="3" opacity=".6"/><rect x="100" y="-3" width="10" height="3" opacity=".6"/>`],
- tower:[125,330,()=>`<path d="M0 0 C30 -30 50 -110 58 -280 L60 -330 L65 -330 L67 -280 C75 -110 95 -30 125 0 L95 0 C80 -40 45 -40 30 0Z"/>`],
- tower2:[57,443,()=>`<path d="M0 0 L0 -60 L6 -60 L6 -200 L12 -200 L12 -330 L20 -330 L20 -380 L26 -380 L28 -443 L29 -443 L31 -380 L37 -380 L37 -330 L45 -330 L45 -200 L51 -200 L51 -60 L57 -60 L57 0Z"/>`]};
-// real photos for the size check: NASA's photo of asteroid Bennu stands in for the asteroid (shown at the flyby's size),
-// next to a real photo of the comparison object at its true size. [file, metres, px w, px h, "h" if the metres are its height, credit]
-const IMG={car:["car.png",4.3,900,321,"","Car photo: Matthew Paul Argall, CC BY 2.0"],bus:["bus.png",12,924,247,"","Bus photo: torbakhopper, CC BY 2.0"],
- whale:["whale.png",30,421,248,"","Whale: Romanian Post stamp, public domain"],plane:["plane.png",76,1200,261,"","747 photo: Boeing Dreamscape, CC BY 2.0"],
- tower:["tower.png",330,383,900,"h","Eiffel Tower photo: Benh Lieu Song, public domain"]},AST=[757,668];
-function sizeSvg(s){const ref=s.ref,im=IMG[ref.icon],S0=SIL[ref.icon]||SIL.bus,W=920,H=372,base=290,d=s.ft/3.281,dh=d*AST[1]/AST[0];
- const [rw,rh]=im?(im[4]==="h"?[im[1]*im[2]/im[3],im[1]]:[im[1],im[1]*im[3]/im[2]]):[S0[0],S0[1]];
+// size references: real photos only (space/ref/photos), each [file, real size in m, px w, px h, "h" = size is its height, credit]
+const IMG={car:["photos/car.png",4.4,2000,1062,"","Car photo: Matthew Paul Argall, CC BY 2.0"],bus:["photos/bus.png",12,2000,579,"","Bus photo: torbakhopper, CC BY 2.0"],
+ shuttle:["photos/shuttle.png",37.2,2000,787,"","Space Shuttle Atlantis: NASA, public domain"],plane:["photos/plane.png",70.7,2000,585,"","747 photo: Frank Kovalchek, CC BY 2.0"],
+ field:["photos/field.jpg",109.7,2560,1087,"","Football field photo: Wikideas1, CC0"],tower:["photos/tower.png",330,850,2000,"h","Eiffel Tower photo: Benh Lieu Song, public domain"]},AST=[1,1];
+function sizeSvg(s){const ref=s.ref,im=IMG[ref.icon],W=920,H=372,base=290,d=s.ft/3.281,dh=d*AST[1]/AST[0];
+ const [rw,rh]=im?(im[4]==="h"?[im[1]*im[2]/im[3],im[1]]:[im[1],im[1]*im[3]/im[2]]):[ref.m,ref.m*.3];
  const sc=Math.min(260/Math.max(rh,dh),(W-260)/(rw+d*1.1)),ax=60+d*sc/2,rx=ax+d*sc/2+60,refFt=Math.round((im?im[1]:ref.m)*3.281);
- const rock2=`<image href="ref/asteroid.png" x="${(-d*sc/2).toFixed(1)}" y="${(-dh*sc/2).toFixed(1)}" width="${(d*sc).toFixed(1)}" height="${(dh*sc).toFixed(1)}"/>`;
+ const rock2=`<image href="ref/photos/bennu.png" x="${(-d*1.06*sc/2).toFixed(1)}" y="${(-dh*1.06*sc/2).toFixed(1)}" width="${(d*1.06*sc).toFixed(1)}" height="${(dh*1.06*sc).toFixed(1)}"/>`;
  const refArt=im?`<image class="rf" href="ref/${im[0]}" x="${rx.toFixed(1)}" y="${(base-rh*sc).toFixed(1)}" width="${(rw*sc).toFixed(1)}" height="${(rh*sc).toFixed(1)}" preserveAspectRatio="none"/>`
-  :`<g class="rf" transform="translate(${rx} ${base}) scale(${sc})" fill="rgba(234,242,255,.85)">${S0[2]()}</g>`;
+  :"";   // no photo, no picture (never a drawing)
  return `<svg class="svg" viewBox="0 0 ${W} ${H}">
   <line x1="20" y1="${base}" x2="${W-20}" y2="${base}" stroke="rgba(234,242,255,.4)" stroke-width="2" stroke-dasharray="6 8"/>
   <g class="az" data-t="translate(${ax} ${base-dh*sc/2})" transform="translate(${ax} ${base-dh*sc/2})">${rock2}</g>${refArt}
@@ -201,12 +193,12 @@ function sizeSvg(s){const ref=s.ref,im=IMG[ref.icon],S0=SIL[ref.icon]||SIL.bus,W
 function distSvg(s){const W=920,H=250,y=120,x0=80,x1=W-60,max=s.ld<=1.15?1.3:s.ld*1.18,X=v=>x0+(x1-x0)*v/max,mx=X(1),ax=X(s.ld);
  return `<svg class="svg" viewBox="0 0 ${W} ${H}"><defs><radialGradient id="eg" cx="35%" cy="30%"><stop offset="0" stop-color="#8fd3ff"/><stop offset=".55" stop-color="#1f6fd1"/><stop offset="1" stop-color="#0a2550"/></radialGradient></defs>
   <line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="rgba(234,242,255,.35)" stroke-width="2" stroke-dasharray="4 10"/>
-  <circle cx="${x0}" cy="${y}" r="48" fill="url(#eg)"/><circle cx="${mx}" cy="${y}" r="17" fill="#c9c6bf"/>
+  <image href="ref/photos/earth.png" x="${x0-51}" y="${y-51}" width="102" height="102" style="filter:drop-shadow(0 0 16px rgba(79,160,255,.6))"/><image href="ref/photos/moon.png" x="${mx-18}" y="${y-18}" width="36" height="36"/>
   <text x="${x0}" y="${y+86}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="22" fill="#8A97B2">EARTH</text>
   <text x="${mx}" y="${y+86}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="22" fill="#8A97B2">MOON</text>
   <text x="${mx}" y="${y+112}" text-anchor="middle" font-family="JBM" font-size="19" fill="#8A97B2">238,900 MI</text>
   <path class="tr" d="M${x1} ${y-70} Q ${(ax+x1)/2} ${y-60} ${ax} ${y}" fill="none" stroke="#FFB547" stroke-width="3" stroke-dasharray="8 8"/>
-  <g class="am" data-x0="${x1}" data-x="${ax}" data-y="${y}"><circle r="12" fill="#FFB547" style="filter:drop-shadow(0 0 10px #FFB547)"/><circle r="26" fill="none" stroke="#FFB547" stroke-width="2"/></g>
+  <g class="am" data-x0="${x1}" data-x="${ax}" data-y="${y}"><image href="ref/photos/bennu.png" x="-15" y="-15" width="30" height="30" style="filter:drop-shadow(0 0 8px #FFB547)"/><circle r="26" fill="none" stroke="#FFB547" stroke-width="2"/></g>
   <text class="al" x="${ax}" y="${y-44}" text-anchor="middle" font-family="JBM" font-weight="800" font-size="26" fill="#FFB547">${com(s.miles)} MI</text></svg>`}
 function kpSvg(kp){const cx=160,cy=170,r=130,arc=(a,b,c)=>{const p=t=>[cx-r*Math.cos(Math.PI*t/9),cy-r*Math.sin(Math.PI*t/9)],[x0,y0]=p(a),[x1,y1]=p(b);return `<path d="M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}" stroke="${c}" stroke-width="22" fill="none"/>`};
  return `<svg class="svg" viewBox="0 0 320 210">${arc(0,4,"#2f6f5a")}${arc(4,5,"#5CFFA8")}${arc(5,7,"#FFB547")}${arc(7,9,"#FF5A5A")}
@@ -218,12 +210,12 @@ function flareSvg(s){const W=880,x=c=>{const m=String(c||"").match(/^([ABCMX])([
  return `<svg class="svg" viewBox="0 0 ${W} 150">${"ABCMX".split("").map((L,i)=>`<rect x="${20+(W-40)*i/5}" y="60" width="${(W-40)/5-4}" height="26" fill="${seg[i]}" opacity=".85"/><text x="${20+(W-40)*(i+.5)/5}" y="120" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="26" fill="#EAF2FF">${L}</text>`).join("")}
   ${x7!=null?`<g class="fm"><line x1="${x7}" x2="${x7}" y1="44" y2="96" stroke="#FFB547" stroke-width="4"/><text x="${x7}" y="34" text-anchor="middle" font-family="JBM" font-weight="800" font-size="20" fill="#FFB547">7D MAX ${esc(s.c7)}</text></g>`:""}
   ${x24!=null?`<g class="fm"><path d="M${x24-12} 104 L${x24+12} 104 L${x24} 90Z" fill="#4FF3FF"/><text x="${x24}" y="146" text-anchor="middle" font-family="JBM" font-weight="800" font-size="20" fill="#4FF3FF">24H ${esc(s.c24)}</text></g>`:""}</svg>`}
-function moonSvg(frac,size){const r=size/2-10,c=size/2,ph=frac*2*Math.PI,k=Math.cos(ph),wax=frac<.5;
- // lit part: half disc on the lit side + an ellipse of half-width r*|k| (gibbous adds it, crescent cuts it)
- const sw=wax?1:0,ex=Math.abs(k)*r,lit=`M${c} ${c-r} A${r} ${r} 0 0 ${sw} ${c} ${c+r} A${ex} ${r} 0 0 ${k<0?sw:1-sw} ${c} ${c-r}Z`;
- return `<svg class="svg" viewBox="0 0 ${size} ${size}"><defs><radialGradient id="mg" cx="40%" cy="35%"><stop offset="0" stop-color="#f2efe8"/><stop offset=".7" stop-color="#bdb8ae"/><stop offset="1" stop-color="#8d887f"/></radialGradient>
-  <clipPath id="lit"><path d="${lit}"/></clipPath></defs><circle cx="${c}" cy="${c}" r="${r}" fill="#141821"/>
-  <g clip-path="url(#lit)"><circle cx="${c}" cy="${c}" r="${r}" fill="url(#mg)"/>${[[.38,.36,.16],[.6,.3,.11],[.55,.55,.14],[.35,.62,.09],[.68,.66,.07],[.46,.78,.06]].map(([x,y,s])=>`<ellipse cx="${size*x}" cy="${size*y}" rx="${size*s}" ry="${size*s*.8}" fill="rgba(80,80,90,.32)"/>`).join("")}</g>
+// the Moon: NASA's real LRO photo, lit to the phase (the dark side keeps a faint earthshine so the whole disc reads)
+let MPN=0;
+function moonSvg(frac,size){const r=size/2-10,c=size/2,k=Math.cos(frac*2*Math.PI),sw=frac<.5?1:0,ex=Math.abs(k)*r,id="mp"+(++MPN),W=2*r*1.06,x=c-W/2,
+ lit=`M${c} ${c-r} A${r} ${r} 0 0 ${sw} ${c} ${c+r} A${ex} ${r} 0 0 ${k<0?sw:1-sw} ${c} ${c-r}Z`,img=o=>`<image href="ref/photos/moon.png" x="${x}" y="${x}" width="${W}" height="${W}" ${o}/>`;
+ return `<svg class="svg" viewBox="0 0 ${size} ${size}"><defs><filter id="${id}b" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="${(r*.02).toFixed(2)}"/></filter><mask id="${id}m"><path d="${lit}" fill="#fff" filter="url(#${id}b)"/></mask></defs>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="#0b0d14"/>${img('opacity=".14"')}${img(`mask="url(#${id}m)"`)}
   <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="rgba(234,242,255,.15)" stroke-width="2"/></svg>`}
 // the readout line under the title; the fact box goes at the bottom of the scene (added in add())
 const TY=s=>s.read?`<div class="rd" data-txt="${esc(s.read)}"></div>`:"";
@@ -381,6 +373,7 @@ window.thumbOld=()=>{const H=D.scenes.find(s=>s.kind==="hook"),T=document.getEle
  const ks=T.querySelector(".k");let f=40;while(ks.offsetWidth>960&&f>24){f-=2;ks.style.fontSize=f+"px"}
  const lr=T.querySelector(".lk.r span");if(lr){let g=28;while(lr.offsetWidth>820&&g>18){g-=1;lr.parentNode.style.fontSize=g+"px"}}
  const [x,y]=orbPos(-.6),m=T.querySelector("#tmoon");m.setAttribute("cx",x);m.setAttribute("cy",y);return true};
-window.ready=()=>Promise.all(['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','400 100px "Bebas"'].map(f=>document.fonts.load(f)));
+const PRELOAD=()=>Promise.all(["moon.png","earth.png","bennu.png","launch.jpg","aurora.jpg",...Object.values(IMG).map(x=>x[0].replace("photos/",""))].map(n=>{const i=new Image();i.src="ref/photos/"+n;return i.decode().catch(()=>0)}));
+window.ready=()=>Promise.all([typeof PRELOAD==="function"?PRELOAD():0,...['800 100px "Unbounded"','900 100px "Unbounded"','700 30px "JBM"','800 30px "JBM"','400 30px "JBM"','600 30px "Archivo"','400 100px "Bebas"'].map(f=>document.fonts.load(f))]);
 window.build=build;window.render=render;
 </script></body></html>

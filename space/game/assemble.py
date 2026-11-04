@@ -15,6 +15,6 @@ open("hol.html","w").write(f'''<!doctype html>
 {body}<script>
 {helpers}{ret}{cov}{pjs}{endlogo}
 {pthumb.strip()}
-{ready}window.build=build;window.render=render;
+{ready}window.ready=(r=>()=>Promise.all([r(),typeof PRE!=="undefined"?PRE:0]))(window.ready);window.build=build;window.render=render;
 </script></body></html>
 ''')
