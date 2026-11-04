@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: "Release tags, separated by spaces (e.g. clip-2026-10-27 space-2026-10-28)"
-        required: true
+        description: "Release tags, separated by spaces (e.g. clip-2026-10-27 space-2026-10-28). Blank = today's Liftoff videos"
+        required: false
 permissions:
   contents: write
 concurrency:
@@ -33,7 +33,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p out
-          for T in ${{ inputs.tags }}; do
+          TAGS="${{ inputs.tags }}"; DAY=$(TZ=America/New_York date +%F)
+          [ -n "$TAGS" ] || TAGS="space-$DAY space-$DAY-quick-1 space-$DAY-quick-2 space-hol-$DAY"
+          # a Sun story's picture lived on the runner that made the video: fetch NASA's current one to the same place
+          mkdir -p ../space/out/img && curl -sSfL -o ../space/out/img/sun.jpg https://sdo.gsfc.nasa.gov/assets/img/latest/latest_2048_0193.jpg || true
+          for T in $TAGS; do
             NAME=$(gh api "repos/${{ github.repository }}/releases/tags/$T" --jq '.assets[]|select(.name|endswith("thumbnail.jpg"))|.name' | head -1)
             if [ -z "$NAME" ]; then echo "::warning::$T has no cover to replace"; continue; fi
             # the data: a copy kept in covers/ (for older quick hits), else the release's own data file
@@ -42,5 +46,6 @@ jobs:
             else J=$(gh api "repos/${{ github.repository }}/releases/tags/$T" --jq '.assets[]|select(.name|test("^(data|quick-[0-9]+)\\.json$"))|.name' | head -1)
               [ -n "$J" ] && gh release download "$T" -p "$J" -O out/cover.json; fi
             if [ ! -f out/cover.json ]; then echo "::warning::$T has no data file, cover left as it was"; continue; fi
+            sed -i "s#file://[^\"]*/out/img/sun\.jpg#file://$(realpath ../space/out/img)/sun.jpg#g" out/cover.json
             node cover.js out/cover.json "out/$NAME" && gh release upload "$T" "out/$NAME" --clobber && echo "replaced $T/$NAME"
           done

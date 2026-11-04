@@ -13,6 +13,9 @@ const { chromium } = require("playwright"), path = require("path"), fs = require
   await p.evaluate(x => window.build(x), d);
   if (!(await p.evaluate(() => typeof window.thumb === "function" && window.thumb()))) { console.error("no cover in this template"); process.exit(1); }
   await p.evaluate(() => Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))));
+  // a photo that didn't load would be a broken cover: stop instead
+  const broken = await p.evaluate(() => [...document.querySelectorAll("#thumb img")].filter(i => !i.naturalWidth).map(i => i.getAttribute("src")));
+  if (broken.length) { console.error("cover photo missing:", broken.join(", ")); process.exit(1); }
   await p.screenshot({ path: out, type: "jpeg", quality: 90 });
   await b.close();
   console.log("cover:", out);

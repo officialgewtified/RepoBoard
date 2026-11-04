@@ -99,21 +99,24 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 /* cover image: mission control has a target. The subject sits inside a tracking reticle, a mono readout tag above the
    number, a HUD rule at the bottom. Everything centred, glowing and thin-lined: nothing like Crossover's flat poster. */
 #thumb{position:absolute;inset:0;display:none;z-index:30;overflow:hidden;background:radial-gradient(62% 40% at 50% 36%,#12305a 0%,#07102a 50%,#020309 100%)}
-/* the ALERT cover: a real photo of the story's subject, hazard stripes, and a huge two-line headline */
+/* the ALERT cover: a real photo of the story's subject, hazard stripes, and a huge two-line headline.
+   TikTok's profile grid shows only the middle 3:4 (y 240-1680), so every word and the photo live in there; the stripes
+   at the very top and bottom are only seen on the full 9:16 (YouTube). */
 #thumb.alert{background:radial-gradient(70% 50% at 50% 40%,#2a0606 0%,#0a0202 60%,#050505 100%)}
 #thumb.alert .ab{position:absolute}
-#thumb.alert .bgp{position:absolute;left:0;top:0;width:1080px;height:1500px;object-fit:cover;filter:saturate(1.3) contrast(1.12)}
-#thumb.alert .bgf{position:absolute;left:0;right:0;top:700px;height:820px;background:linear-gradient(180deg,rgba(5,5,5,0) 0%,rgba(5,5,5,.85) 60%,#050505 100%)}
+#thumb.alert .bgp{position:absolute;left:0;top:0;width:1080px;height:1640px;object-fit:cover;filter:saturate(1.3) contrast(1.12)}
+#thumb.alert .bgf{position:absolute;left:0;right:0;top:860px;height:820px;background:linear-gradient(180deg,rgba(5,5,5,0) 0%,rgba(5,5,5,.85) 55%,#050505 100%)}
+#thumb.alert .bgt{position:absolute;left:0;right:0;top:0;height:420px;background:linear-gradient(180deg,rgba(5,5,5,.75),rgba(5,5,5,0))}
 #thumb.alert .haz{position:absolute;left:-40px;right:-40px;height:64px;background:repeating-linear-gradient(-45deg,#FFD400 0 46px,#111 46px 92px)}
 #thumb.alert .haz.t1{top:0}#thumb.alert .haz.b1{bottom:0}
 #thumb.alert .scan{position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px)}
-#thumb.alert .bar{position:absolute;left:50%;top:120px;transform:translateX(-50%);background:#FF1F1F;color:#fff;font:400 96px/1 "Bebas";letter-spacing:.08em;padding:16px 40px 6px;box-shadow:0 0 70px rgba(255,31,31,.7),0 10px 0 #000;white-space:nowrap}
+#thumb.alert .bar{position:absolute;left:44px;top:268px;background:#FF1F1F;color:#fff;font:400 84px/1 "Bebas";letter-spacing:.08em;padding:16px 40px 6px;box-shadow:0 0 70px rgba(255,31,31,.7),0 10px 0 #000;white-space:nowrap}
 #thumb.alert .bar.calm{background:#00E5FF;color:#04121a;box-shadow:0 0 60px rgba(0,229,255,.55),0 10px 0 #000}
-#thumb.alert .lg{position:absolute;right:44px;top:272px;display:flex;align-items:center;gap:12px;font:900 34px/1 "Unbounded";letter-spacing:.08em;color:#fff;text-shadow:0 4px 0 #000;background:rgba(5,5,5,.72);padding:10px 18px 10px 12px;border-radius:14px}
+#thumb.alert .lg{position:absolute;right:44px;top:282px;display:flex;align-items:center;gap:12px;font:900 34px/1 "Unbounded";letter-spacing:.08em;color:#fff;text-shadow:0 4px 0 #000;background:rgba(5,5,5,.72);padding:10px 18px 10px 12px;border-radius:14px}
 #thumb.alert .lg svg{width:54px;height:54px}
-#thumb.alert .t{position:absolute;left:40px;right:40px;bottom:120px}
+#thumb.alert .t{position:absolute;left:40px;right:40px;bottom:300px}
 #thumb.alert .t small{display:block;margin-bottom:20px;font:800 42px/1.1 "JBM";letter-spacing:.1em;color:#FFD400;text-transform:uppercase;white-space:nowrap;text-shadow:0 4px 0 #000}
-#thumb.alert .ln{font:400 300px/.84 "Bebas";color:#fff;text-transform:uppercase;white-space:nowrap;text-shadow:0 10px 0 #000,0 0 40px rgba(0,0,0,.8)}
+#thumb.alert .ln{font:400 250px/.86 "Bebas";color:#fff;text-transform:uppercase;white-space:nowrap;text-shadow:0 10px 0 #000,0 0 40px rgba(0,0,0,.8)}
 #thumb.alert .ln span{display:inline-block}
 #thumb.alert .ln.r span{background:#FF1F1F;padding:0 22px;box-shadow:14px 14px 0 #FFD400}
 #thumb.alert .rim{filter:drop-shadow(-8px 0 0 rgba(255,20,60,.8)) drop-shadow(8px 0 0 rgba(0,240,255,.8))}
@@ -139,18 +142,18 @@ body{font-family:"Archivo",sans-serif;color:var(--ink);-webkit-font-smoothing:an
 /* the NEON cover (mini games): a colour burst, real planet photos, and a huge glossy two-line headline */
 #thumb.neon{background:#12002a}
 #thumb.neon .ab{position:absolute}
-#thumb.neon .burst{position:absolute;left:540px;top:820px;width:3200px;height:3200px;margin:-1600px 0 0 -1600px;background:repeating-conic-gradient(from 7deg,#ff2bd6 0 9deg,#7a1cff 9deg 18deg,#00e5ff 18deg 27deg,#3b0a8f 27deg 36deg);opacity:.6}
-#thumb.neon .glow{position:absolute;left:540px;top:820px;width:1400px;height:1400px;margin:-700px 0 0 -700px;background:radial-gradient(circle,rgba(255,255,255,.6),rgba(255,43,214,.25) 35%,transparent 62%)}
+#thumb.neon .burst{position:absolute;left:540px;top:870px;width:3200px;height:3200px;margin:-1600px 0 0 -1600px;background:repeating-conic-gradient(from 7deg,#ff2bd6 0 9deg,#7a1cff 9deg 18deg,#00e5ff 18deg 27deg,#3b0a8f 27deg 36deg);opacity:.6}
+#thumb.neon .glow{position:absolute;left:540px;top:870px;width:1400px;height:1400px;margin:-700px 0 0 -700px;background:radial-gradient(circle,rgba(255,255,255,.6),rgba(255,43,214,.25) 35%,transparent 62%)}
 #thumb.neon .vig{position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 42%,transparent 40%,rgba(10,0,30,.8) 100%)}
-#thumb.neon .lg{position:absolute;left:0;right:0;top:66px;display:flex;justify-content:center;align-items:center;gap:14px;font:900 44px/1 "Unbounded";letter-spacing:.08em;color:#fff;text-shadow:0 5px 0 #1a0033}
+#thumb.neon .lg{position:absolute;left:0;right:0;top:262px;display:flex;justify-content:center;align-items:center;gap:14px;font:900 44px/1 "Unbounded";letter-spacing:.08em;color:#fff;text-shadow:0 5px 0 #1a0033}
 #thumb.neon .lg svg{width:62px;height:62px}
-#thumb.neon .chip{position:absolute;left:50%;top:180px;transform:translateX(-50%) rotate(-3deg);max-width:960px;width:max-content;background:#00e5ff;color:#12002a;font:900 50px/1.08 "Unbounded";padding:22px 38px;border-radius:60px;box-shadow:0 0 0 9px #12002a,0 0 60px #00e5ff;text-transform:uppercase;text-align:center}
-#thumb.neon .bang{position:absolute;right:26px;top:360px;width:300px;height:300px;transform:rotate(14deg)}
+#thumb.neon .chip{position:absolute;left:50%;top:346px;transform:translateX(-50%) rotate(-3deg);max-width:960px;width:max-content;background:#00e5ff;color:#12002a;font:900 50px/1.08 "Unbounded";padding:22px 38px;border-radius:60px;box-shadow:0 0 0 9px #12002a,0 0 60px #00e5ff;text-transform:uppercase;text-align:center}
+#thumb.neon .bang{position:absolute;right:20px;top:470px;width:300px;height:300px;transform:rotate(14deg) scale(.8)}
 #thumb.neon .bang b{position:absolute;inset:0;display:grid;place-items:center;font:900 116px/1 "Unbounded";color:#1a0033;transform:rotate(-6deg)}
-#thumb.neon .vs{position:absolute;left:540px;top:820px;width:230px;height:230px;margin:-115px 0 0 -115px;border-radius:50%;background:#FFE14D;border:10px solid #1a0033;display:grid;place-items:center;font:900 96px/1 "Unbounded";color:#1a0033;box-shadow:0 0 60px rgba(255,225,77,.8);transform:rotate(-8deg)}
+#thumb.neon .vs{position:absolute;left:540px;top:870px;width:230px;height:230px;margin:-115px 0 0 -115px;border-radius:50%;background:#FFE14D;border:10px solid #1a0033;display:grid;place-items:center;font:900 96px/1 "Unbounded";color:#1a0033;box-shadow:0 0 60px rgba(255,225,77,.8);transform:rotate(-8deg)}
 #thumb.neon .qm{position:absolute;display:grid;place-items:center;font:900 220px/1 "Unbounded";color:#fff;text-shadow:0 0 40px #ff2bd6,0 10px 0 #1a0033}
-#thumb.neon .t{position:absolute;left:0;right:0;bottom:170px;text-align:center}
-#thumb.neon .ln{font:900 180px/1.04 "Unbounded";text-transform:uppercase;white-space:nowrap}
+#thumb.neon .t{position:absolute;left:0;right:0;bottom:300px;text-align:center}
+#thumb.neon .ln{font:900 170px/1.04 "Unbounded";text-transform:uppercase;white-space:nowrap}
 #thumb.neon .ln span{display:inline-block;position:relative}
 #thumb.neon .ln .nu{color:#1a0033;-webkit-text-stroke:22px #1a0033;text-shadow:0 14px 0 #1a0033}
 #thumb.neon .ln .nf{position:absolute;left:0;top:0;background:linear-gradient(180deg,#ffffff 0%,#fff6a8 35%,#ffb21e 62%,#ff4f2e 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 30px rgba(255,43,214,.8))}
@@ -285,13 +288,13 @@ function moonPhoto(frac,S){const r=S/2/1.06,c=S/2,k=Math.cos(frac*2*Math.PI),sw=
  return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}"><defs><filter id="mpb" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="${(S*.012).toFixed(1)}"/></filter><mask id="mpm"><path d="${lit}" fill="#fff" filter="url(#mpb)"/></mask></defs>
   <image href="${PH("moon.png")}" width="${S}" height="${S}" opacity=".13"/><image href="${PH("moon.png")}" width="${S}" height="${S}" mask="url(#mpm)"/></svg>`}
 function alertScene(H,sc){
- if(H.topic==="sun"&&sc.img)return `<div class="ab" style="left:90px;top:300px;width:900px;height:900px;border-radius:50%;overflow:hidden;box-shadow:0 0 140px 50px rgba(255,140,30,.75),0 0 320px 140px rgba(255,80,0,.4)"><img src="${esc(sc.img)}" style="width:113%;height:113%;margin:-6.5%;filter:saturate(1.5) contrast(1.2) brightness(1.1)"></div>`;
- if(H.topic==="ast"){const S=820,x=560,y=760;
+ if(H.topic==="sun"&&sc.img)return `<div class="ab" style="left:200px;top:420px;width:680px;height:680px;border-radius:50%;overflow:hidden;box-shadow:0 0 140px 50px rgba(255,140,30,.75),0 0 320px 140px rgba(255,80,0,.4)"><img src="${esc(sc.img)}" style="width:113%;height:113%;margin:-6.5%;filter:saturate(1.5) contrast(1.2) brightness(1.1)"></div>`;
+ if(H.topic==="ast"){const S=640,x=540,y=760;
   return `<div class="ab" style="left:${x}px;top:${y}px;width:1500px;height:${S*.6}px;margin-top:-${S*.3}px;transform-origin:0 50%;transform:rotate(-40deg);background:linear-gradient(90deg,rgba(255,240,180,.95),rgba(255,150,40,.85) 25%,rgba(255,60,0,.45) 60%,transparent);filter:blur(22px);border-radius:0 50% 50% 0/0 50% 50% 0"></div>
    <img class="ab rim" src="${PH("bennu.png")}" style="left:${x-S/2}px;top:${y-S/2}px;width:${S}px;height:${S}px;filter:contrast(1.25) brightness(1.12) drop-shadow(0 0 60px rgba(255,140,40,.9)) drop-shadow(0 0 140px rgba(255,80,0,.55))">`}
- if(H.topic==="moon")return `<div class="ab rim" style="left:90px;top:360px;filter:drop-shadow(0 0 70px rgba(234,242,255,.45))">${moonPhoto(sc.frac||.5,900)}</div>`;
+ if(H.topic==="moon")return `<div class="ab rim" style="left:190px;top:410px;filter:drop-shadow(0 0 70px rgba(234,242,255,.45))">${moonPhoto(sc.frac||.5,700)}</div>`;
  const bg=H.topic==="aur"?"aurora.jpg":"launch.jpg";
- return `<img class="bgp" src="${PH(bg)}" style="object-position:50% ${bg==="launch.jpg"?"0%":"50%"}"><div class="bgf"></div>`}
+ return `<img class="bgp" src="${PH(bg)}" style="object-position:50% ${bg==="launch.jpg"?"0%":"50%"}"><div class="bgt"></div><div class="bgf"></div>`}
 
 // the planets, drawn (no photos to license), each in its own colours: the Moon and Mercury grey and cratered, Venus
 // gold under cloud bands, Earth blue and green, Mars rust with a polar cap, Jupiter banded with its red spot, Saturn with
@@ -472,13 +475,13 @@ function neonWords(){const g=neonGame(),r=D.rounds[0]||{};
  return {L:[w.slice(0,best).join(" "),w.slice(best).join(" ")],chip:D.thumbSub||`${D.rounds.length} rounds · beat the clock`,bang:"?!"}}
 // the bodies we have a real photo of (1080 px+ in space/ref/photos); anything else is left off the cover
 const HAS=new Set(["mercury","earth","moon","mars","jupiter","saturn","uranus","neptune"]);
-function neonScene(){const g=neonGame(),r=D.rounds[0]||{},cx=540,cy=820;
+function neonScene(){const g=neonGame(),r=D.rounds[0]||{},cx=540,cy=870;
  let ids=(g==="hol"?[r.b&&r.b.icon,r.a&&r.a.icon]:g==="tf"?(r.ids||[]):(r.opts||[]).map(o=>o.icon)).filter(id=>HAS.has(id));
  if(!ids.length)ids=[HAS.has(D.hookPlanet)?D.hookPlanet:"saturn"];
- if(ids.length===1)return SHOT(ids[0],cx,cy,860);
- if(ids.length===2)return SHOT(ids[0],330,640,560)+SHOT(ids[1],750,1010,560)+(g==="hol"?`<div class="vs">VS</div>`:"");
- const P=ids.length===3?[[-245,-225],[245,-225],[0,250]]:[[-245,-225],[245,-225],[-245,245],[245,245]];
- return ids.slice(0,4).map((id,i)=>SHOT(id,cx+P[i][0],cy+P[i][1],440,g==="guess")).join("")}
+ if(ids.length===1)return SHOT(ids[0],cx,cy,660);
+ if(ids.length===2)return SHOT(ids[0],345,705,450)+SHOT(ids[1],735,1035,450)+(g==="hol"?`<div class="vs">VS</div>`:"");
+ const P=ids.length===3?[[-200,-190],[200,-190],[0,200]]:[[-200,-190],[200,-190],[-200,190],[200,190]];
+ return ids.slice(0,4).map((id,i)=>SHOT(id,cx+P[i][0],cy+P[i][1],350,g==="guess")).join("")}
 window.thumb=async()=>{const T=document.getElementById("thumb"),{L,chip,bang}=neonWords(),scene=neonScene();
  T.dataset.n=(scene.match(/<img /g)||[]).length;   // with 3-4 planets the sticker would cover an answer, so it's left off
  T.className="neon";T.innerHTML=`<div class="burst"></div><div class="glow"></div>${scene}<div class="vig"></div>
@@ -486,7 +489,7 @@ window.thumb=async()=>{const T=document.getElementById("thumb"),{L,chip,bang}=ne
   <div class="chip">${esc(chip)}</div>${T.dataset.n>2?"":`<div class="bang">${BANG}<b>${esc(bang)}</b></div>`}
   <div class="t">${L.map((l,i)=>`<div class="ln ${i?"c":""}"><span><b class="nu">${esc(l)}</b><b class="nf">${esc(l)}</b></span></div>`).join("")}</div>`;
  T.style.display="block";
- T.querySelectorAll(".ln").forEach(d=>{const sp=d.firstElementChild;let f=180;while(sp.offsetWidth>1000&&f>60){f-=6;d.style.fontSize=f+"px"}});
+ T.querySelectorAll(".ln").forEach(d=>{const sp=d.firstElementChild;let f=170;while(sp.offsetWidth>1000&&f>60){f-=6;d.style.fontSize=f+"px"}});
  const c=T.querySelector(".chip");let f=50;while(c.offsetHeight>f*1.08*1.5+44&&f>40){f-=2;c.style.fontSize=f+"px"}while(c.offsetHeight>f*1.08*2.5+44&&f>26){f-=2;c.style.fontSize=f+"px"}
  await Promise.all([...T.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));return true};
 window.thumbOld=()=>{const T=document.getElementById("thumb");
