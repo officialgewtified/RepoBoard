@@ -38,8 +38,9 @@ S = {
  "car": ("obj", ["sedan side view", "car side profile", "compact car side view white background"]),
  "plane": ("obj", ["Boeing 747 side view", "Boeing 747-400 in flight", "Boeing 747-8 takeoff"]),
  "tower": ("obj", ["Eiffel Tower", "Eiffel Tower from Trocadero", "Tour Eiffel blue sky"]),
- "tower2": ("obj", ["Empire State Building", "Empire State Building blue sky", "Empire State Building from Fifth Avenue"]),
+ "tower2": ("obj", ["Empire State Building", "Empire State Building blue sky", "Empire State Building from Fifth Avenue", "Empire State Building 1931", "Empire State Building from Top of the Rock", "Empire State Building isolated"]),
  "whale": ("obj", ["blue whale NOAA", "Balaenoptera musculus surfacing", "blue whale side view"]),
+ "shuttle": ("obj", ["Space Shuttle landing side view", "Space Shuttle Atlantis landing", "Space Shuttle Discovery landing drag chute", "Space Shuttle orbiter rollout side view"]),
  "field": ("bg", ["American football field aerial", "football field aerial view", "football stadium field from above"]),
 }
 _SESS = None
@@ -179,12 +180,14 @@ def pick(picks):
     os.makedirs("space/ref/photos", exist_ok=True)
     credits = json.load(open("space/ref/photos/credits.json")) if os.path.exists("space/ref/photos/credits.json") else {}
     for sub, i in picks.items():
-        kind = S[sub][0]
+        kind = S[sub][0]; box = None
+        if isinstance(i, dict): box, i = i.get("box"), i["title"]
         c = next((x for x in allc.get(sub, []) if x.get("i") == i), None) if isinstance(i, int) else None
         if c is None and isinstance(i, str): c = next((x for x in search(i.replace("File:", ""), 3200) if x["title"] == i), None)
         if c is None: print("no candidate", sub, i); continue
         src = c["orig"] if max(c["w"], c["h"]) <= 4200 else (search(c["title"].replace("File:", ""), 4000) or [c])[0].get("thumb") or c["orig"]
         im = Image.open(io.BytesIO(get(src))).convert("RGB")
+        if box: im = im.crop((int(box[0] * im.width), int(box[1] * im.height), int(box[2] * im.width), int(box[3] * im.height)))
         if kind == "body":
             cut = cut_body(im, SHAPE.get(sub, "round"))
             if cut is None: print("no subject found in", c["title"]); continue
