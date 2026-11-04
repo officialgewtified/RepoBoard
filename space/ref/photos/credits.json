@@ -86,5 +86,13 @@
   "artist": "Bill",
   "credit": "Space Station in the Aurora",
   "px": 1707
+ },
+ "venus": {
+  "title": "File:Venus 2 Approach Image.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Venus_2_Approach_Image.jpg",
+  "license": "Public domain",
+  "artist": "NASA/Johns Hopkins University Applied Physics Laboratory/Carnegie Institution of Washington",
+  "credit": "http://photojournal.jpl.nasa.gov/catalog/PIA10124",
+  "px": 832
  }
 }
