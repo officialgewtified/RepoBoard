@@ -94,5 +94,45 @@
   "artist": "NASA/Johns Hopkins University Applied Physics Laboratory/Carnegie Institution of Washington",
   "credit": "http://photojournal.jpl.nasa.gov/catalog/PIA10124",
   "px": 832
+ },
+ "bus": {
+  "title": "File:2000s International School bus LAUSD.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:2000s_International_School_bus_LAUSD.jpg",
+  "license": "CC BY 2.0",
+  "artist": "torbakhopper",
+  "credit": "Flickr: [1]",
+  "px": 2000
+ },
+ "car": {
+  "title": "File:1992 Toyota Corolla (side view) (48419578466).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:1992_Toyota_Corolla_(side_view)_(48419578466).jpg",
+  "license": "CC BY 2.0",
+  "artist": "Matthew Paul  Argall from Australia",
+  "credit": "1992 Toyota Corolla (side view)",
+  "px": 2000
+ },
+ "plane": {
+  "title": "File:UPS 747 N573UP.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:UPS_747_N573UP.jpg",
+  "license": "CC BY 2.0",
+  "artist": "Frank Kovalchek",
+  "credit": "Flickr: UPS 747 ready to head to points far away",
+  "px": 2000
+ },
+ "tower": {
+  "title": "File:Tour Eiffel Wikimedia Commons.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg",
+  "license": "Public domain",
+  "artist": "Benh LIEU SONG",
+  "credit": "Own work",
+  "px": 2000
+ },
+ "field": {
+  "title": "File:Winona State football field.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Winona_State_football_field.jpg",
+  "license": "CC0",
+  "artist": "Wikideas1",
+  "credit": "Own work",
+  "px": 1310
  }
 }
