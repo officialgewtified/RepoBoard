@@ -134,5 +134,13 @@
   "artist": "Wikideas1",
   "credit": "Own work",
   "px": 1310
+ },
+ "shuttle": {
+  "title": "File:STS-71 landing side view.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:STS-71_landing_side_view.jpg",
+  "license": "Public domain",
+  "artist": "NASA",
+  "credit": "NASA sts071-s-069 High Resolution Image",
+  "px": 2000
  }
 }
