@@ -32,7 +32,7 @@
    {
     "id": "s3",
     "photo": "teaspoon",
-    "head": "1\u00a0teaspoon ≈ 1\u00a0billion tons",
+    "head": "1 teaspoon ≈ 1 billion tons",
     "sub": "How dense a neutron star is",
     "say": "It's so dense that one teaspoon of it would weigh about a billion tons."
    },
@@ -141,7 +141,7 @@
    {
     "id": "l6",
     "photo": "teaspoon",
-    "head": "1\u00a0teaspoon ≈ 1\u00a0billion tons",
+    "head": "1 teaspoon ≈ 1 billion tons",
     "sub": "Neutron star matter, weighed on Earth",
     "say": "That makes it unbelievably dense. On Earth, a single teaspoon of neutron star would weigh about a billion tons."
    },
@@ -263,7 +263,7 @@
    },
    {
     "id": "l21",
-    "photo": "vela",
+    "photo": "meerkat",
     "head": "About 76 seconds",
     "sub": "One of the slowest known: a single turn",
     "say": "At the other end, one of the slowest known pulsars takes about 76 seconds to make a single turn."
@@ -346,6 +346,7 @@
   "Crab Nebula: remnant of a supernova seen on Earth in 1054 AD, 6,000 light-years away; its pulsar emits pulses 30 times a second. Source: Chandra X-ray Center https://chandra.harvard.edu/resources/misc/supernovae1.html",
   "The 1054 supernova was first observed on 5 July 1054 by Chinese astronomers and stayed visible in daylight for 23 days. Source: ESA https://www.esa.int/Science_Exploration/Space_Science/22_April",
   "Fastest-spinning pulsar PSR J1748-2446ad: 716 times per second, in globular cluster Terzan 5, about 28,000 light-years away in Sagittarius; found with the Robert C. Byrd Green Bank Telescope; announced January 2006; spins faster than a kitchen blender's blades (250-500 Hz). Source: NRAO https://public.nrao.edu/news/astronomers-discover-fastest-spinning-pulsar/",
+  "The 76-second pulsar PSR J0901-4046 was discovered with the MeerKAT radio telescope in South Africa (Nature Astronomy, May 2022); it completes one rotation every 76 seconds. Sources: University of Manchester https://www.manchester.ac.uk/discover/news/strange-neutron-star-spinning-every-76-seconds-idiscovered-in-stellar-graveyard/ ; Max Planck Institute for Radio Astronomy https://www.mpifr-bonn.mpg.de/pressreleases/2022/9",
   "NANOGrav, 28 June 2023: 15 years of timing millisecond pulsars gave the first evidence of low-frequency gravitational waves permeating the cosmos (Green Bank Telescope, CHIME, Very Large Array, formerly Arecibo). Source: Green Bank Observatory https://greenbankobservatory.org/front-page-news/nanogravs-15-year-effort-yields-evidence-for-universal-background-of-gravitational-waves",
   "China's FAST telescope has identified more than 1,000 new pulsars (November 2024). Source: Chinese Academy of Sciences https://english.cas.cn/newsroom/cas_media/202411/t20241127_892451.shtml",
   "Pulse sounds in the video are recreated at each pulsar's real rate (not recordings)."
@@ -369,7 +370,8 @@
   "blender": "A kitchen blender",
   "milkyway": "The center of our Milky Way",
   "vla": "The Very Large Array, New Mexico",
-  "sn1987a": "Supernova 1987A, by Hubble"
+  "sn1987a": "Supernova 1987A, by Hubble",
+  "meerkat": "MeerKAT radio telescope, South Africa, which found it"
  },
  "credits": {
   "crab": "NASA, ESA, J. Hester and A. Loll (ASU)",
