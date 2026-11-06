@@ -103,6 +103,43 @@ def kokoro_take(s, sr):
         a = np.interp(np.linspace(0, len(a) - 1, int(len(a) * sr / ksr)), np.arange(len(a)), a).astype(np.float32)
     return trim(a, sr)
 
+# Chatterbox sometimes holds a long silent beat between sentences (0.8-1.2 s) that the voice check rightly flags as
+# sounding like she cut out. MAXPAUSE (seconds; 0 = off) shortens any pause between words longer than that, the way an
+# editor would: only the middle of the pause goes, never the ends of the words on either side, and nothing is cut if
+# anything in that stretch is as loud as speech. The shortened take is listened to again before it's used.
+MAXPAUSE = float(os.environ.get("MAXPAUSE", "0"))
+def tighten(a, sr, ws):
+    if MAXPAUSE <= 0 or not ws: return a
+    pk, hop, cuts = float(np.max(np.abs(a))) or 1.0, int(.01 * sr), []
+    for (_, e0, _), (s1, _, _) in zip(ws, ws[1:]):
+        g = s1 - e0
+        if g <= MAXPAUSE: continue
+        i0 = int((e0 + MAXPAUSE / 2) * sr); i1 = i0 + int((g - MAXPAUSE) * sr)
+        seg = a[i0:i1]; n = len(seg) // hop
+        if n < 1 or np.sqrt((seg[:n * hop].reshape(n, hop) ** 2).mean(axis=1)).max() > pk * .1: continue
+        cuts.append((i0, i1))
+    if not cuts: return a
+    parts, last, f = [], 0, int(.008 * sr)
+    for i0, i1 in cuts: parts.append(a[last:i0].copy()); last = i1
+    parts.append(a[last:].copy())
+    for k, x in enumerate(parts):
+        if len(x) <= 2 * f: continue
+        if k > 0: x[:f] *= np.linspace(0, 1, f, dtype=np.float32)
+        if k < len(parts) - 1: x[-f:] *= np.linspace(1, 0, f, dtype=np.float32)
+    return np.concatenate(parts)
+
+def listen_tight(a, sr, s):
+    """listen; if a pause runs long, try the take with it shortened and keep whichever is better"""
+    ok, score, probs, ws = listen(a, sr, s)
+    if MAXPAUSE > 0 and ws and max([b[0] - x[1] for x, b in zip(ws, ws[1:])] or [0]) > MAXPAUSE:
+        b = tighten(a, sr, ws)
+        if len(b) < len(a):
+            r = listen(b, sr, s)
+            if r[0] or (not ok and r[1] >= score):
+                print(f"   pause shortened by {(len(a) - len(b)) / sr:.1f}s" + ("" if ok or not r[0] else " (that fixed the take)"), flush=True)
+                return (b,) + r
+    return (a, ok, score, probs, ws)
+
 # re-recording costs time and every run has a time limit: once this much time has gone into retakes, later sentences
 # get one take (still listened to, and check.py still gates the finished video)
 BUDGET, _spent = float(os.environ.get("RETAKE_BUDGET", "900")), [0.0]
@@ -118,7 +155,7 @@ def take(s, sr):
         if n > 1: torch.manual_seed(1000 * n + len(s))
         wav = model.generate(fix(s), audio_prompt_path=ref, exaggeration=EXAG, cfg_weight=CFG)
         a = trim(wav.squeeze(0).cpu().numpy().astype(np.float32), sr)
-        ok, score, probs, ws = listen(a, sr, s)
+        a, ok, score, probs, ws = listen_tight(a, sr, s)
         if n > 1: _spent[0] += time.time() - t0
         if ok: return a, n, "chatterbox", [], ws
         if best is None or score > best[1]: best = (a, score, probs, ws)

@@ -34,8 +34,9 @@ jobs:
           F="${{ inputs.format }}"
           if [ "$F" != both ] && [ "$F" != "${{ matrix.fmt }}" ]; then echo "Only making $F"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
           mkdir -p out && node space/explain.js "${{ inputs.topic }}" ${{ matrix.fmt }} out/data.json
-          N="liftoff-explained-${{ inputs.topic }}$([ ${{ matrix.fmt }} = long ] && echo -long)"; echo "N=$N" >> "$GITHUB_ENV"
-          echo "TAG=space-explain-${{ inputs.topic }}$([ ${{ matrix.fmt }} = long ] && echo -long)" >> "$GITHUB_ENV"
+          SUF=""; if [ "${{ matrix.fmt }}" = long ]; then SUF="-long"; fi
+          echo "N=liftoff-explained-${{ inputs.topic }}$SUF" >> "$GITHUB_ENV"
+          echo "TAG=space-explain-${{ inputs.topic }}$SUF" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         if: steps.ep.outputs.skip != '1'
         with:
@@ -82,6 +83,7 @@ jobs:
           CFG: "0.5"
           TEMPO: "1.04"
           RETAKE_BUDGET: "2400"
+          MAXPAUSE: "0.5"
       - name: Render
         if: steps.ep.outputs.skip != '1'
         timeout-minutes: 60

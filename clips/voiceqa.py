@@ -28,13 +28,22 @@ def norm(t):
     """lowercase words only, every number spelled out, so the script and the recognizer can be compared word for word"""
     t = str(t).lower().replace("’", "'").replace("%", " percent").replace("&", " and ")
     t = re.sub(r"(?<=\d),(?=\d{3})", "", t)
-    t = re.sub(r"(?<![\d.])(1[1-9]\d\d)(?![\d.]|,\d)", lambda m: " " + year(int(m.group(1))) + " ", t)
+    # a year can end a sentence ("Back to 1967."), so only a digit after the point rules it out
+    t = re.sub(r"(?<![\d.])(1[1-9]\d\d)(?!\d|[.,]\d)", lambda m: " " + year(int(m.group(1))) + " ", t)
     t = re.sub(r"(\d+)\.(\d+)", lambda m: " " + words(int(m.group(1))) + " point " + " ".join(ONES[int(c)] for c in m.group(2)) + " ", t)
     t = re.sub(r"\d+", lambda m: " " + words(int(m.group(0))) + " ", t)
     t = re.sub(r"\b(\w+)'s\b", r"\1s", t)
     t = re.sub(r"[^a-z ]+", " ", t)
-    # the recognizer writes "forty-two" and "forty two" both ways; nothing below cares
-    return t.split()
+    # the recognizer writes "forty-two" and "forty two" both ways; nothing below cares.
+    # letters read one by one ("L G M", "L.G.M.") and run together ("LGM") count as the same word
+    out, run = [], []
+    for w in t.split() + [""]:
+        if len(w) == 1 and w not in ("a", "i"): run.append(w); continue
+        if len(run) >= 2: out.append("".join(run))
+        else: out += run
+        run = []
+        if w: out.append(w)
+    return out
 
 def compare(expected, heard):
     """how much of the script was heard (recall, with near-misses on names allowed) and how much extra was heard"""
