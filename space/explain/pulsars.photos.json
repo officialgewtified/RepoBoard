@@ -18,5 +18,6 @@
  "blender": ["pic", ["kitchen blender", "blender appliance"]],
  "milkyway": ["pic", ["Milky Way panorama ESO", "Milky Way over Paranal"]],
  "vla": ["pic", ["Very Large Array", "Karl G. Jansky Very Large Array"]],
- "sn1987a": ["pic", ["SN 1987A Hubble", "Supernova 1987A"]]
+ "sn1987a": ["pic", ["SN 1987A Hubble", "Supernova 1987A"]],
+ "meerkat": ["pic", ["MeerKAT radio telescope", "MeerKAT dishes Karoo", "MeerKAT telescope South Africa"]]
 }
