@@ -1,0 +1,147 @@
+<!--CSS-->
+/* SPACE EXPLAINED: one real photo per narration line (slow push-in), a big headline, a "pictured" credit on every
+   photo, chapter cards (long version), and a pulse scope that plays a pulsar's real rate as sound. The same template
+   lays out vertical (1080x1920, Shorts/TikTok) or widescreen (1920x1080, YouTube) from the data's w/h. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:var(--W);height:var(--H);overflow:hidden;background:var(--void);color:var(--ink);font-family:"Archivo",sans-serif}
+#stage{position:absolute;inset:0;overflow:hidden;background:radial-gradient(120% 80% at 50% 30%,#0a1230 0%,var(--void) 70%)}
+.shot{position:absolute;inset:0;opacity:0;will-change:opacity}
+.shot .bgb{position:absolute;left:-8%;top:-8%;width:116%;height:116%;object-fit:cover;filter:blur(46px) brightness(.38) saturate(1.25)}
+.shot .full{position:absolute;inset:0;overflow:hidden}
+.shot .full img{position:absolute;left:50%;top:50%;transform-origin:50% 50%}
+.shot .card{position:absolute;overflow:hidden;border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.7),0 0 0 2px rgba(79,243,255,.35),0 0 60px rgba(79,243,255,.15)}
+.shot .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
+.shot .shade{position:absolute;inset:0}
+.v .shot .shade{background:linear-gradient(180deg,rgba(3,4,10,.55) 0%,rgba(3,4,10,0) 16%,rgba(3,4,10,0) 52%,rgba(3,4,10,.86) 66%,rgba(3,4,10,.95) 100%)}
+.h .shot .shade{background:linear-gradient(90deg,rgba(3,4,10,.94) 0%,rgba(3,4,10,.86) 34%,rgba(3,4,10,0) 58%),linear-gradient(0deg,rgba(3,4,10,.7),rgba(3,4,10,0) 22%)}
+/* words */
+.txt{position:absolute}
+.v .txt{left:70px;right:70px;top:1190px}
+.h .txt{left:110px;width:820px;top:50%;transform:translateY(-50%)}
+.chap{font:800 28px/1 "JBM";letter-spacing:.22em;text-transform:uppercase;color:var(--sol);margin-bottom:26px;display:flex;align-items:center;gap:16px}
+.chap i{display:inline-block;width:54px;height:4px;background:var(--sol);box-shadow:0 0 12px var(--sol)}
+.head{font:900 104px/1.02 "Unbounded";text-transform:uppercase;letter-spacing:-.01em;color:#fff;text-shadow:0 6px 0 rgba(0,0,0,.55),0 0 50px rgba(79,243,255,.25)}
+.h .head{font-size:92px}
+.head b{color:var(--ion);font-weight:900}
+.sub{margin-top:26px;font:700 36px/1.3 "JBM";color:var(--dim);letter-spacing:.02em}
+.h .sub{font-size:32px}
+.pic{position:absolute;font:600 22px/1.35 "JBM";color:rgba(234,242,255,.72);letter-spacing:.03em}
+.v .pic{left:70px;right:70px;top:1560px}
+.h .pic{left:110px;width:820px;bottom:70px}
+.pic b{color:var(--ion);font-weight:800}
+/* top bar + progress */
+.bar{position:absolute;display:flex;align-items:center;gap:16px;font:900 34px/1 "Unbounded";letter-spacing:.1em;z-index:200}
+.v .bar{left:70px;top:110px}.h .bar{left:110px;top:64px}
+.bar svg{width:58px;height:58px}
+.bar small{font:800 22px/1 "JBM";letter-spacing:.2em;color:var(--ion);margin-left:10px;padding:8px 12px;border:2px solid var(--line);background:var(--glass)}
+.prog{position:absolute;height:6px;background:var(--ion);box-shadow:0 0 14px var(--ion);z-index:200;left:0}
+.v .prog{top:0}.h .prog{bottom:0}
+/* pulse scope */
+.scope{position:absolute;opacity:0;background:rgba(4,8,20,.82);border:2px solid var(--line);border-radius:14px;z-index:4}
+.v .scope{left:70px;right:70px;top:760px;height:380px}
+.h .scope{right:90px;width:880px;top:250px;height:420px}
+.scope svg{position:absolute;left:24px;right:24px;top:70px;width:calc(100% - 48px);height:calc(100% - 150px)}
+.scope .lab{position:absolute;left:26px;top:22px;font:800 24px/1 "JBM";letter-spacing:.18em;color:var(--aur);text-transform:uppercase}
+.scope .rate{position:absolute;left:26px;bottom:22px;font:900 40px/1 "Unbounded";color:#fff}
+.scope .note{position:absolute;right:26px;top:24px;font:600 20px/1 "JBM";color:var(--dim)}
+.scope .dot{position:absolute;right:30px;bottom:20px;width:38px;height:38px;border-radius:50%;background:var(--aur);box-shadow:0 0 30px var(--aur)}
+/* ending */
+.end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;z-index:150;background:radial-gradient(70% 50% at 50% 45%,rgba(10,20,50,.92),rgba(3,4,10,.98))}
+.end svg{width:300px;height:300px}
+.end .nm{margin-top:30px;font:900 110px/1 "Unbounded";letter-spacing:.06em}
+.end .tg{margin-top:26px;font:800 34px/1 "JBM";letter-spacing:.24em;color:var(--ion);text-transform:uppercase}
+.end .fl{margin-top:44px;font:900 40px/1 "Unbounded";color:var(--sol);text-transform:uppercase}
+/* cover */
+#thumb{position:absolute;inset:0;display:none;z-index:1000;background:#03040A;overflow:hidden}
+#thumb .tp{position:absolute;object-fit:cover;filter:saturate(1.25) contrast(1.1)}
+#thumb .tg{position:absolute;inset:0}
+#thumb .tl{position:absolute;display:flex;align-items:center;gap:14px;font:900 40px/1 "Unbounded";letter-spacing:.08em;background:rgba(3,4,10,.7);padding:12px 20px 12px 14px;border-radius:14px}
+#thumb .tl svg{width:60px;height:60px}
+#thumb .hl{position:absolute}
+#thumb .hl div{font:900 150px/.98 "Unbounded";text-transform:uppercase;white-space:nowrap;letter-spacing:-.02em;color:#fff;text-shadow:0 8px 0 #000,0 0 30px rgba(0,0,0,.9),0 0 70px rgba(0,0,0,.7)}
+#thumb .hl div.y{color:#FFE14D}
+#thumb .hl span{display:inline-block}
+#thumb .ch{position:absolute;background:#00E5FF;color:#04121a;font:900 46px/1 "Unbounded";text-transform:uppercase;padding:18px 30px;border-radius:999px;box-shadow:0 0 0 8px #03040A,0 0 50px rgba(0,229,255,.7);white-space:nowrap;transform:rotate(-2deg)}
+#thumb .ep{position:absolute;font:800 30px/1 "JBM";letter-spacing:.2em;color:#FFB547;text-transform:uppercase;text-shadow:0 3px 0 #000}
+<!--JS-->
+let D,SC=[],SFX=[],SH=[],END=null,TOTAL=0,V=true,WW=1080,HH=1920;
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ez=x=>{x=cl(x);return 1-Math.pow(1-x,3)};
+const es=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+// words a line takes when there's no voice timing (the voice step fills in the real ones)
+const est=t=>String(t).split(/\s+/).length/2.55+.3;
+function build(data){D=data;SC=[];SFX=[];SH=[];WW=D.w||1080;HH=D.h||1920;V=HH>WW;
+ document.documentElement.style.setProperty("--W",WW+"px");document.documentElement.style.setProperty("--H",HH+"px");
+ document.body.className=V?"v":"h";
+ const st=document.getElementById("stage");st.innerHTML="";
+ let t=0;const lines=D.lines;
+ lines.forEach((L,i)=>{const dur=D.dur&&D.dur[L.id]!=null?D.dur[L.id]:est(D.voice[L.id]);
+  const t0=t,va=t0+(i?.4:.35),ve=va+dur,pa=L.pulse?ve+.6:null,t1=(L.pulse?pa+L.pulse.len+.35:ve+.5)+(L.outro?2.4:0);
+  SC.push({id:L.id,t0,t1,va,...(L.chapter&&D.fmt==="long"?{chapter:L.chapter}:{})});
+  if(L.pulse)SFX.push({t:pa,k:`pulse:${L.pulse.rate}:${L.pulse.len}`});
+  if(L.outro)SFX.push({t:ve+.35,k:"sting"});
+  const P=D.photos[L.photo]||{},el=document.createElement("div");el.className="shot";
+  // a photo fills the frame only if it has the pixels for it (never stretched past its real size); otherwise it's a framed card
+  const zoom=1.08,cover=Math.max(WW/(P.w||1),HH/(P.h||1))*zoom,full=!!P.w&&cover<=1.0001&&L.fit!=="card";   // "fit":"card" keeps the whole photo in view (when what matters is near an edge)
+  let ph="";
+  if(full){ph=`<div class="full"><img src="${es(P.src)}" style="width:${P.w*cover/zoom}px;height:${P.h*cover/zoom}px;margin:${-P.h*cover/zoom/2}px 0 0 ${-P.w*cover/zoom/2}px"></div>`}
+  else if(P.w){const bx=V?{x:60,y:250,w:960,h:900}:{x:1000,y:150,w:840,h:780},ar=(P.w/P.h)/(bx.w/bx.h),
+    fill=L.fit!=="card"&&Math.max(bx.w/P.w,bx.h/P.h)<=1&&ar<1.9&&ar>1/1.9,   // fill the frame (cropped) when the photo has the pixels and isn't too far off its shape
+    s=Math.min(bx.w/P.w,bx.h/P.h,1),w=fill?bx.w:Math.round(P.w*s),h=fill?bx.h:Math.round(P.h*s);
+   ph=`<div class="card" style="left:${Math.round(bx.x+(bx.w-w)/2)}px;top:${Math.round(bx.y+(bx.h-h)/2)}px;width:${w}px;height:${h}px"><img src="${es(P.src)}"></div>`}
+  const chap=L.chapter&&D.fmt==="long"?`<div class="chap"><i></i>${es(L.chapter)}</div>`:"";
+  el.innerHTML=`<img class="bgb" src="${es(P.src)}">${ph}<div class="shade"></div>
+   ${L.outro?"":`<div class="txt">${chap}<div class="head">${es(L.head)}</div>${L.sub?`<div class="sub">${es(L.sub)}</div>`:""}</div>
+   <div class="pic">${P.pictured?`<b>Pictured:</b> ${es(P.pictured)} · `:""}${es(P.credit||"")}</div>`}`;
+  st.appendChild(el);
+  let sc=null;
+  if(L.pulse){sc=document.createElement("div");sc.className="scope";
+   sc.innerHTML=`<div class="lab">Pulse rate, as sound</div>${L.pulse.rate<2?'<div class="dot"></div>':""}<svg viewBox="0 0 1000 300" preserveAspectRatio="none"><line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(79,243,255,.35)" stroke-width="2"/><path fill="none" stroke="#5CFFA8" stroke-width="4" stroke-linejoin="round" style="filter:drop-shadow(0 0 8px #5CFFA8)"/></svg>
+    <div class="rate">${es(L.pulse.label)}</div><div class="note">recreated at its real rate</div>`;st.appendChild(sc)}
+  SH.push({L,el,sc,t0,t1,va,ve,pa,full,i,img:el.querySelector(".full img,.card img"),txt:el.querySelector(".txt"),head:el.querySelector(".head"),sub:el.querySelector(".sub"),pic:el.querySelector(".pic")});
+  t=t1});
+ // the ending card (over the last line, after its words)
+ END=document.createElement("div");END.className="end";
+ END.innerHTML=`<svg viewBox="0 0 200 200">${MARK("e")}</svg><div class="nm">${es(String(D.brand||"Liftoff").toUpperCase())}</div><div class="tg">${es(D.series||"Space Explained")}</div><div class="fl">Follow for more</div>`;
+ st.appendChild(END);
+ const bar=document.createElement("div");bar.className="bar";bar.innerHTML=`<svg viewBox="0 0 200 200">${MARK("b")}</svg>${es(String(D.brand||"Liftoff").toUpperCase())}<small>${es(D.series||"Space Explained")} · Ep ${es(D.ep||1)}</small>`;st.appendChild(bar);
+ const pg=document.createElement("div");pg.className="prog";pg.id="prog";st.appendChild(pg);
+ TOTAL=t;return TOTAL}
+function scopePath(R,lt,len){// spikes at the pulsar's real spacing, scrolling past; a window that shows ~8 of them
+ const win=cl(8/R,.02,6);let k=Math.max(0,Math.floor((lt-win)*R));const last=Math.ceil(lt*R);
+ let d="M0 250";for(;k<=last;k++){const tp=k/R;const x=1000*(1-(lt-tp)/win);if(x<0||x>1000)continue;
+  if(R>200){const j=((Math.sin(k*12.9898)*43758.5453)%1+1)%1;d+=` L${(x-3).toFixed(1)} 250 L${x.toFixed(1)} ${(40+j*60).toFixed(1)} L${(x+3).toFixed(1)} 250`}
+  else d+=` L${(x-8).toFixed(1)} 250 L${(x-3).toFixed(1)} 230 L${x.toFixed(1)} 30 L${(x+3).toFixed(1)} 255 L${(x+9).toFixed(1)} 250`}
+ return d+" L1000 250"}
+function render(T){
+ for(const s of SH){const fade=s.i?.45:0,a=s.i===SH.length-1?1:1,inT=T>=s.t0-.0001&&T<s.t1+(s.i<SH.length-1?.45:1e9);
+  if(!inT){s.el.style.opacity=0;if(s.sc)s.sc.style.opacity=0;continue}
+  const o=fade?cl((T-s.t0)/fade):1;s.el.style.opacity=o.toFixed(3);s.el.style.zIndex=1+s.i;
+  const p=cl((T-s.t0)/Math.max(1,s.t1-s.t0+.45));   // slow push-in, alternating drift
+  if(s.img){const z=1+.07*p,dx=(s.i%2?1:-1)*p*(s.full?24:10),dy=(s.i%3-1)*p*(s.full?16:6);
+   s.img.style.transform=(s.full?"translate(0,0) ":"")+`translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px) scale(${z.toFixed(4)})`}
+  if(s.head){const k=s.i===0?1:ez((T-s.t0-.12)/.5),k2=s.i===0?1:ez((T-s.t0-.35)/.5);
+   s.head.style.opacity=k.toFixed(3);s.head.style.transform=`translateY(${((1-k)*40).toFixed(1)}px)`;
+   if(s.sub){s.sub.style.opacity=k2.toFixed(3);s.sub.style.transform=`translateY(${((1-k2)*24).toFixed(1)}px)`}
+   if(s.pic)s.pic.style.opacity=(ez((T-s.t0-.5)/.6)*.95).toFixed(3);
+   // the outgoing line's words leave quickly so two lines are never readable at once during the crossfade
+   if(T>s.t1&&s.txt){const g=cl(1-(T-s.t1)/.18);s.txt.style.opacity=g.toFixed(3);if(s.pic)s.pic.style.opacity=(g*.95).toFixed(3)}else if(s.txt)s.txt.style.opacity=1}
+  if(s.sc){const on=s.pa!=null&&T>=s.pa-.35&&T<=s.pa+s.L.pulse.len+.2,k=on?Math.min(ez((T-s.pa+.35)/.35),cl((s.pa+s.L.pulse.len+.2-T)/.25)):0;
+   s.sc.style.opacity=k.toFixed(3);s.sc.style.zIndex=50;
+   if(k>0){const lt=Math.max(0,T-s.pa),R=s.L.pulse.rate;s.sc.querySelector("path").setAttribute("d",scopePath(R,lt,s.L.pulse.len));
+    const dot=s.sc.querySelector(".dot");if(dot){const ph=(lt*R)%1;dot.style.opacity=(T>=s.pa&&ph<.18?1:.15).toFixed(2)}}}}
+ const last=SH[SH.length-1];if(END&&last){const e0=last.ve-.2;END.style.opacity=cl((T-(last.t0+.2))/.5).toFixed(3);
+  const svg=END.querySelector("svg");svg.style.transform=`scale(${(.85+.15*ez((T-last.t0)/.8)).toFixed(3)}) rotate(${((T-last.t0)*8).toFixed(1)}deg)`}
+ document.getElementById("prog").style.width=(WW*cl(T/TOTAL)).toFixed(1)+"px"}
+// the cover: the episode's real photo, a huge two-line headline (white + yellow), the series chip; all inside TikTok's
+// middle 3:4 on the vertical one
+window.thumb=async()=>{const C=D.cover||{},P=D.photos[C.photo]||D.photos[D.lines[0].photo],T=document.getElementById("thumb"),L=C.lines||[D.title,""];
+ const ph=V?`<img class="tp" src="${es(P.src)}" style="left:0;top:0;width:${WW}px;height:1250px"><div class="tg" style="background:linear-gradient(180deg,rgba(3,4,10,.6) 0%,rgba(3,4,10,0) 22%,rgba(3,4,10,0) 52%,rgba(3,4,10,.95) 66%,#03040A 100%)"></div>`
+  :`<img class="tp" src="${es(P.src)}" style="right:0;top:0;width:1300px;height:${HH}px"><div class="tg" style="background:linear-gradient(90deg,#03040A 0%,#03040A 38%,rgba(3,4,10,0) 62%)"></div>`;
+ T.innerHTML=`${ph}<div class="tl" style="${V?"left:60px;top:270px":"left:70px;top:60px"}"><svg viewBox="0 0 200 200">${MARK("t")}</svg>${es(String(D.brand||"Liftoff").toUpperCase())}</div>
+  <div class="ep" style="${V?"left:70px;top:1150px":"left:80px;top:250px"}">${es(D.series||"Space Explained")} · Ep ${es(D.ep||1)}</div>
+  <div class="hl" style="${V?"left:50px;top:1210px":"left:60px;top:310px"}">${L.map((l,i)=>`<div class="${i?"y":""}"><span>${es(l)}</span></div>`).join("")}</div>
+  <div class="ch" style="${V?"left:60px;top:1540px":"left:70px;top:640px"}">${es(C.chip||"")}</div>`;
+ T.style.display="block";const max=V?980:1100;
+ T.querySelectorAll(".hl div").forEach(d=>{let f=V?150:160;d.style.fontSize=f+"px";while(d.firstElementChild.offsetWidth>max&&f>60){f-=4;d.style.fontSize=f+"px"}});
+ await Promise.all([...T.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));return true};
+<!--ENDJS-->

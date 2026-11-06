@@ -69,7 +69,13 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
       typing: ["aevalsrc=0.55*(random(0)*2-1)*exp(-(t-floor(t/0.058)*0.058)*170)+0.15*sin(2*PI*3100*t)*exp(-(t-floor(t/0.058)*0.058)*240):d=1.4:s=48000", "highpass=f=1200,volume=0.35"],
       compute: ["aevalsrc=0.3*sin(2*PI*(900+500*sin(floor(t*22)*78.233))*t)*(1+sgn(sin(2*PI*22*t)))/2:d=0.9:s=48000", "afade=t=out:st=0.7:d=0.2,volume=0.28"],
       sting: ["aevalsrc=0.9*sin(2*PI*55*t)*exp(-3.5*t)+0.25*(random(0)*2-1)*exp(-40*t)+0.32*sin(2*PI*329.6*(t-0.05))*exp(-5*(t-0.05))*(1+sgn(t-0.05))/2+0.32*sin(2*PI*493.9*(t-0.22))*exp(-5*(t-0.22))*(1+sgn(t-0.22))/2+0.36*sin(2*PI*659.3*(t-0.39))*exp(-3.2*(t-0.39))*(1+sgn(t-0.39))/2:d=1.8:s=48000", "volume=0.6"] };
-    for (const [k, [src, fx]] of Object.entries(SYN)) await run(["-y", "-loglevel", "error", "-f", "lavfi", "-i", src, "-af", fx, "-ar", "48000", "-ac", "1", path.join(tmp, k + ".wav")]);
+    // a pulsar's real pulse rate as sound (Space Explained): "pulse:<per second>:<seconds>", a click train at that rate
+    // (fast ones become the buzz astronomers' recordings sound like); recreated, not a recording
+    for (const e of SFX) if (/^pulse:/.test(e.k) && !SYN[e.k]) { const [, R, L] = e.k.split(":").map(Number), K = Math.max(70, R * 7);
+      SYN[e.k] = [`aevalsrc=0.8*sin(2*PI*1500*t)*exp(-(t-floor(t*${R})/${R})*${K})+0.25*(random(0)*2-1)*exp(-(t-floor(t*${R})/${R})*${K * 3}):d=${L}:s=48000`,
+        `afade=t=in:d=0.05,afade=t=out:st=${Math.max(0, L - 0.3)}:d=0.3,volume=${R > 200 ? 0.35 : 0.55}`]; }
+    const fname = k => k.replace(/[^a-z0-9]+/gi, "_") + ".wav";
+    for (const [k, [src, fx]] of Object.entries(SYN)) await run(["-y", "-loglevel", "error", "-f", "lavfi", "-i", src, "-af", fx, "-ar", "48000", "-ac", "1", path.join(tmp, fname(k))]);
     // the voice: optionally shifted deeper (PITCH < 1, Kokoro only) without changing its speed
     const P = data.voiceEngine === "chatterbox" ? 1 : Math.min(1, Math.max(.8, +process.env.PITCH || 1));   // the Chatterbox voice is already deep
     // a touch of presence for the female narrator (no bass boost: that was for the old deep male voice)
@@ -78,7 +84,7 @@ const run = args => new Promise((res, rej) => { const p = spawn("ffmpeg", args, 
     if (voice) SC.forEach(s => { const f = path.join(data.voiceDir, s.id + ".wav"); if (fs.existsSync(f)) ins.push([f, s.va, "v"]); });
     // where each narration line sits in the finished video (check.py listens to each one in place before publishing)
     if (voice) fs.writeFileSync(base + ".voicemap.json", JSON.stringify(SC.filter(s => fs.existsSync(path.join(data.voiceDir, s.id + ".wav"))).map(s => ({ id: s.id, at: +s.va.toFixed(3), dur: (data.dur || {})[s.id] || 0 }))));
-    SFX.forEach(e => { if (SYN[e.k] && e.t < total) ins.push([path.join(tmp, e.k + ".wav"), e.t, "s"]); });
+    SFX.forEach(e => { if (SYN[e.k] && e.t < total) ins.push([path.join(tmp, fname(e.k)), e.t, "s"]); });
     const args = ["-y", "-loglevel", "error", "-i", silent];
     ins.forEach(([f]) => args.push("-i", f));
     // background music: one of the tracks in music/ (picked by date, so it rotates), looped to length, quiet,

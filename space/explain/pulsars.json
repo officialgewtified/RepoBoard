@@ -1,0 +1,395 @@
+{
+ "id": "pulsars",
+ "ep": 1,
+ "title": "Pulsars",
+ "series": "Space Explained",
+ "short": {
+  "ytTitle": "This dead star spins 716 times a second #shorts #space #pulsar",
+  "caption": "Pulsars: dead stars that spin and blink like cosmic lighthouses. One spins 716 times a second. 🔭\n\nSpace Explained, ep. 1. Every fact is checked against NASA and observatory sources (see the fact sheet).\n\n#space #pulsar #astronomy #neutronstar #nasa #science #liftoff",
+  "cover": {
+   "photo": "crabx",
+   "lines": [
+    "Dead stars",
+    "that blink"
+   ],
+   "chip": "Pulsars explained"
+  },
+  "lines": [
+   {
+    "id": "s1",
+    "photo": "terzan",
+    "head": "716 spins a second",
+    "sub": "Somewhere in our galaxy",
+    "say": "Somewhere in our galaxy, a dead star is spinning 716 times every second."
+   },
+   {
+    "id": "s2",
+    "photo": "cassa",
+    "head": "It's a pulsar",
+    "sub": "What's left when a giant star explodes",
+    "say": "It's called a pulsar. When a giant star runs out of fuel and explodes, its core can collapse into a ball about 12 miles across, with more mass than our Sun."
+   },
+   {
+    "id": "s3",
+    "photo": "teaspoon",
+    "head": "1 teaspoon ≈ 1 billion tons",
+    "sub": "How dense a neutron star is",
+    "say": "It's so dense that one teaspoon of it would weigh about a billion tons."
+   },
+   {
+    "id": "s4",
+    "photo": "lighthouse",
+    "head": "A cosmic lighthouse",
+    "sub": "Beams sweep past Earth as it spins",
+    "say": "As it spins, beams of radio waves sweep across space like a lighthouse, so from Earth it seems to blink on and off."
+   },
+   {
+    "id": "s5",
+    "photo": "milkyway",
+    "head": "LGM-1",
+    "sub": "\"Little Green Men\" · found in 1967",
+    "say": "The first one was found in 1967 by a graduate student, Jocelyn Bell. Its pulses came every 1.337 seconds, so regular that her team nicknamed it L G M 1, for little green men.",
+    "pulse": {
+     "rate": 0.748,
+     "label": "1 pulse every 1.337 seconds",
+     "len": 4.2
+    }
+   },
+   {
+    "id": "s6",
+    "photo": "crabx",
+    "head": "30 flashes a second",
+    "sub": "The Crab pulsar",
+    "say": "The Crab pulsar, left by a star that exploded in the year 1054, flashes 30 times a second.",
+    "pulse": {
+     "rate": 30,
+     "label": "30 pulses a second",
+     "len": 2.6
+    }
+   },
+   {
+    "id": "s7",
+    "photo": "blender",
+    "head": "Faster than a blender",
+    "sub": "The record: 716 spins a second",
+    "say": "And the record holder, at 716 spins a second, turns faster than the blades of a kitchen blender.",
+    "pulse": {
+     "rate": 716,
+     "label": "716 pulses a second",
+     "len": 2.6
+    }
+   },
+   {
+    "id": "s8",
+    "photo": "crab",
+    "head": "Space, explained",
+    "sub": "Follow Liftoff",
+    "outro": true,
+    "say": "Follow Liftoff for more of space, explained."
+   }
+  ]
+ },
+ "long": {
+  "ytTitle": "Pulsars Explained: The Dead Stars That Blink Like Lighthouses | Space Explained Ep. 1",
+  "caption": "In 1967, a graduate student spotted a signal ticking like a clock. Little green men? No: a pulsar, a dead star spinning like a cosmic lighthouse. Here's what pulsars are, how they were discovered, the record breakers, and why astronomers use them as the most precise clocks in the universe.\n\nSpace Explained, ep. 1. Every fact is checked against NASA, observatory and other primary sources (see the fact sheet). Every picture is a real photo or telescope image; the pulse sounds are recreated at each pulsar's real rate.\n\n#space #pulsar #astronomy #neutronstar #nasa #science",
+  "cover": {
+   "photo": "crabx",
+   "lines": [
+    "Dead stars",
+    "that blink"
+   ],
+   "chip": "Pulsars explained"
+  },
+  "lines": [
+   {
+    "id": "l1",
+    "chapter": "A strange signal",
+    "photo": "milkyway",
+    "head": "1967",
+    "sub": "A signal that ticked like a clock",
+    "say": "In the summer of 1967, a graduate student in England noticed something strange in her radio telescope data. A signal, pulsing over and over, with clockwork precision."
+   },
+   {
+    "id": "l2",
+    "photo": "crab",
+    "head": "Pulsars, explained",
+    "sub": "Space Explained · Episode 1",
+    "say": "Was it a broken machine? A message from aliens? It turned out to be something almost as strange: a dead star, spinning like a lighthouse. Today, it's pulsars, explained."
+   },
+   {
+    "id": "l3",
+    "chapter": "What is a pulsar?",
+    "photo": "sn1987a",
+    "head": "It starts with a death",
+    "sub": "A star much bigger than our Sun",
+    "say": "Pulsars start with a death. When a star much bigger than our Sun runs out of fuel, its core collapses, and the rest of it blasts away in a supernova."
+   },
+   {
+    "id": "l4",
+    "photo": "cassa",
+    "head": "A neutron star",
+    "sub": "About 12 miles across · about 1.4 Suns of mass",
+    "say": "The core gets crushed into a neutron star: a ball only about 12 miles across, but holding about 1.4 times the mass of our Sun."
+   },
+   {
+    "id": "l5",
+    "photo": "manhattan",
+    "head": "The size of a city",
+    "sub": "For scale: Manhattan, seen from the space station",
+    "say": "Picture more than the mass of the Sun, squeezed into a ball the size of a city."
+   },
+   {
+    "id": "l6",
+    "photo": "teaspoon",
+    "head": "1 teaspoon ≈ 1 billion tons",
+    "sub": "Neutron star matter, weighed on Earth",
+    "say": "That makes it unbelievably dense. On Earth, a single teaspoon of neutron star would weigh about a billion tons."
+   },
+   {
+    "id": "l7",
+    "photo": "hand",
+    "head": "200 billion × Earth's gravity",
+    "sub": "And a magnetic field a million times our strongest magnets",
+    "say": "The gravity at its surface is about 200 billion times stronger than Earth's, and its magnetic field is about a million times stronger than the strongest magnets ever made on Earth."
+   },
+   {
+    "id": "l8",
+    "chapter": "The cosmic lighthouse",
+    "photo": "crabc",
+    "head": "It spins",
+    "sub": "Faster and faster as it collapses",
+    "say": "And neutron stars spin. As the core collapses, it spins faster and faster, the same way a figure skater speeds up by pulling in their arms."
+   },
+   {
+    "id": "l9",
+    "photo": "lighthouse",
+    "head": "A cosmic lighthouse",
+    "sub": "Beams from near its magnetic poles",
+    "say": "Some send out beams of radio waves from near their magnetic poles. As the star turns, those beams sweep across space like a lighthouse. When a beam crosses Earth, we see a blink. That's a pulsar."
+   },
+   {
+    "id": "l10",
+    "photo": "gbt",
+    "head": "Set a clock by it",
+    "sub": "Radio telescopes catch every pulse",
+    "say": "Every time the beam passes, our radio telescopes pick up a pulse, with timing so steady you could set a clock by it."
+   },
+   {
+    "id": "l11",
+    "chapter": "Little green men",
+    "photo": "crabx",
+    "head": "Jocelyn Bell",
+    "sub": "She helped build the telescope that caught it",
+    "say": "Back to 1967. The student was Jocelyn Bell, and she had helped build the very radio telescope that caught the signal."
+   },
+   {
+    "id": "l12",
+    "photo": "hand",
+    "head": "1.337 seconds",
+    "sub": "The gap between every pulse",
+    "say": "Her supervisor, Antony Hewish, first thought it was interference. But by late November, they had it: pulses exactly 1.337 seconds apart."
+   },
+   {
+    "id": "l13",
+    "photo": "cassa",
+    "head": "LGM-1",
+    "sub": "\"Little Green Men\"",
+    "say": "The signal was so regular that the team nicknamed it L G M 1, for little green men. This is what that rate sounds like.",
+    "pulse": {
+     "rate": 0.748,
+     "label": "1 pulse every 1.337 seconds",
+     "len": 4.4
+    }
+   },
+   {
+    "id": "l14",
+    "photo": "vla",
+    "head": "A new kind of star",
+    "sub": "Not aliens",
+    "say": "But more of these signals turned up in other parts of the sky. They weren't aliens. They were a whole new kind of star."
+   },
+   {
+    "id": "l15",
+    "photo": "gbt",
+    "head": "The 1974 Nobel Prize",
+    "sub": "Awarded to Antony Hewish and Martin Ryle",
+    "say": "In 1974, Hewish shared the Nobel Prize in Physics, partly for the discovery. Bell was left out, a decision that's been debated ever since."
+   },
+   {
+    "id": "l16",
+    "photo": "milkyway",
+    "head": "$3 million, given away",
+    "sub": "2018 Special Breakthrough Prize",
+    "say": "In 2018, she won a three million dollar Breakthrough Prize, and donated the money to help students from underrepresented groups study physics."
+   },
+   {
+    "id": "l17",
+    "chapter": "Record breakers",
+    "photo": "crab",
+    "head": "The year 1054",
+    "sub": "A new star, seen in daylight for 23 days",
+    "say": "Some pulsars are famous. In the year 1054, astronomers in China recorded a new star so bright it could be seen in daylight for 23 days."
+   },
+   {
+    "id": "l18",
+    "photo": "crabx",
+    "head": "The Crab pulsar",
+    "sub": "About 6,000 light-years away",
+    "say": "What's left of that explosion is the Crab Nebula, about 6,000 light-years away. At its heart, the Crab pulsar flashes 30 times every second.",
+    "pulse": {
+     "rate": 30,
+     "label": "30 pulses a second",
+     "len": 2.8
+    }
+   },
+   {
+    "id": "l19",
+    "photo": "terzan",
+    "head": "The fastest",
+    "sub": "In the star cluster Terzan 5, in Sagittarius",
+    "say": "The fastest pulsar known sits in a star cluster called Terzan 5, about 28,000 light-years away in the constellation Sagittarius."
+   },
+   {
+    "id": "l20",
+    "photo": "blender",
+    "head": "716 spins a second",
+    "sub": "Faster than a kitchen blender",
+    "say": "Found with the Green Bank Telescope and announced in 2006, it spins 716 times a second. That's faster than the blades of a kitchen blender.",
+    "pulse": {
+     "rate": 716,
+     "label": "716 pulses a second",
+     "len": 2.8
+    }
+   },
+   {
+    "id": "l21",
+    "photo": "vela",
+    "head": "About 76 seconds",
+    "sub": "One of the slowest known: a single turn",
+    "say": "At the other end, one of the slowest known pulsars takes about 76 seconds to make a single turn."
+   },
+   {
+    "id": "l22",
+    "chapter": "Why pulsars matter",
+    "photo": "plaque",
+    "head": "A map made of pulsars",
+    "sub": "On the plaques of NASA's Pioneer probes",
+    "say": "Pulsars are so reliable they've been used as cosmic landmarks. The plaques on NASA's Pioneer probes carry a map showing where our Sun is, using 14 pulsars.",
+    "fit": "card"
+   },
+   {
+    "id": "l23",
+    "photo": "record",
+    "head": "14 pulsars",
+    "sub": "The same map is on Voyager's Golden Record",
+    "say": "The Voyager Golden Records carry the same map, in case anyone out there ever finds them.",
+    "fit": "card"
+   },
+   {
+    "id": "l24",
+    "photo": "arecibo",
+    "head": "The first exoplanets",
+    "sub": "1992: planets around a pulsar",
+    "say": "In 1992, astronomers confirmed the first planets ever found outside our solar system, and they were orbiting a pulsar."
+   },
+   {
+    "id": "l25",
+    "photo": "crabc",
+    "head": "Gravitational waves",
+    "sub": "1993 Nobel Prize in Physics",
+    "say": "In 1974, two astronomers found a pulsar orbiting another neutron star. Timing it gave the first evidence of gravitational waves, and won the 1993 Nobel Prize."
+   },
+   {
+    "id": "l26",
+    "photo": "clock",
+    "head": "As steady as atomic clocks",
+    "sub": "The steadiest pulsars",
+    "say": "The steadiest pulsars spin so precisely, they rival the best atomic clocks on Earth."
+   },
+   {
+    "id": "l27",
+    "photo": "vla",
+    "head": "A galaxy-sized detector",
+    "sub": "NANOGrav · 15 years of pulsar timing",
+    "say": "So astronomers turned dozens of them into a galaxy-sized detector. In 2023, after 15 years of timing pulsars, a team called NANOGrav announced the first evidence of slow gravitational waves rippling through the cosmos."
+   },
+   {
+    "id": "l28",
+    "photo": "milkyway",
+    "head": "1,000+ new pulsars",
+    "sub": "Found by China's FAST telescope",
+    "say": "And the hunt is speeding up. China's giant FAST telescope alone has found more than a thousand new pulsars."
+   },
+   {
+    "id": "l29",
+    "chapter": "Look up",
+    "photo": "lighthouse",
+    "head": "Right on time",
+    "sub": "Thousands of dead stars, blinking",
+    "say": "So the next time you look up at the night sky, remember that out there, thousands of dead stars are spinning and blinking, right on time."
+   },
+   {
+    "id": "l30",
+    "photo": "crab",
+    "head": "Space, explained",
+    "sub": "Follow Liftoff",
+    "outro": true,
+    "say": "This has been Liftoff. Follow for more of space, explained."
+   }
+  ]
+ },
+ "facts": [
+  "Pulsars are rotating neutron stars. A neutron star is about 20 km (12 miles) across with about 1.4 times the Sun's mass; on Earth one teaspoonful would weigh a billion tons; surface gravity about 2 x 10^11 times Earth's; magnetic fields a million times stronger than the strongest produced on Earth. Pulsars were discovered in late 1967 by graduate student Jocelyn Bell Burnell. Source: NASA Imagine the Universe, 'Neutron Stars and Pulsars' https://imagine.gsfc.nasa.gov/science/objects/neutron_stars1.html (archived: https://webarchive.library.unt.edu/web/20130302114722/http://imagine.gsfc.nasa.gov/docs/science/know_l1/pulsars.html)",
+  "A ball about fifteen miles across contains more matter than our Sun; pulsars sweep beams like a lighthouse. Source: NASA Scientific Visualization Studio, 'What is a Pulsar?' https://svs.gsfc.nasa.gov/10861",
+  "First pulsar (CP 1919 / PSR B1919+21): data recorded 6 August 1967 on a radio telescope Bell helped build; Hewish first thought it was interference; on 28 November 1967 the pulses were resolved 1.337 s apart; nicknamed LGM-1 ('little green men'). 1974 Nobel Prize in Physics to Hewish and Martin Ryle; Bell not included (controversy). PSR B1913+16 (Hulse & Taylor, 1974) orbits another neutron star; first evidence of gravitational waves; 1993 Nobel. First extrasolar planets found 1992 around PSR B1257+12. Pioneer plaques and Voyager records show the Sun's position relative to 14 pulsars. Millisecond pulsars rival the stability of the best atomic clocks. Longest-period neutron star pulsar listed: 75.9 s (PSR J0901-4046). Source: Wikipedia, 'Pulsar' https://en.wikipedia.org/wiki/Pulsar",
+  "2018 Special Breakthrough Prize in Fundamental Physics ($3 million) to Jocelyn Bell Burnell, who donated the winnings to the Institute of Physics to fund postgraduate places for students from groups underrepresented in physics. Source: The Royal Society https://royalsociety.org/news/2018/09/dame-jocelyn-bell-burnell",
+  "Crab Nebula: remnant of a supernova seen on Earth in 1054 AD, 6,000 light-years away; its pulsar emits pulses 30 times a second. Source: Chandra X-ray Center https://chandra.harvard.edu/resources/misc/supernovae1.html",
+  "The 1054 supernova was first observed on 5 July 1054 by Chinese astronomers and stayed visible in daylight for 23 days. Source: ESA https://www.esa.int/Science_Exploration/Space_Science/22_April",
+  "Fastest-spinning pulsar PSR J1748-2446ad: 716 times per second, in globular cluster Terzan 5, about 28,000 light-years away in Sagittarius; found with the Robert C. Byrd Green Bank Telescope; announced January 2006; spins faster than a kitchen blender's blades (250-500 Hz). Source: NRAO https://public.nrao.edu/news/astronomers-discover-fastest-spinning-pulsar/",
+  "NANOGrav, 28 June 2023: 15 years of timing millisecond pulsars gave the first evidence of low-frequency gravitational waves permeating the cosmos (Green Bank Telescope, CHIME, Very Large Array, formerly Arecibo). Source: Green Bank Observatory https://greenbankobservatory.org/front-page-news/nanogravs-15-year-effort-yields-evidence-for-universal-background-of-gravitational-waves",
+  "China's FAST telescope has identified more than 1,000 new pulsars (November 2024). Source: Chinese Academy of Sciences https://english.cas.cn/newsroom/cas_media/202411/t20241127_892451.shtml",
+  "Pulse sounds in the video are recreated at each pulsar's real rate (not recordings)."
+ ],
+ "pictured": {
+  "crab": "The Crab Nebula, by Hubble",
+  "crabx": "The heart of the Crab Nebula, in X-rays (Chandra) and visible light (Hubble)",
+  "crabc": "The Crab Nebula, combined from five observatories",
+  "cassa": "Cassiopeia A, a supernova remnant, in X-rays (Chandra)",
+  "vela": "The Vela pulsar and its jet, in X-rays (Chandra)",
+  "hand": "Pulsar B1509-58 and its nebula, in X-rays (Chandra)",
+  "terzan": "Star cluster Terzan 5 (Webb and Hubble), home of the fastest known pulsar",
+  "lighthouse": "Boston Light, Massachusetts",
+  "teaspoon": "A silver teaspoon",
+  "manhattan": "Manhattan, photographed from the International Space Station",
+  "gbt": "The Green Bank Telescope, West Virginia",
+  "arecibo": "Arecibo Observatory, Puerto Rico",
+  "plaque": "The pulsar map on NASA's Pioneer plaque",
+  "record": "The cover of Voyager's Golden Record (pulsar map at lower left)",
+  "clock": "An atomic clock at NIST",
+  "blender": "A kitchen blender",
+  "milkyway": "The center of our Milky Way",
+  "vla": "The Very Large Array, New Mexico",
+  "sn1987a": "Supernova 1987A, by Hubble"
+ },
+ "credits": {
+  "crab": "NASA, ESA, J. Hester and A. Loll (ASU)",
+  "crabx": "X-ray: NASA/CXC/ASU/J. Hester et al. · Optical: NASA/HST/ASU/J. Hester et al.",
+  "crabc": "NASA Goddard Space Flight Center",
+  "cassa": "NASA/CXC/GSFC/U. Hwang et al.",
+  "vela": "NASA/CXC/PSU/G. Pavlov et al.",
+  "hand": "NASA/CXC/CfA/P. Slane et al.",
+  "terzan": "NASA, ESA, CSA, STScI, G. Zullo, F. Ferraro et al. (CC BY 4.0)",
+  "lighthouse": "U.S. Coast Guard",
+  "teaspoon": "Cleveland Museum of Art (CC0)",
+  "manhattan": "NASA",
+  "gbt": "Carol M. Highsmith, Library of Congress",
+  "arecibo": "Caribe Tourist Promotions (postcard)",
+  "plaque": "NASA Ames · design: Carl Sagan, Frank Drake, Linda Salzman Sagan",
+  "blender": "Industriemuseum Gent (CC0)",
+  "milkyway": "ESO/S. Guisard (CC BY 4.0)",
+  "vla": "John Fowler (CC BY 2.0)",
+  "sn1987a": "NASA and ESA",
+  "record": "NASA/JPL",
+  "clock": "NIST"
+ }
+}

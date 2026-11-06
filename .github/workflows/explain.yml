@@ -1,0 +1,106 @@
+name: Space Explained videos
+# Liftoff's explainer series: one episode file (space/explain/<topic>.json, every fact sourced, every picture a real
+# photo from space/ref/photos) makes a ~1 minute vertical Short and a longer widescreen YouTube video. Her voice reads it,
+# the finished video is listened to line by line before it's published, and both land on the Liftoff videos page.
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Episode name (space/explain/<topic>.json)"
+        default: pulsars
+      format:
+        description: "Which videos to make"
+        type: choice
+        options: [both, short, long]
+        default: both
+permissions:
+  contents: write
+concurrency:
+  group: explain-${{ inputs.topic }}
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    strategy:
+      fail-fast: false
+      matrix:
+        fmt: [short, long]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Which video
+        id: ep
+        run: |
+          F="${{ inputs.format }}"
+          if [ "$F" != both ] && [ "$F" != "${{ matrix.fmt }}" ]; then echo "Only making $F"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          mkdir -p out && node space/explain.js "${{ inputs.topic }}" ${{ matrix.fmt }} out/data.json
+          N="liftoff-explained-${{ inputs.topic }}$([ ${{ matrix.fmt }} = long ] && echo -long)"; echo "N=$N" >> "$GITHUB_ENV"
+          echo "TAG=space-explain-${{ inputs.topic }}$([ ${{ matrix.fmt }} = long ] && echo -long)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        if: steps.ep.outputs.skip != '1'
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        if: steps.ep.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        if: steps.ep.outputs.skip != '1'
+        with:
+          path: |
+            clips/.models
+            ~/.cache/huggingface
+          key: voices-kokoro-chatterbox-whisper-v2
+      - name: Browser and ffmpeg
+        if: steps.ep.outputs.skip != '1'
+        timeout-minutes: 12
+        working-directory: clips
+        run: |
+          npm i --no-save --no-package-lock playwright@1.63.0
+          if which google-chrome; then echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"; else timeout 300 npx playwright install --with-deps chromium; fi
+          if ! which ffmpeg; then timeout 120 sudo apt-get update -qq || true
+            for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
+          which ffmpeg
+      - name: Voiceover
+        if: steps.ep.outputs.skip != '1'
+        # Liftoff's narrator: Chatterbox cloned from a Kokoro read, every line listened back and re-recorded if needed
+        timeout-minutes: 100
+        working-directory: clips
+        run: |
+          mkdir -p .models
+          [ -f .models/kokoro-v1.0.int8.onnx ] || curl -sSfL -o .models/kokoro-v1.0.int8.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          [ -f .models/voices-v1.0.bin ] || curl -sSfL -o .models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          pip install -q kokoro-onnx soundfile faster-whisper
+          python ref.py
+          pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install -q chatterbox-tts || true
+          python tts_cb.py ../out/data.json ../out/voice ref.wav || python tts.py ../out/data.json ../out/voice
+        env:
+          REF_VOICE: af_bella
+          VOICE: af_bella
+          SPEED: "1.05"
+          EXAGGERATION: "0.5"
+          CFG: "0.5"
+          TEMPO: "1.04"
+          RETAKE_BUDGET: "2400"
+      - name: Render
+        if: steps.ep.outputs.skip != '1'
+        timeout-minutes: 60
+        run: |
+          node clips/render.js out/data.json "out/$N.mp4" 30
+          node -e "process.stdout.write(require('./out/data.json').caption||'')" > out/caption.txt
+          node -e "process.stdout.write((require('./out/data.json').facts||[]).join('\n\n'))" > out/fact-sheet.txt
+          [ -f "out/$N.chapters.txt" ] && { printf '\n\nChapters:\n' >> out/caption.txt; cat "out/$N.chapters.txt" >> out/caption.txt; } || true
+      - name: Check before publishing
+        # listens to the finished video: every line of narration clearly there, nothing garbled, silent or clipped
+        if: steps.ep.outputs.skip != '1'
+        run: |
+          pip install -q faster-whisper
+          python clips/check.py "out/$N.mp4" out/data.json
+      - name: Publish
+        if: steps.ep.outputs.skip != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          THUMB=$(ls "out/$N-thumbnail.jpg" 2>/dev/null || true)
+          gh release create "$TAG" "out/$N.mp4" $THUMB out/fact-sheet.txt out/data.json --title "$(node -e "process.stdout.write(require('./out/data.json').ytTitle||'')")" --notes-file out/caption.txt --latest=false
