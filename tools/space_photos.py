@@ -43,6 +43,12 @@ S = {
  "shuttle": ("obj", ["Space Shuttle landing side view", "Space Shuttle Atlantis landing", "Space Shuttle Discovery landing drag chute", "Space Shuttle orbiter rollout side view"]),
  "field": ("bg", ["American football field aerial", "football field aerial view", "football stadium field from above"]),
 }
+# explainer episodes list their own photos: space/explain/<topic>.photos.json, {name: ["pic", [searches]]}.
+# "pic" = a whole real photo (no cutout), kept up to 3000 px, at least 1080 px on its short side
+import glob as _glob
+for _f in sorted(_glob.glob("space/explain/*.photos.json")):
+    S.update({k: (v[0], v[1]) for k, v in json.load(open(_f)).items()})
+
 _SESS = None
 def cut_obj(im):
     """a thing on a background (bus, plane, tower, whale) -> RGBA cut tight around it, using rembg's segmentation model"""
@@ -143,9 +149,9 @@ def scout(only=None, extra=None):
             for c in search(q, 2400):
                 if c["title"] in seen: continue
                 seen.add(c["title"])
-                if min(c["w"], c["h"]) < (1600 if kind == "body" and sub not in MINS else MINS.get(sub, 1080)) or (kind == "bg" and c["w"] < 1920) or (kind == "obj" and max(c["w"], c["h"]) < 1600): continue
+                if min(c["w"], c["h"]) < (1600 if kind == "body" and sub not in MINS else MINS.get(sub, 1080)) or (kind == "bg" and c["w"] < 1920) or (kind in ("obj", "pic") and max(c["w"], c["h"]) < 1600): continue
                 cands.append(c)
-        cands = cands[:12]; tiles = []
+        cands = cands[:8 if kind == "pic" else 12]; tiles = []
         for i, c in enumerate(cands):
             try:
                 im = Image.open(io.BytesIO(get(c["thumb"] or c["orig"]))).convert("RGB")
@@ -200,6 +206,8 @@ def pick(picks):
             cut.thumbnail((2000, 2000), Image.LANCZOS); px = max(cut.size)
             if px < MIN_SIDE: print("too small:", sub, px, "px"); continue
             cut.save(f"space/ref/photos/{sub}.png", optimize=True)
+        elif kind == "pic":
+            im.thumbnail((3000, 3000), Image.LANCZOS); im.save(f"space/ref/photos/{sub}.jpg", quality=88); px = min(im.size)
         else:
             im.thumbnail((2560, 2560), Image.LANCZOS); im.save(f"space/ref/photos/{sub}.jpg", quality=90); px = min(im.size)
         credits[sub] = {"title": c["title"], "page": c["page"], "license": c["license"], "artist": c["artist"], "credit": c.get("credit", ""), "px": px}

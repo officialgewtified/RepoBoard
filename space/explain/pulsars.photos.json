@@ -1,0 +1,22 @@
+{
+ "crab": ["pic", ["Crab Nebula Hubble mosaic", "Crab Nebula mosaic HST"]],
+ "crabx": ["pic", ["Crab Nebula Chandra X-ray", "Crab pulsar Chandra"]],
+ "crabc": ["pic", ["Crab Nebula composite Chandra Hubble Spitzer", "Crab Nebula multiwavelength"]],
+ "cassa": ["pic", ["Cassiopeia A Chandra", "Cassiopeia A composite"]],
+ "vela": ["pic", ["Vela pulsar Chandra", "Vela pulsar jet"]],
+ "hand": ["pic", ["PSR B1509-58", "Hand of God pulsar Chandra"]],
+ "terzan": ["pic", ["Terzan 5 Hubble", "Terzan 5"]],
+ "lighthouse": ["pic", ["lighthouse at night beam", "lighthouse beam night sky"]],
+ "teaspoon": ["pic", ["teaspoon", "metal teaspoon"]],
+ "manhattan": ["pic", ["Manhattan from International Space Station", "New York City from ISS"]],
+ "gbt": ["pic", ["Green Bank Telescope", "Robert C. Byrd Green Bank Telescope"]],
+ "arecibo": ["pic", ["Arecibo Observatory aerial", "Arecibo radio telescope"]],
+ "ipsa": ["pic", ["Interplanetary Scintillation Array", "Mullard Radio Astronomy Observatory"]],
+ "plaque": ["pic", ["Pioneer plaque", "Pioneer 10 plaque"]],
+ "record": ["pic", ["Voyager Golden Record cover", "Golden Record cover NASA"]],
+ "clock": ["pic", ["NIST-F2 atomic clock", "NIST-F1 cesium fountain atomic clock"]],
+ "blender": ["pic", ["kitchen blender", "blender appliance"]],
+ "milkyway": ["pic", ["Milky Way panorama ESO", "Milky Way over Paranal"]],
+ "vla": ["pic", ["Very Large Array", "Karl G. Jansky Very Large Array"]],
+ "sn1987a": ["pic", ["SN 1987A Hubble", "Supernova 1987A"]]
+}
