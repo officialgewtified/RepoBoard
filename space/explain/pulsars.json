@@ -32,7 +32,7 @@
    {
     "id": "s3",
     "photo": "teaspoon",
-    "head": "1 teaspoon ≈ 1 billion tons",
+    "head": "1\u00a0teaspoon ≈ 1\u00a0billion tons",
     "sub": "How dense a neutron star is",
     "say": "It's so dense that one teaspoon of it would weigh about a billion tons."
    },
@@ -141,7 +141,7 @@
    {
     "id": "l6",
     "photo": "teaspoon",
-    "head": "1 teaspoon ≈ 1 billion tons",
+    "head": "1\u00a0teaspoon ≈ 1\u00a0billion tons",
     "sub": "Neutron star matter, weighed on Earth",
     "say": "That makes it unbelievably dense. On Earth, a single teaspoon of neutron star would weigh about a billion tons."
    },

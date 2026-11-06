@@ -16,7 +16,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: explain-${{ inputs.topic }}
+  group: explain-${{ inputs.topic }}-${{ inputs.format }}
   cancel-in-progress: false
 jobs:
   make:

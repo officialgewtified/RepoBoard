@@ -93,6 +93,10 @@ function build(data){D=data;SC=[];SFX=[];SH=[];WW=D.w||1080;HH=D.h||1920;V=HH>WW
    ${L.outro?"":`<div class="txt">${chap}<div class="head">${es(L.head)}</div>${L.sub?`<div class="sub">${es(L.sub)}</div>`:""}</div>
    <div class="pic">${P.pictured?`<b>Pictured:</b> ${es(P.pictured)} · `:""}${es(P.credit||"")}</div>`}`;
   st.appendChild(el);
+  // a long headline (3+ lines) must never run into the "Pictured:" line: shrink it until there's room
+  {const tx=el.querySelector(".txt"),pc=el.querySelector(".pic"),hd=el.querySelector(".head");
+   if(tx&&pc&&hd){let fs=parseFloat(getComputedStyle(hd).fontSize);
+    while(fs>60&&tx.getBoundingClientRect().bottom>pc.getBoundingClientRect().top-24){fs-=4;hd.style.fontSize=fs+"px"}}}
   let sc=null;
   if(L.pulse){sc=document.createElement("div");sc.className="scope";
    sc.innerHTML=`<div class="lab">Pulse rate, as sound</div>${L.pulse.rate<2?'<div class="dot"></div>':""}<svg viewBox="0 0 1000 300" preserveAspectRatio="none"><line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(79,243,255,.35)" stroke-width="2"/><path fill="none" stroke="#5CFFA8" stroke-width="4" stroke-linejoin="round" style="filter:drop-shadow(0 0 8px #5CFFA8)"/></svg>
