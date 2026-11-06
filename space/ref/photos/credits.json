@@ -142,5 +142,157 @@
   "artist": "NASA",
   "credit": "NASA sts071-s-069 High Resolution Image",
   "px": 2000
+ },
+ "crab": {
+  "title": "File:Crab Nebula.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Crab_Nebula.jpg",
+  "license": "Public domain",
+  "artist": "NASA, ESA, J. Hester and A. Loll (Arizona State University)",
+  "credit": "A Giant Hubble Mosaic of the Crab Nebula",
+  "px": 3000
+ },
+ "crabx": {
+  "title": "File:Chandra-crab.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Chandra-crab.jpg",
+  "license": "Public domain",
+  "artist": "Optical: NASA/HST/ASU/J. Hester et al. X-Ray: NASA/CXC/ASU/J. Hester et al.",
+  "credit": "https://hubblesite.org/contents/media/images/2002/24/1248-Image.html",
+  "px": 2400
+ },
+ "crabc": {
+  "title": "File:Observatories Combine to Crack Open the Crab Nebula (33735105264).png",
+  "page": "https://commons.wikimedia.org/wiki/File:Observatories_Combine_to_Crack_Open_the_Crab_Nebula_(33735105264).png",
+  "license": "Public domain",
+  "artist": "NASA Goddard Space Flight Center from Greenbelt, MD, USA",
+  "credit": "Observatories Combine to Crack Open the Crab Nebula",
+  "px": 3000
+ },
+ "cassa": {
+  "title": "File:Chandra 3-color X-ray Image of Cassiopeia A (2004-casa-more-1).tiff",
+  "page": "https://commons.wikimedia.org/wiki/File:Chandra_3-color_X-ray_Image_of_Cassiopeia_A_(2004-casa-more-1).tiff",
+  "license": "Public domain",
+  "artist": "(Credit: NASA/CXC/GSFC/U.Hwang et al.)",
+  "credit": "Chandra 3-color X-ray Image of Cassiopeia A",
+  "px": 2400
+ },
+ "vela": {
+  "title": "File:Individual Chandra Stills of Vela Movie (2003-vela pulsar-more-2 - f2 velazoom).tiff",
+  "page": "https://commons.wikimedia.org/wiki/File:Individual_Chandra_Stills_of_Vela_Movie_(2003-vela_pulsar-more-2_-_f2_velazoom).tiff",
+  "license": "Public domain",
+  "artist": "(Credit: NASA/CXC/PSU/G.Pavlov et al.)",
+  "credit": "Individual Chandra Stills of Vela Movie",
+  "px": 1767
+ },
+ "hand": {
+  "title": "File:PSR B1509-58 full.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:PSR_B1509-58_full.jpg",
+  "license": "Public domain",
+  "artist": "NASA/CXC/CfA/P. Slane et al.",
+  "credit": "NASA",
+  "px": 2250
+ },
+ "terzan": {
+  "title": "File:Bulge fossil fragment Terzan 5 (Webb and Hubble image) (weic2611a).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Bulge_fossil_fragment_Terzan_5_(Webb_and_Hubble_image)_(weic2611a).jpg",
+  "license": "CC BY 4.0",
+  "artist": "NASA, ESA, CSA, STScI, Giorgia Zullo (University of Bologna), Francesco Ferraro (University of Bolog",
+  "credit": "\n\n\n\n\n\nThis media was produced by the James Webb Space Telescope and shared by the European Space Agency, under the ident",
+  "px": 2194
+ },
+ "lighthouse": {
+  "title": "File:Boston Light- America's first lighthouse (29850513722).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Boston_Light-_America%27s_first_lighthouse_(29850513722).jpg",
+  "license": "Public domain",
+  "artist": "Coast Guard",
+  "credit": "Boston Light: America's first lighthouse",
+  "px": 2002
+ },
+ "teaspoon": {
+  "title": "File:Rufus Farnam (American, 1771-) - Teaspoon - 1940.396 - Cleveland Museum of Art.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Rufus_Farnam_(American,_1771-)_-_Teaspoon_-_1940.396_-_Cleveland_Museum_of_Art.jpg",
+  "license": "CC0",
+  "artist": "Rufus Farnam",
+  "credit": "Cleveland Museum of Art\u00a0",
+  "px": 1463
+ },
+ "manhattan": {
+  "title": "File:ISS-38 Manhattan with Central Park.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:ISS-38_Manhattan_with_Central_Park.jpg",
+  "license": "Public domain",
+  "artist": "NASA",
+  "credit": "https://www.flickr.com/photos/nasa2explore/12108625406/",
+  "px": 2000
+ },
+ "gbt": {
+  "title": "File:Radio telescope at the National Radio Astronomy Observatory in Green Bank, West Virginia LCCN2015634500.tif",
+  "page": "https://commons.wikimedia.org/wiki/File:Radio_telescope_at_the_National_Radio_Astronomy_Observatory_in_Green_Bank,_West_Virginia_LCCN2015634500.tif",
+  "license": "Public domain",
+  "artist": "Carol M. Highsmith",
+  "credit": "Library of Congress\n\nCatalog: http://lccn.loc.gov/2015634500\nImage download: https://cdn.loc.gov/master/pnp/highsm/34400",
+  "px": 2000
+ },
+ "arecibo": {
+  "title": "File:Arecibo - Ionospheric Observatory.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Arecibo_-_Ionospheric_Observatory.jpg",
+  "license": "Public domain",
+  "artist": "Caribe Tourist Promotions",
+  "credit": "Digital scan of postcard",
+  "px": 1926
+ },
+ "plaque": {
+  "title": "File:Pioneer10-plaque.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Pioneer10-plaque.jpg",
+  "license": "Public domain",
+  "artist": "Designed by Carl Sagan and Frank Drake.  Artwork prepared by Linda Salzman Sagan.\n\nPhotograph by NAS",
+  "credit": "Ames Pioneer 10",
+  "px": 1445
+ },
+ "blender": {
+  "title": "File:Elektrische blender van het merk Princess - INDUS V09861.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Elektrische_blender_van_het_merk_Princess_-_INDUS_V09861.JPG",
+  "license": "CC0",
+  "artist": "",
+  "credit": "\n\n\n\nThis file was provided by courtesy of Industriemuseum Gent, supported by WikiMedia Belgium.This tag does not indicat",
+  "px": 1920
+ },
+ "milkyway": {
+  "title": "File:Guisard - Milky Way.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Guisard_-_Milky_Way.jpg",
+  "license": "CC BY 4.0",
+  "artist": "ESO/S. Guisard (www.eso.org/~sguisard)",
+  "credit": "http://www.eso.org/public/images/eso0934a/ (direct link)\n0.3 Gigapixel mosaic of the same region",
+  "px": 1718
+ },
+ "vla": {
+  "title": "File:Very Large Array, 2012.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Very_Large_Array,_2012.jpg",
+  "license": "CC BY 2.0",
+  "artist": "John Fowler",
+  "credit": "Flickr: VLA",
+  "px": 2002
+ },
+ "sn1987a": {
+  "title": "File:Supernova 1987A (1991-03-34).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Supernova_1987A_(1991-03-34).jpg",
+  "license": "Public domain",
+  "artist": "NASA and ESA",
+  "credit": "Supernova 1987A",
+  "px": 2202
+ },
+ "record": {
+  "title": "File:The Sounds of Earth Record Cover - GPN-2000-001978.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:The_Sounds_of_Earth_Record_Cover_-_GPN-2000-001978.jpg",
+  "license": "Public domain",
+  "artist": "NASA/JPL",
+  "credit": "The Sounds of Earth Record Cover",
+  "px": 2215
+ },
+ "clock": {
+  "title": "File:Ytterbium Lattice Atomic Clock (10444764266).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Ytterbium_Lattice_Atomic_Clock_(10444764266).jpg",
+  "license": "Public domain",
+  "artist": "National Institute of Standards and Technology",
+  "credit": "Ytterbium Lattice Atomic Clock",
+  "px": 1793
  }
 }
