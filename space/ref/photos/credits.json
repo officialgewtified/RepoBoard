@@ -294,5 +294,13 @@
   "artist": "National Institute of Standards and Technology",
   "credit": "Ytterbium Lattice Atomic Clock",
   "px": 1793
+ },
+ "meerkat": {
+  "title": "File:2018-MeerKAT-1.png",
+  "page": "https://commons.wikimedia.org/wiki/File:2018-MeerKAT-1.png",
+  "license": "CC BY 3.0",
+  "artist": "Square Kilometre Array Organisation (SKAO) / South African Radio Astronomy Observatory (SARAO)",
+  "credit": "https://skao.canto.global/v/MJSMPJ99RO/folder/U0DIS?viewIndex=0",
+  "px": 1621
  }
 }
