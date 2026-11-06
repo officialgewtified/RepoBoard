@@ -13,6 +13,10 @@ on:
         type: choice
         options: [both, short, long]
         default: both
+      keep_voice:
+        description: "Keep the published narration (already checked) and only redo the pictures"
+        type: boolean
+        default: false
 permissions:
   contents: write
 concurrency:
@@ -37,6 +41,19 @@ jobs:
           SUF=""; if [ "${{ matrix.fmt }}" = long ]; then SUF="-long"; fi
           echo "N=liftoff-explained-${{ inputs.topic }}$SUF" >> "$GITHUB_ENV"
           echo "TAG=space-explain-${{ inputs.topic }}$SUF" >> "$GITHUB_ENV"
+          if [ "${{ inputs.keep_voice }}" = true ]; then
+            # the published video's soundtrack and timing (its narration already passed the line-by-line check) with the
+            # episode's current pictures and text
+            N="liftoff-explained-${{ inputs.topic }}$SUF"; TAG="space-explain-${{ inputs.topic }}$SUF"
+            gh release download "$TAG" -p "$N.mp4" -p data.json -D out/old
+            node -e '
+              const fs=require("fs"),o=JSON.parse(fs.readFileSync("out/old/data.json")),n=JSON.parse(fs.readFileSync("out/data.json"));
+              if(o.lines.map(l=>l.id).join()!==n.lines.map(l=>l.id).join())throw new Error("the lines changed: the narration has to be re-recorded");
+              for(const k of ["lines","photos","facts","cover","ytTitle","caption","series","ep","title"])if(k in n)o[k]=n[k];
+              delete o.voiceDir;fs.writeFileSync("out/data.json",JSON.stringify(o,null,1))'
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
       - uses: actions/setup-node@v4
         if: steps.ep.outputs.skip != '1'
         with:
@@ -46,7 +63,7 @@ jobs:
         with:
           python-version: "3.12"
       - uses: actions/cache@v4
-        if: steps.ep.outputs.skip != '1'
+        if: steps.ep.outputs.skip != '1' && !inputs.keep_voice
         with:
           path: |
             clips/.models
@@ -63,7 +80,7 @@ jobs:
             for i in 1 2 3; do timeout 150 sudo apt-get install -y -qq --no-install-recommends ffmpeg > /dev/null && break; echo "retry $i"; sudo pkill -9 -f apt-get || true; sleep 5; done; fi
           which ffmpeg
       - name: Voiceover
-        if: steps.ep.outputs.skip != '1'
+        if: steps.ep.outputs.skip != '1' && !inputs.keep_voice
         # Liftoff's narrator: Chatterbox cloned from a Kokoro read, every line listened back and re-recorded if needed
         timeout-minutes: 100
         working-directory: clips
@@ -89,12 +106,23 @@ jobs:
         timeout-minutes: 60
         run: |
           node clips/render.js out/data.json "out/$N.mp4" 30
+          if [ "${{ inputs.keep_voice }}" = true ]; then
+            ffmpeg -loglevel error -y -i "out/$N.mp4" -i "out/old/$N.mp4" -map 0:v -map 1:a -c copy -movflags +faststart out/swap.mp4 && mv out/swap.mp4 "out/$N.mp4"
+          fi
           node -e "process.stdout.write(require('./out/data.json').caption||'')" > out/caption.txt
           node -e "process.stdout.write((require('./out/data.json').facts||[]).join('\n\n'))" > out/fact-sheet.txt
           [ -f "out/$N.chapters.txt" ] && { printf '\n\nChapters:\n' >> out/caption.txt; cat "out/$N.chapters.txt" >> out/caption.txt; } || true
+      - name: Same checked narration
+        # pictures-only redo: the soundtrack must be byte-for-byte the one that already passed the check, same length
+        if: steps.ep.outputs.skip != '1' && inputs.keep_voice
+        run: |
+          a=$(ffmpeg -v error -i "out/$N.mp4" -map 0:a -c copy -f md5 -); b=$(ffmpeg -v error -i "out/old/$N.mp4" -map 0:a -c copy -f md5 -)
+          d1=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "out/$N.mp4"); d2=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "out/old/$N.mp4")
+          echo "narration $a vs $b; length $d1 vs $d2"
+          [ "$a" = "$b" ] && [ "$d1" = "$d2" ] && echo "PASS: same narration that passed the line-by-line check, new pictures" || { echo "FAIL: the soundtrack or length changed"; exit 1; }
       - name: Check before publishing
         # listens to the finished video: every line of narration clearly there, nothing garbled, silent or clipped
-        if: steps.ep.outputs.skip != '1'
+        if: steps.ep.outputs.skip != '1' && !inputs.keep_voice
         run: |
           pip install -q faster-whisper
           python clips/check.py "out/$N.mp4" out/data.json
