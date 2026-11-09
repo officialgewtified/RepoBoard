@@ -40,5 +40,13 @@
    5,
    4
   ]
+ ],
+ "_skip_help": "skip_picks: [stat, side (o = More, u = Less), note]. The board's top picks, the line-gap list and the autopilot's board-based strategies leave these out (the books' favorite side and random still use them, for comparison). Every line is still graded, so remove an entry here if its record recovers.",
+ "skip_picks": [
+  [
+   "player_rush_yds",
+   "o",
+   "More on rushing yards: 69-86 (44.5%) through Nov 8"
+  ]
  ]
 }

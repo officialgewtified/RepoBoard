@@ -17,13 +17,13 @@ function board(A,title){if(!A||!A.v)return "";const K=Object.keys(A.strats);
  h+=rows.map(([k,n,s])=>`<div class="apr"><span class="apn"><b>${esc(n)}</b><small>${s.n?`${s.w}-${s.l}${s.rf?"-"+s.rf:""}`:"no results yet"}${s.open?` · ${s.open} waiting`:""}</small></span>
   <span class="apv"><b class="${s.value>A.start?"gold":s.value<A.start?"red":""}">${usd(s.value)}</b><small>${s.n?pc(s.roi)+" return":"of "+usd(A.start)}</small></span></div>`).join("");
  const open=(A.entries||[]).filter(e=>!e.res).slice(-6).reverse(),done=(A.entries||[]).filter(e=>e.res).slice(-6).reverse();
- if(open.length)h+=`<h4 class="aph">Waiting on games</h4>${open.map(e=>`<div class="ape"><div class="apeh"><b>${esc(A.strats[e.s].name)}</b><small>${esc(e.day)} · $${e.stake} to win $${e.stake*A.payout}</small></div>${e.legs.map(l=>`<div class="apl">${legTxt(l)}</div>`).join("")}</div>`).join("")}`;
- if(done.length)h+=`<h4 class="aph">Last results</h4>${done.map(e=>`<div class="ape ${e.res}"><div class="apeh"><b>${esc(A.strats[e.s].name)}</b><small>${esc(e.day)} · ${e.res==="won"?`won $${e.paid}`:e.res==="refund"?"refunded":"lost $"+e.stake}</small></div>${e.legs.map(l=>`<div class="apl">${legTxt(l)}</div>`).join("")}</div>`).join("")}`;
+ if(open.length)h+=`<h4 class="aph">Waiting on games</h4>${open.map(e=>`<div class="ape"><div class="apeh"><b>${esc(A.strats[e.s].name)}</b><small>${esc(e.day)} · $${e.stake} to win up to $${e.max||e.stake*A.payout}</small></div>${e.legs.map(l=>`<div class="apl">${legTxt(l)}</div>`).join("")}</div>`).join("")}`;
+ if(done.length)h+=`<h4 class="aph">Last results</h4>${done.map(e=>`<div class="ape ${e.res}"><div class="apeh"><b>${esc(A.strats[e.s].name)}</b><small>${esc(e.day)} · ${e.res==="won"?(e.paid>e.stake?`won $${e.paid}`:`got back $${e.paid}`):e.res==="refund"?"refunded":"lost $"+e.stake}</small></div>${e.legs.map(l=>`<div class="apl">${legTxt(l)}</div>`).join("")}</div>`).join("")}`;
  if(!any)h+=`<p class="fine" style="margin:10px 0 0">Its first entries go in with the next overnight update.</p>`;
  return h+`</div>`}
 /* boards: [{A, title}] */
 function html(boards){const B=boards.filter(b=>b.A&&b.A.v);
- return `<h2>Autopilot</h2><p class="lede">Every day it places up to 5 fake $10 2-pick Power Plays for each strategy and grades them after the games. Each strategy has its own fake $1,000, so you can see which one actually makes money without spending yours. A 2-pick Power Play pays 3x, so both picks have to hit about 58% of the time just to break even.</p>`+
+ return `<h2>Autopilot</h2><p class="lede">Every day it places up to 5 fake $10 2-pick Power Plays for each strategy and grades them after the games. Each strategy has its own fake $1,000, so you can see which one actually makes money without spending yours. A 2-pick Power Play pays 3x, so both picks have to hit about 58% of the time just to break even. The 6-pick Flex places one entry a day from the board's top six picks; it still pays with one or two misses, so each pick only has to hit about 54%.</p>`+
   (B.length?B.map(b=>board(b.A,b.title)).join(""):`<div class="card empty">Its first entries go in with the next overnight update.</div>`)+
   `<p class="fine">"Random" picks lines and sides by chance: if a strategy can't beat it over a few weeks, it isn't real. A handful of entries is mostly luck.</p>`}
 return{html,stats}})();

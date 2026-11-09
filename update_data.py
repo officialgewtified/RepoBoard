@@ -1158,6 +1158,8 @@ def fit_cal(P):
 def write_brief(games, props, teams, site, url):
     """Today's strongest picks, the biggest line gaps and last night's results, small enough to read in a text."""
     gbi = {g["id"]: g for g in games}
+    # stat-and-side groups the board no longer recommends (settings.json skip_picks), because they have lost badly
+    SKIP = {(x[0], x[1]) for x in load_json("settings.json", {}).get("skip_picks", []) if len(x) >= 2}
     picks, gaps, allc = {}, [], []   # allc: every playable prop, for the autopilot
     h = load_json("history.json", {})
     P = [x for x in h.get("props", []) if x.get("pp") and x.get("hit") in (True, False)]
@@ -1200,12 +1202,13 @@ def write_brief(games, props, teams, site, url):
         if r.get("bm") is not None and (r["bm"] - r["ln"]) * (1 if side == "o" else -1) > 0 and abs((r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])) >= .15:
             why.append(f"books have {r['bm']} vs PrizePicks {r['ln']}")
         item["why"] = why
-        allc.append(dict(item, po=r["po"]))
-        if not is_mixed(r, teams, gbi) and (r["pl"] not in picks or picks[r["pl"]]["p"] < p):
+        skip = (r["mk"], side) in SKIP
+        allc.append(dict(item, po=r["po"], skip=skip))
+        if not skip and not is_mixed(r, teams, gbi) and (r["pl"] not in picks or picks[r["pl"]]["p"] < p):
             picks[r["pl"]] = item
         if r.get("bm") is not None:
             gz = (r["bm"] - r["ln"]) / sigma_for(r["mk"], r["ln"])
-            if abs(gz) >= .15:
+            if abs(gz) >= .15 and (r["mk"], "o" if gz > 0 else "u") not in SKIP:
                 gaps.append(dict(item, side="More" if gz > 0 else "Less", p=round(honest_mk(p, r["mk"], side) if (gz > 0) == (side == "o") else 1 - honest_mk(p, r["mk"], side), 3), books=r["bm"], gz=round(gz, 2)))
     last_day = max((x["d"] for x in P), default=None)
     last = [x for x in P if x["d"] == last_day] if last_day else []

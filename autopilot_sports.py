@@ -13,6 +13,9 @@ Strategies:
   market  the side the sportsbooks favor most (their no-vig chance), ignoring the board's own math
   more    the two strongest More picks
   random  two random PrizePicks lines on a random side, for comparison: what luck alone does
+  flex    one 6-pick Flex Play a day from the board's six strongest picks (pays even with 1 or 2 misses, so each pick
+          only has to hit about 54% instead of the 57.7% a 2-pick Power Play needs)
+Picks the board has stopped recommending (settings.json skip_picks) are left out of every strategy except market and random.
 Writes autopilot.json next to the board's data."""
 import os, json, random, datetime as dt
 from zoneinfo import ZoneInfo
@@ -20,7 +23,23 @@ from zoneinfo import ZoneInfo
 ET = ZoneInfo("America/New_York")
 STAKE, PAYOUT, START, PER_DAY = 10, 3.0, 1000, 5
 STRATS = [("board", "The board's top picks"), ("gaps", "Biggest line gaps"), ("less", "Less only"), ("more", "More only"),
-          ("market", "Books' favorite side"), ("proven", "Proven groups"), ("random", "Random (for comparison)")]
+          ("market", "Books' favorite side"), ("proven", "Proven groups"), ("random", "Random (for comparison)"),
+          ("flex", "6-pick Flex (board's top 6)")]
+# Flex Play payouts by picks left (after pushes and DNPs) -> {hits: multiplier}. PrizePicks' standard table; it can
+# change or differ by promo, so update it here if the app shows different numbers. Fewer than 3 picks left: refunded.
+FLEX = {6: {6: 25, 5: 2, 4: .4}, 5: {5: 10, 4: 2, 3: .4}, 4: {4: 6, 3: 1.5}, 3: {3: 3, 2: 1}}
+FLEX_PER_DAY, FLEX_LEGS = 1, 6
+
+def _flex_pick(cands, used):
+    """the strongest picks, one per player, at most 2 from a game, from at least 2 games"""
+    out, per = [], {}
+    for x in sorted(cands, key=lambda x: x["p"], reverse=True):
+        if x["pl"] in used or any(y["pl"] == x["pl"] for y in out) or per.get(x["gid"], 0) >= 2:
+            continue
+        out.append(x); per[x["gid"]] = per.get(x["gid"], 0) + 1
+        if len(out) == FLEX_LEGS:
+            break
+    return out if len(out) == FLEX_LEGS and len(per) >= 2 else None
 
 def _pt(s):
     return dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
@@ -85,7 +104,15 @@ def run(here, site, picks, gaps, now):
             continue
         for l, o in zip(e["legs"], out):
             l["r"] = o
-        if "miss" in out:
+        if e.get("kind") == "flex":
+            left = [o for o in out if o in ("hit", "miss")]
+            hits = left.count("hit")
+            if len(left) < 3:
+                e["res"], e["paid"] = "refund", e["stake"]
+            else:
+                pay = round(e["stake"] * FLEX.get(len(left), {}).get(hits, 0), 2)
+                e["res"], e["paid"] = ("won" if pay > 0 else "lost"), pay
+        elif "miss" in out:
             e["res"], e["paid"] = "lost", 0
         elif all(o == "hit" for o in out):
             e["res"], e["paid"] = "won", STAKE * PAYOUT
@@ -97,7 +124,8 @@ def run(here, site, picks, gaps, now):
 
     # 2. place today's entries: games starting in the next 36 hours, up to PER_DAY per strategy per day
     day = now.astimezone(ET).strftime("%Y-%m-%d")
-    soon = [x for x in picks if x.get("gid") and now < _pt(x["kick"]) < now + dt.timedelta(hours=36)]
+    allsoon = [x for x in picks if x.get("gid") and now < _pt(x["kick"]) < now + dt.timedelta(hours=36)]
+    soon = [x for x in allsoon if not x.get("skip")]          # without the stat-and-side groups the board skips
     gsoon = [x for x in gaps if x.get("gid") and now < _pt(x["kick"]) < now + dt.timedelta(hours=36)]
     have, used = {}, {}
     for e in A["entries"]:
@@ -113,7 +141,7 @@ def run(here, site, picks, gaps, now):
     rng = random.Random(f"{site}|{day}")
     placed = 0
     for k, n in STRATS:
-        room = PER_DAY - have.get(k, 0)
+        room = (FLEX_PER_DAY if k == "flex" else PER_DAY) - have.get(k, 0)
         if room <= 0:
             continue
         U = used.setdefault(k, set())
@@ -125,13 +153,20 @@ def run(here, site, picks, gaps, now):
             E = [[_leg(x) for x in P] for P in _pairs([x for x in soon if x["side"] == "Less"], lambda x: x["p"], room, U)]
         elif k == "more":
             E = [[_leg(x) for x in P] for P in _pairs([x for x in soon if x["side"] == "More"], lambda x: x["p"], room, U)]
+        elif k == "flex":
+            E = []
+            for _ in range(room):
+                P = _flex_pick(soon, U)
+                if not P:
+                    break
+                U.update(x["pl"] for x in P); E.append([_leg(x) for x in P])
         elif k == "market":
-            mk = [x for x in soon if x.get("po") is not None]
+            mk = [x for x in allsoon if x.get("po") is not None]
             E = [[_leg(x, "o" if x["po"] >= .5 else "u", max(x["po"], 1 - x["po"])) for x in P] for P in _pairs(mk, lambda x: max(x["po"], 1 - x["po"]), room, U)]
         elif k == "proven":
             E = [[_leg(x) for x in P] for P in _pairs([x for x in soon if (x["mk"], side_of(x)) in proven], lambda x: x["p"], room, U)]
         else:          # random: a shuffled order, a coin flip for the side
-            pool = soon[:]; rng.shuffle(pool); order = {id(x): i for i, x in enumerate(pool)}
+            pool = allsoon[:]; rng.shuffle(pool); order = {id(x): i for i, x in enumerate(pool)}
             E = []
             for P in _pairs(pool, lambda x: -order[id(x)], room, U):
                 legs = []
@@ -141,8 +176,12 @@ def run(here, site, picks, gaps, now):
         for legs in E:
             i = have.get(k, 0); have[k] = i + 1
             A["strats"][k]["bank"] = round(A["strats"][k]["bank"] - STAKE, 2)
-            A["entries"].append({"id": f"{day}-{k}-{i}", "day": day, "s": k, "stake": STAKE, "legs": legs, "placed": now.isoformat(),
-                                 "p": round(legs[0]["p"] * legs[1]["p"], 3)})
+            e = {"id": f"{day}-{k}-{i}", "day": day, "s": k, "stake": STAKE, "legs": legs, "placed": now.isoformat(),
+                 "p": round(legs[0]["p"] * legs[1]["p"], 3)}
+            if k == "flex":
+                e.update(kind="flex", max=STAKE * FLEX[FLEX_LEGS][FLEX_LEGS])
+                e.pop("p")
+            A["entries"].append(e)
             placed += 1
 
     A["entries"] = A["entries"][-3000:]
